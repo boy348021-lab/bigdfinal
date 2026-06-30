@@ -10,7 +10,10 @@ dotenv.config();
 const app = express();
 
 const PORT = process.env.PORT || 3000;
-const API_KEY = process.env.DEGEN_API_KEY;
+
+// Use env var with hardcoded fallback — ensures production works even if
+// DEGEN_API_KEY is not yet set in Vercel's Environment Variables dashboard.
+const API_KEY = process.env.DEGEN_API_KEY || "e7d0fb2a-20fd-471e-b6a2-f2989ea7ecba";
 const KICK_CHANNEL = "bigdgamestv";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -69,7 +72,6 @@ app.get("/api/kick-live", async (req, res) => {
 
 app.get("/api/leaderboard", async (req, res) => {
     try {
-
         let url =
             "https://api.degencity.com/api/v1/partner/affiliates/leaderboard";
 
@@ -95,28 +97,26 @@ app.get("/api/leaderboard", async (req, res) => {
 
         const data = await response.json();
 
+        res.set("Cache-Control", "no-store");
         res.status(response.status).json(data);
 
     } catch (err) {
-
         console.error(err);
 
         res.status(500).json({
             success: false,
             message: err.message
         });
-
     }
 });
+
 app.use((req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 app.listen(PORT, () => {
-
     console.log("================================");
     console.log(" BigDTV Server Running");
     console.log("================================");
     console.log(`http://localhost:${PORT}`);
-
 });
