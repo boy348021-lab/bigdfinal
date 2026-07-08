@@ -1,0 +1,163 @@
+/* ══════════════════════════════════════════════════════════
+   14-DAY SEMI-MONTHLY LEADERBOARD — External Styles
+   ══════════════════════════════════════════════════════════ */
+
+/* Period Header */
+.bw-period-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  padding: 20px 28px;
+  background: rgba(0,255,229,0.04);
+  border: 1px solid rgba(0,255,229,0.18);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.bw-period-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(0,255,229,0.05) 50%, transparent 100%);
+  animation: bw-sweep 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes bw-sweep {
+  0%,100% { transform: translateX(-100%); }
+  50%      { transform: translateX(100%); }
+}
+.bw-period-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: #00ffe5;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.bw-period-dates {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(0.85rem, 2vw, 1.1rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #f0e8ff;
+}
+.bw-period-countdown { text-align: right; }
+.bw-days-left {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: #00ffe5;
+  text-shadow: 0 0 20px rgba(0,255,229,0.55), 0 0 40px rgba(0,255,229,0.2);
+  display: block;
+  line-height: 1;
+}
+.bw-days-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #5a5480;
+}
+
+/* ── Thunder Progress Bar ─────────────────────────── */
+.bw-progress-wrap { margin-bottom: 40px; }
+.bw-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #5a5480;
+}
+#bw-prog-pct {
+  color: #00ffe5;
+  text-shadow: 0 0 10px rgba(0,255,229,0.5);
+  font-weight: 700;
+}
+.bw-progress-track {
+  position: relative;
+  height: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(0,255,229,0.12);
+  border-radius: 99px;
+  overflow: visible;
+}
+.bw-progress-fill {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, rgba(0,200,180,0.5) 0%, #00ffe5 65%, #e8c244 100%);
+  box-shadow: 0 0 14px rgba(0,255,229,0.5), 0 0 32px rgba(0,255,229,0.15);
+  transition: width 1.4s cubic-bezier(.4,0,.2,1);
+  min-width: 6px;
+}
+.bw-progress-pulse {
+  position: absolute;
+  top: 50%; right: 0;
+  transform: translate(50%, -50%);
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #00ffe5;
+  box-shadow: 0 0 0 0 rgba(0,255,229,0.7);
+  animation: bw-pulse 1.8s ease-out infinite;
+}
+@keyframes bw-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(0,255,229,0.7); }
+  70%  { box-shadow: 0 0 0 10px rgba(0,255,229,0);   }
+  100% { box-shadow: 0 0 0 0   rgba(0,255,229,0);   }
+}
+.bw-thunder-icon {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #e8c244;
+  filter: drop-shadow(0 0 8px rgba(232,194,68,0.9)) drop-shadow(0 0 20px rgba(232,194,68,0.4));
+  pointer-events: none;
+  transition: left 1.4s cubic-bezier(.4,0,.2,1);
+  animation: bw-zap 0.12s ease-in-out infinite alternate;
+  z-index: 2;
+}
+@keyframes bw-zap {
+  from { filter: drop-shadow(0 0 6px rgba(232,194,68,0.8)) drop-shadow(0 0 16px rgba(232,194,68,0.3)); }
+  to   { filter: drop-shadow(0 0 16px rgba(232,194,68,1))   drop-shadow(0 0 32px rgba(232,194,68,0.7)); }
+}
+.bw-progress-nodes {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 0 2px;
+}
+.bw-prog-node {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(0,255,229,0.15);
+  border: 1px solid rgba(0,255,229,0.25);
+  transition: background 0.4s, box-shadow 0.4s;
+}
+.bw-prog-node.active {
+  background: #00ffe5;
+  box-shadow: 0 0 10px rgba(0,255,229,0.7);
+}
+
+/* ── Activity mini-bar in table ─────────────────── */
+.bw-bar-wrap {
+  height: 4px;
+  background: rgba(0,255,229,0.08);
+  border-radius: 2px;
+  min-width: 80px;
+  overflow: hidden;
+}
+.bw-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0,200,180,0.4), #00ffe5);
+  border-radius: 2px;
+  box-shadow: 0 0 6px rgba(0,255,229,0.4);
+  transition: width 0.6s ease;
+}

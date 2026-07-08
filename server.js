@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import { execFile } from "child_process";
 
 dotenv.config();
 
@@ -24,50 +25,51 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/api/kick-live", async (req, res) => {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+/* ──────────────────────────────────────────
+   KICK LIVE STATUS — uses Python curl_cffi
+   to bypass Cloudflare (Node fetch gets 403)
+   ────────────────────────────────────────── */
+let kickCache = { live: false, checkedAt: null };
+const KICK_CACHE_TTL = 45_000; // 45 seconds
 
-    try {
-        const response = await fetch(
-            `https://kick.com/api/v2/channels/${KICK_CHANNEL}`,
-            {
-                headers: {
-                    "Accept": "application/json",
-                    "User-Agent": "BigDGamesTV-live-status/1.0"
-                },
-                signal: controller.signal
+function fetchKickViaPython() {
+    return new Promise((resolve) => {
+        const script = path.join(__dirname, "kick_status.py");
+        execFile("python3", [script], { timeout: 12_000 }, (err, stdout) => {
+            if (err) {
+                console.error("Kick Python helper error:", err.message);
+                return resolve({ live: false, ok: false });
             }
-        );
-
-        if (!response.ok) {
-            throw new Error(`Kick status request failed (${response.status})`);
-        }
-
-        const data = await response.json();
-        const stream = data?.livestream;
-        const live = Boolean(stream && stream.is_live !== false);
-
-        res.set("Cache-Control", "no-store");
-        res.json({
-            channel: "BigDgamesTV",
-            live,
-            checkedAt: new Date().toISOString()
+            try {
+                resolve(JSON.parse(stdout));
+            } catch (e) {
+                console.error("Kick Python helper bad JSON:", stdout?.slice(0, 200));
+                resolve({ live: false, ok: false });
+            }
         });
+    });
+}
 
-    } catch (err) {
-        console.error("Kick live status error:", err.message);
-
+app.get("/api/kick-live", async (req, res) => {
+    // Return cached result if fresh
+    if (kickCache.checkedAt && Date.now() - kickCache.checkedAt < KICK_CACHE_TTL) {
         res.set("Cache-Control", "no-store");
-        res.json({
+        return res.json({
             channel: "BigDgamesTV",
-            live: false,
-            checkedAt: new Date().toISOString()
+            live: kickCache.live,
+            checkedAt: new Date(kickCache.checkedAt).toISOString()
         });
-
-    } finally {
-        clearTimeout(timeout);
     }
+
+    const result = await fetchKickViaPython();
+    kickCache = { live: result.live, checkedAt: Date.now() };
+
+    res.set("Cache-Control", "no-store");
+    res.json({
+        channel: "BigDgamesTV",
+        live: result.live,
+        checkedAt: new Date().toISOString()
+    });
 });
 
 app.get("/api/leaderboard", async (req, res) => {
