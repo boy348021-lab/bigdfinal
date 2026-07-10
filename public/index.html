@@ -2022,6 +2022,10 @@ transition:transform .1s linear;
           <div class="bw-prog-node" id="bw-node-mid"></div>
           <div class="bw-prog-node" id="bw-node-end"></div>
         </div>
+        <div class="bw-countdown-hud">
+          <span class="bw-countdown-label">Time Remaining (ET):</span>
+          <span class="bw-countdown-timer" id="bw-countdown-timer">--d --h --m --s</span>
+        </div>
       </div>
 
       <!-- Prize Pool -->
@@ -2078,6 +2082,25 @@ transition:transform .1s linear;
         <div class="bonus-code-row">
           <span class="code-label">Status:</span>
           <span class="code-value">COMING SOON</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bonus-card">
+      <div class="bonus-thumb">
+        <div class="bonus-thumb-icon">🎰</div>
+        <div class="bonus-site-badge">BIGD DRAW</div>
+      </div>
+      <div class="bonus-body">
+        <div class="bonus-name">Community Wager Draw</div>
+        <div class="bonus-desc" style="font-size: 0.8rem; line-height: 1.4; min-height: 135px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
+          <span>• When the community reaches a total wager of <strong>$50,000</strong>, four participants from the current wagering pool will be selected at random to receive a <strong>$40</strong> slot spin each.</span>
+          <span>• When the community reaches a total wager of <strong>$100,000</strong>, three participants from the current wagering pool will be selected at random to receive a <strong>$100</strong> slot spin each.</span>
+          <span style="color: var(--text-muted); font-size: 0.76rem;">Selections will be made live during the Kick stream using a random draw. Every participant on the current wagering leaderboard has an equal chance of being selected. Rankings do not increase or decrease a participant's chances of winning.</span>
+        </div>
+        <div class="bonus-code-row">
+          <span class="code-label">Selection:</span>
+          <span class="code-value">RANDOM DRAW</span>
         </div>
       </div>
     </div>
@@ -2463,6 +2486,11 @@ function activateTab(panelId) {
       p.classList.remove('active');
     }
   });
+  if (panelId === 'biweekly') {
+    initBiweeklyProgress();
+    fetchBiweeklyLeaderboard();
+    startBiweeklyCountdown();
+  }
 }
 
 tabBtns.forEach(btn => {
@@ -2656,34 +2684,132 @@ fetchLeaderboard('', '');
 /* ──────────────────────────────────────────
    14-DAY (SEMI-MONTHLY) LEADERBOARD
    ────────────────────────────────────────── */
+function getETNow() {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: 'numeric', minute: 'numeric', second: 'numeric',
+    hour12: false
+  });
+  const parts = formatter.formatToParts(new Date());
+  const pv = {};
+  parts.forEach(p => pv[p.type] = p.value);
+  return {
+    year: parseInt(pv.year, 10),
+    month: parseInt(pv.month, 10) - 1, // 0-indexed
+    day: parseInt(pv.day, 10),
+    hour: parseInt(pv.hour, 10),
+    minute: parseInt(pv.minute, 10),
+    second: parseInt(pv.second, 10)
+  };
+}
+
+function getUTCFromET(year, month, day, hour = 0, minute = 0, second = 0) {
+  const approxUTC = Date.UTC(year, month, day, hour, minute, second);
+  const tempDate = new Date(approxUTC);
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: 'numeric', minute: 'numeric', second: 'numeric',
+    hour12: false
+  });
+  const parts = formatter.formatToParts(tempDate);
+  const pv = {};
+  parts.forEach(p => pv[p.type] = p.value);
+  const NewYorkUTC = Date.UTC(
+    parseInt(pv.year, 10),
+    parseInt(pv.month, 10) - 1,
+    parseInt(pv.day, 10),
+    parseInt(pv.hour, 10),
+    parseInt(pv.minute, 10),
+    parseInt(pv.second, 10)
+  );
+  const offset = NewYorkUTC - tempDate.getTime();
+  return approxUTC - offset;
+}
+
 function getSemiMonthPeriod() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const day = now.getDate();
-  let start, end;
-  if (day <= 15) {
-    start = new Date(year, month, 1);
-    end   = new Date(year, month, 15, 23, 59, 59);
+  const etNow = getETNow();
+  let startUTC, endUTC;
+  if (etNow.day <= 15) {
+    startUTC = getUTCFromET(etNow.year, etNow.month, 1, 0, 0, 0);
+    endUTC   = getUTCFromET(etNow.year, etNow.month, 16, 0, 0, 0);
   } else {
-    start = new Date(year, month, 16);
-    end   = new Date(year, month + 1, 0, 23, 59, 59);
+    startUTC = getUTCFromET(etNow.year, etNow.month, 16, 0, 0, 0);
+    let nextMonth = etNow.month + 1;
+    let nextYear = etNow.year;
+    if (nextMonth > 11) {
+      nextMonth = 0;
+      nextYear++;
+    }
+    endUTC = getUTCFromET(nextYear, nextMonth, 1, 0, 0, 0);
   }
-  return { start, end, now };
+  return {
+    start: new Date(startUTC),
+    end: new Date(endUTC),
+    now: new Date()
+  };
 }
 
 function bwFmtDate(d) {
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return d.toLocaleDateString('en-US', {
+    timeZone: 'America/New_York',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
 }
 
 function bwFmtISO(d) {
-  const y  = d.getFullYear();
-  const m  = String(d.getMonth() + 1).padStart(2, '0');
-  const dy = String(d.getDate()).padStart(2, '0');
-  return y + '-' + m + '-' + dy;
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  });
+  const parts = formatter.formatToParts(d);
+  const pv = {};
+  parts.forEach(p => pv[p.type] = p.value);
+  return `${pv.year}-${pv.month}-${pv.day}`;
 }
 
-function initBiweeklyProgress() {
+function formatETCountdown(diffMs) {
+  if (diffMs <= 0) return "00d 00h 00m 00s";
+  const seconds = Math.floor((diffMs / 1000) % 60);
+  const minutes = Math.floor((diffMs / (1000 * 60)) % 60);
+  const hours   = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+  const days    = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${pad(days)}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+}
+
+let bwCountdownInterval = null;
+
+function startBiweeklyCountdown() {
+  if (bwCountdownInterval) clearInterval(bwCountdownInterval);
+  
+  function update() {
+    const { start, end, now } = getSemiMonthPeriod();
+    const diffMs = end - now;
+    
+    if (diffMs <= 0) {
+      initBiweeklyProgress();
+      fetchBiweeklyLeaderboard();
+      return;
+    }
+    
+    const timerEl = document.getElementById('bw-countdown-timer');
+    if (timerEl) {
+      timerEl.textContent = formatETCountdown(diffMs);
+    }
+    
+    initBiweeklyProgress(true);
+  }
+  
+  update();
+  bwCountdownInterval = setInterval(update, 1000);
+}
+
+function initBiweeklyProgress(isIntervalUpdate = false) {
   const { start, end, now } = getSemiMonthPeriod();
   const totalMs   = end - start;
   const elapsedMs = now - start;
@@ -2706,10 +2832,15 @@ function initBiweeklyProgress() {
   const fill    = document.getElementById('bw-progress-fill');
   const thunder = document.getElementById('bw-thunder-icon');
   if (fill) {
-    setTimeout(() => {
+    if (isIntervalUpdate) {
       fill.style.width = pct + '%';
       if (thunder) thunder.style.left = Math.max(2, Math.min(98, pct)) + '%';
-    }, 350);
+    } else {
+      setTimeout(() => {
+        fill.style.width = pct + '%';
+        if (thunder) thunder.style.left = Math.max(2, Math.min(98, pct)) + '%';
+      }, 350);
+    }
   }
 
   const midNode = document.getElementById('bw-node-mid');
@@ -2794,6 +2925,7 @@ document.querySelectorAll('.tab-btn[data-panel="biweekly"]').forEach(btn => {
   btn.addEventListener('click', () => {
     initBiweeklyProgress();
     fetchBiweeklyLeaderboard();
+    startBiweeklyCountdown();
   });
 });
 

@@ -161,3 +161,35 @@
   box-shadow: 0 0 6px rgba(0,255,229,0.4);
   transition: width 0.6s ease;
 }
+
+/* Countdown HUD */
+.bw-countdown-hud {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 10px;
+}
+.bw-countdown-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #5a5480;
+}
+.bw-countdown-timer {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #33fff0;
+  text-shadow: 0 0 12px rgba(0,255,229,0.5);
+  background: rgba(0,255,229,0.03);
+  border: 1px solid rgba(0,255,229,0.15);
+  border-radius: 4px;
+  padding: 5px 12px;
+  display: inline-block;
+  min-width: 145px;
+  text-align: center;
+}
