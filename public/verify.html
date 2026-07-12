@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BigDGamesTV — Code Verification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/style.css"/>
+<style>
+/* ============================================================
+   DESIGN TOKENS & BASE
+   ============================================================ */
+:root {
+  --bg-void:        #080810;
+  --bg-deep:        #0c0c1a;
+  --bg-surface:     #11112a;
+  --bg-card:        #14143a;
+  --bg-card-hover:  #1a1a48;
+
+  --purple-900:     #1a0033;
+  --purple-800:     #2d0066;
+  --purple-700:     #4b00a8;
+  --purple-600:     #6600cc;
+  --purple-500:     #8800ff;
+  --purple-400:     #aa33ff;
+  --purple-300:     #cc66ff;
+  --purple-200:     #dd99ff;
+  --purple-100:     #f0ccff;
+
+  --gold-500:       #c9a227;
+  --gold-400:       #e8c244;
+  --gold-300:       #f5d87a;
+
+  --cyan-500:       #00ffe5;
+  --cyan-400:       #33fff0;
+
+  --text-primary:   #f0e8ff;
+  --text-secondary: #a099c0;
+  --text-muted:     #5a5480;
+
+  --border-subtle:  rgba(136, 0, 255, 0.15);
+  --border-glow:    rgba(136, 0, 255, 0.5);
+
+  --glow-purple:    0 0 20px rgba(136,0,255,0.4), 0 0 60px rgba(136,0,255,0.15);
+  --glow-gold:      0 0 20px rgba(201,162,39,0.4), 0 0 60px rgba(201,162,39,0.1);
+  --glow-intense:   0 0 40px rgba(136,0,255,0.6), 0 0 100px rgba(136,0,255,0.2);
+
+  --font-display:   'Orbitron', sans-serif;
+  --font-ui:        'Rajdhani', sans-serif;
+  --font-body:      'Space Grotesk', sans-serif;
+
+  --radius-sm:      4px;
+  --radius-md:      8px;
+  --radius-lg:      16px;
+  --radius-xl:      24px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; background: none; font: inherit; }
+ul { list-style: none; }
+img { display: block; max-width: 100%; }
+
+/* ============================================================
+   NEBULA BACKDROP & PARTICLES
+   ============================================================ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(80,0,180,0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(120,0,220,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(60,0,120,0.1) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.04) 3px,
+    rgba(0,0,0,0.04) 4px
+  );
+}
+
+.brand-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.brand-bg::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    linear-gradient(115deg, transparent 20%, rgba(0,255,229,0.035) 45%, rgba(232,194,68,0.04) 50%, transparent 72%),
+    radial-gradient(circle at 25% 20%, rgba(136,0,255,0.12), transparent 28%),
+    radial-gradient(circle at 78% 72%, rgba(201,162,39,0.08), transparent 30%);
+  animation: brand-bg-sweep 24s linear infinite;
+  opacity: 0.85;
+}
+@keyframes brand-bg-sweep {
+  0% { transform: translate3d(-4%, -3%, 0) rotate(0deg); }
+  50% { transform: translate3d(4%, 3%, 0) rotate(2deg); }
+  100% { transform: translate3d(-4%, -3%, 0) rotate(0deg); }
+}
+
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+.particle {
+  position: absolute;
+  background: var(--purple-400);
+  border-radius: 50%;
+  animation: float var(--dur) linear infinite;
+  animation-delay: var(--delay);
+}
+@keyframes float {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  10% { opacity: var(--op, 1); }
+  90% { opacity: var(--op, 1); }
+  100% { transform: translateY(-300px) scale(0.5); opacity: 0; }
+}
+
+/* ============================================================
+   SHARD DECORATORS
+   ============================================================ */
+.shard {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+.shard-tl {
+  top: -40px; left: -30px;
+  width: 220px; height: 260px;
+  background: linear-gradient(135deg, rgba(136,0,255,0.25) 0%, transparent 70%);
+  clip-path: polygon(0 0, 100% 0, 40% 100%, 0 60%);
+}
+.shard-tr {
+  top: -20px; right: -40px;
+  width: 200px; height: 300px;
+  background: linear-gradient(225deg, rgba(136,0,255,0.2) 0%, transparent 70%);
+  clip-path: polygon(60% 0, 100% 0, 100% 80%, 30% 100%);
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+#nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 64px;
+  background: rgba(8, 8, 16, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-logo-text {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+}
+.nav-logo-text em {
+  font-style: normal;
+  color: var(--purple-400);
+  text-shadow: var(--glow-purple);
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.nav-links a {
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 6px 0;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--purple-500);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+.nav-links a:hover { color: var(--text-primary); }
+.nav-links a:hover::after { transform: scaleX(1); }
+.nav-links a.active {
+  color: var(--text-primary);
+  text-shadow: 0 0 10px rgba(204, 102, 255, 0.8), 0 0 20px rgba(204, 102, 255, 0.4);
+  font-weight: 700;
+}
+.nav-links a.active::after {
+  transform: scaleX(1);
+  background: var(--purple-300);
+  box-shadow: 0 0 10px var(--purple-400), 0 0 20px var(--purple-500);
+}
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.kick-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  border-radius: var(--radius-sm);
+  background: rgba(248, 113, 113, 0.05);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #f87171;
+  transition: all 0.3s ease;
+}
+.kick-live-badge.is-live {
+  background: rgba(83, 250, 93, 0.08);
+  border-color: rgba(83, 250, 93, 0.55);
+  color: #53fa5d;
+  box-shadow: 0 0 12px rgba(83, 250, 93, 0.2);
+}
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1.6s infinite alternate;
+}
+@keyframes pulse {
+  from { opacity: 0.4; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1.1); }
+}
+
+/* HAMBURGER */
+#hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px; height: 36px;
+  padding: 4px;
+  background: rgba(136,0,255,0.1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  z-index: 200;
+}
+#hamburger span {
+  display: block;
+  height: 2px;
+  background: var(--purple-300);
+  border-radius: 1px;
+  transition: all 0.25s;
+}
+#hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+#hamburger.open span:nth-child(2) { opacity: 0; }
+#hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* MOBILE DRAWER */
+#mobile-nav-drawer {
+  display: none;
+  position: fixed;
+  top: 64px; left: 0; right: 0;
+  background: rgba(8,8,16,0.96);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 24px;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 99;
+}
+#mobile-nav-drawer a {
+  font-family: var(--font-ui);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+#mobile-nav-drawer a:hover,
+#mobile-nav-drawer a.active {
+  color: var(--text-primary);
+  text-shadow: 0 0 10px rgba(204,102,255,0.6);
+}
+
+/* ============================================================
+   VERIFICATION PAGE CONTENT
+   ============================================================ */
+#verify-section {
+  min-height: calc(100vh - 92px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 20px 80px;
+  position: relative;
+  z-index: 10;
+}
+.verify-card {
+  width: 100%;
+  max-width: 580px;
+  background: rgba(17, 17, 42, 0.75);
+  border: 1px solid rgba(0, 255, 229, 0.2);
+  border-radius: var(--radius-md);
+  padding: 40px;
+  box-shadow: 0 0 20px rgba(0, 255, 229, 0.1), 0 0 60px rgba(0, 255, 229, 0.05);
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+.verify-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 229, 0.04) 50%, transparent 100%);
+  animation: sweep 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes sweep {
+  0%,100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+.verify-title {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+}
+.verify-title span {
+  color: var(--cyan-500);
+  text-shadow: 0 0 15px rgba(0, 255, 229, 0.6);
+}
+.verify-sub {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.input-group {
+  margin-bottom: 24px;
+  position: relative;
+}
+.input-label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.verify-input {
+  width: 100%;
+  background: rgba(8, 8, 16, 0.6);
+  border: 1px solid rgba(136, 0, 255, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.3s ease;
+}
+.verify-input:focus {
+  border-color: var(--cyan-500);
+  box-shadow: 0 0 15px rgba(0, 255, 229, 0.35);
+  background: rgba(8, 8, 16, 0.85);
+}
+
+.verify-btn {
+  width: 100%;
+  background: linear-gradient(90deg, #00ffe5, #00c8b4);
+  color: #080810;
+  font-family: var(--font-ui);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 15px rgba(0, 255, 229, 0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.verify-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(0, 255, 229, 0.55);
+  background: linear-gradient(90deg, #33fff0, #00ffe5);
+}
+.verify-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+.verify-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.checking-box {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 0 12px;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--cyan-500);
+  text-transform: uppercase;
+}
+.spinner-cyan {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(0, 255, 229, 0.1);
+  border-top-color: var(--cyan-500);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  box-shadow: 0 0 10px rgba(0, 255, 229, 0.2);
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.result-box {
+  margin-top: 32px;
+  display: none;
+  animation: fadeIn 0.4s ease forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.result-card {
+  padding: 20px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.result-card.success {
+  background: rgba(0, 255, 128, 0.04);
+  border: 1px solid rgba(0, 255, 128, 0.25);
+  box-shadow: 0 0 15px rgba(0, 255, 128, 0.08);
+}
+.result-card.error {
+  background: rgba(255, 50, 50, 0.04);
+  border: 1px solid rgba(255, 50, 50, 0.25);
+  box-shadow: 0 0 15px rgba(255, 50, 50, 0.08);
+}
+.result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+.result-card.success .result-badge {
+  background: rgba(0, 255, 128, 0.12);
+  color: #00ff80;
+  border: 1px solid rgba(0, 255, 128, 0.25);
+}
+.result-card.error .result-badge {
+  background: rgba(255, 50, 50, 0.12);
+  color: #ff3232;
+  border: 1px solid rgba(255, 50, 50, 0.25);
+}
+.result-message {
+  color: var(--text-primary);
+}
+.result-message strong {
+  color: var(--cyan-500);
+}
+
+.promo-box {
+  margin-top: 14px;
+  background: rgba(8, 8, 16, 0.4);
+  border: 1px dashed rgba(136, 0, 255, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.promo-text {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.promo-code {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold-400);
+  text-shadow: 0 0 10px rgba(232, 194, 68, 0.3);
+}
+.btn-copy-promo {
+  background: rgba(232, 194, 68, 0.1);
+  border: 1px solid rgba(232, 194, 68, 0.3);
+  color: var(--gold-400);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-copy-promo:hover {
+  background: var(--gold-400);
+  color: #080810;
+  box-shadow: 0 0 12px rgba(232, 194, 68, 0.5);
+}
+
+/* ============================================================
+   FOOTER & TICKER
+   ============================================================ */
+footer {
+  text-align: center;
+  padding: 40px 20px 80px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  z-index: 10;
+  position: relative;
+}
+footer a {
+  color: var(--purple-300);
+  transition: color 0.2s;
+}
+footer a:hover { color: var(--purple-200); }
+
+/* HUD TICKER */
+#hud-ticker {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: rgba(8,8,16,0.92);
+  border-top: 1px solid rgba(136,0,255,0.3);
+  z-index: 9000;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+#hud-ticker-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--purple-400);
+  background: rgba(136,0,255,0.18);
+  border-right: 1px solid rgba(136,0,255,0.3);
+  padding: 0 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ticker-track {
+  display: flex;
+  animation: ticker-scroll 32s linear infinite;
+  white-space: nowrap;
+  align-items: center;
+  height: 100%;
+}
+.ticker-item {
+  font-family: 'Rajdhani', monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+  padding: 0 28px;
+}
+.ticker-item .hi { color: var(--purple-300); }
+.ticker-sep { color: rgba(136,0,255,0.5); padding: 0 4px; }
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* FERRARI EDGE BOT */
+#edge-bot {
+  position: fixed;
+  width: 96px;
+  height: 52px;
+  z-index: 9999;
+  cursor: pointer;
+  pointer-events: auto;
+  transform-origin: center center;
+}
+#racecar-canvas {
+  display: block;
+}
+
+/* COPY TOAST */
+#copy-toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(8, 8, 16, 0.95);
+  border: 1px solid var(--cyan-500);
+  box-shadow: 0 0 20px rgba(0, 255, 229, 0.3);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 10px 24px;
+  border-radius: var(--radius-sm);
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+#copy-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 900px) {
+  #nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  #hamburger { display: flex; }
+}
+</style>
+</head>
+<body>
+
+<div class="brand-bg"></div>
+
+<!-- ================================================================
+     NAVIGATION
+     ================================================================ -->
+<nav id="nav">
+  <div class="nav-logo">
+    <img src="/logo.png" alt="BigDGamesTV" style="height:44px;width:44px;object-fit:contain;border-radius:4px;"/>
+    <span class="nav-logo-text">BIG<em>D</em>TV</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="index.html#tabs-section" data-tab="leaderboard">Leaderboards</a></li>
+    <li><a href="index.html#tabs-section" data-tab="challenges">Challenges</a></li>
+    <li><a href="index.html#tabs-section" data-tab="milestones">Milestones</a></li>
+    <li><a href="index.html#tabs-section" data-tab="store">Socials</a></li>
+    <li><a href="verify.html" class="active">Code Check</a></li>
+  </ul>
+  <div class="nav-right">
+    <a class="kick-live-badge" id="kick-live-badge" href="https://kick.com/BigDgamesTV" target="_blank" rel="noopener">
+      <span class="status-dot"></span>
+      <span id="kick-live-text">Offline</span>
+    </a>
+    <button id="hamburger" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE NAV DRAWER -->
+<div id="mobile-nav-drawer">
+  <a href="index.html#tabs-section" data-tab="leaderboard">Leaderboards</a>
+  <a href="index.html#tabs-section" data-tab="challenges">Challenges</a>
+  <a href="index.html#tabs-section" data-tab="milestones">Milestones</a>
+  <a href="index.html#tabs-section" data-tab="store">Socials</a>
+  <a href="verify.html" class="active">Code Check</a>
+</div>
+
+<!-- ================================================================
+     VERIFICATION CONTAINER
+     ================================================================ -->
+<section id="verify-section">
+  <div class="hero-particles" id="hero-particles"></div>
+  <div class="shard shard-tl"></div>
+  <div class="shard shard-tr"></div>
+  
+  <div class="verify-card">
+    <h1 class="verify-title">Code <span>Verification</span></h1>
+    <p class="verify-sub">Check if your DegenCity username is linked to creator code BIGD</p>
+    
+    <div class="input-group">
+      <label class="input-label" for="verify-username">DegenCity Username</label>
+      <input type="text" id="verify-username" class="verify-input" placeholder="Enter your username..." autocomplete="off"/>
+    </div>
+    
+    <button id="verify-btn" class="verify-btn" onclick="doVerify()">
+      <span>Check Status</span>
+      <span>→</span>
+    </button>
+    
+    <div class="checking-box" id="checking-box">
+      <div class="spinner-cyan"></div>
+      <span>Verifying database...</span>
+    </div>
+    
+    <div class="result-box" id="result-box"></div>
+  </div>
+</section>
+
+<!-- ================================================================
+     FOOTER
+     ================================================================ -->
+<footer>
+  <p>&copy; 2026 BigDGamesTV. All rights reserved. &nbsp;|&nbsp; <a href="#">Terms</a> &nbsp;|&nbsp; <a href="#">Privacy</a> &nbsp;|&nbsp; Powered by <a href="https://degencity.com">DegenCity</a></p>
+  <p style="margin-top:8px; font-size:0.72rem; opacity:0.5;">Gambling can be addictive. Please play responsibly. 18+ only.</p>
+</footer>
+
+<!-- COPY TOAST -->
+<div id="copy-toast">✓ Code copied!</div>
+
+<!-- ================================================================
+     EDGE BOT — Futuristic Ferrari
+     ================================================================ -->
+<div id="edge-bot">
+    <canvas id="racecar-canvas" width="96" height="52" aria-label="Ferrari edge bot" tabindex="0">Ferrari</canvas>
+</div>
+
+<!-- HUD TICKER -->
+<div id="hud-ticker">
+  <div id="hud-ticker-label">SYS</div>
+  <div style="overflow:hidden;flex:1;display:flex;">
+    <div class="ticker-track" id="ticker-track"></div>
+  </div>
+</div>
+
+<script>
+/* ──────────────────────────────────────────
+   CONFIG — API
+   ────────────────────────────────────────── */
+const API_BASE = "/api/leaderboard";
+const KICK_LIVE_API = '/api/kick-live';
+
+/* ──────────────────────────────────────────
+   KICK LIVE STATUS
+   ────────────────────────────────────────── */
+const kickLiveBadge = document.getElementById('kick-live-badge');
+const kickLiveText = document.getElementById('kick-live-text');
+
+function setKickLiveStatus(isLive) {
+  if (!kickLiveBadge || !kickLiveText) return;
+  kickLiveBadge.classList.toggle('is-live', isLive);
+  kickLiveText.textContent = isLive ? 'Live' : 'Offline';
+  kickLiveBadge.setAttribute('title', isLive ? 'BigDgamesTV is live on Kick' : 'BigDgamesTV is offline on Kick');
+}
+
+async function refreshKickLiveStatus() {
+  try {
+    const res = await fetch(KICK_LIVE_API, { cache: 'no-store' });
+    if (!res.ok) throw new Error('Kick status unavailable');
+    const data = await res.json();
+    setKickLiveStatus(Boolean(data.live));
+  } catch (err) {
+    setKickLiveStatus(false);
+  }
+}
+
+refreshKickLiveStatus();
+setInterval(refreshKickLiveStatus, 60000);
+
+/* ──────────────────────────────────────────
+   BACKGROUND PARTICLES
+   ────────────────────────────────────────── */
+const particleContainer = document.getElementById('hero-particles');
+for (let i = 0; i < 20; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.cssText = `
+    left: ${Math.random() * 100}%;
+    bottom: ${Math.random() * 20}%;
+    --dur: ${4 + Math.random() * 6}s;
+    --delay: ${Math.random() * -8}s;
+    width: ${1 + Math.random() * 2}px;
+    height: ${1 + Math.random() * 2}px;
+    opacity: ${0.3 + Math.random() * 0.7};
+  `;
+  particleContainer.appendChild(p);
+}
+
+/* ──────────────────────────────────────────
+   HAMBURGER / MOBILE DRAWER
+   ────────────────────────────────────────── */
+const hamburger = document.getElementById('hamburger');
+const mobileDrawer = document.getElementById('mobile-nav-drawer');
+
+function toggleDrawer(force) {
+  if (!hamburger || !mobileDrawer) return;
+  const open = typeof force === 'boolean' ? force : !hamburger.classList.contains('open');
+  hamburger.classList.toggle('open', open);
+  mobileDrawer.classList.toggle('open', open);
+}
+
+if (hamburger) hamburger.addEventListener('click', () => toggleDrawer());
+document.addEventListener('click', (e) => {
+  if (hamburger && mobileDrawer && !hamburger.contains(e.target) && !mobileDrawer.contains(e.target)) {
+    toggleDrawer(false);
+  }
+});
+
+/* ──────────────────────────────────────────
+   COPY TOAST / CODE COPY
+   ────────────────────────────────────────── */
+const copyToast = document.getElementById('copy-toast');
+let toastTimer;
+
+function copyCode(code, btn) {
+  navigator.clipboard.writeText(code).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = code;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+  if (btn) btn.textContent = '✓';
+  setTimeout(() => { if (btn) btn.textContent = '📋'; }, 1500);
+
+  clearTimeout(toastTimer);
+  copyToast.classList.add('show');
+  toastTimer = setTimeout(() => copyToast.classList.remove('show'), 2200);
+}
+
+/* ──────────────────────────────────────────
+   VERIFICATION LOGIC
+   ────────────────────────────────────────── */
+function escHtml(str) {
+  return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function doVerify() {
+  const usernameInput = document.getElementById('verify-username');
+  const checkBtn = document.getElementById('verify-btn');
+  const checkingBox = document.getElementById('checking-box');
+  const resultBox = document.getElementById('result-box');
+  
+  const username = usernameInput.value.trim();
+  if (!username) {
+    alert("Please enter a username.");
+    return;
+  }
+  
+  checkBtn.disabled = true;
+  usernameInput.disabled = true;
+  checkingBox.style.display = 'flex';
+  resultBox.style.display = 'none';
+  
+  try {
+    const res = await fetch(API_BASE, { cache: 'no-store' });
+    if (!res.ok) {
+      throw new Error(`Server returned status: ${res.status}`);
+    }
+    const json = await res.json();
+    const users = json.data || [];
+    
+    const match = users.find(u => u.username && u.username.toLowerCase() === username.toLowerCase());
+    
+    checkingBox.style.display = 'none';
+    
+    if (match) {
+      resultBox.innerHTML = `
+        <div class="result-card success">
+          <div class="result-badge">✓ Verified</div>
+          <div class="result-message">
+            Success! The account <strong>${escHtml(match.username)}</strong> is verified under Big D's creator code. You are enrolled in the active wagering pool and Milestones.
+          </div>
+        </div>
+      `;
+    } else {
+      resultBox.innerHTML = `
+        <div class="result-card error">
+          <div class="result-badge">✕ Not Verified</div>
+          <div class="result-message">
+            The username <strong>${escHtml(username)}</strong> was not found in Big D's wagering pool.
+          </div>
+          <div class="promo-box">
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <span class="promo-text">Use Creator Code:</span>
+              <span class="promo-code">BIGD</span>
+            </div>
+            <button class="btn-copy-promo" onclick="copyCode('BIGD', this)">📋 Copy Code</button>
+          </div>
+          <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:4px; line-height: 1.4;">
+            To qualify, make sure you registered on DegenCity using affiliate code <strong>BIGD</strong> and have active gameplay.
+          </div>
+        </div>
+      `;
+    }
+    resultBox.style.display = 'block';
+  } catch (err) {
+    console.error(err);
+    checkingBox.style.display = 'none';
+    resultBox.innerHTML = `
+      <div class="result-card error">
+        <div class="result-badge">⚠️ Error</div>
+        <div class="result-message">
+          Unable to check verification database. Please try again shortly.
+        </div>
+      </div>
+    `;
+    resultBox.style.display = 'block';
+  } finally {
+    checkBtn.disabled = false;
+    usernameInput.disabled = false;
+  }
+}
+
+// Allow Enter key to trigger check
+document.getElementById('verify-username').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    doVerify();
+  }
+});
+
+/* ──────────────────────────────────────────
+   HUD TICKER
+   ────────────────────────────────────────── */
+(function(){
+  const items = [
+    'BIGDGAMESTV','DEGEN MODE: <span class="hi">ACTIVE</span>','TOP WAGER: <span class="hi">$11,979</span>',
+    'PRIZE POOL: <span class="hi">$750</span>','PLAYERS: <span class="hi">LIVE</span>','CODE: <span class="hi">BIGD</span>',
+    'PLATFORM: <span class="hi">DEGENCITY</span>','STREAM: <span class="hi">KICK.COM/BIGDGAMESTV</span>',
+    'SEASON: <span class="hi">ONGOING</span>','AFFILIATE: <span class="hi">VERIFIED</span>'
+  ];
+  const track = document.getElementById('ticker-track');
+  if(track){
+    const html = items.map(i=>`<span class="ticker-item">${i}</span><span class="ticker-sep ticker-item">◆</span>`).join('');
+    track.innerHTML = html+html;
+  }
+})();
+
+/* ──────────────────────────────────────────
+   FERRARI EDGE BOT PERIMETER ORBIT
+   ────────────────────────────────────────── */
+(() => {
+  const bot = document.getElementById("edge-bot");
+  if (!bot) return;
+
+  const canvas = document.getElementById("racecar-canvas");
+  const ctx = canvas ? canvas.getContext("2d") : null;
+  let t = 0;
+  let mouseX = -9999;
+  let mouseY = -9999;
+  let soundPlaying = false;
+
+  window.addEventListener("mousemove", e => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+  });
+  const speed = 0.00022;
+  const engineSound = new Audio("assets/sounds/ferrari.mp3");
+  engineSound.loop = true;
+  engineSound.volume = 0.45;
+
+  let soundStarted = false;
+  function startCarSound() {
+      if (soundStarted) return;
+      soundStarted = true;
+      soundPlaying = true;
+      engineSound.currentTime = 0;
+      engineSound.play().catch(() => { soundStarted = false; soundPlaying = false; });
+  }
+  function stopCarSound() {}
+  
+  ['click','keydown','touchstart','scroll'].forEach(ev =>
+      document.addEventListener(ev, () => startCarSound(), { once: true })
+  );
+
+  function drawFerrari(frame){
+      if(!ctx) return;
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const cssW = 96; const cssH = 52;
+      if(canvas.width !== cssW*dpr || canvas.height !== cssH*dpr){
+          canvas.width = cssW*dpr; canvas.height = cssH*dpr;
+      }
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx.clearRect(0,0,cssW,cssH);
+      const spin = frame*28;
+      const flame = 5 + Math.sin(frame*88)*3;
+      const pulse = 0.7 + Math.sin(frame*60)*0.3;
+      ctx.save();
+      ctx.translate(2,4);
+
+      // Exhaust flame
+      ctx.globalAlpha = 0.55*pulse;
+      const flameGrad = ctx.createLinearGradient(0,24,flame+8,24);
+      flameGrad.addColorStop(0,'#fff4a0'); flameGrad.addColorStop(0.4,'#ff8c00'); flameGrad.addColorStop(1,'rgba(255,30,0,0)');
+      ctx.fillStyle = flameGrad;
+      ctx.beginPath(); ctx.moveTo(6,26); ctx.lineTo(0,23); ctx.lineTo(0,29); ctx.lineTo(6,30); ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 0.35*pulse;
+      ctx.fillStyle='#ffff00';
+      ctx.beginPath(); ctx.ellipse(3,26,flame*0.5,2,0,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Floor/diffuser
+      ctx.fillStyle='#1a1a1a';
+      ctx.beginPath(); ctx.moveTo(10,38); ctx.lineTo(82,38); ctx.lineTo(88,36); ctx.lineTo(6,36); ctx.closePath(); ctx.fill();
+
+      // Side pods
+      ctx.fillStyle='#cc0000';
+      ctx.beginPath(); ctx.moveTo(16,33); ctx.lineTo(30,26); ctx.lineTo(60,26); ctx.lineTo(70,33); ctx.lineTo(16,33); ctx.closePath(); ctx.fill();
+
+      // Main body
+      const body = ctx.createLinearGradient(8,12,88,36);
+      body.addColorStop(0,'#9b0000'); body.addColorStop(0.3,'#e00000'); body.addColorStop(0.55,'#ff2020'); body.addColorStop(1,'#8b0000');
+      ctx.fillStyle = body;
+      ctx.beginPath();
+      ctx.moveTo(8,35); ctx.bezierCurveTo(14,22,26,14,44,13); ctx.lineTo(62,13);
+      ctx.bezierCurveTo(76,14,85,22,88,34); ctx.lineTo(80,36); ctx.lineTo(14,36); ctx.closePath(); ctx.fill();
+
+      // Body highlight stripe
+      ctx.globalAlpha=0.18;
+      ctx.fillStyle='#ffffff';
+      ctx.beginPath(); ctx.moveTo(20,22); ctx.bezierCurveTo(35,16,55,15,70,20); ctx.lineTo(70,23); ctx.bezierCurveTo(55,18,35,19,20,25); ctx.closePath(); ctx.fill();
+      ctx.globalAlpha=1;
+
+      // Nose cone
+      const nose = ctx.createLinearGradient(76,20,92,34);
+      nose.addColorStop(0,'#cc0000'); nose.addColorStop(1,'#500000');
+      ctx.fillStyle=nose;
+      ctx.beginPath(); ctx.moveTo(80,34); ctx.bezierCurveTo(85,30,90,28,92,30); ctx.lineTo(90,34); ctx.closePath(); ctx.fill();
+
+      // Cockpit
+      ctx.fillStyle='#0a0a14';
+      ctx.beginPath(); ctx.ellipse(48,20,14,5,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='rgba(100,150,255,0.15)';
+      ctx.beginPath(); ctx.ellipse(48,20,12,4,0,0,Math.PI*2); ctx.fill();
+
+      // Halo bar
+      ctx.strokeStyle='#888'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(38,17); ctx.bezierCurveTo(43,14,53,14,58,17); ctx.stroke();
+
+      // Front wing
+      ctx.fillStyle='#111';
+      ctx.beginPath(); ctx.moveTo(72,35); ctx.lineTo(90,35); ctx.lineTo(91,38); ctx.lineTo(71,38); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='#cc0000';
+      ctx.fillRect(74,33,14,2);
+
+      // Rear wing
+      ctx.fillStyle='#cc0000';
+      ctx.fillRect(8,15,16,2.5);
+      ctx.fillStyle='#111';
+      ctx.fillRect(8,18,16,1.5);
+
+      // Ferrari prancing horse badge
+      ctx.fillStyle='#ffd700';
+      ctx.fillRect(44,24,8,4);
+      ctx.fillStyle='#111';
+      ctx.font='bold 3.5px Orbitron,sans-serif';
+      ctx.textAlign='center'; ctx.fillText('SF',48,27.5);
+
+      // Wheels
+      const wheelPositions = [{x:22,y:37,r:8},{x:70,y:37,r:8}];
+      wheelPositions.forEach(w=>{
+          ctx.fillStyle='#111';
+          ctx.beginPath(); ctx.arc(w.x,w.y,w.r,0,Math.PI*2); ctx.fill();
+          const rimGrad = ctx.createRadialGradient(w.x,w.y,1,w.x,w.y,w.r-2);
+          rimGrad.addColorStop(0,'#cccccc'); rimGrad.addColorStop(1,'#444');
+          ctx.fillStyle=rimGrad;
+          ctx.beginPath(); ctx.arc(w.x,w.y,w.r-2,0,Math.PI*2); ctx.fill();
+          ctx.strokeStyle='#999'; ctx.lineWidth=1.5;
+          for(let s=0;s<5;s++){
+              const a=spin+s*(Math.PI*2/5);
+              ctx.save(); ctx.translate(w.x,w.y); ctx.rotate(a);
+              ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-(w.r-2)); ctx.stroke();
+              ctx.restore();
+          }
+          ctx.fillStyle='#ffd700';
+          ctx.beginPath(); ctx.arc(w.x,w.y,2,0,Math.PI*2); ctx.fill();
+      });
+
+      // Brake glow
+      ctx.globalAlpha=0.35*pulse;
+      ctx.fillStyle='#4488ff';
+      ctx.beginPath(); ctx.arc(22,37,4,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=1;
+
+      ctx.restore();
+  }
+
+  function point(t){
+      const margin = 12;
+      const botW = bot.offsetWidth || 96;
+      const botH = bot.offsetHeight || 52;
+
+      const minX = margin + botW/2;
+      const maxX = Math.max(minX, window.innerWidth - margin - botW/2);
+      const minY = margin + botH/2;
+      const maxY = Math.max(minY, window.innerHeight - margin - botH/2);
+
+      const w = maxX-minX;
+      const h = maxY-minY;
+      const total = 2*(w+h);
+      let d = (t%1)*total;
+
+      if(d < w) return {x:minX+d,y:minY};
+      d -= w;
+      if(d < h) return {x:maxX,y:minY+d};
+      d -= h;
+      if(d < w) return {x:maxX-d,y:maxY};
+      d -= w;
+      return {x:minX,y:maxY-d};
+  }
+
+  function animate(){
+      requestAnimationFrame(animate);
+      t += speed;
+      drawFerrari(t);
+
+      const p1 = point(t);
+      const p2 = point(t+0.0005);
+      const angle = Math.atan2(p2.y-p1.y, p2.x-p1.x);
+
+      bot.style.left = p1.x+"px";
+      bot.style.top = p1.y+"px";
+
+      const goingLeft = Math.abs(angle) > Math.PI / 2;
+      bot.style.transform = `translate(-50%,-50%) rotate(${angle}rad) scaleY(${goingLeft ? -1 : 1})`;
+
+      const rect = bot.getBoundingClientRect();
+      const hovering =
+          mouseX >= rect.left &&
+          mouseX <= rect.right &&
+          mouseY >= rect.top &&
+          mouseY <= rect.bottom;
+
+      if (hovering && !soundPlaying) {
+          soundPlaying = true;
+          startCarSound();
+      }
+      if (!hovering && soundPlaying) {
+          soundPlaying = false;
+          stopCarSound();
+      }
+  }
+
+  animate();
+
+  let hovering = false;
+  bot.addEventListener("mouseenter", () => {
+      hovering = true;
+      startCarSound();
+  });
+  bot.addEventListener("mouseleave", () => {
+      hovering = false;
+      stopCarSound();
+  });
+
+  bot.addEventListener("focus", startCarSound);
+  bot.addEventListener("blur", stopCarSound);
+
+  bot.onclick = () => {
+      window.open("https://discord.gg/B2K2U5sF37", "_blank");
+  };
+})();
+</script>
+</body>
+</html>
