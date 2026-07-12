@@ -211,39 +211,58 @@ body::after {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 12px;
 }
 .nav-links a {
   font-family: var(--font-ui);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  transition: all 0.3s ease;
-  position: relative;
-  padding: 6px 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(136, 0, 255, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
 }
-.nav-links a::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--purple-500);
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-}
-.nav-links a:hover { color: var(--text-primary); }
-.nav-links a:hover::after { transform: scaleX(1); }
-.nav-links a.active {
+.nav-links a:hover {
   color: var(--text-primary);
-  text-shadow: 0 0 10px rgba(204, 102, 255, 0.8), 0 0 20px rgba(204, 102, 255, 0.4);
+  background: rgba(136, 0, 255, 0.08);
+  border-color: rgba(136, 0, 255, 0.35);
+  box-shadow: 0 0 15px rgba(136, 0, 255, 0.15);
+  transform: translateY(-1px);
+}
+.nav-links a.active {
+  color: #ffffff;
+  background: rgba(136, 0, 255, 0.15);
+  border-color: var(--purple-400);
+  box-shadow: 
+    0 0 15px rgba(136, 0, 255, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
   font-weight: 700;
 }
-.nav-links a.active::after {
-  transform: scaleX(1);
-  background: var(--purple-300);
-  box-shadow: 0 0 10px var(--purple-400), 0 0 20px var(--purple-500);
+.nav-links a[href="verify.html"] {
+  border-color: rgba(0, 255, 229, 0.15);
+  background: rgba(0, 255, 229, 0.02);
+}
+.nav-links a[href="verify.html"]:hover {
+  background: rgba(0, 255, 229, 0.08);
+  border-color: rgba(0, 255, 229, 0.5);
+  box-shadow: 0 0 15px rgba(0, 255, 229, 0.25);
+}
+.nav-links a[href="verify.html"].active {
+  background: rgba(0, 255, 229, 0.15);
+  border-color: var(--cyan-500);
+  box-shadow: 
+    0 0 15px rgba(0, 255, 229, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 .nav-right {
   display: flex;
@@ -314,28 +333,49 @@ body::after {
   display: none;
   position: fixed;
   top: 64px; left: 0; right: 0;
-  background: rgba(8,8,16,0.96);
+  z-index: 99;
+  background: rgba(8,8,20,0.97);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 24px;
+  padding: 20px 24px;
   flex-direction: column;
-  gap: 16px;
-  z-index: 99;
+  gap: 8px;
 }
+#mobile-nav-drawer.open { display: flex; }
 #mobile-nav-drawer a {
   font-family: var(--font-ui);
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.02);
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(136, 0, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.25s ease;
 }
 #mobile-nav-drawer a:hover,
 #mobile-nav-drawer a.active {
-  color: var(--text-primary);
-  text-shadow: 0 0 10px rgba(204,102,255,0.6);
+  color: #ffffff;
+  background: rgba(136, 0, 255, 0.08);
+  border-color: rgba(136, 0, 255, 0.35);
+  box-shadow: 0 0 12px rgba(136, 0, 255, 0.15);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  font-weight: 700;
+}
+#mobile-nav-drawer a[href="verify.html"] {
+  border-color: rgba(0, 255, 229, 0.12);
+  background: rgba(0, 255, 229, 0.01);
+}
+#mobile-nav-drawer a[href="verify.html"]:hover,
+#mobile-nav-drawer a[href="verify.html"].active {
+  border-color: rgba(0, 255, 229, 0.5);
+  background: rgba(0, 255, 229, 0.08);
+  box-shadow: 0 0 12px rgba(0, 255, 229, 0.2);
 }
 
 /* ============================================================
