@@ -97,13 +97,37 @@ function fetchKickViaPython() {
 }
 
 function etDateStringToUTC(dateStr, timeStr = "00:00:00") {
-  const loc = new Date(`${dateStr}T${timeStr}Z`);
-  const etStr = loc.toLocaleString("en-US", { timeZone: "America/New_York", hour12: false });
-  const match = etStr.match(/(\d+)\/(\d+)\/(\d+),\s+(\d+):(\d+):(\d+)/);
-  if (!match) return loc;
-  const etUTC = new Date(Date.UTC(Number(match[3]), Number(match[1]) - 1, Number(match[2]), Number(match[4]), Number(match[5]), Number(match[6])));
-  const diff = loc.getTime() - etUTC.getTime();
-  return new Date(loc.getTime() + diff);
+  // Parse YYYY-MM-DD + HH:MM:SS as Eastern Time and return the correct UTC Date.
+  // Strategy: construct a UTC timestamp, ask what ET time that corresponds to,
+  // then compute the ET→UTC offset and apply it correctly.
+  const [datePart] = dateStr.split("T");
+  const [timePart] = timeStr ? [timeStr] : ["00:00:00"];
+  const [y, mo, d] = datePart.split("-").map(Number);
+  const [h, mi, s] = timePart.split(":").map(Number);
+
+  // Start with a naive UTC timestamp (will be off by the ET offset)
+  const naive = new Date(Date.UTC(y, mo - 1, d, h, mi, s));
+
+  // Find what ET clock time this naive UTC maps to
+  const etStr = naive.toLocaleString("en-US", { timeZone: "America/New_York", hour12: false });
+  const match = etStr.match(/(\d+)\/(\d+)\/(\d+),\s*(\d+):(\d+):(\d+)/);
+  if (!match) return naive;
+
+  // Build what the ET clock said as a UTC reference point
+  const etAsUTC = new Date(Date.UTC(
+    Number(match[3]),
+    Number(match[1]) - 1,
+    Number(match[2]),
+    Number(match[4]) === 24 ? 0 : Number(match[4]),
+    Number(match[5]),
+    Number(match[6])
+  ));
+
+  // The offset is: naive_UTC - ET_as_UTC = the true UTC offset for this moment
+  const offsetMs = naive.getTime() - etAsUTC.getTime();
+
+  // Correct UTC = naive + offset (shift naive UTC so that ET interpretation gives desired time)
+  return new Date(naive.getTime() + offsetMs);
 }
 
 // ─── Leaderboard — 15-Day and Lifetime ────────────────────────────────────────
