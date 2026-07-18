@@ -580,7 +580,7 @@ app.get("/auth/discord/callback", async (req, res) => {
       ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`
       : null;
 
-    let userId   = req.session.userId || null;
+    let userId   = getAuthUserId(req) || req.session.userId || null;
     let dbPoints = 0;
     let dbKickId = null;
     let dbKickUsername = null;
@@ -710,7 +710,7 @@ app.get("/auth/kick/callback", async (req, res) => {
       chatActivityTracker.registerUser(kickUsername);
     }
 
-    let userId   = req.session.userId || null;
+    let userId   = getAuthUserId(req) || req.session.userId || null;
     let dbPoints = 0;
     let dbDegenUsername = null;
     let dbDegenVerified = false;
