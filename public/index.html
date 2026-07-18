@@ -774,6 +774,21 @@ body::after {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .lb-error { color: #f87171; }
+.lb-period-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+.lb-period-banner strong { color: var(--purple-300); }
 
 /* ============================================================
    BONUSES SECTION
@@ -2611,7 +2626,7 @@ function scrollToTabs() {
 /* ──────────────────────────────────────────
    LEADERBOARD API
    ────────────────────────────────────────── */
-async function fetchLeaderboard(after, before) {
+async function fetchLeaderboard(after, before, rangeLabel) {
   const lbContent = document.getElementById('lb-content');
   lbContent.innerHTML = `<div class="lb-loading"><div class="spinner"></div>Fetching live data from DegenCity…</div>`;
 
@@ -2644,7 +2659,7 @@ async function fetchLeaderboard(after, before) {
     }
 
     const json = await res.json();
-    renderLeaderboard(json.data || []);
+    renderLeaderboard(json.data || [], rangeLabel);
 
     // update stats
     const allUsers = json.data || [];
@@ -2676,7 +2691,7 @@ async function fetchLeaderboard(after, before) {
 const PRIZE_POOL = [350, 150, 100, 50, 50, 25, 25]; // biweekly $750
 const PRIZE_TOTAL = 750;
 
-function renderLeaderboard(data) {
+function renderLeaderboard(data, rangeLabel) {
   const lbContent = document.getElementById('lb-content');
 
   if (!data || data.length === 0) {
@@ -2723,7 +2738,6 @@ function renderLeaderboard(data) {
           ${nameHtml}
           ${hasMonths ? `<span class="expand-chevron" id="chev-${rowId}">▸</span>` : ''}
         </td>
-
         <td>
           <span class="month-count-badge">${monthCount} month${monthCount !== 1 ? 's' : ''}</span>
         </td>
@@ -2740,7 +2754,12 @@ function renderLeaderboard(data) {
       </tr>` : ''}`;
   }).join('');
 
+  const labelBanner = rangeLabel
+    ? `<div class="lb-period-banner">📅 Showing data for: <strong>${rangeLabel}</strong></div>`
+    : '';
+
   lbContent.innerHTML = `
+    ${labelBanner}
     <div class="lb-table-wrap">
       <table class="lb-table">
         <thead>
@@ -2771,10 +2790,51 @@ function escHtml(str) {
 }
 
 document.getElementById('lb-fetch-btn').addEventListener('click', () => {
-  const after  = document.getElementById('lb-after').value;
-  const before = document.getElementById('lb-before').value;
-  fetchLeaderboard(after, before);
+  const afterRaw  = document.getElementById('lb-after').value;
+  const beforeRaw = document.getElementById('lb-before').value;
+
+  if (!afterRaw) {
+    fetchLeaderboard('', '');
+    return;
+  }
+
+  // Normalize: snap to start of the "after" month and end of the "before" month
+  // The DegenCity API aggregates at monthly granularity, so we round to month bounds.
+  const afterDate  = new Date(afterRaw + 'T00:00:00');
+  const beforeDate = beforeRaw ? new Date(beforeRaw + 'T00:00:00') : afterDate;
+
+  // Start = first day of afterDate's month
+  const startYear  = afterDate.getFullYear();
+  const startMonth = afterDate.getMonth(); // 0-indexed
+  const afterNorm  = `${startYear}-${String(startMonth + 1).padStart(2, '0')}-01`;
+
+  // End = first day of NEXT month after beforeDate's month
+  const endYear    = beforeDate.getFullYear();
+  const endMonth   = beforeDate.getMonth(); // 0-indexed
+  const nextMonth  = new Date(endYear, endMonth + 1, 1);
+  const beforeNorm = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-01`;
+
+  // Build a human-readable label for what's being shown
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let rangeLabel;
+  if (startYear === endYear && startMonth === endMonth) {
+    rangeLabel = `${monthNames[startMonth]} ${startYear}`;
+  } else {
+    rangeLabel = `${monthNames[startMonth]} ${startYear} – ${monthNames[endMonth]} ${endYear}`;
+  }
+
+  fetchLeaderboard(afterNorm, beforeNorm, rangeLabel);
 });
+
+// Pre-fill date inputs with current month defaults
+(function prefillDates() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
+  document.getElementById('lb-after').value  = `${y}-${m}-01`;
+  document.getElementById('lb-before').value = `${y}-${m}-${String(lastDay).padStart(2, '0')}`;
+})();
 
 // auto-load on page open
 fetchLeaderboard('', '');
