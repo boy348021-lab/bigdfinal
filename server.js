@@ -29,8 +29,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
 // ─── Supabase ────────────────────────────────────────────────────────────────
-const supabaseUrl     = process.env.SUPABASE_URL     || "";
-const supabaseKey     = process.env.SUPABASE_SERVICE_KEY || "";
+const supabaseUrl     = process.env.SUPABASE_URL     || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseKey     = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_ANON_KEY || "";
 const supabase        = supabaseUrl && supabaseKey
   ? createClient(supabaseUrl, supabaseKey)
   : null;
@@ -112,9 +112,7 @@ app.get("/api/leaderboard", async (req, res) => {
   const { after, before } = req.query;
 
   // ─── LEADERBOARD B: 15-Day (Biweekly) Leaderboard (Database-driven) ────────────────
-  if (after === '2026-07-16') {
-    if (!supabase) return res.status(503).json({ error: "Database not configured" });
-
+  if (after === '2026-07-16' && supabase) {
     try {
       // Query local wager transactions strictly within the date range
       const { data: txs, error } = await supabase
@@ -131,39 +129,38 @@ app.get("/api/leaderboard", async (req, res) => {
         .gte("processed_at", "2026-07-16T00:00:00.000Z")
         .lte("processed_at", "2026-07-31T23:59:59.999Z");
 
-      if (error) throw error;
-
-      // Group in memory to aggregate totals for each user
-      const playerMap = new Map();
-      for (const tx of txs || []) {
-        const username = tx.users?.degencity_username || tx.users?.kick_username || "Unknown";
-        if (!playerMap.has(username)) {
-          playerMap.set(username, { username, total_wager: 0, total_points: 0 });
-        }
-        const entry = playerMap.get(username);
-        entry.total_wager += Number(tx.wager_amount_usd || 0);
-        entry.total_points += Number(tx.points_awarded || 0);
-      }
-
-      const players = Array.from(playerMap.values())
-        .sort((a, b) => b.total_wager - a.total_wager);
-
-      const formatted = players.map(p => ({
-        user_id: 1,
-        username: p.username,
-        wager_data: [
-          {
-            month: "2026-07",
-            total_wager_usd: p.total_wager
+      if (!error && txs && txs.length > 0) {
+        // Group in memory to aggregate totals for each user
+        const playerMap = new Map();
+        for (const tx of txs) {
+          const username = tx.users?.degencity_username || tx.users?.kick_username || "Unknown";
+          if (!playerMap.has(username)) {
+            playerMap.set(username, { username, total_wager: 0, total_points: 0 });
           }
-        ]
-      }));
+          const entry = playerMap.get(username);
+          entry.total_wager += Number(tx.wager_amount_usd || 0);
+          entry.total_points += Number(tx.points_awarded || 0);
+        }
 
-      res.set("Cache-Control", "no-store");
-      return res.json({ data: formatted });
+        const players = Array.from(playerMap.values())
+          .sort((a, b) => b.total_wager - a.total_wager);
+
+        const formatted = players.map(p => ({
+          user_id: 1,
+          username: p.username,
+          wager_data: [
+            {
+              month: "2026-07",
+              total_wager_usd: p.total_wager
+            }
+          ]
+        }));
+
+        res.set("Cache-Control", "no-store");
+        return res.json({ data: formatted });
+      }
     } catch (err) {
-      console.error("Biweekly leaderboard error:", err);
-      return res.status(500).json({ success: false, message: err.message });
+      console.error("Biweekly leaderboard DB error, falling back to proxy:", err);
     }
   }
 
