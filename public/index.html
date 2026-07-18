@@ -2828,12 +2828,15 @@ function getUTCFromET(year, month, day, hour = 0, minute = 0, second = 0) {
 
 function getSemiMonthPeriod() {
   // LOCKED: 16 July 2026 → 31 July 2026
-  // end is 2026-08-01 (exclusive) so July 31 is fully included.
-  const start = new Date('2026-07-16T00:00:00.000Z');
-  const end   = new Date('2026-08-01T00:00:00.000Z');
+  // API uses exclusive upper bound 2026-08-01 so July 31 is fully included.
+  // Display uses noon UTC to avoid ET timezone shift showing wrong date.
+  const start      = new Date('2026-07-16T12:00:00.000Z'); // noon UTC = safe for ET display
+  const end        = new Date('2026-08-01T00:00:00.000Z'); // exclusive API upper bound
+  const displayEnd = new Date('2026-07-31T12:00:00.000Z'); // Jul 31 for display only
   return {
     start,
     end,
+    displayEnd,
     now: new Date()
   };
 }
@@ -2898,14 +2901,14 @@ function startBiweeklyCountdown() {
 }
 
 function initBiweeklyProgress(isIntervalUpdate = false) {
-  const { start, end, now } = getSemiMonthPeriod();
+  const { start, end, displayEnd, now } = getSemiMonthPeriod();
   const totalMs   = end - start;
   const elapsedMs = now - start;
   const pct       = Math.min(100, Math.max(0, Math.round((elapsedMs / totalMs) * 100)));
   const daysLeft  = Math.max(0, Math.ceil((end - now) / 86400000));
 
   const datesEl = document.getElementById('bw-period-dates');
-  if (datesEl) datesEl.textContent = bwFmtDate(start) + ' → ' + bwFmtDate(end);
+  if (datesEl) datesEl.textContent = bwFmtDate(start) + ' → ' + bwFmtDate(displayEnd);
 
   const daysLeftEl = document.getElementById('bw-days-left');
   if (daysLeftEl) daysLeftEl.textContent = daysLeft;
@@ -2914,7 +2917,7 @@ function initBiweeklyProgress(isIntervalUpdate = false) {
   const endEl   = document.getElementById('bw-prog-end');
   const pctEl   = document.getElementById('bw-prog-pct');
   if (startEl) startEl.textContent = bwFmtDate(start);
-  if (endEl)   endEl.textContent   = bwFmtDate(end);
+  if (endEl)   endEl.textContent   = bwFmtDate(displayEnd);
   if (pctEl)   pctEl.textContent   = pct + '% complete';
 
   const fill    = document.getElementById('bw-progress-fill');
@@ -2944,9 +2947,9 @@ async function fetchBiweeklyLeaderboard() {
   if (!bwContent) return;
   bwContent.innerHTML = '<div class="lb-loading"><div class="spinner"></div>Loading 14-day rankings…</div>';
 
-  const { start, end } = getSemiMonthPeriod();
-  const after  = bwFmtISO(start);
-  const before = bwFmtISO(end);
+  // Hard-coded API date strings — bypasses ET timezone shift in bwFmtISO
+  const after  = '2026-07-16';
+  const before = '2026-08-01'; // exclusive upper bound; includes all of Jul 31
 
   try {
     const url = API_BASE + '?after=' + encodeURIComponent(after) + '&before=' + encodeURIComponent(before);
