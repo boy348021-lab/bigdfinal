@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 import { execFile } from "child_process";
 import session from "express-session";
 import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
 import { createClient } from "@supabase/supabase-js";
 import { createHash, randomBytes } from "crypto";
 import fs from "fs";
@@ -452,8 +453,33 @@ app.post("/api/admin/redemptions/:id", requireAdmin, async (req, res) => {
 });
 
 // ─── Auth — Session Info ──────────────────────────────────────────────────────
+// ─── JWT Auth Cookie helpers (survive serverless — no in-memory session needed) ─
+const JWT_SECRET = process.env.SESSION_SECRET || 'bigdtv-dev-secret-change-in-production';
+const AUTH_COOKIE = 'auth_token';
+const AUTH_COOKIE_OPTS = {
+  httpOnly: true,
+  secure:   process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  maxAge:   7 * 24 * 60 * 60 * 1000, // 7 days
+};
+
+function setAuthCookie(res, userId) {
+  const token = jwt.sign({ uid: String(userId) }, JWT_SECRET, { expiresIn: '7d' });
+  res.cookie(AUTH_COOKIE, token, AUTH_COOKIE_OPTS);
+}
+
+function getAuthUserId(req) {
+  const token = req.cookies?.[AUTH_COOKIE];
+  if (!token) return null;
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    return payload.uid || null;
+  } catch { return null; }
+}
+
 app.get("/auth/me", async (req, res) => {
-  if (!req.session.userId) return res.json({ loggedIn: false });
+  const userId = getAuthUserId(req) || req.session.userId || null;
+  if (!userId) return res.json({ loggedIn: false });
 
   let dbUser = null;
   if (supabase) {
@@ -461,7 +487,7 @@ app.get("/auth/me", async (req, res) => {
       const { data, error } = await supabase
         .from("users")
         .select("discord_username, discord_avatar, kick_username, kick_id, degencity_username, degencity_verification_status, points")
-        .eq("id", req.session.userId)
+        .eq("id", userId)
         .single();
       if (!error && data) {
         dbUser = data;
@@ -475,18 +501,19 @@ app.get("/auth/me", async (req, res) => {
 
   res.json({
     loggedIn:             true,
-    userId:               req.session.userId,
-    discordUsername:      user.discord_username         || req.session.discordUsername  || null,
-    discordAvatar:        user.discord_avatar           || req.session.discordAvatar    || null,
-    kickUsername:         user.kick_username            || req.session.kickUsername     || null,
-    kickId:               user.kick_id                  || req.session.kickId           || null,
-    degencityUsername:    user.degencity_username       || req.session.degencityUsername || null,
-    degencityVerified:    (user.degencity_verification_status === "verified") || req.session.degencityVerified || false,
-    points:               user.points !== undefined ? user.points : (req.session.points || 0),
+    userId,
+    discordUsername:      user.discord_username         || null,
+    discordAvatar:        user.discord_avatar           || null,
+    kickUsername:         user.kick_username            || null,
+    kickId:               user.kick_id                  || null,
+    degencityUsername:    user.degencity_username       || null,
+    degencityVerified:    (user.degencity_verification_status === 'verified') || false,
+    points:               user.points ?? 0,
   });
 });
 
 app.post("/auth/logout", (req, res) => {
+  res.clearCookie(AUTH_COOKIE);
   req.session.destroy(() => res.json({ success: true }));
 });
 
@@ -604,6 +631,8 @@ app.get("/auth/discord/callback", async (req, res) => {
     req.session.degencityUsername = dbDegenUsername || req.session.degencityUsername || null;
     req.session.degencityVerified = dbDegenVerified || req.session.degencityVerified || false;
 
+    // Set persistent JWT cookie so auth survives across serverless instances
+    if (userId) setAuthCookie(res, userId);
     res.redirect("/account.html?success=discord");
   } catch (err) {
     console.error("Discord callback error:", err);
@@ -733,6 +762,8 @@ app.get("/auth/kick/callback", async (req, res) => {
     req.session.degencityUsername   = dbDegenUsername;
     req.session.degencityVerified   = dbDegenVerified;
 
+    // Set persistent JWT cookie so auth survives across serverless instances
+    if (userId) setAuthCookie(res, userId);
     res.redirect("/account.html?success=kick");
   } catch (err) {
     console.error("Kick callback error:", err);
