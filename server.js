@@ -40,13 +40,24 @@ if (!supabase) {
 }
 
 // ─── OAuth Config ────────────────────────────────────────────────────────────
-const DISCORD_CLIENT_ID     = process.env.DISCORD_CLIENT_ID     || "";
-const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "";
-const DISCORD_REDIRECT_URI  = process.env.DISCORD_REDIRECT_URI  || `http://localhost:${PORT}/auth/discord/callback`;
+const DISCORD_CLIENT_ID     = process.env.DISCORD_CLIENT_ID     || \"1526125659494154250\";
+const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || \"njb6UmXsbJeKn76NFtyHjTMY7yrGdEHi\";
 
-const KICK_CLIENT_ID     = process.env.KICK_CLIENT_ID     || "";
-const KICK_CLIENT_SECRET = process.env.KICK_CLIENT_SECRET || "";
-const KICK_REDIRECT_URI  = process.env.KICK_REDIRECT_URI  || `http://localhost:${PORT}/auth/kick/callback`;
+const KICK_CLIENT_ID     = process.env.KICK_CLIENT_ID     || \"\";
+const KICK_CLIENT_SECRET = process.env.KICK_CLIENT_SECRET || \"\";
+
+// Auto-detect the base URL: prefer explicit env var, then Vercel URL, then production domain, then localhost
+const BASE_URL = process.env.BASE_URL
+  || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+  || (process.env.NODE_ENV === \"production\" ? \"https://bigdtv.vip\" : null)
+  || `http://localhost:${PORT}`;
+
+const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || `${BASE_URL}/auth/discord/callback`;
+const KICK_REDIRECT_URI    = process.env.KICK_REDIRECT_URI    || `${BASE_URL}/auth/kick/callback`;
+
+console.log(`🔗 BASE_URL: ${BASE_URL}`);
+console.log(`🔗 Discord redirect: ${DISCORD_REDIRECT_URI}`);
+console.log(`🔗 Kick redirect:    ${KICK_REDIRECT_URI}`);
 
 // Admin secret for admin endpoints (set ADMIN_SECRET in .env)
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "bigdtv-admin-change-me";
