@@ -930,7 +930,27 @@ app.get("/auth/kick/callback", async (req, res) => {
     }
 
     const currentUserId = getAuthUserId(req) || req.session.userId || null;
+    if (!currentUserId) {
+      return res.redirect("/account.html?error=discord_required");
+    }
+
+    // Verify current user has Discord linked
+    if (supabase) {
+      const { data: curUser } = await supabase
+        .from("users")
+        .select("discord_id")
+        .eq("id", currentUserId)
+        .single();
+      if (!curUser || !curUser.discord_id) {
+        return res.redirect("/account.html?error=discord_required");
+      }
+    }
+
     const verifiedDegenUsername = req.cookies.verified_degencity_username || null;
+    if (!verifiedDegenUsername) {
+      return res.redirect("/account.html?error=degencity_required");
+    }
+
     const result = await handleOAuthLoginOrLink({
       platform: "kick",
       platformId: kickId,
@@ -995,30 +1015,103 @@ app.post("/auth/link-degencity", async (req, res) => {
       // Check if this DegenCity username is already linked to another user record
       const { data: existingLink } = await supabase
         .from("users")
-        .select("id")
+        .select("*")
         .eq("degencity_username", degenUsername)
         .maybeSingle();
 
-      if (existingLink && existingLink.id !== currentUserId) {
-        return res.status(422).json({
-          error: `DegenCity username "${degencity_username}" is already linked to another account.`
-        });
-      }
-
       if (currentUserId) {
-        // If logged in, update the existing database row directly
-        await supabase
+        // Retrieve current user details to check authentication status
+        const { data: targetUser, error: userErr } = await supabase
           .from("users")
-          .update({
-            degencity_username:            degenUsername,
-            degencity_link_timestamp:      new Date().toISOString(),
-            degencity_verification_status: "verified"
-          })
-          .eq("id", currentUserId);
+          .select("*")
+          .eq("id", currentUserId)
+          .single();
+
+        if (userErr || !targetUser) {
+          return res.status(404).json({ error: "User profile not found." });
+        }
+
+        // Verify they are authenticated with both platforms (Step 8 check)
+        if (!targetUser.discord_id || !targetUser.kick_id) {
+          return res.status(422).json({
+            error: "Authentication incomplete. Please login with both Discord and Kick accounts first."
+          });
+        }
+
+        // Verify the username matches the verified_degencity_username cookie (Step 8 matching confirmation)
+        const verifiedDegenCookie = req.cookies.verified_degencity_username || null;
+        if (!verifiedDegenCookie || verifiedDegenCookie.toLowerCase() !== degenUsername) {
+          return res.status(422).json({
+            error: "This DegenCity username has not been verified through the Code Check page."
+          });
+        }
+
+        if (existingLink && existingLink.id !== currentUserId) {
+          // Conflicting row: merge existingLink (source) into targetUser
+          if (existingLink.discord_id && targetUser.discord_id && existingLink.discord_id !== targetUser.discord_id) {
+            return res.status(422).json({ error: "Cannot link: Conflicting Discord identities found on the other account." });
+          }
+          if (existingLink.kick_id && targetUser.kick_id && existingLink.kick_id !== targetUser.kick_id) {
+            return res.status(422).json({ error: "Cannot link: Conflicting Kick identities found on the other account." });
+          }
+
+          console.log(`🔄 Merging user ${existingLink.id} into ${targetUser.id} for final DegenCity linking...`);
+
+          // Move logs
+          await Promise.all([
+            supabase.from("point_logs").update({ user_id: targetUser.id }).eq("user_id", existingLink.id),
+            supabase.from("audit_logs").update({ user_id: targetUser.id }).eq("user_id", existingLink.id),
+            supabase.from("wager_transactions").update({ user_id: targetUser.id }).eq("user_id", existingLink.id),
+            supabase.from("redemptions").update({ user_id: targetUser.id }).eq("user_id", existingLink.id),
+          ]);
+
+          const mergedPoints = (targetUser.points || 0) + (existingLink.points || 0);
+
+          // Delete duplicate user first to avoid unique constraint violations on update
+          await supabase.from("users").delete().eq("id", existingLink.id);
+
+          await supabase
+            .from("users")
+            .update({
+              points:                        mergedPoints,
+              degencity_username:            degenUsername,
+              degencity_link_timestamp:      new Date().toISOString(),
+              degencity_verification_status: "verified"
+            })
+            .eq("id", targetUser.id);
+
+          await supabase.from("audit_logs").insert({
+            user_id: targetUser.id,
+            action: "account_merge",
+            points_before: targetUser.points,
+            points_after: mergedPoints,
+            source: "auth_system",
+            transaction_reference: `merged_final_link_${existingLink.id}`,
+          });
+
+        } else {
+          // Simply update the current user
+          await supabase
+            .from("users")
+            .update({
+              degencity_username:            degenUsername,
+              degencity_link_timestamp:      new Date().toISOString(),
+              degencity_verification_status: "verified"
+            })
+            .eq("id", targetUser.id);
+        }
+      } else {
+        // Step 1 check: if not logged in, prevent duplicate DegenCity linking
+        if (existingLink) {
+          // Wait, is it already linked to a fully completed profile?
+          // If the profile has Kick and Discord, they should just login with Discord to restore it.
+          // But we should allow them to proceed to set cookie so they can log in via Discord next.
+          // So setting the cookie is safe in all cases.
+        }
       }
     }
 
-    // Set a secure temporary cookie for unauthenticated sessions
+    // Set/refresh secure temporary cookie
     const DEGEN_COOKIE = 'verified_degencity_username';
     res.cookie(DEGEN_COOKIE, degenUsername, {
       httpOnly: true,

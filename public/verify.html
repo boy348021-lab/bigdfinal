@@ -992,21 +992,29 @@ async function doVerify() {
     checkingBox.style.display = 'none';
     
     if (match) {
-      // Call link-degencity on backend to set the verified cookie
-      fetch('/auth/link-degencity', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ degencity_username: match.username })
-      }).catch(err => console.error("Error setting verified cookie:", err));
-
       resultBox.innerHTML = `
         <div class="result-card success">
           <div class="result-badge">✓ Verified</div>
           <div class="result-message">
-            Success! The account <strong>${escHtml(match.username)}</strong> is verified under Big D's creator code. You are enrolled in the active wagering pool and Milestones.
+            Success! The account <strong>${escHtml(match.username)}</strong> is verified under Big D's creator code. Redirecting to Account page…
           </div>
         </div>
       `;
+      // Call link-degencity on backend to set the verified cookie and redirect
+      fetch('/auth/link-degencity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ degencity_username: match.username })
+      })
+      .then(() => {
+        setTimeout(() => {
+          window.location.href = "/account.html";
+        }, 1500);
+      })
+      .catch(err => {
+        console.error("Error setting verified cookie:", err);
+        window.location.href = "/account.html";
+      });
     } else {
       resultBox.innerHTML = `
         <div class="result-card error">
