@@ -992,6 +992,7 @@ async function doVerify() {
     checkingBox.style.display = 'none';
     
     if (match) {
+      localStorage.setItem('verified_degencity_username', match.username);
       resultBox.innerHTML = `
         <div class="result-card success">
           <div class="result-badge">✓ Verified</div>

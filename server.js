@@ -242,105 +242,154 @@ async function handleOAuthLoginOrLink({ platform, platformId, platformUsername, 
     return { success: true, userId: currentUserId };
   }
 
-  if (existingUser) {
-    // Conflict: The platform account authorized already belongs to another user (existingUser).
-    // Merge existingUser (source) into currentUser (target).
+  // Find if another user already has this DegenCity username linked
+  let existingDegenUser = null;
+  if (platform === "kick" && verifiedDegenUsername) {
+    const { data } = await supabase
+      .from("users")
+      .select("*")
+      .eq("degencity_username", verifiedDegenUsername.trim().toLowerCase())
+      .maybeSingle();
+    existingDegenUser = data;
+  }
+
+  // Check conflicts for existingUser (platform match)
+  if (existingUser && existingUser.id !== currentUserId) {
     const otherIdField = platform === "discord" ? "kick_id" : "discord_id";
     if (currentUser[otherIdField] && existingUser[otherIdField] && currentUser[otherIdField] !== existingUser[otherIdField]) {
-      // Both accounts already have different identities linked for the other platform! Conflict.
       return { success: false, error: "already_linked" };
     }
+  }
 
-    const targetId = currentUser.id;
-    const sourceId = existingUser.id;
-
-    console.log(`🔄 Merging user ${sourceId} into ${targetId}...`);
-
-    // 1) Move logs, transactions, and redemptions to target
-    await Promise.all([
-      supabase.from("point_logs").update({ user_id: targetId }).eq("user_id", sourceId),
-      supabase.from("audit_logs").update({ user_id: targetId }).eq("user_id", sourceId),
-      supabase.from("wager_transactions").update({ user_id: targetId }).eq("user_id", sourceId),
-      supabase.from("redemptions").update({ user_id: targetId }).eq("user_id", sourceId),
-    ]);
-
-    // 2) Combine points and merge profile columns
-    const mergedPayload = {
-      points: (currentUser.points || 0) + (existingUser.points || 0),
-      last_seen_at: new Date().toISOString(),
-      discord_id: currentUser.discord_id || existingUser.discord_id,
-      discord_username: currentUser.discord_username || existingUser.discord_username,
-      discord_avatar: currentUser.discord_avatar || existingUser.discord_avatar,
-      kick_id: currentUser.kick_id || existingUser.kick_id,
-      kick_username: currentUser.kick_username || existingUser.kick_username,
-      degencity_username: currentUser.degencity_username || existingUser.degencity_username,
-      degencity_verification_status: (currentUser.degencity_verification_status === "verified" || existingUser.degencity_verification_status === "verified") ? "verified" : "unverified",
-      degencity_link_timestamp: currentUser.degencity_link_timestamp || existingUser.degencity_link_timestamp,
-    };
-
-    if (platform === "discord") {
-      mergedPayload.discord_id = platformId;
-      mergedPayload.discord_username = platformUsername;
-      mergedPayload.discord_avatar = platformAvatar;
-    } else {
-      mergedPayload.kick_id = platformId;
-      mergedPayload.kick_username = platformUsername;
-      if (verifiedDegenUsername) {
-        mergedPayload.degencity_username = verifiedDegenUsername;
-        mergedPayload.degencity_verification_status = "verified";
-        mergedPayload.degencity_link_timestamp = new Date().toISOString();
-      }
+  // Check conflicts for existingDegenUser (degencity match)
+  if (existingDegenUser && existingDegenUser.id !== currentUserId) {
+    if (currentUser.discord_id && existingDegenUser.discord_id && currentUser.discord_id !== existingDegenUser.discord_id) {
+      return { success: false, error: "already_linked" };
     }
+    const incomingKickId = platform === "kick" ? platformId : null;
+    const targetKickId = currentUser.kick_id || incomingKickId;
+    if (targetKickId && existingDegenUser.kick_id && targetKickId !== existingDegenUser.kick_id) {
+      return { success: false, error: "already_linked" };
+    }
+  }
 
-    // 3) Delete source user (do this before updating target user to avoid unique constraint violations)
+  const sourcesToDelete = [];
+  let mergedPoints = currentUser.points || 0;
+
+  const mergedPayload = {
+    last_seen_at: new Date().toISOString(),
+    discord_id: currentUser.discord_id,
+    discord_username: currentUser.discord_username,
+    discord_avatar: currentUser.discord_avatar,
+    kick_id: currentUser.kick_id,
+    kick_username: currentUser.kick_username,
+    degencity_username: currentUser.degencity_username,
+    degencity_verification_status: currentUser.degencity_verification_status,
+    degencity_link_timestamp: currentUser.degencity_link_timestamp,
+  };
+
+  if (platform === "discord") {
+    mergedPayload.discord_id = platformId;
+    mergedPayload.discord_username = platformUsername;
+    mergedPayload.discord_avatar = platformAvatar;
+  } else {
+    mergedPayload.kick_id = platformId;
+    mergedPayload.kick_username = platformUsername;
+    if (verifiedDegenUsername) {
+      mergedPayload.degencity_username = verifiedDegenUsername;
+      mergedPayload.degencity_verification_status = "verified";
+      mergedPayload.degencity_link_timestamp = new Date().toISOString();
+    }
+  }
+
+  // 1) Merge existingUser (matched by platformId)
+  if (existingUser && existingUser.id !== currentUserId) {
+    const sourceId = existingUser.id;
+    sourcesToDelete.push(sourceId);
+    mergedPoints += (existingUser.points || 0);
+
+    mergedPayload.discord_id = mergedPayload.discord_id || existingUser.discord_id;
+    mergedPayload.discord_username = mergedPayload.discord_username || existingUser.discord_username;
+    mergedPayload.discord_avatar = mergedPayload.discord_avatar || existingUser.discord_avatar;
+    mergedPayload.kick_id = mergedPayload.kick_id || existingUser.kick_id;
+    mergedPayload.kick_username = mergedPayload.kick_username || existingUser.kick_username;
+    mergedPayload.degencity_username = mergedPayload.degencity_username || existingUser.degencity_username;
+    if (existingUser.degencity_verification_status === "verified") {
+      mergedPayload.degencity_verification_status = "verified";
+    }
+    mergedPayload.degencity_link_timestamp = mergedPayload.degencity_link_timestamp || existingUser.degencity_link_timestamp;
+
+    await Promise.all([
+      supabase.from("point_logs").update({ user_id: currentUserId }).eq("user_id", sourceId),
+      supabase.from("audit_logs").update({ user_id: currentUserId }).eq("user_id", sourceId),
+      supabase.from("wager_transactions").update({ user_id: currentUserId }).eq("user_id", sourceId),
+      supabase.from("redemptions").update({ user_id: currentUserId }).eq("user_id", sourceId),
+    ]);
+  }
+
+  // 2) Merge existingDegenUser (matched by degencity_username)
+  if (existingDegenUser && existingDegenUser.id !== currentUserId && (!existingUser || existingDegenUser.id !== existingUser.id)) {
+    const sourceId = existingDegenUser.id;
+    sourcesToDelete.push(sourceId);
+    mergedPoints += (existingDegenUser.points || 0);
+
+    mergedPayload.discord_id = mergedPayload.discord_id || existingDegenUser.discord_id;
+    mergedPayload.discord_username = mergedPayload.discord_username || existingDegenUser.discord_username;
+    mergedPayload.discord_avatar = mergedPayload.discord_avatar || existingDegenUser.discord_avatar;
+    mergedPayload.kick_id = mergedPayload.kick_id || existingDegenUser.kick_id;
+    mergedPayload.kick_username = mergedPayload.kick_username || existingDegenUser.kick_username;
+    mergedPayload.degencity_username = mergedPayload.degencity_username || existingDegenUser.degencity_username;
+    if (existingDegenUser.degencity_verification_status === "verified") {
+      mergedPayload.degencity_verification_status = "verified";
+    }
+    mergedPayload.degencity_link_timestamp = mergedPayload.degencity_link_timestamp || existingDegenUser.degencity_link_timestamp;
+
+    await Promise.all([
+      supabase.from("point_logs").update({ user_id: currentUserId }).eq("user_id", sourceId),
+      supabase.from("audit_logs").update({ user_id: currentUserId }).eq("user_id", sourceId),
+      supabase.from("wager_transactions").update({ user_id: currentUserId }).eq("user_id", sourceId),
+      supabase.from("redemptions").update({ user_id: currentUserId }).eq("user_id", sourceId),
+    ]);
+  }
+
+  mergedPayload.points = mergedPoints;
+
+  // 3) Delete source users first
+  for (const sourceId of sourcesToDelete) {
     const { error: deleteErr } = await supabase
       .from("users")
       .delete()
       .eq("id", sourceId);
-
     if (deleteErr) {
-      console.error("Error deleting source user during merge:", deleteErr);
+      console.error(`Error deleting source user ${sourceId} during merge:`, deleteErr);
     }
+  }
 
-    const { error: mergeErr } = await supabase
-      .from("users")
-      .update(mergedPayload)
-      .eq("id", targetId);
+  // 4) Update currentUser
+  const { error: updateErr } = await supabase
+    .from("users")
+    .update(mergedPayload)
+    .eq("id", currentUserId);
 
-    if (mergeErr) {
-      console.error("Error updating target user during merge:", mergeErr);
-      throw mergeErr;
-    }
+  if (updateErr) {
+    console.error("Error updating user details on link/merge:", updateErr);
+    throw updateErr;
+  }
 
-    // 4) Write audit log
+  // 5) Write audit log
+  if (sourcesToDelete.length > 0) {
     await supabase.from("audit_logs").insert({
-      user_id: targetId,
+      user_id: currentUserId,
       action: "account_merge",
       points_before: currentUser.points,
-      points_after: mergedPayload.points,
+      points_after: mergedPoints,
       source: "auth_system",
-      transaction_reference: `merged_user_${sourceId}`,
-      metadata: { source_user_id: sourceId }
+      transaction_reference: `merged_users_${sourcesToDelete.join("_")}`,
+      metadata: { merged_source_ids: sourcesToDelete }
     });
-
-    return { success: true, userId: targetId };
-  } else {
-    // Platform identity does not exist in DB yet, link it to current user
-    const linkPayload = {
-      ...updatePayload,
-      [idField]: platformId,
-    };
-    const { error: linkErr } = await supabase
-      .from("users")
-      .update(linkPayload)
-      .eq("id", currentUserId);
-
-    if (linkErr) {
-      console.error("Error linking new identity:", linkErr);
-      throw linkErr;
-    }
-    return { success: true, userId: currentUserId };
   }
+
+  return { success: true, userId: currentUserId };
 }
 
 // ─── Session Restore Middleware ──────────────────────────────────────────────
@@ -1118,6 +1167,7 @@ app.post("/auth/link-degencity", async (req, res) => {
       secure:   process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge:   60 * 60 * 1000, // 1 hour
+      path:     '/',
     });
 
     res.json({ success: true, degencity_username: degenUsername, verified: true });

@@ -779,8 +779,9 @@ async function loadSession() {
     const d = await r.json();
     currentUser = d;
 
-    // Enforce Step 1: Redirect to verify.html if they have not completed Code Verification (neither logged-in DB link nor cookie)
-    const hasDegen = d.degencityUsername || d.tempDegencityUsername;
+    // Enforce Step 1: Redirect to verify.html if they have not completed Code Verification (neither logged-in DB link nor cookie nor localStorage)
+    const localDegen = localStorage.getItem('verified_degencity_username');
+    const hasDegen = d.degencityUsername || d.tempDegencityUsername || localDegen;
     if (!hasDegen) {
       window.location.href = "/verify.html";
       return;
@@ -794,7 +795,7 @@ async function loadSession() {
 
 function renderAccountState(d) {
   const isLoggedIn = d.loggedIn;
-  const degencityUsername = d.degencityUsername || d.tempDegencityUsername || null;
+  const degencityUsername = d.degencityUsername || d.tempDegencityUsername || localStorage.getItem('verified_degencity_username') || null;
 
   // Discord panel
   if (d.discordUsername) {
@@ -844,32 +845,22 @@ function renderAccountState(d) {
     }
   }
 
-  // DegenCity panel state (Step 8: Only visible/accessible once Discord + Kick are both authenticated)
-  const bothConnected = d.discordUsername && d.kickUsername;
+  // DegenCity panel state (Always visible if verified, read-only representation)
   const degenPanel = document.getElementById('degen-panel');
 
-  if (bothConnected) {
+  if (degencityUsername) {
     degenPanel.style.display = 'block';
-    if (d.degencityUsername) {
-      document.getElementById('degen-saved-row').style.display = 'block';
-      document.getElementById('degen-form').style.display      = 'none';
-      document.getElementById('degen-username-display').textContent = d.degencityUsername;
-      document.getElementById('degen-pill').textContent = 'Verified';
-      document.getElementById('degen-pill').className   = 'status-pill connected';
-      document.getElementById('vr-degen-desc').textContent  = `✓ Verified (${d.degencityUsername})`;
-      document.getElementById('vr-degen').style.borderColor = 'rgba(0,255,128,0.2)';
-    } else {
-      document.getElementById('degen-saved-row').style.display = 'none';
-      document.getElementById('degen-form').style.display      = 'flex';
-      document.getElementById('degen-pill').textContent = 'Not Linked';
-      document.getElementById('degen-pill').className   = 'status-pill disconnected';
-      document.getElementById('vr-degen-desc').textContent  = '✗ Not linked';
-      document.getElementById('vr-degen').style.borderColor = 'rgba(255,50,50,0.15)';
-      // Pre-fill the input field with temp verified username
-      if (d.tempDegencityUsername) {
-        document.getElementById('degen-input').value = d.tempDegencityUsername;
-      }
-    }
+    document.getElementById('degen-saved-row').style.display = 'block';
+    document.getElementById('degen-form').style.display      = 'none';
+    document.getElementById('degen-username-display').textContent = degencityUsername;
+    document.getElementById('degen-pill').textContent = 'Verified';
+    document.getElementById('degen-pill').className   = 'status-pill connected';
+    document.getElementById('vr-degen-desc').textContent  = `✓ Verified (${degencityUsername})`;
+    document.getElementById('vr-degen').style.borderColor = 'rgba(0,255,128,0.2)';
+
+    // Hide edit button to ensure it is read-only
+    const editBtn = document.getElementById('degen-saved-row').querySelector('button');
+    if (editBtn) editBtn.style.display = 'none';
   } else {
     degenPanel.style.display = 'none';
   }
@@ -955,8 +946,9 @@ function startHeartbeat() {
 
 /* ── Logout ──────────────────────────────────────────────── */
 async function doLogout() {
+  localStorage.removeItem('verified_degencity_username');
   await fetch('/auth/logout', { method: 'POST' });
-  location.reload();
+  window.location.href = "/verify.html";
 }
 
 /* ── Hamburger ───────────────────────────────────────────── */
