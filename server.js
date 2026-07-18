@@ -79,6 +79,239 @@ app.use(session({
   }
 }));
 
+// ─── JWT Auth Cookie helpers ──────────────────────────────────────────────────
+const JWT_SECRET = process.env.SESSION_SECRET || 'bigdtv-dev-secret-change-in-production';
+const AUTH_COOKIE = 'auth_token';
+const AUTH_COOKIE_OPTS = {
+  httpOnly: true,
+  secure:   process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  maxAge:   7 * 24 * 60 * 60 * 1000, // 7 days
+};
+
+function setAuthCookie(res, userId) {
+  const token = jwt.sign({ uid: String(userId) }, JWT_SECRET, { expiresIn: '7d' });
+  res.cookie(AUTH_COOKIE, token, AUTH_COOKIE_OPTS);
+}
+
+function getAuthUserId(req) {
+  const token = req.cookies?.[AUTH_COOKIE];
+  if (!token) return null;
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    return payload.uid || null;
+  } catch { return null; }
+}
+
+/**
+ * Handles the core logic of OAuth login and linking for both Discord and Kick.
+ * Returns { success: true, userId } or { success: false, error: 'already_linked' }
+ */
+async function handleOAuthLoginOrLink({ platform, platformId, platformUsername, platformAvatar = null, currentUserId = null }) {
+  if (!supabase) {
+    throw new Error("Database not configured");
+  }
+
+  const idField = platform === "discord" ? "discord_id" : "kick_id";
+  const { data: existingUser, error: findErr } = await supabase
+    .from("users")
+    .select("*")
+    .eq(idField, platformId)
+    .maybeSingle();
+
+  if (findErr) {
+    console.error(`Error looking up user by ${idField}:`, findErr);
+    throw findErr;
+  }
+
+  const updatePayload = {
+    last_seen_at: new Date().toISOString(),
+  };
+  if (platform === "discord") {
+    updatePayload.discord_username = platformUsername;
+    updatePayload.discord_avatar = platformAvatar;
+  } else {
+    updatePayload.kick_username = platformUsername;
+  }
+
+  // If no user is logged in currently
+  if (!currentUserId) {
+    if (existingUser) {
+      // Existing user logging in: update profile details
+      const { error: updateErr } = await supabase
+        .from("users")
+        .update(updatePayload)
+        .eq("id", existingUser.id);
+      if (updateErr) console.error("Error updating user details on login:", updateErr);
+      return { success: true, userId: existingUser.id };
+    } else {
+      // Brand new user signing up
+      const insertPayload = {
+        [idField]: platformId,
+        ...(platform === "discord" ? {
+          discord_username: platformUsername,
+          discord_avatar: platformAvatar,
+        } : {
+          kick_username: platformUsername,
+        })
+      };
+      const { data: newUser, error: insertErr } = await supabase
+        .from("users")
+        .insert(insertPayload)
+        .select("id")
+        .single();
+      if (insertErr) {
+        console.error("Error inserting new user:", insertErr);
+        throw insertErr;
+      }
+      return { success: true, userId: newUser.id };
+    }
+  }
+
+  // If a user IS logged in (linking attempt)
+  const { data: currentUser, error: curErr } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", currentUserId)
+    .single();
+
+  if (curErr || !currentUser) {
+    console.error("Error fetching current user for link:", curErr);
+    throw new Error("Current logged in user not found");
+  }
+
+  // Already linked to this user
+  if (currentUser[idField] === platformId) {
+    await supabase.from("users").update(updatePayload).eq("id", currentUserId);
+    return { success: true, userId: currentUserId };
+  }
+
+  if (existingUser) {
+    // Conflict: The platform account authorized already belongs to another user (existingUser).
+    // Merge existingUser (source) into currentUser (target).
+    const otherIdField = platform === "discord" ? "kick_id" : "discord_id";
+    if (currentUser[otherIdField] && existingUser[otherIdField] && currentUser[otherIdField] !== existingUser[otherIdField]) {
+      // Both accounts already have different identities linked for the other platform! Conflict.
+      return { success: false, error: "already_linked" };
+    }
+
+    const targetId = currentUser.id;
+    const sourceId = existingUser.id;
+
+    console.log(`🔄 Merging user ${sourceId} into ${targetId}...`);
+
+    // 1) Move logs, transactions, and redemptions to target
+    await Promise.all([
+      supabase.from("point_logs").update({ user_id: targetId }).eq("user_id", sourceId),
+      supabase.from("audit_logs").update({ user_id: targetId }).eq("user_id", sourceId),
+      supabase.from("wager_transactions").update({ user_id: targetId }).eq("user_id", sourceId),
+      supabase.from("redemptions").update({ user_id: targetId }).eq("user_id", sourceId),
+    ]);
+
+    // 2) Combine points and merge profile columns
+    const mergedPayload = {
+      points: (currentUser.points || 0) + (existingUser.points || 0),
+      last_seen_at: new Date().toISOString(),
+      discord_id: currentUser.discord_id || existingUser.discord_id,
+      discord_username: currentUser.discord_username || existingUser.discord_username,
+      discord_avatar: currentUser.discord_avatar || existingUser.discord_avatar,
+      kick_id: currentUser.kick_id || existingUser.kick_id,
+      kick_username: currentUser.kick_username || existingUser.kick_username,
+      degencity_username: currentUser.degencity_username || existingUser.degencity_username,
+      degencity_verification_status: (currentUser.degencity_verification_status === "verified" || existingUser.degencity_verification_status === "verified") ? "verified" : "unverified",
+      degencity_link_timestamp: currentUser.degencity_link_timestamp || existingUser.degencity_link_timestamp,
+    };
+
+    if (platform === "discord") {
+      mergedPayload.discord_id = platformId;
+      mergedPayload.discord_username = platformUsername;
+      mergedPayload.discord_avatar = platformAvatar;
+    } else {
+      mergedPayload.kick_id = platformId;
+      mergedPayload.kick_username = platformUsername;
+    }
+
+    // 3) Delete source user (do this before updating target user to avoid unique constraint violations)
+    const { error: deleteErr } = await supabase
+      .from("users")
+      .delete()
+      .eq("id", sourceId);
+
+    if (deleteErr) {
+      console.error("Error deleting source user during merge:", deleteErr);
+    }
+
+    const { error: mergeErr } = await supabase
+      .from("users")
+      .update(mergedPayload)
+      .eq("id", targetId);
+
+    if (mergeErr) {
+      console.error("Error updating target user during merge:", mergeErr);
+      throw mergeErr;
+    }
+
+    // 4) Write audit log
+    await supabase.from("audit_logs").insert({
+      user_id: targetId,
+      action: "account_merge",
+      points_before: currentUser.points,
+      points_after: mergedPayload.points,
+      source: "auth_system",
+      transaction_reference: `merged_user_${sourceId}`,
+      metadata: { source_user_id: sourceId }
+    });
+
+    return { success: true, userId: targetId };
+  } else {
+    // Platform identity does not exist in DB yet, link it to current user
+    const linkPayload = {
+      ...updatePayload,
+      [idField]: platformId,
+    };
+    const { error: linkErr } = await supabase
+      .from("users")
+      .update(linkPayload)
+      .eq("id", currentUserId);
+
+    if (linkErr) {
+      console.error("Error linking new identity:", linkErr);
+      throw linkErr;
+    }
+    return { success: true, userId: currentUserId };
+  }
+}
+
+// ─── Session Restore Middleware ──────────────────────────────────────────────
+app.use(async (req, res, next) => {
+  const userId = getAuthUserId(req);
+  if (userId && supabase) {
+    try {
+      const { data: user, error } = await supabase
+        .from("users")
+        .select("id, points, kick_id, kick_username, discord_id, discord_username, discord_avatar, degencity_username, degencity_verification_status")
+        .eq("id", userId)
+        .single();
+      if (!error && user) {
+        req.session.userId = user.id;
+        req.session.kickUsername = user.kick_username;
+        req.session.kickId = user.kick_id;
+        req.session.discordUsername = user.discord_username;
+        req.session.discordAvatar = user.discord_avatar;
+        req.session.degencityUsername = user.degencity_username;
+        req.session.degencityVerified = user.degencity_verification_status === "verified";
+        req.session.points = user.points;
+        req.user = user;
+      } else {
+        res.clearCookie(AUTH_COOKIE);
+      }
+    } catch (e) {
+      console.error("Session restore error:", e);
+    }
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 // ─── Auth guard middleware ────────────────────────────────────────────────────
@@ -453,62 +686,20 @@ app.post("/api/admin/redemptions/:id", requireAdmin, async (req, res) => {
 });
 
 // ─── Auth — Session Info ──────────────────────────────────────────────────────
-// ─── JWT Auth Cookie helpers (survive serverless — no in-memory session needed) ─
-const JWT_SECRET = process.env.SESSION_SECRET || 'bigdtv-dev-secret-change-in-production';
-const AUTH_COOKIE = 'auth_token';
-const AUTH_COOKIE_OPTS = {
-  httpOnly: true,
-  secure:   process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
-  maxAge:   7 * 24 * 60 * 60 * 1000, // 7 days
-};
-
-function setAuthCookie(res, userId) {
-  const token = jwt.sign({ uid: String(userId) }, JWT_SECRET, { expiresIn: '7d' });
-  res.cookie(AUTH_COOKIE, token, AUTH_COOKIE_OPTS);
-}
-
-function getAuthUserId(req) {
-  const token = req.cookies?.[AUTH_COOKIE];
-  if (!token) return null;
-  try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    return payload.uid || null;
-  } catch { return null; }
-}
-
-app.get("/auth/me", async (req, res) => {
-  const userId = getAuthUserId(req) || req.session.userId || null;
-  if (!userId) return res.json({ loggedIn: false });
-
-  let dbUser = null;
-  if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from("users")
-        .select("discord_username, discord_avatar, kick_username, kick_id, degencity_username, degencity_verification_status, points")
-        .eq("id", userId)
-        .single();
-      if (!error && data) {
-        dbUser = data;
-      }
-    } catch (e) {
-      console.error("Error fetching user in /auth/me:", e);
-    }
+app.get("/auth/me", (req, res) => {
+  if (!req.user) {
+    return res.json({ loggedIn: false });
   }
-
-  const user = dbUser || {};
-
   res.json({
     loggedIn:             true,
-    userId,
-    discordUsername:      user.discord_username         || null,
-    discordAvatar:        user.discord_avatar           || null,
-    kickUsername:         user.kick_username            || null,
-    kickId:               user.kick_id                  || null,
-    degencityUsername:    user.degencity_username       || null,
-    degencityVerified:    (user.degencity_verification_status === 'verified') || false,
-    points:               user.points ?? 0,
+    userId:               req.user.id,
+    discordUsername:      req.user.discord_username         || null,
+    discordAvatar:        req.user.discord_avatar           || null,
+    kickUsername:         req.user.kick_username            || null,
+    kickId:               req.user.kick_id                  || null,
+    degencityUsername:    req.user.degencity_username       || null,
+    degencityVerified:    req.user.degencity_verification_status === 'verified',
+    points:               req.user.points ?? 0,
   });
 });
 
@@ -580,59 +771,23 @@ app.get("/auth/discord/callback", async (req, res) => {
       ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`
       : null;
 
-    let userId   = getAuthUserId(req) || req.session.userId || null;
-    let dbPoints = 0;
-    let dbKickId = null;
-    let dbKickUsername = null;
-    let dbDegenUsername = null;
-    let dbDegenVerified = false;
+    const currentUserId = getAuthUserId(req) || req.session.userId || null;
+    const result = await handleOAuthLoginOrLink({
+      platform: "discord",
+      platformId: profile.id,
+      platformUsername: profile.username,
+      platformAvatar: avatar,
+      currentUserId
+    });
 
-    if (supabase) {
-      const { data: existing } = await supabase
-        .from("users")
-        .select("id, points, kick_id, kick_username, degencity_username, degencity_verification_status")
-        .eq("discord_id", profile.id)
-        .single();
-
-      if (existing) {
-        userId   = existing.id;
-        dbPoints = existing.points;
-        dbKickId = existing.kick_id || null;
-        dbKickUsername = existing.kick_username || null;
-        dbDegenUsername = existing.degencity_username || null;
-        dbDegenVerified = existing.degencity_verification_status === "verified";
-        await supabase
-          .from("users")
-          .update({ discord_username: profile.username, discord_avatar: avatar, last_seen_at: new Date().toISOString() })
-          .eq("id", userId);
-      } else {
-        if (userId) {
-          await supabase
-            .from("users")
-            .update({ discord_id: profile.id, discord_username: profile.username, discord_avatar: avatar })
-            .eq("id", userId);
-        } else {
-          const { data: newUser } = await supabase
-            .from("users")
-            .insert({ discord_id: profile.id, discord_username: profile.username, discord_avatar: avatar })
-            .select("id, points")
-            .single();
-          if (newUser) { userId = newUser.id; dbPoints = newUser.points; }
-        }
+    if (!result.success) {
+      if (result.error === "already_linked") {
+        return res.redirect("/account.html?error=discord_already_linked");
       }
+      return res.redirect("/account.html?error=discord_failed");
     }
 
-    req.session.userId            = userId;
-    req.session.discordUsername   = profile.username;
-    req.session.discordAvatar     = avatar;
-    req.session.points            = dbPoints;
-    req.session.kickId            = dbKickId || req.session.kickId || null;
-    req.session.kickUsername      = dbKickUsername || req.session.kickUsername || null;
-    req.session.degencityUsername = dbDegenUsername || req.session.degencityUsername || null;
-    req.session.degencityVerified = dbDegenVerified || req.session.degencityVerified || false;
-
-    // Set persistent JWT cookie so auth survives across serverless instances
-    if (userId) setAuthCookie(res, userId);
+    setAuthCookie(res, result.userId);
     res.redirect("/account.html?success=discord");
   } catch (err) {
     console.error("Discord callback error:", err);
@@ -710,60 +865,27 @@ app.get("/auth/kick/callback", async (req, res) => {
       chatActivityTracker.registerUser(kickUsername);
     }
 
-    let userId   = getAuthUserId(req) || req.session.userId || null;
-    let dbPoints = 0;
-    let dbDegenUsername = null;
-    let dbDegenVerified = false;
+    const currentUserId = getAuthUserId(req) || req.session.userId || null;
+    const result = await handleOAuthLoginOrLink({
+      platform: "kick",
+      platformId: kickId,
+      platformUsername: kickUsername,
+      currentUserId
+    });
 
-    if (supabase) {
-      const { data: existing } = await supabase
-        .from("users")
-        .select("id, points, discord_username, discord_avatar, degencity_username, degencity_verification_status")
-        .eq("kick_id", kickId)
-        .single();
-
-      if (existing) {
-        userId             = existing.id;
-        dbPoints           = existing.points;
-        dbDegenUsername    = existing.degencity_username;
-        dbDegenVerified    = existing.degencity_verification_status === "verified";
-        req.session.discordUsername = existing.discord_username || null;
-        req.session.discordAvatar   = existing.discord_avatar || null;
-        await supabase
-          .from("users")
-          .update({ kick_username: kickUsername, last_seen_at: new Date().toISOString() })
-          .eq("id", userId);
-      } else {
-        if (userId) {
-          await supabase
-            .from("users")
-            .update({ kick_id: kickId, kick_username: kickUsername })
-            .eq("id", userId);
-        } else {
-          const { data: newUser } = await supabase
-            .from("users")
-            .insert({ kick_id: kickId, kick_username: kickUsername })
-            .select("id, points")
-            .single();
-          if (newUser) { userId = newUser.id; dbPoints = newUser.points; }
-        }
+    if (!result.success) {
+      if (result.error === "already_linked") {
+        return res.redirect("/account.html?error=kick_already_linked");
       }
-
-      // Register user ID in the memory map so points can be awarded
-      if (kickUsername && userId) {
-        chatActivityTracker.registerUser(kickUsername, userId);
-      }
+      return res.redirect("/account.html?error=kick_failed");
     }
 
-    req.session.userId              = userId;
-    req.session.kickUsername        = kickUsername;
-    req.session.kickId              = kickId;
-    req.session.points              = dbPoints;
-    req.session.degencityUsername   = dbDegenUsername;
-    req.session.degencityVerified   = dbDegenVerified;
+    // Register user ID in the memory map so points can be awarded
+    if (kickUsername && result.userId) {
+      chatActivityTracker.registerUser(kickUsername, result.userId);
+    }
 
-    // Set persistent JWT cookie so auth survives across serverless instances
-    if (userId) setAuthCookie(res, userId);
+    setAuthCookie(res, result.userId);
     res.redirect("/account.html?success=kick");
   } catch (err) {
     console.error("Kick callback error:", err);
