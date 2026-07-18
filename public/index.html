@@ -2973,7 +2973,7 @@ async function fetchBiweeklyLeaderboard() {
   const before = bwFmtISO(end);
 
   try {
-    const url = API_BASE + '?after=' + encodeURIComponent(after) + '&before=' + encodeURIComponent(before);
+    const url = API_BASE + '?after=' + encodeURIComponent(after) + '&before=' + encodeURIComponent(before) + '&period=biweekly';
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) {
       bwContent.innerHTML = '<div class="lb-error">⚠️ Error loading 14-day data (' + res.status + '). Try again.</div>';

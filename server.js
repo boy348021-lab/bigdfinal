@@ -111,62 +111,61 @@ app.get("/api/leaderboard", async (req, res) => {
   const { after, before } = req.query;
 
   // ─── LEADERBOARD B: 15-Day (Biweekly) Leaderboard (Database-driven) ────────────────
-  if (after && before) {
-    if (!supabase) return res.status(503).json({ error: "Database not configured" });
+  if (req.query.period === "biweekly") {
+    if (supabase) {
+      try {
+        // Convert ET dates to exact UTC bounds
+        const startUTC = etDateStringToUTC(after, "00:00:00");
+        const endUTC   = etDateStringToUTC(before, "00:00:00"); // exclusive upper bound
 
-    try {
-      // Convert ET dates to exact UTC bounds
-      const startUTC = etDateStringToUTC(after, "00:00:00");
-      const endUTC   = etDateStringToUTC(before, "00:00:00"); // exclusive upper bound
+        // Query local wager transactions strictly within the date range
+        const { data: txs, error } = await supabase
+          .from("wager_transactions")
+          .select(`
+            wager_amount_usd,
+            points_awarded,
+            processed_at,
+            users!inner (
+              degencity_username,
+              kick_username
+            )
+          `)
+          .gte("processed_at", startUTC.toISOString())
+          .lt("processed_at", endUTC.toISOString());
 
-      // Query local wager transactions strictly within the date range
-      const { data: txs, error } = await supabase
-        .from("wager_transactions")
-        .select(`
-          wager_amount_usd,
-          points_awarded,
-          processed_at,
-          users!inner (
-            degencity_username,
-            kick_username
-          )
-        `)
-        .gte("processed_at", startUTC.toISOString())
-        .lt("processed_at", endUTC.toISOString());
+        if (error) throw error;
 
-      if (error) throw error;
-
-      // Group in memory to aggregate totals for each user
-      const playerMap = new Map();
-      for (const tx of txs || []) {
-        const username = tx.users?.degencity_username || tx.users?.kick_username || "Unknown";
-        if (!playerMap.has(username)) {
-          playerMap.set(username, { username, total_wager: 0, total_points: 0 });
-        }
-        const entry = playerMap.get(username);
-        entry.total_wager += Number(tx.wager_amount_usd || 0);
-        entry.total_points += Number(tx.points_awarded || 0);
-      }
-
-      const players = Array.from(playerMap.values())
-        .sort((a, b) => b.total_wager - a.total_wager);
-
-      const formatted = players.map(p => ({
-        user_id: 1,
-        username: p.username,
-        wager_data: [
-          {
-            month: after.slice(0, 7),
-            total_wager_usd: p.total_wager
+        // Group in memory to aggregate totals for each user
+        const playerMap = new Map();
+        for (const tx of txs || []) {
+          const username = tx.users?.degencity_username || tx.users?.kick_username || "Unknown";
+          if (!playerMap.has(username)) {
+            playerMap.set(username, { username, total_wager: 0, total_points: 0 });
           }
-        ]
-      }));
+          const entry = playerMap.get(username);
+          entry.total_wager += Number(tx.wager_amount_usd || 0);
+          entry.total_points += Number(tx.points_awarded || 0);
+        }
 
-      res.set("Cache-Control", "no-store");
-      return res.json({ data: formatted });
-    } catch (err) {
-      console.error("Biweekly leaderboard error:", err);
-      return res.status(500).json({ success: false, message: err.message });
+        const players = Array.from(playerMap.values())
+          .sort((a, b) => b.total_wager - a.total_wager);
+
+        const formatted = players.map(p => ({
+          user_id: 1,
+          username: p.username,
+          wager_data: [
+            {
+              month: after.slice(0, 7),
+              total_wager_usd: p.total_wager
+            }
+          ]
+        }));
+
+        res.set("Cache-Control", "no-store");
+        return res.json({ data: formatted });
+      } catch (err) {
+        console.error("Biweekly leaderboard DB error, falling back to proxy:", err);
+      }
     }
   }
 
