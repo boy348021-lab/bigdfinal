@@ -275,6 +275,42 @@ body::after {
     inset 0 1px 1px rgba(255, 255, 255, 0.1);
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
+/* Store nav — gold accent */
+.nav-links a[href="store.html"] {
+  border-color: rgba(201, 162, 39, 0.18);
+  background: rgba(201, 162, 39, 0.03);
+}
+.nav-links a[href="store.html"]:hover {
+  color: #e8c244;
+  background: rgba(201, 162, 39, 0.1);
+  border-color: rgba(201, 162, 39, 0.45);
+  box-shadow: 0 0 15px rgba(201, 162, 39, 0.2);
+}
+.nav-links a[href="store.html"].active {
+  color: #e8c244;
+  background: rgba(201, 162, 39, 0.15);
+  border-color: #e8c244;
+  box-shadow: 0 0 15px rgba(201,162,39,0.35), inset 0 1px 1px rgba(255,255,255,0.08);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  font-weight: 700;
+}
+/* Account nav — cyan like Code Check */
+.nav-links a[href="account.html"] {
+  border-color: rgba(0, 255, 229, 0.15);
+  background: rgba(0, 255, 229, 0.02);
+}
+.nav-links a[href="account.html"]:hover {
+  background: rgba(0, 255, 229, 0.08);
+  border-color: rgba(0, 255, 229, 0.5);
+  box-shadow: 0 0 15px rgba(0, 255, 229, 0.25);
+}
+.nav-links a[href="account.html"].active {
+  background: rgba(0, 255, 229, 0.15);
+  border-color: var(--cyan-500);
+  box-shadow: 0 0 15px rgba(0, 255, 229, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  font-weight: 700;
+}
 .nav-right {
   display: flex;
   align-items: center;
@@ -1825,6 +1861,8 @@ transition:transform .1s linear;
     <li><a href="#tabs-section" data-tab="milestones">Milestones</a></li>
     <li><a href="#tabs-section" data-tab="store">Socials</a></li>
     <li><a href="verify.html">Code Check</a></li>
+    <li><a href="store.html">Store</a></li>
+    <li><a href="account.html">Account</a></li>
   </ul>
   <div class="nav-right">
     <a class="kick-live-badge" id="kick-live-badge" href="https://kick.com/BigDgamesTV" target="_blank" rel="noopener">
@@ -1846,6 +1884,8 @@ transition:transform .1s linear;
   <a href="#tabs-section" data-tab="milestones">Milestones</a>
   <a href="#tabs-section" data-tab="store">Socials</a>
   <a href="verify.html">Code Check</a>
+  <a href="store.html">Store</a>
+  <a href="account.html">Account</a>
 </div>
 
 <!-- ================================================================
@@ -2787,27 +2827,17 @@ function getUTCFromET(year, month, day, hour = 0, minute = 0, second = 0) {
 }
 
 function getSemiMonthPeriod() {
-  const etNow = getETNow();
-  let startUTC, endUTC;
-  if (etNow.day <= 15) {
-    startUTC = getUTCFromET(etNow.year, etNow.month, 1, 0, 0, 0);
-    endUTC   = getUTCFromET(etNow.year, etNow.month, 16, 0, 0, 0);
-  } else {
-    startUTC = getUTCFromET(etNow.year, etNow.month, 16, 0, 0, 0);
-    let nextMonth = etNow.month + 1;
-    let nextYear = etNow.year;
-    if (nextMonth > 11) {
-      nextMonth = 0;
-      nextYear++;
-    }
-    endUTC = getUTCFromET(nextYear, nextMonth, 1, 0, 0, 0);
-  }
+  // LOCKED: 16 July 2026 → 31 July 2026
+  // end is 2026-08-01 (exclusive) so July 31 is fully included.
+  const start = new Date('2026-07-16T00:00:00.000Z');
+  const end   = new Date('2026-08-01T00:00:00.000Z');
   return {
-    start: new Date(startUTC),
-    end: new Date(endUTC),
+    start,
+    end,
     now: new Date()
   };
 }
+
 
 function bwFmtDate(d) {
   return d.toLocaleDateString('en-US', {

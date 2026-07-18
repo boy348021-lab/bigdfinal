@@ -1,0 +1,11 @@
+{
+  "coming_soon": true,
+  "point_currency_name": "BigD Coins",
+  "point_currency_symbol": "🪙",
+  "earning_rules": {
+    "chat_activity_interval_minutes": 5,
+    "points_per_interval": 10,
+    "description": "Earn 10 BigD Coins for every 5 minutes you actively chat in BigDGamesTV's Kick stream"
+  },
+  "items": []
+}

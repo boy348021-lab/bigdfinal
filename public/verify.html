@@ -264,6 +264,14 @@ body::after {
     inset 0 1px 1px rgba(255, 255, 255, 0.1);
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
+/* Store nav — gold accent */
+.nav-links a[href="store.html"] { border-color: rgba(201,162,39,0.18); background: rgba(201,162,39,0.03); }
+.nav-links a[href="store.html"]:hover { color: #e8c244; background: rgba(201,162,39,0.1); border-color: rgba(201,162,39,0.45); box-shadow: 0 0 15px rgba(201,162,39,0.2); }
+.nav-links a[href="store.html"].active { color: #e8c244; background: rgba(201,162,39,0.15); border-color: #e8c244; box-shadow: 0 0 15px rgba(201,162,39,0.35); font-weight: 700; }
+/* Account nav — cyan */
+.nav-links a[href="account.html"] { border-color: rgba(0,255,229,0.15); background: rgba(0,255,229,0.02); }
+.nav-links a[href="account.html"]:hover { background: rgba(0,255,229,0.08); border-color: rgba(0,255,229,0.5); box-shadow: 0 0 15px rgba(0,255,229,0.25); }
+.nav-links a[href="account.html"].active { background: rgba(0,255,229,0.15); border-color: var(--cyan-500); box-shadow: 0 0 15px rgba(0,255,229,0.4); font-weight: 700; }
 .nav-right {
   display: flex;
   align-items: center;
@@ -710,6 +718,10 @@ footer a:hover { color: var(--purple-200); }
 }
 #racecar-canvas {
   display: block;
+  width: 96px;
+  height: 52px;
+  touch-action: manipulation;
+  filter: drop-shadow(0 0 10px rgba(255, 30, 30, 0.55)) drop-shadow(0 0 18px rgba(255, 186, 0, 0.25));
 }
 
 /* COPY TOAST */
@@ -763,6 +775,8 @@ footer a:hover { color: var(--purple-200); }
     <li><a href="index.html#tabs-section" data-tab="milestones">Milestones</a></li>
     <li><a href="index.html#tabs-section" data-tab="store">Socials</a></li>
     <li><a href="verify.html" class="active">Code Check</a></li>
+    <li><a href="store.html">Store</a></li>
+    <li><a href="account.html">Account</a></li>
   </ul>
   <div class="nav-right">
     <a class="kick-live-badge" id="kick-live-badge" href="https://kick.com/BigDgamesTV" target="_blank" rel="noopener">
@@ -784,6 +798,8 @@ footer a:hover { color: var(--purple-200); }
   <a href="index.html#tabs-section" data-tab="milestones">Milestones</a>
   <a href="index.html#tabs-section" data-tab="store">Socials</a>
   <a href="verify.html" class="active">Code Check</a>
+  <a href="store.html">Store</a>
+  <a href="account.html">Account</a>
 </div>
 
 <!-- ================================================================
@@ -832,7 +848,7 @@ footer a:hover { color: var(--purple-200); }
      EDGE BOT — Futuristic Ferrari
      ================================================================ -->
 <div id="edge-bot">
-    <canvas id="racecar-canvas" width="96" height="52" aria-label="Ferrari edge bot" tabindex="0">Ferrari</canvas>
+    <canvas id="racecar-canvas" width="192" height="104" aria-label="Ferrari edge bot" tabindex="0">Ferrari</canvas>
 </div>
 
 <!-- HUD TICKER -->
