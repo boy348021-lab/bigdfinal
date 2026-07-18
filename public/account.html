@@ -605,6 +605,9 @@ footer a:hover { color: var(--purple-200); }
             </svg>
             Login with Kick
           </a>
+          <div id="kick-lock-msg" style="display:none; font-size:0.78rem; color:var(--text-muted); margin-top:8px; text-align:center; font-family:var(--font-ui); letter-spacing:0.05em;">
+            🔒 Please verify your DegenCity username first
+          </div>
         </div>
       </div>
     </div>
@@ -743,6 +746,7 @@ footer a:hover { color: var(--purple-200); }
     kick_failed:     'Kick login failed. Please try again.',
     discord_already_linked: 'This Discord account is already connected to another user.',
     kick_already_linked:    'This Kick account is already connected to another user.',
+    degencity_required:     'Please verify your DegenCity username before connecting Kick.',
   };
   const s = p.get('success'), e = p.get('error');
   const sEl = document.getElementById('alert-success');
@@ -778,6 +782,7 @@ async function loadSession() {
 
 function renderAccountState(d) {
   const isLoggedIn = d.loggedIn;
+  const degencityUsername = d.degencityUsername || d.tempDegencityUsername || null;
 
   // Discord panel
   if (d.discordUsername) {
@@ -787,6 +792,11 @@ function renderAccountState(d) {
     document.getElementById('discord-pill').textContent        = 'Connected';
     document.getElementById('discord-pill').className          = 'status-pill connected';
     if (d.discordAvatar) document.getElementById('discord-avatar').src = d.discordAvatar;
+  } else {
+    document.getElementById('discord-login').style.display     = 'block';
+    document.getElementById('discord-connected').style.display = 'none';
+    document.getElementById('discord-pill').textContent        = 'Not Connected';
+    document.getElementById('discord-pill').className          = 'status-pill disconnected';
   }
 
   // Kick panel
@@ -797,38 +807,55 @@ function renderAccountState(d) {
     document.getElementById('kick-id-display').textContent = 'ID: ' + (d.kickId || '—');
     document.getElementById('kick-pill').textContent = 'Connected';
     document.getElementById('kick-pill').className   = 'status-pill connected';
-  }
+  } else {
+    document.getElementById('kick-login').style.display      = 'block';
+    document.getElementById('kick-connected').style.display  = 'none';
+    document.getElementById('kick-pill').textContent = 'Not Connected';
+    document.getElementById('kick-pill').className   = 'status-pill disconnected';
 
-  // Show advanced panels only when logged in
-  if (isLoggedIn) {
-    document.getElementById('degen-panel').style.display   = 'block';
-    document.getElementById('verify-panel').style.display  = 'block';
-    document.getElementById('logout-wrap').style.display   = 'block';
-
-    // DegenCity panel state
-    if (d.degencityUsername) {
-      document.getElementById('degen-saved-row').style.display = 'block';
-      document.getElementById('degen-form').style.display      = 'none';
-      document.getElementById('degen-username-display').textContent = d.degencityUsername;
-      document.getElementById('degen-pill').textContent = 'Verified';
-      document.getElementById('degen-pill').className   = 'status-pill connected';
-      document.getElementById('vr-degen-desc').textContent  = `✓ Verified (${d.degencityUsername})`;
-      document.getElementById('vr-degen').style.borderColor = 'rgba(0,255,128,0.2)';
+    // Disable Kick connection if DegenCity username is not verified
+    const kickBtn = document.getElementById('kick-btn');
+    if (!degencityUsername) {
+      kickBtn.classList.add('disabled');
+      kickBtn.setAttribute('href', '#');
+      kickBtn.style.opacity = '0.5';
+      kickBtn.style.pointerEvents = 'none';
+      document.getElementById('kick-lock-msg').style.display = 'block';
     } else {
-      document.getElementById('degen-saved-row').style.display = 'none';
-      document.getElementById('degen-form').style.display      = 'flex';
-      document.getElementById('degen-pill').textContent = 'Not Linked';
-      document.getElementById('degen-pill').className   = 'status-pill disconnected';
-      document.getElementById('vr-degen-desc').textContent  = '✗ Not linked';
-      document.getElementById('vr-degen').style.borderColor = 'rgba(255,50,50,0.15)';
+      kickBtn.classList.remove('disabled');
+      kickBtn.setAttribute('href', '/auth/kick');
+      kickBtn.style.opacity = '1';
+      kickBtn.style.pointerEvents = 'auto';
+      document.getElementById('kick-lock-msg').style.display = 'none';
     }
-
-    // Verification panel for Discord/Kick
-    document.getElementById('vr-discord-desc').textContent = d.discordUsername ? `✓ ${d.discordUsername}` : '✗ Not connected';
-    document.getElementById('vr-kick-desc').textContent    = d.kickUsername    ? `✓ ${d.kickUsername}`    : '✗ Not connected';
-    document.getElementById('vr-discord').style.borderColor = d.discordUsername ? 'rgba(0,255,128,0.2)' : 'rgba(255,50,50,0.15)';
-    document.getElementById('vr-kick').style.borderColor    = d.kickUsername    ? 'rgba(0,255,128,0.2)' : 'rgba(255,50,50,0.15)';
   }
+
+  // DegenCity panel state
+  if (degencityUsername) {
+    document.getElementById('degen-saved-row').style.display = 'block';
+    document.getElementById('degen-form').style.display      = 'none';
+    document.getElementById('degen-username-display').textContent = degencityUsername;
+    document.getElementById('degen-pill').textContent = 'Verified';
+    document.getElementById('degen-pill').className   = 'status-pill connected';
+    document.getElementById('vr-degen-desc').textContent  = `✓ Verified (${degencityUsername})`;
+    document.getElementById('vr-degen').style.borderColor = 'rgba(0,255,128,0.2)';
+  } else {
+    document.getElementById('degen-saved-row').style.display = 'none';
+    document.getElementById('degen-form').style.display      = 'flex';
+    document.getElementById('degen-pill').textContent = 'Not Linked';
+    document.getElementById('degen-pill').className   = 'status-pill disconnected';
+    document.getElementById('vr-degen-desc').textContent  = '✗ Not linked';
+    document.getElementById('vr-degen').style.borderColor = 'rgba(255,50,50,0.15)';
+  }
+
+  // Verification panel
+  document.getElementById('vr-discord-desc').textContent = d.discordUsername ? `✓ ${d.discordUsername}` : '✗ Not connected';
+  document.getElementById('vr-kick-desc').textContent    = d.kickUsername    ? `✓ ${d.kickUsername}`    : '✗ Not connected';
+  document.getElementById('vr-discord').style.borderColor = d.discordUsername ? 'rgba(0,255,128,0.2)' : 'rgba(255,50,50,0.15)';
+  document.getElementById('vr-kick').style.borderColor    = d.kickUsername    ? 'rgba(0,255,128,0.2)' : 'rgba(255,50,50,0.15)';
+
+  // Logout wrap visibility
+  document.getElementById('logout-wrap').style.display = isLoggedIn ? 'block' : 'none';
 }
 
 /* ── DegenCity Link ──────────────────────────────────────── */

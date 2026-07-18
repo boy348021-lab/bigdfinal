@@ -107,7 +107,7 @@ function getAuthUserId(req) {
  * Handles the core logic of OAuth login and linking for both Discord and Kick.
  * Returns { success: true, userId } or { success: false, error: 'already_linked' }
  */
-async function handleOAuthLoginOrLink({ platform, platformId, platformUsername, platformAvatar = null, currentUserId = null }) {
+async function handleOAuthLoginOrLink({ platform, platformId, platformUsername, platformAvatar = null, currentUserId = null, verifiedDegenUsername = null }) {
   if (!supabase) {
     throw new Error("Database not configured");
   }
@@ -122,6 +122,28 @@ async function handleOAuthLoginOrLink({ platform, platformId, platformUsername, 
   if (findErr) {
     console.error(`Error looking up user by ${idField}:`, findErr);
     throw findErr;
+  }
+
+  // 1. Enforce DegenCity verification requirement for Kick connections
+  if (platform === "kick") {
+    let activeDegen = verifiedDegenUsername;
+
+    if (currentUserId) {
+      const { data: curUser } = await supabase
+        .from("users")
+        .select("degencity_username")
+        .eq("id", currentUserId)
+        .single();
+      if (curUser?.degencity_username) {
+        activeDegen = curUser.degencity_username;
+      }
+    } else if (existingUser?.degencity_username) {
+      activeDegen = existingUser.degencity_username;
+    }
+
+    if (!activeDegen) {
+      return { success: false, error: "degencity_required" };
+    }
   }
 
   const updatePayload = {
@@ -145,26 +167,55 @@ async function handleOAuthLoginOrLink({ platform, platformId, platformUsername, 
       if (updateErr) console.error("Error updating user details on login:", updateErr);
       return { success: true, userId: existingUser.id };
     } else {
-      // Brand new user signing up
-      const insertPayload = {
-        [idField]: platformId,
-        ...(platform === "discord" ? {
-          discord_username: platformUsername,
-          discord_avatar: platformAvatar,
-        } : {
-          kick_username: platformUsername,
-        })
-      };
-      const { data: newUser, error: insertErr } = await supabase
-        .from("users")
-        .insert(insertPayload)
-        .select("id")
-        .single();
-      if (insertErr) {
-        console.error("Error inserting new user:", insertErr);
-        throw insertErr;
+      // Brand new Kick/Discord signup
+      let existingDegenUser = null;
+      if (platform === "kick" && verifiedDegenUsername) {
+        const { data } = await supabase
+          .from("users")
+          .select("id")
+          .eq("degencity_username", verifiedDegenUsername)
+          .maybeSingle();
+        existingDegenUser = data;
       }
-      return { success: true, userId: newUser.id };
+
+      if (existingDegenUser) {
+        // Associate the Kick account with the existing user record that has this DegenCity username
+        const updatePayloadWithKick = {
+          ...updatePayload,
+          kick_id: platformId,
+          kick_username: platformUsername
+        };
+        const { error: updateErr } = await supabase
+          .from("users")
+          .update(updatePayloadWithKick)
+          .eq("id", existingDegenUser.id);
+        if (updateErr) throw updateErr;
+        return { success: true, userId: existingDegenUser.id };
+      } else {
+        // Create a new record containing both
+        const insertPayload = {
+          [idField]: platformId,
+          ...(platform === "discord" ? {
+            discord_username: platformUsername,
+            discord_avatar: platformAvatar,
+          } : {
+            kick_username: platformUsername,
+            degencity_username: verifiedDegenUsername,
+            degencity_verification_status: "verified",
+            degencity_link_timestamp: new Date().toISOString()
+          })
+        };
+        const { data: newUser, error: insertErr } = await supabase
+          .from("users")
+          .insert(insertPayload)
+          .select("id")
+          .single();
+        if (insertErr) {
+          console.error("Error inserting new user:", insertErr);
+          throw insertErr;
+        }
+        return { success: true, userId: newUser.id };
+      }
     }
   }
 
@@ -687,8 +738,9 @@ app.post("/api/admin/redemptions/:id", requireAdmin, async (req, res) => {
 
 // ─── Auth — Session Info ──────────────────────────────────────────────────────
 app.get("/auth/me", (req, res) => {
+  const tempDegen = req.cookies?.verified_degencity_username || null;
   if (!req.user) {
-    return res.json({ loggedIn: false });
+    return res.json({ loggedIn: false, tempDegencityUsername: tempDegen });
   }
   res.json({
     loggedIn:             true,
@@ -700,11 +752,13 @@ app.get("/auth/me", (req, res) => {
     degencityUsername:    req.user.degencity_username       || null,
     degencityVerified:    req.user.degencity_verification_status === 'verified',
     points:               req.user.points ?? 0,
+    tempDegencityUsername: tempDegen,
   });
 });
 
 app.post("/auth/logout", (req, res) => {
   res.clearCookie(AUTH_COOKIE);
+  res.clearCookie("verified_degencity_username");
   req.session.destroy(() => res.json({ success: true }));
 });
 
@@ -866,19 +920,27 @@ app.get("/auth/kick/callback", async (req, res) => {
     }
 
     const currentUserId = getAuthUserId(req) || req.session.userId || null;
+    const verifiedDegenUsername = req.cookies.verified_degencity_username || null;
     const result = await handleOAuthLoginOrLink({
       platform: "kick",
       platformId: kickId,
       platformUsername: kickUsername,
-      currentUserId
+      currentUserId,
+      verifiedDegenUsername
     });
 
     if (!result.success) {
       if (result.error === "already_linked") {
         return res.redirect("/account.html?error=kick_already_linked");
       }
+      if (result.error === "degencity_required") {
+        return res.redirect("/account.html?error=degencity_required");
+      }
       return res.redirect("/account.html?error=kick_failed");
     }
+
+    // Clear temp DegenCity cookie now that it is permanently saved to DB
+    res.clearCookie("verified_degencity_username");
 
     // Register user ID in the memory map so points can be awarded
     if (kickUsername && result.userId) {
@@ -894,22 +956,14 @@ app.get("/auth/kick/callback", async (req, res) => {
 });
 
 // ─── Link DegenCity Username (with verification against leaderboard) ──────────
-app.post("/auth/link-degencity", requireAuth, requireKick, async (req, res) => {
+app.post("/auth/link-degencity", async (req, res) => {
   const { degencity_username } = req.body;
   if (!degencity_username) return res.status(400).json({ error: "Username required" });
 
-  const kickUsername   = (req.session.kickUsername || "").trim().toLowerCase();
-  const degenUsername  = degencity_username.trim().toLowerCase();
-
-  // STRICT OWNERSHIP VERIFICATION Check: entered DegenCity username must match logged-in Kick username
-  if (degenUsername !== kickUsername) {
-    return res.status(422).json({
-      error: "This DegenCity account does not belong to the authenticated Kick account."
-    });
-  }
+  const degenUsername = degencity_username.trim().toLowerCase();
 
   try {
-    // Verify the DegenCity username exists in the leaderboard
+    // 1) Verify the DegenCity username exists in the leaderboard
     const lbRes = await fetch("https://api.degencity.com/api/v1/partner/affiliates/leaderboard", {
       headers: { "x-api-key": API_KEY, "Accept": "application/json" }
     });
@@ -925,19 +979,43 @@ app.post("/auth/link-degencity", requireAuth, requireKick, async (req, res) => {
       });
     }
 
+    const currentUserId = getAuthUserId(req) || req.session.userId || null;
+
     if (supabase) {
-      await supabase
+      // Check if this DegenCity username is already linked to another user record
+      const { data: existingLink } = await supabase
         .from("users")
-        .update({
-          degencity_username:            degenUsername,
-          degencity_link_timestamp:      new Date().toISOString(),
-          degencity_verification_status: "verified"
-        })
-        .eq("id", req.session.userId);
+        .select("id")
+        .eq("degencity_username", degenUsername)
+        .maybeSingle();
+
+      if (existingLink && existingLink.id !== currentUserId) {
+        return res.status(422).json({
+          error: `DegenCity username "${degencity_username}" is already linked to another account.`
+        });
+      }
+
+      if (currentUserId) {
+        // If logged in, update the existing database row directly
+        await supabase
+          .from("users")
+          .update({
+            degencity_username:            degenUsername,
+            degencity_link_timestamp:      new Date().toISOString(),
+            degencity_verification_status: "verified"
+          })
+          .eq("id", currentUserId);
+      }
     }
 
-    req.session.degencityUsername = degenUsername;
-    req.session.degencityVerified = true;
+    // Set a secure temporary cookie for unauthenticated sessions
+    const DEGEN_COOKIE = 'verified_degencity_username';
+    res.cookie(DEGEN_COOKIE, degenUsername, {
+      httpOnly: true,
+      secure:   process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge:   60 * 60 * 1000, // 1 hour
+    });
 
     res.json({ success: true, degencity_username: degenUsername, verified: true });
   } catch (err) {
