@@ -29,8 +29,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
 // ─── Supabase ────────────────────────────────────────────────────────────────
-const supabaseUrl     = process.env.SUPABASE_URL     || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseKey     = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_ANON_KEY || "";
+const supabaseUrl     = process.env.SUPABASE_URL     || process.env.NEXT_PUBLIC_SUPABASE_URL || "https://yqhvptfbzorbgrioqoyc.supabase.co";
+const supabaseKey     = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxaHZwdGZiem9yYmdyaW9xb3ljIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzkyMTUzNSwiZXhwIjoyMDk5NDk3NTM1fQ.UZgvlsrx6NXtBS5OV2uiOv0nJXEt_ewbRTjqHP6KumI";
 const supabase        = supabaseUrl && supabaseKey
   ? createClient(supabaseUrl, supabaseKey)
   : null;
@@ -96,24 +96,29 @@ function fetchKickViaPython() {
   });
 }
 
-app.get("/api/kick-live", async (req, res) => {
-  if (kickCache.checkedAt && Date.now() - kickCache.checkedAt < KICK_CACHE_TTL) {
-    res.set("Cache-Control", "no-store");
-    return res.json({ channel: "BigDgamesTV", live: kickCache.live, checkedAt: new Date(kickCache.checkedAt).toISOString() });
-  }
-  const result = await fetchKickViaPython();
-  kickCache = { live: result.live, checkedAt: Date.now() };
-  res.set("Cache-Control", "no-store");
-  res.json({ channel: "BigDgamesTV", live: result.live, checkedAt: new Date().toISOString() });
-});
+function etDateStringToUTC(dateStr, timeStr = "00:00:00") {
+  const loc = new Date(`${dateStr}T${timeStr}Z`);
+  const etStr = loc.toLocaleString("en-US", { timeZone: "America/New_York", hour12: false });
+  const match = etStr.match(/(\d+)\/(\d+)\/(\d+),\s+(\d+):(\d+):(\d+)/);
+  if (!match) return loc;
+  const etUTC = new Date(Date.UTC(Number(match[3]), Number(match[1]) - 1, Number(match[2]), Number(match[4]), Number(match[5]), Number(match[6])));
+  const diff = loc.getTime() - etUTC.getTime();
+  return new Date(loc.getTime() + diff);
+}
 
-// ─── Leaderboard — LOCKED to 2026-07-16 → 2026-07-31 ────────────────────────
+// ─── Leaderboard — 15-Day and Lifetime ────────────────────────────────────────
 app.get("/api/leaderboard", async (req, res) => {
   const { after, before } = req.query;
 
   // ─── LEADERBOARD B: 15-Day (Biweekly) Leaderboard (Database-driven) ────────────────
-  if (after === '2026-07-16' && supabase) {
+  if (after && before) {
+    if (!supabase) return res.status(503).json({ error: "Database not configured" });
+
     try {
+      // Convert ET dates to exact UTC bounds
+      const startUTC = etDateStringToUTC(after, "00:00:00");
+      const endUTC   = etDateStringToUTC(before, "00:00:00"); // exclusive upper bound
+
       // Query local wager transactions strictly within the date range
       const { data: txs, error } = await supabase
         .from("wager_transactions")
@@ -126,41 +131,42 @@ app.get("/api/leaderboard", async (req, res) => {
             kick_username
           )
         `)
-        .gte("processed_at", "2026-07-16T00:00:00.000Z")
-        .lte("processed_at", "2026-07-31T23:59:59.999Z");
+        .gte("processed_at", startUTC.toISOString())
+        .lt("processed_at", endUTC.toISOString());
 
-      if (!error && txs && txs.length > 0) {
-        // Group in memory to aggregate totals for each user
-        const playerMap = new Map();
-        for (const tx of txs) {
-          const username = tx.users?.degencity_username || tx.users?.kick_username || "Unknown";
-          if (!playerMap.has(username)) {
-            playerMap.set(username, { username, total_wager: 0, total_points: 0 });
-          }
-          const entry = playerMap.get(username);
-          entry.total_wager += Number(tx.wager_amount_usd || 0);
-          entry.total_points += Number(tx.points_awarded || 0);
+      if (error) throw error;
+
+      // Group in memory to aggregate totals for each user
+      const playerMap = new Map();
+      for (const tx of txs || []) {
+        const username = tx.users?.degencity_username || tx.users?.kick_username || "Unknown";
+        if (!playerMap.has(username)) {
+          playerMap.set(username, { username, total_wager: 0, total_points: 0 });
         }
-
-        const players = Array.from(playerMap.values())
-          .sort((a, b) => b.total_wager - a.total_wager);
-
-        const formatted = players.map(p => ({
-          user_id: 1,
-          username: p.username,
-          wager_data: [
-            {
-              month: "2026-07",
-              total_wager_usd: p.total_wager
-            }
-          ]
-        }));
-
-        res.set("Cache-Control", "no-store");
-        return res.json({ data: formatted });
+        const entry = playerMap.get(username);
+        entry.total_wager += Number(tx.wager_amount_usd || 0);
+        entry.total_points += Number(tx.points_awarded || 0);
       }
+
+      const players = Array.from(playerMap.values())
+        .sort((a, b) => b.total_wager - a.total_wager);
+
+      const formatted = players.map(p => ({
+        user_id: 1,
+        username: p.username,
+        wager_data: [
+          {
+            month: after.slice(0, 7),
+            total_wager_usd: p.total_wager
+          }
+        ]
+      }));
+
+      res.set("Cache-Control", "no-store");
+      return res.json({ data: formatted });
     } catch (err) {
-      console.error("Biweekly leaderboard DB error, falling back to proxy:", err);
+      console.error("Biweekly leaderboard error:", err);
+      return res.status(500).json({ success: false, message: err.message });
     }
   }
 

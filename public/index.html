@@ -2826,19 +2826,40 @@ function getUTCFromET(year, month, day, hour = 0, minute = 0, second = 0) {
   return approxUTC - offset;
 }
 
+function getETDate(year, month, day, hour, minute, second) {
+  const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:${String(second).padStart(2, "0")}`;
+  const loc = new Date(dateStr + "Z");
+  const etStr = loc.toLocaleString("en-US", { timeZone: "America/New_York", hour12: false });
+  const match = etStr.match(/(\d+)\/(\d+)\/(\d+),\s+(\d+):(\d+):(\d+)/);
+  if (!match) return loc;
+  const etUTC = new Date(Date.UTC(Number(match[3]), Number(match[1]) - 1, Number(match[2]), Number(match[4]), Number(match[5]), Number(match[6])));
+  const diff = loc.getTime() - etUTC.getTime();
+  return new Date(loc.getTime() + diff);
+}
+
 function getSemiMonthPeriod() {
-  // LOCKED: 16 July 2026 → 31 July 2026
-  // API uses exclusive upper bound 2026-08-01 so July 31 is fully included.
-  // Display uses noon UTC to avoid ET timezone shift showing wrong date.
-  const start      = new Date('2026-07-16T12:00:00.000Z'); // noon UTC = safe for ET display
-  const end        = new Date('2026-08-01T00:00:00.000Z'); // exclusive API upper bound
-  const displayEnd = new Date('2026-07-31T12:00:00.000Z'); // Jul 31 for display only
-  return {
-    start,
-    end,
-    displayEnd,
-    now: new Date()
-  };
+  const nowETStr = new Date().toLocaleString("en-US", { timeZone: "America/New_York", hour12: false });
+  const match = nowETStr.match(/(\d+)\/(\d+)\/(\d+),\s+(\d+):(\d+):(\d+)/);
+  if (!match) {
+    const now = new Date();
+    return { start: now, end: now, displayEnd: now, now };
+  }
+  const year = Number(match[3]);
+  const month = Number(match[1]) - 1;
+  const date = Number(match[2]);
+  
+  let start, end, displayEnd;
+  if (date <= 15) {
+    start = getETDate(year, month, 1, 0, 0, 0);
+    end   = getETDate(year, month, 16, 0, 0, 0);
+    displayEnd = getETDate(year, month, 15, 12, 0, 0);
+  } else {
+    start = getETDate(year, month, 16, 0, 0, 0);
+    end   = getETDate(year, month + 1, 1, 0, 0, 0);
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    displayEnd = getETDate(year, month, lastDay, 12, 0, 0);
+  }
+  return { start, end, displayEnd, now: new Date() };
 }
 
 
@@ -2947,9 +2968,9 @@ async function fetchBiweeklyLeaderboard() {
   if (!bwContent) return;
   bwContent.innerHTML = '<div class="lb-loading"><div class="spinner"></div>Loading 14-day rankings…</div>';
 
-  // Hard-coded API date strings — bypasses ET timezone shift in bwFmtISO
-  const after  = '2026-07-16';
-  const before = '2026-08-01'; // exclusive upper bound; includes all of Jul 31
+  const { start, end } = getSemiMonthPeriod();
+  const after  = bwFmtISO(start);
+  const before = bwFmtISO(end);
 
   try {
     const url = API_BASE + '?after=' + encodeURIComponent(after) + '&before=' + encodeURIComponent(before);
