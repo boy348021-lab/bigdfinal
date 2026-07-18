@@ -772,24 +772,50 @@ footer a:hover { color: var(--purple-200); }
 
 /* ── Load Session State ──────────────────────────────────── */
 let currentUser = null;
-
 async function loadSession() {
+  const localDegen = localStorage.getItem('verified_degencity_username');
+
   try {
     const r = await fetch('/auth/me');
+    if (!r.ok) {
+      console.warn("Session fetch failed with status:", r.status);
+      if (localDegen) {
+        // We have local verification, let them stay and render fallback state
+        renderAccountState({ loggedIn: false, tempDegencityUsername: localDegen });
+        return;
+      } else {
+        window.location.href = "/verify.html";
+        return;
+      }
+    }
+
     const d = await r.json();
     currentUser = d;
 
-    // Enforce Step 1: Redirect to verify.html if they have not completed Code Verification (neither logged-in DB link nor cookie nor localStorage)
-    const localDegen = localStorage.getItem('verified_degencity_username');
+    // Enforce Step 1: Redirect to verify.html if they have not completed Code Verification
+    // (neither logged-in DB link nor cookie nor localStorage)
     const hasDegen = d.degencityUsername || d.tempDegencityUsername || localDegen;
     if (!hasDegen) {
       window.location.href = "/verify.html";
       return;
     }
 
+    // If backend confirmed the DegenCity username is linked or we have a cookie, sync it to localStorage
+    if (d.degencityUsername) {
+      localStorage.setItem('verified_degencity_username', d.degencityUsername);
+    } else if (d.tempDegencityUsername) {
+      localStorage.setItem('verified_degencity_username', d.tempDegencityUsername);
+    }
+
     renderAccountState(d);
   } catch (err) {
-    window.location.href = "/verify.html";
+    console.error("Session load error:", err);
+    if (localDegen) {
+      // Network/Syntax error, but we have local verification, let them stay
+      renderAccountState({ loggedIn: false, tempDegencityUsername: localDegen });
+    } else {
+      window.location.href = "/verify.html";
+    }
   }
 }
 
@@ -798,6 +824,7 @@ function renderAccountState(d) {
   const degencityUsername = d.degencityUsername || d.tempDegencityUsername || localStorage.getItem('verified_degencity_username') || null;
 
   // Discord panel
+  const discordBtn = document.getElementById('discord-btn');
   if (d.discordUsername) {
     document.getElementById('discord-login').style.display     = 'none';
     document.getElementById('discord-connected').style.display = 'block';
@@ -810,6 +837,14 @@ function renderAccountState(d) {
     document.getElementById('discord-connected').style.display = 'none';
     document.getElementById('discord-pill').textContent        = 'Not Connected';
     document.getElementById('discord-pill').className          = 'status-pill disconnected';
+
+    if (discordBtn) {
+      if (degencityUsername) {
+        discordBtn.setAttribute('href', `/auth/discord?degencity_username=${encodeURIComponent(degencityUsername)}`);
+      } else {
+        discordBtn.setAttribute('href', '/auth/discord');
+      }
+    }
   }
 
   // Kick panel (Step 3: Only enabled after Discord is connected)
@@ -838,7 +873,11 @@ function renderAccountState(d) {
       lockMsg.style.display = 'block';
     } else {
       kickBtn.classList.remove('disabled');
-      kickBtn.setAttribute('href', '/auth/kick');
+      if (degencityUsername) {
+        kickBtn.setAttribute('href', `/auth/kick?degencity_username=${encodeURIComponent(degencityUsername)}`);
+      } else {
+        kickBtn.setAttribute('href', '/auth/kick');
+      }
       kickBtn.style.opacity = '1';
       kickBtn.style.pointerEvents = 'auto';
       lockMsg.style.display = 'none';
