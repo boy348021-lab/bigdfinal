@@ -6,6 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { execFile } from "child_process";
 import session from "express-session";
+import cookieParser from "cookie-parser";
 import { createClient } from "@supabase/supabase-js";
 import { createHash, randomBytes } from "crypto";
 import fs from "fs";
@@ -64,6 +65,7 @@ const ADMIN_SECRET = process.env.ADMIN_SECRET || "bigdtv-admin-change-me";
 // ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser(process.env.SESSION_SECRET || "bigdtv-dev-secret-change-in-production"));
 
 app.use(session({
   secret:            process.env.SESSION_SECRET || "bigdtv-dev-secret-change-in-production",
@@ -489,12 +491,20 @@ app.post("/auth/logout", (req, res) => {
 });
 
 // ─── Auth — Discord ───────────────────────────────────────────────────────────
+const OAUTH_COOKIE_OPTS = {
+  httpOnly: true,
+  secure:   process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  maxAge:   10 * 60 * 1000, // 10 minutes — enough to complete OAuth
+};
+
 app.get("/auth/discord", (req, res) => {
   if (!DISCORD_CLIENT_ID) {
     return res.status(503).send("Discord OAuth not configured. Please set DISCORD_CLIENT_ID in .env");
   }
-  const state  = randomBytes(16).toString("hex");
-  req.session.oauthState = state;
+  const state = randomBytes(16).toString("hex");
+  // Store state in a cookie so it survives the redirect regardless of serverless instance
+  res.cookie("discord_oauth_state", state, OAUTH_COOKIE_OPTS);
 
   const params = new URLSearchParams({
     client_id:     DISCORD_CLIENT_ID,
@@ -512,10 +522,12 @@ app.get("/auth/discord/callback", async (req, res) => {
   if (error || !code) {
     return res.redirect("/account.html?error=discord_denied");
   }
-  if (state !== req.session.oauthState) {
+  // Verify state from cookie (not session — session breaks across serverless instances)
+  const savedState = req.cookies.discord_oauth_state;
+  res.clearCookie("discord_oauth_state");
+  if (!savedState || state !== savedState) {
     return res.redirect("/account.html?error=state_mismatch");
   }
-  delete req.session.oauthState;
 
   try {
     const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
@@ -612,8 +624,9 @@ app.get("/auth/kick", (req, res) => {
   const codeVerifier = randomBytes(32).toString("base64url");
   const codeChallenge = sha256base64url(codeVerifier);
 
-  req.session.oauthState    = state;
-  req.session.codeVerifier  = codeVerifier;
+  // Store state + PKCE verifier in cookies (survive serverless instance change)
+  res.cookie("kick_oauth_state",   state,        OAUTH_COOKIE_OPTS);
+  res.cookie("kick_code_verifier", codeVerifier, OAUTH_COOKIE_OPTS);
 
   const params = new URLSearchParams({
     client_id:             KICK_CLIENT_ID,
@@ -631,11 +644,12 @@ app.get("/auth/kick/callback", async (req, res) => {
   const { code, state, error } = req.query;
 
   if (error || !code) return res.redirect("/account.html?error=kick_denied");
-  if (state !== req.session.oauthState) return res.redirect("/account.html?error=state_mismatch");
-
-  const codeVerifier = req.session.codeVerifier;
-  delete req.session.oauthState;
-  delete req.session.codeVerifier;
+  // Verify state from cookie
+  const savedKickState = req.cookies.kick_oauth_state;
+  const codeVerifier   = req.cookies.kick_code_verifier;
+  res.clearCookie("kick_oauth_state");
+  res.clearCookie("kick_code_verifier");
+  if (!savedKickState || state !== savedKickState) return res.redirect("/account.html?error=state_mismatch");
 
   try {
     const tokenRes = await fetch("https://id.kick.com/oauth/token", {
