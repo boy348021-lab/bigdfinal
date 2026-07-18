@@ -992,6 +992,13 @@ async function doVerify() {
     checkingBox.style.display = 'none';
     
     if (match) {
+      // Call link-degencity on backend to set the verified cookie
+      fetch('/auth/link-degencity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ degencity_username: match.username })
+      }).catch(err => console.error("Error setting verified cookie:", err));
+
       resultBox.innerHTML = `
         <div class="result-card success">
           <div class="result-badge">✓ Verified</div>

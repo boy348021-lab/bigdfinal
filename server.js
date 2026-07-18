@@ -154,6 +154,11 @@ async function handleOAuthLoginOrLink({ platform, platformId, platformUsername, 
     updatePayload.discord_avatar = platformAvatar;
   } else {
     updatePayload.kick_username = platformUsername;
+    if (verifiedDegenUsername) {
+      updatePayload.degencity_username = verifiedDegenUsername;
+      updatePayload.degencity_verification_status = "verified";
+      updatePayload.degencity_link_timestamp = new Date().toISOString();
+    }
   }
 
   // If no user is logged in currently
@@ -280,6 +285,11 @@ async function handleOAuthLoginOrLink({ platform, platformId, platformUsername, 
     } else {
       mergedPayload.kick_id = platformId;
       mergedPayload.kick_username = platformUsername;
+      if (verifiedDegenUsername) {
+        mergedPayload.degencity_username = verifiedDegenUsername;
+        mergedPayload.degencity_verification_status = "verified";
+        mergedPayload.degencity_link_timestamp = new Date().toISOString();
+      }
     }
 
     // 3) Delete source user (do this before updating target user to avoid unique constraint violations)
