@@ -22,6 +22,30 @@ const PORT = process.env.PORT || 3000;
 const API_KEY      = process.env.DEGEN_API_KEY || "e7d0fb2a-20fd-471e-b6a2-f2989ea7ecba";
 const KICK_CHANNEL = "bigdgamestv";
 
+// Baseline wagers recorded up to July 15th (from user verification)
+const JULY_15_BASELINES = {
+  "armedupmused": 7458.45,
+  "wisthechad": 1620.75,
+  "supermustang": 1038.46,
+  "tommytapz": 357.67,
+  "ninjazod": 301.68,
+  "raneoner": 180.70,
+  "jcoolincuz": 105.47,
+  "dbigluffy": 69.87,
+  "tonykukkur": 49.33,
+  "angelvssinner": 48.26,
+  "degenbigd": 44.23,
+  "tusharju567": 25.00,
+  "bellybutton": 22.00,
+  "oliviagirl": 18.26,
+  "lavrona": 16.14,
+  "tycenoxbigd": 11.23,
+  "zyrexop": 11.00,
+  "roket": 8.33,
+  "younis123": 1.10
+};
+
+
 // Leaderboard period: 16 Jul – 31 Jul 2026 (fixed)
 // Before is 2026-08-01 (exclusive upper bound so Jul 31 is fully included)
 const LB_PERIOD_AFTER  = "2026-07-16";
@@ -487,65 +511,170 @@ function etDateStringToUTC(dateStr, timeStr = "00:00:00") {
 }
 
 // ─── Leaderboard — 15-Day and Lifetime ────────────────────────────────────────
+function parseToISODate(dateStr) {
+  if (!dateStr) return "";
+  // Check if format is DD/MM/YYYY
+  if (dateStr.includes("/")) {
+    const parts = dateStr.split("/");
+    if (parts.length === 3) {
+      const day = parts[0].padStart(2, "0");
+      const month = parts[1].padStart(2, "0");
+      const year = parts[2];
+      return `${year}-${month}-${day}`;
+    }
+  }
+  // Fallback to standard parsing
+  try {
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      return d.toISOString().slice(0, 10);
+    }
+  } catch (err) {}
+  return dateStr;
+}
+
 app.get("/api/leaderboard", async (req, res) => {
   const { after, before } = req.query;
 
-  // ─── LEADERBOARD B: 15-Day (Biweekly) Leaderboard (Database-driven) ────────────────
+  const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+  // ─── LEADERBOARD B: 15-Day (Biweekly) Leaderboard ───────────────────────────
   if (req.query.period === "biweekly") {
-    if (supabase) {
-      try {
-        // Convert ET dates to exact UTC bounds
-        const startUTC = etDateStringToUTC(after, "00:00:00");
-        const endUTC   = etDateStringToUTC(before, "00:00:00"); // exclusive upper bound
+    try {
+      const afterStr = after || "";
+      const isoAfter = parseToISODate(afterStr);
+      const dateParts = isoAfter.split("-");
+      const targetMonth = dateParts.length >= 2 ? `${dateParts[0]}-${dateParts[1]}` : new Date().toISOString().slice(0, 7);
 
-        // Query local wager transactions strictly within the date range
-        const { data: txs, error } = await supabase
-          .from("wager_transactions")
-          .select(`
-            wager_amount_usd,
-            points_awarded,
-            processed_at,
-            users!inner (
-              degencity_username,
-              kick_username
-            )
-          `)
-          .gte("processed_at", startUTC.toISOString())
-          .lt("processed_at", endUTC.toISOString());
+      // Check for manual override data from degencity_leaderboard_override.json
+      const overridePath = path.join(__dirname, "degencity_leaderboard_override.json");
+      if (fs.existsSync(overridePath)) {
+        try {
+          const overrideContent = fs.readFileSync(overridePath, "utf8");
+          const overrideData = JSON.parse(overrideContent);
+          if (Array.isArray(overrideData) && overrideData.length > 0) {
+            const formatted = overrideData.map(u => ({
+              user_id: u.user_id || 1,
+              username: u.username,
+              wager_data: [
+                {
+                  month: targetMonth,
+                  total_wager_usd: Number(u.wager) || 0
+                }
+              ],
+              _currentWager: Number(u.wager) || 0
+            })).sort((a, b) => b.wager_data[0].total_wager_usd - a.wager_data[0].total_wager_usd);
 
-        if (error) throw error;
-
-        // Group in memory to aggregate totals for each user
-        const playerMap = new Map();
-        for (const tx of txs || []) {
-          const username = tx.users?.degencity_username || tx.users?.kick_username || "Unknown";
-          if (!playerMap.has(username)) {
-            playerMap.set(username, { username, total_wager: 0, total_points: 0 });
+            res.set("Cache-Control", "no-store");
+            return res.json({ data: formatted });
           }
-          const entry = playerMap.get(username);
-          entry.total_wager += Number(tx.wager_amount_usd || 0);
-          entry.total_points += Number(tx.points_awarded || 0);
+        } catch (err) {
+          console.error("Failed to parse degencity_leaderboard_override.json:", err);
         }
+      }
 
-        const players = Array.from(playerMap.values())
-          .sort((a, b) => b.total_wager - a.total_wager);
+      // Determine baseline date dynamically (day before start date)
+      let userBaselines = {};
+      if (isoAfter && /^\d{4}-\d{2}-\d{2}$/.test(isoAfter)) {
+        try {
+          const startDate = new Date(isoAfter + "T00:00:00Z");
+          startDate.setUTCDate(startDate.getUTCDate() - 1);
+          const baselineDateStr = startDate.toISOString().slice(0, 10);
+          
+          const baselinesPath = path.join(__dirname, "baselines.json");
+          if (fs.existsSync(baselinesPath)) {
+            const baselinesContent = fs.readFileSync(baselinesPath, "utf8");
+            const baselinesObj = JSON.parse(baselinesContent);
+            userBaselines = baselinesObj[baselineDateStr] || {};
+          }
+        } catch (err) {
+          console.error("Error loading baseline from baselines.json:", err);
+        }
+      }
 
-        const formatted = players.map(p => ({
-          user_id: 1,
-          username: p.username,
+
+      // Fetch current data from DegenCity API with robust fallback on error/timeout
+      let rawList = [];
+      try {
+        let url = "https://api.degencity.com/api/v1/partner/affiliates/leaderboard";
+        const params = new URLSearchParams();
+        if (after) params.append("after", after);
+        if (before) params.append("before", before);
+        if (params.toString()) url += "?" + params.toString();
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 seconds timeout
+        
+        const response = await fetch(url, {
+          method:  "GET",
+          headers: { 
+            "x-api-key": API_KEY, 
+            "Accept": "application/json",
+            "User-Agent": USER_AGENT
+          },
+          signal:  controller.signal
+        });
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          const data = await response.json();
+          rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          
+          // Cache successful response to degencity_leaderboard_fallback.json
+          try {
+            const fallbackPath = path.join(__dirname, "degencity_leaderboard_fallback.json");
+            fs.writeFileSync(fallbackPath, JSON.stringify(data, null, 2));
+          } catch (writeErr) {
+            console.error("Failed to write to local fallback JSON:", writeErr);
+          }
+        } else {
+          throw new Error(`HTTP Error: ${response.status}`);
+        }
+      } catch (fetchErr) {
+        console.warn("DegenCity API fetch failed, loading from local JSON fallback:", fetchErr.message);
+        try {
+          const fallbackPath = path.join(__dirname, "degencity_leaderboard_fallback.json");
+          if (fs.existsSync(fallbackPath)) {
+            const fallbackContent = fs.readFileSync(fallbackPath, "utf8");
+            const data = JSON.parse(fallbackContent);
+            rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+          } else {
+            console.error("Local fallback JSON does not exist at:", fallbackPath);
+          }
+        } catch (readErr) {
+          console.error("Failed to read local fallback JSON:", readErr);
+        }
+      }
+
+      const formatted = rawList.map(u => {
+        const uname = u.username || "";
+        const unameKey = uname.toLowerCase();
+
+        const monthObj = (u.wager_data || []).find(m => m.month === targetMonth);
+        const currentWager = monthObj ? (Number(monthObj.total_wager_usd) || 0) : 0;
+
+        // Subtracted net wager: Current MTD - July 15 Baseline
+        const baseWager = Number(userBaselines[unameKey] || 0);
+        const netWager = Math.max(0, currentWager - baseWager);
+
+        return {
+          user_id: u.user_id || 1,
+          username: uname,
           wager_data: [
             {
-              month: after.slice(0, 7),
-              total_wager_usd: p.total_wager
+              month: targetMonth,
+              total_wager_usd: netWager
             }
-          ]
-        }));
+          ],
+          _currentWager: currentWager
+        };
+      }).sort((a, b) => (b.wager_data[0].total_wager_usd - a.wager_data[0].total_wager_usd) || (b._currentWager - a._currentWager));
 
-        res.set("Cache-Control", "no-store");
-        return res.json({ data: formatted });
-      } catch (err) {
-        console.error("Biweekly leaderboard DB error, falling back to proxy:", err);
-      }
+      res.set("Cache-Control", "no-store");
+      return res.json({ data: formatted });
+    } catch (err) {
+      console.error("Biweekly leaderboard calculation error:", err);
+      return res.status(500).json({ success: false, message: err.message });
     }
   }
 
@@ -559,7 +688,11 @@ app.get("/api/leaderboard", async (req, res) => {
 
     const response = await fetch(url, {
       method:  "GET",
-      headers: { "x-api-key": API_KEY, "Accept": "application/json" }
+      headers: { 
+        "x-api-key": API_KEY, 
+        "Accept": "application/json",
+        "User-Agent": USER_AGENT
+      }
     });
     const data = await response.json();
     res.set("Cache-Control", "no-store");

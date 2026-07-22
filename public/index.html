@@ -3060,7 +3060,7 @@ function renderBiweeklyLeaderboard(data) {
     user_id:  u.user_id,
     username: u.username,
     total: (u.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0)
-  })).filter(p => p.total > 0).sort((a, b) => b.total - a.total);
+  })).filter(p => p.total >= 0).sort((a, b) => b.total - a.total);
 
   if (players.length === 0) {
     bwContent.innerHTML = '<div class="lb-empty">No activity yet this period. Check back soon!</div>';
@@ -3076,7 +3076,8 @@ function renderBiweeklyLeaderboard(data) {
     const isHidden  = p.user_id === -1;
     const nameHtml  = isHidden ? '<span class="hidden-user">🔒 Hidden User</span>' : '<span>' + escHtml(p.username) + '</span>';
     const amtClass  = rank === 1 ? 'wager-amount gold' : 'wager-amount';
-    const barPct    = Math.round((p.total / top) * 100);
+    const barPct    = top > 0 ? Math.round((p.total / top) * 100) : 0;
+
     const prizeHtml = rank <= BW_PRIZE_POOL.length
       ? '<span class="prize-badge prize-badge-' + (rank <= 3 ? rank : 'n') + '">$' + BW_PRIZE_POOL[rank - 1] + '</span>'
       : '<span style="color:var(--text-muted);font-family:var(--font-ui);font-size:0.75rem;">—</span>';
