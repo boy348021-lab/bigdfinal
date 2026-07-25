@@ -7,7 +7,7 @@
       "wager_data": [
         {
           "month": "2026-07",
-          "total_wager_usd": 127.3275
+          "total_wager_usd": 127.4796
         }
       ]
     },
@@ -30,6 +30,17 @@
         {
           "month": "2026-07",
           "total_wager_usd": 105.47
+        }
+      ]
+    },
+    {
+      "user_id": 34375,
+      "username": "soysolos",
+      "status": "visible",
+      "wager_data": [
+        {
+          "month": "2026-07",
+          "total_wager_usd": 87.88
         }
       ]
     },
@@ -85,6 +96,17 @@
         {
           "month": "2026-07",
           "total_wager_usd": 1258.5115
+        }
+      ]
+    },
+    {
+      "user_id": 36931,
+      "username": "bigballszs34",
+      "status": "visible",
+      "wager_data": [
+        {
+          "month": "2026-07",
+          "total_wager_usd": 412.55
         }
       ]
     },
@@ -161,7 +183,7 @@
       "wager_data": [
         {
           "month": "2026-07",
-          "total_wager_usd": 146.35
+          "total_wager_usd": 194.68
         }
       ]
     },
