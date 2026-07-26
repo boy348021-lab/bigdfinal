@@ -1,0 +1,6 @@
+ALTER TABLE users ADD COLUMN IF NOT EXISTS clerk_id TEXT UNIQUE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS discord_display_name TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id);

@@ -13,6 +13,8 @@ import { createHash, randomBytes } from "crypto";
 import fs from "fs";
 import { readFile } from "fs/promises";
 import { WebSocket } from "ws";
+import { createClerkClient } from "@clerk/backend";
+import { Webhook } from "svix";
 
 dotenv.config();
 
@@ -65,33 +67,121 @@ if (!supabase) {
   console.warn("⚠️  Supabase not configured — set SUPABASE_URL + SUPABASE_SERVICE_KEY in .env");
 }
 
-// ─── OAuth Config ────────────────────────────────────────────────────────────
-const DISCORD_CLIENT_ID     = process.env.DISCORD_CLIENT_ID     || '1526125659494154250';
-const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || 'njb6UmXsbJeKn76NFtyHjTMY7yrGdEHi';
-
-const KICK_CLIENT_ID     = process.env.KICK_CLIENT_ID     || '';
-const KICK_CLIENT_SECRET = process.env.KICK_CLIENT_SECRET || '';
-
 // Auto-detect the base URL: prefer explicit env var, then Vercel URL, then production domain, then localhost
 const BASE_URL = process.env.BASE_URL
   || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
   || (process.env.NODE_ENV === 'production' ? 'https://bigdtv.vip' : null)
   || `http://localhost:${PORT}`;
 
-const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || `${BASE_URL}/auth/discord/callback`;
-const KICK_REDIRECT_URI    = process.env.KICK_REDIRECT_URI    || `${BASE_URL}/auth/kick/callback`;
-
 console.log(`BASE_URL: ${BASE_URL}`);
-console.log(`Discord redirect: ${DISCORD_REDIRECT_URI}`);
 
 // Admin secret for admin endpoints (set ADMIN_SECRET in .env)
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "bigdtv-admin-change-me";
 
-// ─── Middleware ───────────────────────────────────────────────────────────────
+// ─── Clerk & Middleware ────────────────────────────────────────────────────────
+const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY || "";
+const CLERK_PUBLISHABLE_KEY = process.env.CLERK_PUBLISHABLE_KEY || "";
+
+const clerkClient = createClerkClient({ secretKey: CLERK_SECRET_KEY });
+
 app.use(cors());
+
+// Clerk webhook endpoint (defined before global express.json() to get raw body)
+app.post("/api/webhooks/clerk", express.raw({ type: "application/json" }), async (req, res) => {
+  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+
+  if (!WEBHOOK_SECRET) {
+    console.error("Missing CLERK_WEBHOOK_SECRET environment variable");
+    return res.status(500).json({ error: "Webhook secret not configured" });
+  }
+
+  const svix_id = req.headers["svix-id"];
+  const svix_timestamp = req.headers["svix-timestamp"];
+  const svix_signature = req.headers["svix-signature"];
+
+  if (!svix_id || !svix_timestamp || !svix_signature) {
+    return res.status(400).json({ error: "Error occurred -- no svix headers" });
+  }
+
+  const payload = req.body;
+  const body = payload.toString();
+  const wh = new Webhook(WEBHOOK_SECRET);
+
+  let evt;
+  try {
+    evt = wh.verify(body, {
+      "svix-id": svix_id,
+      "svix-timestamp": svix_timestamp,
+      "svix-signature": svix_signature,
+    });
+  } catch (err) {
+    console.error("Error verifying webhook:", err.message);
+    return res.status(400).json({ error: err.message });
+  }
+
+  const { id } = evt.data;
+  const eventType = evt.type;
+
+  console.log(`Clerk webhook received: ${eventType} (User ID: ${id})`);
+
+  try {
+    if (eventType === "user.created" || eventType === "user.updated") {
+      const email = evt.data.email_addresses?.[0]?.email_address || null;
+      const displayName = `${evt.data.first_name || ""} ${evt.data.last_name || ""}`.trim() || evt.data.username || "Guest";
+      const avatarUrl = evt.data.image_url || null;
+
+      if (supabase) {
+        const { data: existingUser } = await supabase
+          .from("users")
+          .select("*")
+          .eq("clerk_id", id)
+          .maybeSingle();
+
+        if (existingUser) {
+          await supabase
+            .from("users")
+            .update({
+              email: email,
+              display_name: displayName,
+              avatar_url: avatarUrl,
+              updated_at: new Date().toISOString()
+            })
+            .eq("clerk_id", id);
+        } else {
+          await supabase
+            .from("users")
+            .insert({
+              clerk_id: id,
+              email: email,
+              display_name: displayName,
+              avatar_url: avatarUrl,
+              auth_provider: 'clerk',
+              points: 0,
+              created_at: new Date().toISOString(),
+              last_login: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
+        }
+      }
+    } else if (eventType === "user.deleted") {
+      if (supabase) {
+        await supabase
+          .from("users")
+          .delete()
+          .eq("clerk_id", id);
+      }
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Webhook processing failed:", err.message);
+    res.status(500).json({ error: "Internal processing error" });
+  }
+});
+
 app.use(express.json());
 app.use(cookieParser(process.env.SESSION_SECRET || "bigdtv-dev-secret-change-in-production"));
 
+// Keep express-session for non-auth legacy requirements if any, but clean up active session dependency
 app.use(session({
   secret:            process.env.SESSION_SECRET || "bigdtv-dev-secret-change-in-production",
   resave:            false,
@@ -103,359 +193,61 @@ app.use(session({
   }
 }));
 
-// ─── JWT Auth Cookie helpers ──────────────────────────────────────────────────
-const JWT_SECRET = process.env.SESSION_SECRET || 'bigdtv-dev-secret-change-in-production';
-const AUTH_COOKIE = 'auth_token';
-const AUTH_COOKIE_OPTS = {
-  httpOnly: true,
-  secure:   process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
-  maxAge:   7 * 24 * 60 * 60 * 1000, // 7 days
-};
-
-function setAuthCookie(res, userId) {
-  const token = jwt.sign({ uid: String(userId) }, JWT_SECRET, { expiresIn: '7d' });
-  res.cookie(AUTH_COOKIE, token, AUTH_COOKIE_OPTS);
-}
-
-function getAuthUserId(req) {
-  const token = req.cookies?.[AUTH_COOKIE];
-  if (!token) return null;
-  try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    return payload.uid || null;
-  } catch { return null; }
-}
-
-/**
- * Handles the core logic of OAuth login and linking for both Discord and Kick.
- * Returns { success: true, userId } or { success: false, error: 'already_linked' }
- */
-async function handleOAuthLoginOrLink({ platform, platformId, platformUsername, platformAvatar = null, currentUserId = null, verifiedDegenUsername = null }) {
-  if (!supabase) {
-    throw new Error("Database not configured");
-  }
-
-  const idField = platform === "discord" ? "discord_id" : "kick_id";
-  const { data: existingUser, error: findErr } = await supabase
-    .from("users")
-    .select("*")
-    .eq(idField, platformId)
-    .maybeSingle();
-
-  if (findErr) {
-    console.error(`Error looking up user by ${idField}:`, findErr);
-    throw findErr;
-  }
-
-  // 1. Enforce DegenCity verification requirement for Kick connections
-  if (platform === "kick") {
-    let activeDegen = verifiedDegenUsername;
-
-    if (currentUserId) {
-      const { data: curUser } = await supabase
-        .from("users")
-        .select("degencity_username")
-        .eq("id", currentUserId)
-        .single();
-      if (curUser?.degencity_username) {
-        activeDegen = curUser.degencity_username;
-      }
-    } else if (existingUser?.degencity_username) {
-      activeDegen = existingUser.degencity_username;
-    }
-
-    if (!activeDegen) {
-      return { success: false, error: "degencity_required" };
-    }
-  }
-
-  const updatePayload = {
-    last_seen_at: new Date().toISOString(),
-  };
-  if (platform === "discord") {
-    updatePayload.discord_username = platformUsername;
-    updatePayload.discord_avatar = platformAvatar;
-  } else {
-    updatePayload.kick_username = platformUsername;
-    if (verifiedDegenUsername) {
-      updatePayload.degencity_username = verifiedDegenUsername;
-      updatePayload.degencity_verification_status = "verified";
-      updatePayload.degencity_link_timestamp = new Date().toISOString();
-    }
-  }
-
-  // If no user is logged in currently
-  if (!currentUserId) {
-    if (existingUser) {
-      // Existing user logging in: update profile details
-      const { error: updateErr } = await supabase
-        .from("users")
-        .update(updatePayload)
-        .eq("id", existingUser.id);
-      if (updateErr) console.error("Error updating user details on login:", updateErr);
-      return { success: true, userId: existingUser.id };
-    } else {
-      // Brand new Kick/Discord signup
-      let existingDegenUser = null;
-      if (platform === "kick" && verifiedDegenUsername) {
-        const { data } = await supabase
-          .from("users")
-          .select("id")
-          .eq("degencity_username", verifiedDegenUsername)
-          .maybeSingle();
-        existingDegenUser = data;
-      }
-
-      if (existingDegenUser) {
-        // Associate the Kick account with the existing user record that has this DegenCity username
-        const updatePayloadWithKick = {
-          ...updatePayload,
-          kick_id: platformId,
-          kick_username: platformUsername
-        };
-        const { error: updateErr } = await supabase
-          .from("users")
-          .update(updatePayloadWithKick)
-          .eq("id", existingDegenUser.id);
-        if (updateErr) throw updateErr;
-        return { success: true, userId: existingDegenUser.id };
-      } else {
-        // Create a new record containing both
-        const insertPayload = {
-          [idField]: platformId,
-          ...(platform === "discord" ? {
-            discord_username: platformUsername,
-            discord_avatar: platformAvatar,
-          } : {
-            kick_username: platformUsername,
-            degencity_username: verifiedDegenUsername,
-            degencity_verification_status: "verified",
-            degencity_link_timestamp: new Date().toISOString()
-          })
-        };
-        const { data: newUser, error: insertErr } = await supabase
-          .from("users")
-          .insert(insertPayload)
-          .select("id")
-          .single();
-        if (insertErr) {
-          console.error("Error inserting new user:", insertErr);
-          throw insertErr;
-        }
-        return { success: true, userId: newUser.id };
-      }
-    }
-  }
-
-  // If a user IS logged in (linking attempt)
-  const { data: currentUser, error: curErr } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", currentUserId)
-    .single();
-
-  if (curErr || !currentUser) {
-    console.error("Error fetching current user for link:", curErr);
-    throw new Error("Current logged in user not found");
-  }
-
-  // Already linked to this user
-  if (currentUser[idField] === platformId) {
-    await supabase.from("users").update(updatePayload).eq("id", currentUserId);
-    return { success: true, userId: currentUserId };
-  }
-
-  // Find if another user already has this DegenCity username linked
-  let existingDegenUser = null;
-  if (platform === "kick" && verifiedDegenUsername) {
-    const { data } = await supabase
-      .from("users")
-      .select("*")
-      .eq("degencity_username", verifiedDegenUsername.trim().toLowerCase())
-      .maybeSingle();
-    existingDegenUser = data;
-  }
-
-  // Check conflicts for existingUser (platform match)
-  if (existingUser && existingUser.id !== currentUserId) {
-    const otherIdField = platform === "discord" ? "kick_id" : "discord_id";
-    if (currentUser[otherIdField] && existingUser[otherIdField] && currentUser[otherIdField] !== existingUser[otherIdField]) {
-      return { success: false, error: "already_linked" };
-    }
-  }
-
-  // Check conflicts for existingDegenUser (degencity match)
-  if (existingDegenUser && existingDegenUser.id !== currentUserId) {
-    if (currentUser.discord_id && existingDegenUser.discord_id && currentUser.discord_id !== existingDegenUser.discord_id) {
-      return { success: false, error: "already_linked" };
-    }
-    const incomingKickId = platform === "kick" ? platformId : null;
-    const targetKickId = currentUser.kick_id || incomingKickId;
-    if (targetKickId && existingDegenUser.kick_id && targetKickId !== existingDegenUser.kick_id) {
-      return { success: false, error: "already_linked" };
-    }
-  }
-
-  const sourcesToDelete = [];
-  let mergedPoints = currentUser.points || 0;
-
-  const mergedPayload = {
-    last_seen_at: new Date().toISOString(),
-    discord_id: currentUser.discord_id,
-    discord_username: currentUser.discord_username,
-    discord_avatar: currentUser.discord_avatar,
-    kick_id: currentUser.kick_id,
-    kick_username: currentUser.kick_username,
-    degencity_username: currentUser.degencity_username,
-    degencity_verification_status: currentUser.degencity_verification_status,
-    degencity_link_timestamp: currentUser.degencity_link_timestamp,
-  };
-
-  if (platform === "discord") {
-    mergedPayload.discord_id = platformId;
-    mergedPayload.discord_username = platformUsername;
-    mergedPayload.discord_avatar = platformAvatar;
-  } else {
-    mergedPayload.kick_id = platformId;
-    mergedPayload.kick_username = platformUsername;
-    if (verifiedDegenUsername) {
-      mergedPayload.degencity_username = verifiedDegenUsername;
-      mergedPayload.degencity_verification_status = "verified";
-      mergedPayload.degencity_link_timestamp = new Date().toISOString();
-    }
-  }
-
-  // 1) Merge existingUser (matched by platformId)
-  if (existingUser && existingUser.id !== currentUserId) {
-    const sourceId = existingUser.id;
-    sourcesToDelete.push(sourceId);
-    mergedPoints += (existingUser.points || 0);
-
-    mergedPayload.discord_id = mergedPayload.discord_id || existingUser.discord_id;
-    mergedPayload.discord_username = mergedPayload.discord_username || existingUser.discord_username;
-    mergedPayload.discord_avatar = mergedPayload.discord_avatar || existingUser.discord_avatar;
-    mergedPayload.kick_id = mergedPayload.kick_id || existingUser.kick_id;
-    mergedPayload.kick_username = mergedPayload.kick_username || existingUser.kick_username;
-    mergedPayload.degencity_username = mergedPayload.degencity_username || existingUser.degencity_username;
-    if (existingUser.degencity_verification_status === "verified") {
-      mergedPayload.degencity_verification_status = "verified";
-    }
-    mergedPayload.degencity_link_timestamp = mergedPayload.degencity_link_timestamp || existingUser.degencity_link_timestamp;
-
-    await Promise.all([
-      supabase.from("point_logs").update({ user_id: currentUserId }).eq("user_id", sourceId),
-      supabase.from("audit_logs").update({ user_id: currentUserId }).eq("user_id", sourceId),
-      supabase.from("wager_transactions").update({ user_id: currentUserId }).eq("user_id", sourceId),
-      supabase.from("redemptions").update({ user_id: currentUserId }).eq("user_id", sourceId),
-    ]);
-  }
-
-  // 2) Merge existingDegenUser (matched by degencity_username)
-  if (existingDegenUser && existingDegenUser.id !== currentUserId && (!existingUser || existingDegenUser.id !== existingUser.id)) {
-    const sourceId = existingDegenUser.id;
-    sourcesToDelete.push(sourceId);
-    mergedPoints += (existingDegenUser.points || 0);
-
-    mergedPayload.discord_id = mergedPayload.discord_id || existingDegenUser.discord_id;
-    mergedPayload.discord_username = mergedPayload.discord_username || existingDegenUser.discord_username;
-    mergedPayload.discord_avatar = mergedPayload.discord_avatar || existingDegenUser.discord_avatar;
-    mergedPayload.kick_id = mergedPayload.kick_id || existingDegenUser.kick_id;
-    mergedPayload.kick_username = mergedPayload.kick_username || existingDegenUser.kick_username;
-    mergedPayload.degencity_username = mergedPayload.degencity_username || existingDegenUser.degencity_username;
-    if (existingDegenUser.degencity_verification_status === "verified") {
-      mergedPayload.degencity_verification_status = "verified";
-    }
-    mergedPayload.degencity_link_timestamp = mergedPayload.degencity_link_timestamp || existingDegenUser.degencity_link_timestamp;
-
-    await Promise.all([
-      supabase.from("point_logs").update({ user_id: currentUserId }).eq("user_id", sourceId),
-      supabase.from("audit_logs").update({ user_id: currentUserId }).eq("user_id", sourceId),
-      supabase.from("wager_transactions").update({ user_id: currentUserId }).eq("user_id", sourceId),
-      supabase.from("redemptions").update({ user_id: currentUserId }).eq("user_id", sourceId),
-    ]);
-  }
-
-  mergedPayload.points = mergedPoints;
-
-  // 3) Delete source users first
-  for (const sourceId of sourcesToDelete) {
-    const { error: deleteErr } = await supabase
-      .from("users")
-      .delete()
-      .eq("id", sourceId);
-    if (deleteErr) {
-      console.error(`Error deleting source user ${sourceId} during merge:`, deleteErr);
-    }
-  }
-
-  // 4) Update currentUser
-  const { error: updateErr } = await supabase
-    .from("users")
-    .update(mergedPayload)
-    .eq("id", currentUserId);
-
-  if (updateErr) {
-    console.error("Error updating user details on link/merge:", updateErr);
-    throw updateErr;
-  }
-
-  // 5) Write audit log
-  if (sourcesToDelete.length > 0) {
-    await supabase.from("audit_logs").insert({
-      user_id: currentUserId,
-      action: "account_merge",
-      points_before: currentUser.points,
-      points_after: mergedPoints,
-      source: "auth_system",
-      transaction_reference: `merged_users_${sourcesToDelete.join("_")}`,
-      metadata: { merged_source_ids: sourcesToDelete }
-    });
-  }
-
-  return { success: true, userId: currentUserId };
-}
-
-// ─── Session Restore Middleware ──────────────────────────────────────────────
-app.use(async (req, res, next) => {
-  const userId = getAuthUserId(req);
-  if (userId && supabase) {
-    try {
-      const { data: user, error } = await supabase
-        .from("users")
-        .select("id, points, kick_id, kick_username, discord_id, discord_username, discord_avatar, degencity_username, degencity_verification_status")
-        .eq("id", userId)
-        .single();
-      if (!error && user) {
-        req.session.userId = user.id;
-        req.session.kickUsername = user.kick_username;
-        req.session.kickId = user.kick_id;
-        req.session.discordUsername = user.discord_username;
-        req.session.discordAvatar = user.discord_avatar;
-        req.session.degencityUsername = user.degencity_username;
-        req.session.degencityVerified = user.degencity_verification_status === "verified";
-        req.session.points = user.points;
-        req.user = user;
-      } else {
-        res.clearCookie(AUTH_COOKIE);
-      }
-    } catch (e) {
-      console.error("Session restore error:", e);
-    }
-  }
-  next();
-});
-
 app.use(express.static(path.join(__dirname, "public")));
 
-// ─── Auth guard middleware ────────────────────────────────────────────────────
-function requireAuth(req, res, next) {
-  if (!req.session.userId) return res.status(401).json({ error: "Not authenticated" });
-  next();
-}
-function requireKick(req, res, next) {
-  if (!req.session.kickUsername) return res.status(403).json({ error: "Kick account required to earn points" });
-  next();
+// Reusable Clerk verification middleware
+async function requireClerkAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: "No authentication token provided" });
+  }
+  const token = authHeader.split(' ')[1];
+
+  // Support Mock Mode JWTs
+  if (token.startsWith('mock_jwt_')) {
+    try {
+      const payloadStr = Buffer.from(token.replace('mock_jwt_', ''), 'base64').toString('utf8');
+      const payload = JSON.parse(payloadStr);
+      req.auth = { sub: payload.id };
+
+      if (supabase) {
+        const { data: user } = await supabase
+          .from("users")
+          .select("*")
+          .eq("clerk_id", payload.id)
+          .maybeSingle();
+
+        if (user) {
+          req.user = user;
+        }
+      }
+      return next();
+    } catch (err) {
+      console.error("Mock authentication error:", err.message);
+      return res.status(401).json({ error: "Invalid mock token" });
+    }
+  }
+
+  try {
+    const verified = await clerkClient.verifyToken(token);
+    req.auth = verified;
+
+    if (supabase) {
+      const { data: user } = await supabase
+        .from("users")
+        .select("*")
+        .eq("clerk_id", verified.sub)
+        .maybeSingle();
+
+      if (user) {
+        req.user = user;
+      }
+    }
+    next();
+  } catch (err) {
+    console.error("Clerk authentication error:", err.message);
+    res.status(401).json({ error: "Invalid or expired token" });
+  }
 }
 
 // ─── Kick Live Status ─────────────────────────────────────────────────────────
@@ -731,23 +523,14 @@ app.get("/api/points/:userId", async (req, res) => {
   if (!supabase) return res.status(503).json({ error: "Database not configured" });
   const { data, error } = await supabase
     .from("users")
-    .select("points, kick_username, discord_username")
+    .select("points, kick_username")
     .eq("id", req.params.userId)
     .single();
   if (error) return res.status(404).json({ error: "User not found" });
   res.json(data);
 });
 
-// ─── Activity Heartbeat (for multi-tab prevention + idle detection) ───────────
-// Clients hit this every 60s if they are on-site and logged in with Kick.
-const heartbeatMap = new Map(); // userId → { lastSeen, kickUsername }
-
-app.post("/api/heartbeat", requireAuth, requireKick, (req, res) => {
-  const userId      = req.session.userId;
-  const kickUsername = req.session.kickUsername;
-  heartbeatMap.set(userId, { lastSeen: Date.now(), kickUsername });
-  res.json({ ok: true });
-});
+// Heartbeat endpoint removed
 
 // ─── Wager Webhook ─────────────────────────────────────────────────────────────
 // Expected payload: { transaction_id, degencity_username, wager_amount_usd, provider? }
@@ -819,11 +602,12 @@ app.post("/api/webhooks/wager", async (req, res) => {
 });
 
 // ─── Store Redemption ─────────────────────────────────────────────────────────
-app.post("/api/store/redeem", requireAuth, async (req, res) => {
+app.post("/api/store/redeem", requireClerkAuth, async (req, res) => {
   if (!supabase) return res.status(503).json({ error: "Database not configured" });
+  if (!req.user) return res.status(404).json({ error: "User profile not found. Please sync first." });
 
   const { reward_id } = req.body;
-  const userId        = req.session.userId;
+  const userId        = req.user.id;
 
   const reward = STORE_REWARDS.find(r => r.id === reward_id);
   if (!reward) return res.status(400).json({ error: "Invalid reward_id" });
@@ -852,7 +636,6 @@ app.post("/api/store/redeem", requireAuth, async (req, res) => {
       .select("id, status, created_at")
       .single();
 
-    req.session.points = newBalance;
     console.log(`🛒 Redemption: user ${userId} redeemed ${reward.label} (${reward.points_cost} pts)`);
     res.json({ ok: true, redemption, new_balance: newBalance });
 
@@ -867,12 +650,13 @@ app.post("/api/store/redeem", requireAuth, async (req, res) => {
 });
 
 // ─── User Redemption History ──────────────────────────────────────────────────
-app.get("/api/store/redemptions", requireAuth, async (req, res) => {
+app.get("/api/store/redemptions", requireClerkAuth, async (req, res) => {
   if (!supabase) return res.status(503).json({ error: "Database not configured" });
+  if (!req.user) return res.status(404).json({ error: "User profile not found. Please sync first." });
   const { data, error } = await supabase
     .from("redemptions")
     .select("id, reward_id, reward_label, points_cost, status, admin_note, created_at, updated_at")
-    .eq("user_id", req.session.userId)
+    .eq("user_id", req.user.id)
     .order("created_at", { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   res.json({ redemptions: data || [] });
@@ -929,270 +713,243 @@ app.post("/api/admin/redemptions/:id", requireAdmin, async (req, res) => {
 });
 
 // ─── Auth — Session Info ──────────────────────────────────────────────────────
-app.get("/auth/me", (req, res) => {
-  const tempDegen = req.cookies?.verified_degencity_username || null;
-  if (!req.user) {
-    return res.json({ loggedIn: false, tempDegencityUsername: tempDegen });
-  }
-  res.json({
-    loggedIn:             true,
-    userId:               req.user.id,
-    discordUsername:      req.user.discord_username         || null,
-    discordAvatar:        req.user.discord_avatar           || null,
-    kickUsername:         req.user.kick_username            || null,
-    kickId:               req.user.kick_id                  || null,
-    degencityUsername:    req.user.degencity_username       || null,
-    degencityVerified:    req.user.degencity_verification_status === 'verified',
-    points:               req.user.points ?? 0,
-    tempDegencityUsername: tempDegen,
-  });
+// ─── GET Clerk Publishable Key config ─────────────────────────────────────────
+app.get("/api/auth/config", (req, res) => {
+  res.json({ publishableKey: CLERK_PUBLISHABLE_KEY });
 });
 
-app.post("/auth/logout", (req, res) => {
-  res.clearCookie(AUTH_COOKIE);
-  res.clearCookie("verified_degencity_username", { path: '/' });
-  req.session.destroy(() => res.json({ success: true }));
-});
-
-// ─── Auth — Discord ───────────────────────────────────────────────────────────
-const OAUTH_COOKIE_OPTS = {
-  httpOnly: true,
-  secure:   process.env.NODE_ENV === "production",
-  sameSite: "lax",
-  maxAge:   10 * 60 * 1000, // 10 minutes — enough to complete OAuth
-};
-
-app.get("/auth/discord", (req, res) => {
-  if (!DISCORD_CLIENT_ID) {
-    return res.status(503).send("Discord OAuth not configured. Please set DISCORD_CLIENT_ID in .env");
+// ─── POST /auth/sync (Verify Clerk JWT & sync Supabase profile/linked_accounts) 
+app.post("/auth/sync", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No authentication token provided' });
   }
-
-  const { degencity_username } = req.query;
-  if (degencity_username) {
-    res.cookie('verified_degencity_username', degencity_username.trim().toLowerCase(), {
-      httpOnly: true,
-      secure:   process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge:   60 * 60 * 1000, // 1 hour
-      path:     '/',
-    });
-  }
-
-  const state = randomBytes(16).toString("hex");
-  // Store state in a cookie so it survives the redirect regardless of serverless instance
-  res.cookie("discord_oauth_state", state, OAUTH_COOKIE_OPTS);
-
-  const params = new URLSearchParams({
-    client_id:     DISCORD_CLIENT_ID,
-    redirect_uri:  DISCORD_REDIRECT_URI,
-    response_type: "code",
-    scope:         "identify",
-    state,
-  });
-  res.redirect(`https://discord.com/oauth2/authorize?${params}`);
-});
-
-app.get("/auth/discord/callback", async (req, res) => {
-  const { code, state, error } = req.query;
-
-  if (error || !code) {
-    return res.redirect("/account.html?error=discord_denied");
-  }
-  // Verify state from cookie (not session — session breaks across serverless instances)
-  const savedState = req.cookies.discord_oauth_state;
-  res.clearCookie("discord_oauth_state");
-  if (!savedState || state !== savedState) {
-    return res.redirect("/account.html?error=state_mismatch");
-  }
-
+  const token = authHeader.split(' ')[1];
   try {
-    const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
-      method:  "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body:    new URLSearchParams({
-        client_id:     DISCORD_CLIENT_ID,
-        client_secret: DISCORD_CLIENT_SECRET,
-        grant_type:    "authorization_code",
-        code,
-        redirect_uri:  DISCORD_REDIRECT_URI,
-      }),
-    });
-    const tokenData = await tokenRes.json();
-    if (!tokenData.access_token) throw new Error("No access token from Discord");
+    let clerkUserId, email, displayName, avatarUrl;
+    let discordUserId, discordUsername, discordAvatar;
 
-    const profileRes = await fetch("https://discord.com/api/users/@me", {
-      headers: { Authorization: `Bearer ${tokenData.access_token}` }
-    });
-    const profile = await profileRes.json();
+    if (token.startsWith('mock_jwt_')) {
+      const payloadStr = Buffer.from(token.replace('mock_jwt_', ''), 'base64').toString('utf8');
+      const payload = JSON.parse(payloadStr);
+      
+      clerkUserId = payload.id;
+      email = payload.email;
+      displayName = payload.displayName;
+      avatarUrl = payload.avatarUrl;
+      
+      discordUserId = payload.discordId;
+      discordUsername = payload.username;
+      discordAvatar = payload.avatarUrl;
+    } else {
+      const verified = await clerkClient.verifyToken(token);
+      clerkUserId = verified.sub;
 
-    const avatar = profile.avatar
-      ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`
-      : null;
+      const clerkUser = await clerkClient.users.getUser(clerkUserId);
+      email = clerkUser.emailAddresses?.[0]?.emailAddress || null;
+      displayName = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || clerkUser.username || "Guest";
+      avatarUrl = clerkUser.imageUrl || null;
 
-    const currentUserId = getAuthUserId(req) || req.session.userId || null;
-    const result = await handleOAuthLoginOrLink({
-      platform: "discord",
-      platformId: profile.id,
-      platformUsername: profile.username,
-      platformAvatar: avatar,
-      currentUserId
-    });
-
-    if (!result.success) {
-      if (result.error === "already_linked") {
-        return res.redirect("/account.html?error=discord_already_linked");
-      }
-      return res.redirect("/account.html?error=discord_failed");
+      const discordAccount = clerkUser.externalAccounts?.find(acc => acc.provider === 'oauth_discord' || acc.provider === 'discord');
+      discordUserId = discordAccount?.providerUserId || null;
+      discordUsername = discordAccount?.username || null;
+      discordAvatar = discordAccount?.avatarUrl || null;
     }
 
-    setAuthCookie(res, result.userId);
-    res.redirect("/account.html?success=discord");
-  } catch (err) {
-    console.error("Discord callback error:", err);
-    res.redirect("/account.html?error=discord_failed");
-  }
-});
-
-// ─── Auth — Kick (PKCE OAuth 2.1) ────────────────────────────────────────────
-function sha256base64url(str) {
-  return createHash("sha256").update(str).digest("base64url");
-}
-
-app.get("/auth/kick", (req, res) => {
-  if (!KICK_CLIENT_ID) {
-    return res.status(503).send("Kick OAuth not configured. Please set KICK_CLIENT_ID in .env");
-  }
-
-  const { degencity_username } = req.query;
-  if (degencity_username) {
-    res.cookie('verified_degencity_username', degencity_username.trim().toLowerCase(), {
-      httpOnly: true,
-      secure:   process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge:   60 * 60 * 1000, // 1 hour
-      path:     '/',
-    });
-  }
-
-  const state        = randomBytes(16).toString("hex");
-  const codeVerifier = randomBytes(32).toString("base64url");
-  const codeChallenge = sha256base64url(codeVerifier);
-
-  // Store state + PKCE verifier in cookies (survive serverless instance change)
-  res.cookie("kick_oauth_state",   state,        OAUTH_COOKIE_OPTS);
-  res.cookie("kick_code_verifier", codeVerifier, OAUTH_COOKIE_OPTS);
-
-  const params = new URLSearchParams({
-    client_id:             KICK_CLIENT_ID,
-    redirect_uri:          KICK_REDIRECT_URI,
-    response_type:         "code",
-    scope:                 "user:read",
-    state,
-    code_challenge:        codeChallenge,
-    code_challenge_method: "S256",
-  });
-  res.redirect(`https://id.kick.com/oauth/authorize?${params}`);
-});
-
-app.get("/auth/kick/callback", async (req, res) => {
-  const { code, state, error } = req.query;
-
-  if (error || !code) return res.redirect("/account.html?error=kick_denied");
-  // Verify state from cookie
-  const savedKickState = req.cookies.kick_oauth_state;
-  const codeVerifier   = req.cookies.kick_code_verifier;
-  res.clearCookie("kick_oauth_state");
-  res.clearCookie("kick_code_verifier");
-  if (!savedKickState || state !== savedKickState) return res.redirect("/account.html?error=state_mismatch");
-
-  try {
-    const tokenRes = await fetch("https://id.kick.com/oauth/token", {
-      method:  "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body:    new URLSearchParams({
-        client_id:     KICK_CLIENT_ID,
-        client_secret: KICK_CLIENT_SECRET,
-        grant_type:    "authorization_code",
-        code,
-        redirect_uri:  KICK_REDIRECT_URI,
-        code_verifier: codeVerifier,
-      }),
-    });
-    const tokenData = await tokenRes.json();
-    if (!tokenData.access_token) throw new Error("No access token from Kick");
-
-    const profileRes = await fetch("https://api.kick.com/public/v1/users", {
-      headers: { Authorization: `Bearer ${tokenData.access_token}` }
-    });
-    const profileData = await profileRes.json();
-    const profile     = profileData.data?.[0] || profileData;
-
-    const kickId       = String(profile.user_id || profile.id || "");
-    const kickUsername = profile.name || profile.username || profile.slug || "";
-
-    // Register in point tracker memory map
-    if (kickUsername) {
-      chatActivityTracker.registerUser(kickUsername);
+    if (!supabase) {
+      return res.status(500).json({ error: "Database unavailable" });
     }
 
-    const currentUserId = getAuthUserId(req) || req.session.userId || null;
-    if (!currentUserId) {
-      return res.redirect("/account.html?error=discord_required");
-    }
+    // Step 1: Look up existing user by clerk_id
+    let { data: dbUser } = await supabase
+      .from("users")
+      .select("*")
+      .eq("clerk_id", clerkUserId)
+      .maybeSingle();
 
-    // Verify current user has Discord linked
-    if (supabase) {
-      const { data: curUser } = await supabase
+    // Step 2: If not found, look up by discord_id for migration/preventing duplicates
+    if (!dbUser && discordUserId) {
+      const { data: legacyUser } = await supabase
         .from("users")
-        .select("discord_id")
-        .eq("id", currentUserId)
+        .select("*")
+        .eq("discord_id", discordUserId)
+        .maybeSingle();
+
+      if (legacyUser) {
+        // Link clerk_id to legacy user
+        const { data: updatedLegacy } = await supabase
+          .from("users")
+          .update({
+            clerk_id: clerkUserId,
+            email: email,
+            display_name: displayName,
+            avatar_url: avatarUrl,
+            last_login: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", legacyUser.id)
+          .select()
+          .single();
+
+        dbUser = updatedLegacy;
+        console.log(`Migrated legacy user ${discordUsername} (${discordUserId}) to Clerk ${clerkUserId}`);
+      }
+    }
+
+    // Step 3: If still not found, create a new user
+    if (!dbUser) {
+      const { data: newUser, error: createError } = await supabase
+        .from("users")
+        .insert({
+          clerk_id: clerkUserId,
+          email: email,
+          display_name: displayName,
+          avatar_url: avatarUrl,
+          auth_provider: 'clerk',
+          points: 0,
+          created_at: new Date().toISOString(),
+          last_login: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
         .single();
-      if (!curUser || !curUser.discord_id) {
-        return res.redirect("/account.html?error=discord_required");
+
+      if (createError) throw createError;
+      dbUser = newUser;
+      console.log(`Created new Clerk user: ${clerkUserId} (${displayName})`);
+    } else {
+      // Update existing user profile
+      const { data: updatedUser } = await supabase
+        .from("users")
+        .update({
+          display_name: displayName,
+          avatar_url: avatarUrl,
+          last_login: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq("clerk_id", clerkUserId)
+        .select()
+        .single();
+
+      dbUser = updatedUser;
+    }
+
+    // Step 4: Sync Discord linked account in linked_accounts table
+    if (discordUserId) {
+      // Check if linked account exists
+      const { data: existingLink } = await supabase
+        .from("linked_accounts")
+        .select("*")
+        .eq("user_id", dbUser.id)
+        .eq("provider", "discord")
+        .maybeSingle();
+
+      if (existingLink) {
+        await supabase
+          .from("linked_accounts")
+          .update({
+            provider_user_id: discordUserId,
+            username: discordUsername,
+            display_name: displayName,
+            avatar_url: discordAvatar,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", existingLink.id);
+      } else {
+        await supabase
+          .from("linked_accounts")
+          .insert({
+            user_id: dbUser.id,
+            provider: "discord",
+            provider_user_id: discordUserId,
+            username: discordUsername,
+            display_name: displayName,
+            avatar_url: discordAvatar,
+            linked_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
       }
     }
 
-    const verifiedDegenUsername = req.cookies.verified_degencity_username || null;
-    if (!verifiedDegenUsername) {
-      return res.redirect("/account.html?error=degencity_required");
-    }
-
-    const result = await handleOAuthLoginOrLink({
-      platform: "kick",
-      platformId: kickId,
-      platformUsername: kickUsername,
-      currentUserId,
-      verifiedDegenUsername
-    });
-
-    if (!result.success) {
-      if (result.error === "already_linked") {
-        return res.redirect("/account.html?error=kick_already_linked");
-      }
-      if (result.error === "degencity_required") {
-        return res.redirect("/account.html?error=degencity_required");
-      }
-      return res.redirect("/account.html?error=kick_failed");
-    }
-
-    // Clear temp DegenCity cookie now that it is permanently saved to DB
-    res.clearCookie("verified_degencity_username", { path: '/' });
-
-    // Register user ID in the memory map so points can be awarded
-    if (kickUsername && result.userId) {
-      chatActivityTracker.registerUser(kickUsername, result.userId);
-    }
-
-    setAuthCookie(res, result.userId);
-    res.redirect("/account.html?success=kick");
+    res.json({ success: true, user: dbUser });
   } catch (err) {
-    console.error("Kick callback error:", err);
-    res.redirect("/account.html?error=kick_failed");
+    console.error("Clerk sync error:", err.message);
+    res.status(500).json({ error: "Failed to synchronize session: " + err.message });
   }
 });
 
-// ─── Link DegenCity Username (with verification against leaderboard) ──────────
-app.post("/auth/link-degencity", async (req, res) => {
+// ─── GET /auth/me (Read-only Supabase profile details) ───────────────────────
+app.get("/auth/me", requireClerkAuth, async (req, res) => {
+  if (!req.user) {
+    return res.status(404).json({ error: "User profile not found. Please sync first." });
+  }
+
+  // Fetch linked accounts
+  let linkedAccounts = [];
+  if (supabase) {
+    const { data } = await supabase
+      .from("linked_accounts")
+      .select("*")
+      .eq("user_id", req.user.id);
+    linkedAccounts = data || [];
+  }
+
+  res.json({
+    loggedIn:          true,
+    userId:            req.user.id,
+    clerkId:           req.user.clerk_id,
+    email:             req.user.email,
+    displayName:       req.user.display_name,
+    avatarUrl:         req.user.avatar_url,
+    points:            req.user.points ?? 0,
+    degencityUsername: req.user.degencity_username || null,
+    kickUsername:      req.user.kick_username || null,
+    linkedAccounts:    linkedAccounts
+  });
+});
+
+// ─── POST /auth/logout ────────────────────────────────────────────────────────
+app.post("/auth/logout", (req, res) => {
+  res.clearCookie("verified_degencity_username", { path: '/' });
+  res.json({ success: true });
+});
+
+// ─── PATCH /profile ───────────────────────────────────────────────────────────
+app.patch("/profile", requireClerkAuth, async (req, res) => {
+  if (!req.user) {
+    return res.status(404).json({ error: "User profile not found. Please sync first." });
+  }
+  const { display_name, avatar_url } = req.body;
+  const updates = { updated_at: new Date().toISOString() };
+  if (display_name !== undefined) updates.display_name = display_name;
+  if (avatar_url !== undefined) updates.avatar_url = avatar_url;
+
+  try {
+    if (supabase) {
+      const { data: user, error } = await supabase
+        .from("users")
+        .update(updates)
+        .eq("id", req.user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return res.json({ success: true, user });
+    } else {
+      return res.status(500).json({ error: "Database connection unavailable" });
+    }
+  } catch (err) {
+    console.error("Update profile error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── PATCH /profile/degencity ─────────────────────────────────────────────────
+app.patch("/profile/degencity", requireClerkAuth, async (req, res) => {
+  if (!req.user) {
+    return res.status(404).json({ error: "User profile not found. Please sync first." });
+  }
+
   const { degencity_username } = req.body;
   if (!degencity_username) return res.status(400).json({ error: "Username required" });
 
@@ -1215,22 +972,173 @@ app.post("/auth/link-degencity", async (req, res) => {
       });
     }
 
-    // DB checks and linking are fully automated on the Kick connect callback,
-    // so here we only verify the affiliate and set the temporary cookie.
+    // 2) Check if another user has already linked this DegenCity username
+    if (supabase) {
+      const { data: duplicateUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("degencity_username", degenUsername)
+        .neq("id", req.user.id)
+        .maybeSingle();
 
-    // Set/refresh secure temporary cookie
-    const DEGEN_COOKIE = 'verified_degencity_username';
-    res.cookie(DEGEN_COOKIE, degenUsername, {
-      httpOnly: true,
-      secure:   process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge:   60 * 60 * 1000, // 1 hour
-      path:     '/',
-    });
+      if (duplicateUser) {
+        return res.status(422).json({ error: "This DegenCity account is already linked to another player." });
+      }
 
-    res.json({ success: true, degencity_username: degenUsername, verified: true });
+      // 3) Update DegenCity username in users table
+      const { data: updatedUser, error: updateError } = await supabase
+        .from("users")
+        .update({
+          degencity_username: degenUsername,
+          degencity_verification_status: "verified",
+          degencity_link_timestamp: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", req.user.id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      // Update linked_accounts table for DegenCity as well
+      const { data: existingLink } = await supabase
+        .from("linked_accounts")
+        .select("*")
+        .eq("user_id", req.user.id)
+        .eq("provider", "degencity")
+        .maybeSingle();
+
+      if (existingLink) {
+        await supabase
+          .from("linked_accounts")
+          .update({
+            provider_user_id: degenUsername,
+            username: degenUsername,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", existingLink.id);
+      } else {
+        await supabase
+          .from("linked_accounts")
+          .insert({
+            user_id: req.user.id,
+            provider: "degencity",
+            provider_user_id: degenUsername,
+            username: degenUsername,
+            linked_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+      }
+
+      return res.json({ success: true, degencity_username: degenUsername, verified: true });
+    } else {
+      return res.status(500).json({ error: "Database connection unavailable" });
+    }
   } catch (err) {
     console.error("link-degencity error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── PATCH /profile/kick ──────────────────────────────────────────────────────
+app.patch("/profile/kick", requireClerkAuth, async (req, res) => {
+  if (!req.user) {
+    return res.status(404).json({ error: "User profile not found. Please sync first." });
+  }
+
+  const { kick_username } = req.body;
+  if (kick_username === undefined) return res.status(400).json({ error: "kick_username required" });
+
+  const cleanedUname = kick_username ? kick_username.trim() : null;
+
+  try {
+    if (supabase) {
+      // Check if this Kick username is already linked to another user
+      if (cleanedUname) {
+        const { data: duplicateUser } = await supabase
+          .from("users")
+          .select("id")
+          .eq("kick_username", cleanedUname.toLowerCase())
+          .neq("id", req.user.id)
+          .maybeSingle();
+
+        if (duplicateUser) {
+          return res.status(422).json({ error: "This Kick account is already linked to another player." });
+        }
+      }
+
+      // Fetch user's old Kick username from DB to unregister
+      const { data: oldUser } = await supabase
+        .from("users")
+        .select("kick_username")
+        .eq("id", req.user.id)
+        .single();
+
+      if (oldUser && oldUser.kick_username) {
+        chatActivityTracker.unregisterUser(oldUser.kick_username);
+      }
+
+      const { data: user, error: upErr } = await supabase
+        .from("users")
+        .update({ 
+          kick_username: cleanedUname ? cleanedUname.toLowerCase() : null,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", req.user.id)
+        .select()
+        .single();
+
+      if (upErr) throw new Error(upErr.message);
+
+      // Register new Kick username immediately for active chat rewards
+      if (user && user.kick_username) {
+        chatActivityTracker.registerUser(user.kick_username, user.id);
+      }
+
+      // Update linked_accounts table for Kick as well
+      if (cleanedUname) {
+        const { data: existingLink } = await supabase
+          .from("linked_accounts")
+          .select("*")
+          .eq("user_id", req.user.id)
+          .eq("provider", "kick")
+          .maybeSingle();
+
+        if (existingLink) {
+          await supabase
+            .from("linked_accounts")
+            .update({
+              provider_user_id: cleanedUname.toLowerCase(),
+              username: cleanedUname,
+              updated_at: new Date().toISOString()
+            })
+            .eq("id", existingLink.id);
+        } else {
+          await supabase
+            .from("linked_accounts")
+            .insert({
+              user_id: req.user.id,
+              provider: "kick",
+              provider_user_id: cleanedUname.toLowerCase(),
+              username: cleanedUname,
+              linked_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
+        }
+      } else {
+        await supabase
+          .from("linked_accounts")
+          .delete()
+          .eq("user_id", req.user.id)
+          .eq("provider", "kick");
+      }
+
+      return res.json({ success: true, kick_username: cleanedUname });
+    } else {
+      return res.status(500).json({ error: "Database connection unavailable" });
+    }
+  } catch (err) {
+    console.error("Update Kick username error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });

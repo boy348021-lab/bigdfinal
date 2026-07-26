@@ -1877,7 +1877,6 @@ transition:transform .1s linear;
     <li><a href="#tabs-section" data-tab="store">Socials</a></li>
     <li><a href="verify.html">Code Check</a></li>
     <li><a href="store.html">Store</a></li>
-    <li><a href="account.html">Account</a></li>
   </ul>
   <div class="nav-right">
     <a class="kick-live-badge" id="kick-live-badge" href="https://kick.com/BigDgamesTV" target="_blank" rel="noopener">
@@ -1900,7 +1899,6 @@ transition:transform .1s linear;
   <a href="#tabs-section" data-tab="store">Socials</a>
   <a href="verify.html">Code Check</a>
   <a href="store.html">Store</a>
-  <a href="account.html">Account</a>
 </div>
 
 <!-- ================================================================
@@ -1935,8 +1933,8 @@ transition:transform .1s linear;
       <span>→</span>
     </button>
     <button class="btn-ghost" id="hero-login-btn">
-      <svg width="18" height="18" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0 0 45.5.4a40.9 40.9 0 0 0-1.8 3.7 54.1 54.1 0 0 0-16.2 0A40.8 40.8 0 0 0 25.6.4 58.4 58.4 0 0 0 10.9 5C1.6 18.7-1 32 .3 45.1a58.9 58.9 0 0 0 18 9.1 44.5 44.5 0 0 0 3.8-6.3 38.3 38.3 0 0 1-6-2.9l1.5-1.2a42 42 0 0 0 36 0l1.5 1.2a38.5 38.5 0 0 1-6 2.9 44.8 44.8 0 0 0 3.8 6.3 58.7 58.7 0 0 0 18.1-9.1C72.1 30 69 16.8 60.1 4.9ZM23.8 37.3c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.5 0 6.3 3.2 6.4 7.2 0 4-2.9 7.2-6.4 7.2Zm23.4 0c-3.5 0-6.4-3.2-6.4-7.2s2.8-7.2 6.4-7.2c3.5 0 6.3 3.2 6.4 7.2 0 4-2.8 7.2-6.4 7.2Z"/></svg>
-      Login with Discord
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Verify / Login
     </button>
   </div>
 
@@ -2230,37 +2228,7 @@ transition:transform .1s linear;
 <!-- ================================================================
      LOGIN MODAL
      ================================================================ -->
-<div id="login-overlay">
-  <div class="login-modal">
-    <div class="login-modal-bg"></div>
-    <button class="modal-close" id="modal-close-btn">✕</button>
-    <div class="login-skull-icon">
-      <svg class="login-skull-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <radialGradient id="lsg1" cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stop-color="#cc66ff"/>
-            <stop offset="100%" stop-color="#4400aa"/>
-          </radialGradient>
-        </defs>
-        <path d="M14 30 C14 16 22 8 32 8 C42 8 50 16 50 30 L50 36 C50 36 46 38 44 40 L44 48 C44 50 42 52 40 52 L24 52 C22 52 20 50 20 48 L20 40 C18 38 14 36 14 36 Z" fill="url(#lsg1)" opacity="0.9"/>
-        <ellipse cx="24" cy="30" rx="5" ry="6" fill="#080810"/>
-        <ellipse cx="24" cy="30" rx="2.5" ry="3.5" fill="#8800ff"/>
-        <ellipse cx="40" cy="30" rx="5" ry="6" fill="#080810"/>
-        <ellipse cx="40" cy="30" rx="2.5" ry="3.5" fill="#8800ff"/>
-        <path d="M30 36 L32 33 L34 36 L33 39 L31 39 Z" fill="#080810" opacity="0.8"/>
-        <path d="M22 12 L26 8 L30 13 L32 8 L34 13 L38 8 L42 12" stroke="#aa33ff" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <h2 class="modal-title">Enter the <span>BigD</span> Zone</h2>
-    <p class="modal-sub">Choose your login method to start competing</p>
-    </div>
-    <div class="login-divider"><span>or</span></div>
-    <div class="login-notice">
-      By logging in you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.<br>
-      You must be 18+ to participate.
-    </div>
-  </div>
-</div>
+<!-- Login Modal removed (redirects directly to verify.html) -->
 
 <!-- COPY TOAST -->
 <div id="copy-toast">✓ Code copied!</div>
@@ -3102,37 +3070,7 @@ document.querySelectorAll('.tab-btn[data-panel="biweekly"]').forEach(btn => {
   });
 });
 
-/* ──────────────────────────────────────────
-   LOGIN MODAL
-   ────────────────────────────────────────── */
-const overlay = document.getElementById('login-overlay');
-
-const MODAL_DEFAULT_HTML = document.querySelector('.login-modal').innerHTML;
-
-function openLogin() {
-  // Always reset to the default login options view before opening
-  document.querySelector('.login-modal').innerHTML = MODAL_DEFAULT_HTML;
-  // Re-bind the close button inside the restored HTML
-  document.getElementById('modal-close-btn').addEventListener('click', closeLogin);
-  overlay.classList.add('open');
-}
-function closeLogin() {
-  overlay.classList.remove('open');
-}
-
-const navLoginBtn = document.getElementById('nav-login-btn');
-const heroLoginBtn = document.getElementById('hero-login-btn');
-if (navLoginBtn) navLoginBtn.addEventListener('click', openLogin);
-if (heroLoginBtn) heroLoginBtn.addEventListener('click', openLogin);
-// modalCloseBtn binding moved into openLogin() to survive innerHTML reset
-overlay.addEventListener('click', e => { if (e.target === overlay) closeLogin(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLogin(); });
-
-function mockLogin(provider) {
-  const providerKey = provider.toLowerCase() === 'google' ? 'google' : 'discord';
-  // Redirect to the real DegenCity OAuth endpoint
-  window.location.href = `https://api.degencity.com/auth/${providerKey}`;
-}
+/* Login Modal javascript removed */
 
 /* ──────────────────────────────────────────
    COPY CODE
@@ -3655,6 +3593,32 @@ bot.onclick = () => {
   }
 })();
 </script>
+    <script src="/auth-helper.js"></script>
+    <script>
+      onClerkAuth((clerk) => {
+        const loginBtn = document.getElementById("hero-login-btn");
+        if (!loginBtn) return;
+        
+        if (clerk && clerk.user) {
+          const isVerified = window.clerkUser && window.clerkUser.degencityUsername;
+          if (isVerified) {
+            loginBtn.innerHTML = `
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              Go to Store
+            `;
+            loginBtn.onclick = () => window.location.href = "/store.html";
+          } else {
+            loginBtn.innerHTML = `
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Link DegenCity
+            `;
+            loginBtn.onclick = () => window.location.href = "/verify.html";
+          }
+        } else {
+          loginBtn.onclick = () => loginWithDiscord();
+        }
+      });
+    </script>
     <script src="/app.js"></script>
 </body>
 </html>

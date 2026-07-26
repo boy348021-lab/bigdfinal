@@ -776,7 +776,6 @@ footer a:hover { color: var(--purple-200); }
     <li><a href="index.html#tabs-section" data-tab="store">Socials</a></li>
     <li><a href="verify.html" class="active">Code Check</a></li>
     <li><a href="store.html">Store</a></li>
-    <li><a href="account.html">Account</a></li>
   </ul>
   <div class="nav-right">
     <a class="kick-live-badge" id="kick-live-badge" href="https://kick.com/BigDgamesTV" target="_blank" rel="noopener">
@@ -799,7 +798,6 @@ footer a:hover { color: var(--purple-200); }
   <a href="index.html#tabs-section" data-tab="store">Socials</a>
   <a href="verify.html" class="active">Code Check</a>
   <a href="store.html">Store</a>
-  <a href="account.html">Account</a>
 </div>
 
 <!-- ================================================================
@@ -810,7 +808,16 @@ footer a:hover { color: var(--purple-200); }
   <div class="shard shard-tl"></div>
   <div class="shard shard-tr"></div>
   
-  <div class="verify-card">
+  <div class="verify-card" id="login-card" style="display:none; text-align:center;">
+    <h1 class="verify-title">Authentication <span>Required</span></h1>
+    <p class="verify-sub" style="margin-bottom:30px;">Please login with Discord using Clerk before linking your DegenCity account.</p>
+    <button class="verify-btn" onclick="loginWithDiscord()">
+      <span>Login with Discord</span>
+      <span>→</span>
+    </button>
+  </div>
+
+  <div class="verify-card" id="main-verify-card">
     <h1 class="verify-title">Code <span>Verification</span></h1>
     <p class="verify-sub">Check if your DegenCity username is linked to creator code BIGD</p>
     
@@ -859,6 +866,29 @@ footer a:hover { color: var(--purple-200); }
   </div>
 </div>
 
+<script src="/auth-helper.js"></script>
+<script>
+  onClerkAuth((clerk) => {
+    const loginCard = document.getElementById("login-card");
+    const verifyCard = document.getElementById("main-verify-card");
+    
+    if (clerk && clerk.user) {
+      if (loginCard) loginCard.style.display = "none";
+      if (verifyCard) verifyCard.style.display = "block";
+    } else {
+      if (loginCard) loginCard.style.display = "block";
+      if (verifyCard) verifyCard.style.display = "none";
+    }
+  });
+
+  function showToast(msg) {
+    const toast = document.getElementById("copy-toast");
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 3000);
+  }
+</script>
 <script>
 /* ──────────────────────────────────────────
    CONFIG — API
@@ -997,24 +1027,39 @@ async function doVerify() {
         <div class="result-card success">
           <div class="result-badge">✓ Verified</div>
           <div class="result-message">
-            Success! The account <strong>${escHtml(match.username)}</strong> is verified under Big D's creator code. Redirecting to Account page…
+            Success! The account <strong>${escHtml(match.username)}</strong> is verified under Big D's creator code. Redirecting to Store…
           </div>
         </div>
       `;
-      // Call link-degencity on backend to set the verified cookie and redirect
-      fetch('/auth/link-degencity', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ degencity_username: match.username })
-      })
-      .then(() => {
-        setTimeout(() => {
-          window.location.href = "/account.html";
-        }, 1500);
-      })
-      .catch(err => {
-        console.error("Error setting verified cookie:", err);
-        window.location.href = "/account.html";
+      // Call PATCH /profile/degencity with Clerk token
+      getClerkToken().then(token => {
+        if (!token) {
+          showToast("Authentication session lost. Please log in again.");
+          return;
+        }
+        fetch('/profile/degencity', {
+          method: 'PATCH',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ degencity_username: match.username })
+        })
+        .then(res => {
+          if (res.ok) {
+            setTimeout(() => {
+              window.location.href = "/store.html";
+            }, 1500);
+          } else {
+            res.json().then(data => {
+              showToast(data.error || "Failed to link DegenCity account");
+            });
+          }
+        })
+        .catch(err => {
+          console.error("Error linking DegenCity account:", err);
+          window.location.href = "/store.html";
+        });
       });
     } else {
       resultBox.innerHTML = `
