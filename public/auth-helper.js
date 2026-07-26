@@ -1,8 +1,52 @@
-// Inject hand-pointer styles globally to ensure hover feedback on all buttons
+// Inject hand-pointer and auth navbar button styles globally
 const style = document.createElement("style");
 style.textContent = `
-  .verify-btn, .btn-ghost, .btn-primary, .reward-card-btn, .mock-login-submit, .btn-copy-promo {
+  .verify-btn, .btn-ghost, .btn-primary, .reward-card-btn, .mock-login-submit, .btn-copy-promo, .nav-btn-auth, .mobile-auth-btn {
     cursor: pointer !important;
+  }
+  .nav-btn-auth {
+    background: linear-gradient(90deg, #8800ff, #5500aa) !important;
+    border: 1px solid rgba(136, 0, 255, 0.2) !important;
+    color: #ffffff !important;
+    font-family: inherit;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    padding: 8px 16px !important;
+    border-radius: 4px !important;
+    transition: all 0.25s !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    height: fit-content !important;
+    border: none !important;
+    outline: none !important;
+  }
+  .nav-btn-auth:hover {
+    background: linear-gradient(90deg, #9933ff, #7700cc) !important;
+    box-shadow: 0 0 15px rgba(136, 0, 255, 0.45) !important;
+  }
+  .mobile-auth-btn {
+    display: block !important;
+    margin: 16px 24px !important;
+    padding: 12px !important;
+    background: linear-gradient(90deg, #8800ff, #5500aa) !important;
+    text-align: center !important;
+    border-radius: 4px !important;
+    color: #ffffff !important;
+    font-family: inherit;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    border: none !important;
+    width: calc(100% - 48px) !important;
+    box-sizing: border-box !important;
+    text-decoration: none !important;
+  }
+  .mobile-auth-btn:hover {
+    background: linear-gradient(90deg, #9933ff, #7700cc) !important;
+    box-shadow: 0 0 15px rgba(136, 0, 255, 0.45) !important;
   }
 `;
 document.head.appendChild(style);
@@ -36,7 +80,6 @@ let clerkInstance = null;
 async function initClerk() {
   if (clerkInstance) return clerkInstance;
 
-  // 1. Fetch publishable key from backend
   let publishableKey = "";
   try {
     const res = await fetch("/api/auth/config");
@@ -53,7 +96,6 @@ async function initClerk() {
     return clerkInstance;
   }
 
-  // 2. Load Clerk script dynamically
   try {
     await new Promise((resolve, reject) => {
       const script = document.createElement("script");
@@ -266,5 +308,31 @@ async function logoutClerk() {
     window.location.reload();
   }
 }
+
+// Auto-bind navbar and mobile drawer auth buttons on state change
+onClerkAuth((clerk) => {
+  const desktopBtn = document.getElementById("nav-auth-btn");
+  const mobileBtn = document.getElementById("mobile-nav-auth-btn");
+  
+  const isLoggedIn = !!(clerk && clerk.user);
+  
+  [desktopBtn, mobileBtn].forEach(btn => {
+    if (!btn) return;
+    
+    if (isLoggedIn) {
+      btn.textContent = "Logout";
+      btn.onclick = (e) => {
+        e.preventDefault();
+        logoutClerk();
+      };
+    } else {
+      btn.textContent = "Login";
+      btn.onclick = (e) => {
+        e.preventDefault();
+        loginWithDiscord();
+      };
+    }
+  });
+});
 
 bootAuth();
