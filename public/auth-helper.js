@@ -1,5 +1,3 @@
-let clerkInstance = null;
-
 // Inject hand-pointer styles globally to ensure hover feedback on all buttons
 const style = document.createElement("style");
 style.textContent = `
@@ -8,6 +6,32 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+class MockClerk {
+  constructor() {
+    this.user = null;
+    this.session = null;
+  }
+  async load() {
+    const savedUser = localStorage.getItem("mock_clerk_user");
+    if (savedUser) {
+      this.user = JSON.parse(savedUser);
+      this.session = {
+        getToken: async () => `mock_jwt_${btoa(JSON.stringify(this.user))}`
+      };
+    }
+  }
+  openSignIn({ afterSignInUrl } = {}) {
+    showMockLoginModal(afterSignInUrl);
+  }
+  async signOut() {
+    this.user = null;
+    this.session = null;
+    localStorage.removeItem("mock_clerk_user");
+  }
+}
+
+let clerkInstance = null;
 
 async function initClerk() {
   if (clerkInstance) return clerkInstance;
@@ -50,30 +74,6 @@ async function initClerk() {
     clerkInstance = new MockClerk();
     await clerkInstance.load();
     return clerkInstance;
-  }
-}
-
-class MockClerk {
-  constructor() {
-    this.user = null;
-    this.session = null;
-  }
-  async load() {
-    const savedUser = localStorage.getItem("mock_clerk_user");
-    if (savedUser) {
-      this.user = JSON.parse(savedUser);
-      this.session = {
-        getToken: async () => `mock_jwt_${btoa(JSON.stringify(this.user))}`
-      };
-    }
-  }
-  openSignIn({ afterSignInUrl } = {}) {
-    showMockLoginModal(afterSignInUrl);
-  }
-  async signOut() {
-    this.user = null;
-    this.session = null;
-    localStorage.removeItem("mock_clerk_user");
   }
 }
 
@@ -240,11 +240,21 @@ function onClerkAuth(callback) {
 
 async function loginWithDiscord() {
   const clerk = await initClerk();
-  if (clerk) {
-    clerk.openSignIn({
-      afterSignInUrl: window.location.href,
-      afterSignUpUrl: window.location.href,
-    });
+  if (!clerk) return;
+
+  if (clerk instanceof MockClerk) {
+    clerk.openSignIn();
+  } else {
+    try {
+      await clerk.signIn.authenticateWithRedirect({
+        strategy: "oauth_discord",
+        redirectUrl: window.location.origin + "/verify.html",
+        redirectUrlComplete: window.location.origin + "/verify.html",
+      });
+    } catch (err) {
+      console.error("Clerk direct OAuth redirect failed, opening default modal:", err);
+      clerk.openSignIn();
+    }
   }
 }
 
