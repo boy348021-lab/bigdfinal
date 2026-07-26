@@ -950,6 +950,16 @@ app.patch("/profile/degencity", requireClerkAuth, async (req, res) => {
     return res.status(404).json({ error: "User profile not found. Please sync first." });
   }
 
+  // 1) Enforce Kick username is linked first
+  if (!req.user.kick_username) {
+    return res.status(400).json({ error: "Please link your Kick account first before linking DegenCity." });
+  }
+
+  // 2) Enforce permanent account linking (one-to-one)
+  if (req.user.degencity_username) {
+    return res.status(400).json({ error: "Your account is already permanently linked to a DegenCity username." });
+  }
+
   const { degencity_username } = req.body;
   if (!degencity_username) return res.status(400).json({ error: "Username required" });
 
@@ -1046,10 +1056,15 @@ app.patch("/profile/kick", requireClerkAuth, async (req, res) => {
     return res.status(404).json({ error: "User profile not found. Please sync first." });
   }
 
-  const { kick_username } = req.body;
-  if (kick_username === undefined) return res.status(400).json({ error: "kick_username required" });
+  // Enforce permanent account linking (one-to-one)
+  if (req.user.kick_username) {
+    return res.status(400).json({ error: "Your account is already permanently linked to a Kick username." });
+  }
 
-  const cleanedUname = kick_username ? kick_username.trim() : null;
+  const { kick_username } = req.body;
+  if (!kick_username) return res.status(400).json({ error: "kick_username is required" });
+
+  const cleanedUname = kick_username.trim();
 
   try {
     if (supabase) {
