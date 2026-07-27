@@ -739,6 +739,10 @@ app.post("/api/casino/blackjack/deal", requireAuth, async (req, res) => {
       }
     }
 
+    const offerInsurance = dealerCards[0].rank === 'A' && !playerCalc.isBlackjack;
+    const insuranceCost = offerInsurance ? Math.floor(bet * 0.5) : 0;
+    const canSplit = playerCards.length === 2 && (playerCards[0].rank === playerCards[1].rank || playerCards[0].value === playerCards[1].value);
+
     const handState = {
       handId: `bj_${Date.now()}`,
       bet,
@@ -750,6 +754,10 @@ app.post("/api/casino/blackjack/deal", requireAuth, async (req, res) => {
       isEnded,
       outcome,
       payout,
+      offerInsurance,
+      insuranceCost,
+      insuranceBought: false,
+      canSplit,
       shoe
     };
 
@@ -781,6 +789,80 @@ app.post("/api/casino/blackjack/deal", requireAuth, async (req, res) => {
 
   } catch (err) {
     console.error("Blackjack deal error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── POST /api/casino/blackjack/insurance (Buy or Decline Insurance) ─────────
+app.post("/api/casino/blackjack/insurance", requireAuth, async (req, res) => {
+  if (!supabase) return res.status(503).json({ error: "Database not configured" });
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
+  const userId = req.user.id;
+  let game = activeBlackjackGames.get(userId);
+
+  if (!game || game.isEnded || !game.offerInsurance) {
+    return res.status(400).json({ error: "No active insurance offer." });
+  }
+
+  const { buyInsurance } = req.body;
+  let updatedBalance = undefined;
+  game.offerInsurance = false;
+
+  try {
+    if (buyInsurance && game.insuranceCost > 0) {
+      const { data: newBal, error: rpcErr } = await supabase.rpc("modify_points", {
+        p_user_id: userId,
+        p_delta: -game.insuranceCost,
+        p_action: "blackjack_insurance",
+        p_source: "blackjack",
+        p_ref: `bj_ins_${Date.now()}`
+      });
+
+      if (rpcErr) {
+        return res.status(402).json({ error: "Insufficient balance for Insurance" });
+      }
+      updatedBalance = newBal;
+      game.insuranceBought = true;
+    }
+
+    // Check if Dealer has Blackjack (Card 2 value is 10)
+    const dealerCalc = calcHandScore(game.dealerCards);
+    if (dealerCalc.isBlackjack) {
+      game.isEnded = true;
+      let insurancePayout = 0;
+
+      if (game.insuranceBought) {
+        insurancePayout = game.insuranceCost * 3; // 2:1 payout
+        const { data: balAfterIns } = await supabase.rpc("modify_points", {
+          p_user_id: userId,
+          p_delta: insurancePayout,
+          p_action: "blackjack_insurance_payout",
+          p_source: "blackjack",
+          p_ref: `bj_inspay_${Date.now()}`
+        });
+        if (balAfterIns !== null && balAfterIns !== undefined) {
+          updatedBalance = balAfterIns;
+        }
+      }
+
+      game.outcome = game.insuranceBought ? 'insurance_win' : 'loss';
+      game.payout = insurancePayout;
+      activeBlackjackGames.delete(userId);
+      saveBlackjackHistory(userId, game);
+    }
+
+    res.json({
+      ok: true,
+      new_balance: updatedBalance,
+      handState: {
+        ...game,
+        shoe: undefined
+      }
+    });
+
+  } catch (err) {
+    console.error("Insurance error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -824,6 +906,54 @@ app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
         game.outcome = 'bust';
         game.payout = 0;
       }
+    } else if (action === 'split') {
+      if (game.playerCards.length !== 2 || (game.playerCards[0].rank !== game.playerCards[1].rank && game.playerCards[0].value !== game.playerCards[1].value)) {
+        return res.status(400).json({ error: "Hand cannot be split" });
+      }
+
+      if (game.bet > 0) {
+        const { data: newBal, error: rpcErr } = await supabase.rpc("modify_points", {
+          p_user_id: userId,
+          p_delta: -game.bet,
+          p_action: "blackjack_split",
+          p_source: "blackjack",
+          p_ref: `bj_split_${Date.now()}`
+        });
+
+        if (rpcErr) {
+          return res.status(402).json({ error: "Insufficient balance to split" });
+        }
+        updatedBalance = newBal;
+      }
+
+      // Split into two hands
+      const card1 = game.playerCards[0];
+      const card2 = game.playerCards[1];
+
+      const splitHand1 = {
+        playerCards: [card1, game.shoe.pop()],
+        bet: game.bet,
+        isEnded: false,
+        outcome: null,
+        payout: 0
+      };
+      splitHand1.playerScore = calcHandScore(splitHand1.playerCards).score;
+
+      const splitHand2 = {
+        playerCards: [card2, game.shoe.pop()],
+        bet: game.bet,
+        isEnded: false,
+        outcome: null,
+        payout: 0
+      };
+      splitHand2.playerScore = calcHandScore(splitHand2.playerCards).score;
+
+      game.isSplit = true;
+      game.splitHands = [splitHand1, splitHand2];
+      game.activeSplitIndex = 0;
+      game.playerCards = splitHand1.playerCards;
+      game.playerScore = splitHand1.playerScore;
+      game.canSplit = false;
     } else if (action === 'stand' || action === 'double') {
       if (action === 'double') {
         const { data: newBal, error: rpcErr } = await supabase.rpc("modify_points", {

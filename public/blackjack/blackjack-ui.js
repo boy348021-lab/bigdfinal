@@ -19,8 +19,7 @@
         <!-- Left Sidebar Controls -->
         <div class="bj-sidebar">
           <div class="bj-mode-tabs">
-            <button class="bj-mode-btn active" id="bj-mode-std">Standard</button>
-            <button class="bj-mode-btn" id="bj-mode-side" title="Side Bets (Coming Soon)">Side Bet</button>
+            <button class="bj-mode-btn active" id="bj-mode-std" style="width:100%;">Standard</button>
           </div>
 
           <div class="bj-bet-box">
@@ -342,8 +341,10 @@
       await delay(400);
     }
 
-    // If player has natural Blackjack immediately
-    if (activeHand.isEnded) {
+    // If Dealer shows an Ace, offer Insurance
+    if (activeHand.offerInsurance && !activeHand.isEnded) {
+      await showInsuranceModal();
+    } else if (activeHand.isEnded) {
       await revealDealerTurnAnimated();
     } else {
       setButtonsDisabled(false);
@@ -351,10 +352,73 @@
       const btnSplit = document.getElementById('bj-btn-split');
       const btnMain = document.getElementById('bj-btn-main');
 
+      const canSplit = activeHand.canSplit || (activeHand.playerCards.length === 2 && (activeHand.playerCards[0].rank === activeHand.playerCards[1].rank || activeHand.playerCards[0].value === activeHand.playerCards[1].value));
+
       if (btnDoubleDown) btnDoubleDown.disabled = activeHand.playerCards.length !== 2;
-      if (btnSplit) btnSplit.disabled = activeHand.playerCards.length !== 2 || activeHand.playerCards[0].rank !== activeHand.playerCards[1].rank;
+      if (btnSplit) btnSplit.disabled = !canSplit;
       if (btnMain) { btnMain.textContent = 'Game in Progress'; btnMain.disabled = true; }
     }
+  }
+
+  async function showInsuranceModal() {
+    return new Promise((resolve) => {
+      let overlay = document.getElementById('bj-insurance-modal');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'bj-insurance-modal';
+        overlay.className = 'bj-result-overlay show';
+        overlay.style.cssText = 'background:rgba(10,10,25,0.94); backdrop-filter:blur(10px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:25px; text-align:center; z-index:100;';
+        document.querySelector('.bj-table').appendChild(overlay);
+      }
+
+      overlay.innerHTML = `
+        <div style="font-size:1.6rem; font-weight:900; color:#53fa5d; margin-bottom:10px; text-shadow:0 0 15px rgba(83,250,93,0.5);">🛡️ DEALER SHOWS AN ACE</div>
+        <div style="font-size:0.95rem; color:#d0c8ef; margin-bottom:24px; max-width:340px; line-height:1.5;">Buy Insurance for 50% of your bet (${activeHand.insuranceCost} BigD Coins)? Pays 2:1 if Dealer has Blackjack.</div>
+        <div style="display:flex; gap:14px;">
+          <button id="bj-ins-yes" style="background:#53fa5d; color:#000; border:none; padding:12px 22px; border-radius:6px; font-weight:800; cursor:pointer; font-size:0.95rem; text-transform:uppercase;">Accept Insurance</button>
+          <button id="bj-ins-no" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:12px 22px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.95rem;">Decline</button>
+        </div>
+      `;
+
+      overlay.classList.add('show');
+
+      const handleChoice = async (buy) => {
+        overlay.classList.remove('show');
+        const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
+        if (token) {
+          try {
+            const res = await fetch('/api/casino/blackjack/insurance', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({ buyInsurance: buy })
+            });
+            const data = await res.json();
+            if (res.ok) {
+              activeHand = data.handState;
+              if (data.new_balance !== undefined) {
+                const balanceEl = document.getElementById('bj-balance-display');
+                if (balanceEl) balanceEl.textContent = (data.new_balance || 0).toLocaleString();
+              }
+            }
+          } catch (e) { console.error("Insurance error:", e); }
+        }
+
+        if (activeHand.isEnded) {
+          await revealDealerTurnAnimated();
+        } else {
+          setButtonsDisabled(false);
+          const btnDoubleDown = document.getElementById('bj-btn-double-down');
+          const btnSplit = document.getElementById('bj-btn-split');
+          const canSplit = activeHand.canSplit || (activeHand.playerCards.length === 2 && (activeHand.playerCards[0].rank === activeHand.playerCards[1].rank || activeHand.playerCards[0].value === activeHand.playerCards[1].value));
+          if (btnDoubleDown) btnDoubleDown.disabled = activeHand.playerCards.length !== 2;
+          if (btnSplit) btnSplit.disabled = !canSplit;
+        }
+        resolve();
+      };
+
+      document.getElementById('bj-ins-yes').onclick = () => handleChoice(true);
+      document.getElementById('bj-ins-no').onclick = () => handleChoice(false);
+    });
   }
 
   async function revealDealerTurnAnimated() {
@@ -454,11 +518,11 @@
     const btnSplit = document.getElementById('bj-btn-split');
     const btnMain = document.getElementById('bj-btn-main');
 
-    const canAction = !activeHand.isEnded;
+    const canSplit = activeHand.canSplit || (activeHand.playerCards.length === 2 && (activeHand.playerCards[0].rank === activeHand.playerCards[1].rank || activeHand.playerCards[0].value === activeHand.playerCards[1].value));
     if (btnHit) btnHit.disabled = !canAction;
     if (btnStand) btnStand.disabled = !canAction;
     if (btnDoubleDown) btnDoubleDown.disabled = !canAction || activeHand.playerCards.length !== 2;
-    if (btnSplit) btnSplit.disabled = !canAction || activeHand.playerCards.length !== 2 || activeHand.playerCards[0].rank !== activeHand.playerCards[1].rank;
+    if (btnSplit) btnSplit.disabled = !canAction || !canSplit;
 
     if (btnMain) {
       btnMain.textContent = activeHand.isEnded ? 'Deal Again' : 'Game in Progress';
