@@ -629,32 +629,70 @@ function calcHandScore(cards) {
   };
 }
 
+async function saveBlackjackHistory(userId, handState) {
+  if (!supabase) return;
+  try {
+    const { error } = await supabase
+      .from("blackjack_history")
+      .insert({
+        user_id: userId,
+        bet_amount: handState.bet,
+        payout: handState.payout,
+        outcome: handState.outcome,
+        player_score: handState.playerScore,
+        dealer_score: handState.dealerScore,
+        player_cards: handState.playerCards,
+        dealer_cards: handState.dealerCards,
+        created_at: new Date().toISOString()
+      });
+
+    if (error && (error.message.includes("relation") || error.code === "42P01")) {
+      // Fallback: log to points_ledger if blackjack_history table is not created yet
+      await supabase.from("points_ledger").insert({
+        user_id: userId,
+        delta: handState.payout - handState.bet,
+        action: "blackjack_hand",
+        source: "blackjack",
+        ref_id: `${handState.outcome}_bet${handState.bet}_pay${handState.payout}`,
+        created_at: new Date().toISOString()
+      }).catch(() => {});
+    }
+  } catch (e) {
+    console.warn("Could not save blackjack history:", e.message);
+  }
+}
+
 app.post("/api/casino/blackjack/deal", requireAuth, async (req, res) => {
   if (!supabase) return res.status(503).json({ error: "Database not configured" });
   if (!req.user) return res.status(401).json({ error: "Unauthorized" });
 
   const bet = parseInt(req.body.bet, 10);
-  if (isNaN(bet) || bet <= 0) {
+  if (isNaN(bet) || bet < 0) {
     return res.status(400).json({ error: "Invalid bet amount" });
   }
 
   const userId = req.user.id;
 
   try {
-    // Deduct bet atomically via modify_points RPC
-    const { data: newBalance, error: rpcErr } = await supabase.rpc("modify_points", {
-      p_user_id: userId,
-      p_delta: -bet,
-      p_action: "blackjack_bet",
-      p_source: "blackjack",
-      p_ref: `bj_bet_${Date.now()}`
-    });
+    let newBalance = req.user.points || 0;
 
-    if (rpcErr) {
-      if (rpcErr.message.toLowerCase().includes("insufficient")) {
-        return res.status(402).json({ error: "Insufficient BigD Coins balance" });
+    // Deduct bet atomically if bet > 0
+    if (bet > 0) {
+      const { data: balData, error: rpcErr } = await supabase.rpc("modify_points", {
+        p_user_id: userId,
+        p_delta: -bet,
+        p_action: "blackjack_bet",
+        p_source: "blackjack",
+        p_ref: `bj_bet_${Date.now()}`
+      });
+
+      if (rpcErr) {
+        if (rpcErr.message.toLowerCase().includes("insufficient")) {
+          return res.status(402).json({ error: "Insufficient BigD Coins balance" });
+        }
+        throw new Error(rpcErr.message);
       }
-      throw new Error(rpcErr.message);
+      newBalance = balData;
     }
 
     // Get or create shoe for user session
@@ -710,10 +748,11 @@ app.post("/api/casino/blackjack/deal", requireAuth, async (req, res) => {
       shoe
     };
 
-    if (!isEnded) {
-      activeBlackjackGames.set(userId, handState);
-    } else {
+    if (isEnded) {
       activeBlackjackGames.delete(userId);
+      saveBlackjackHistory(userId, handState);
+    } else {
+      activeBlackjackGames.set(userId, handState);
     }
 
     res.json({
@@ -721,7 +760,7 @@ app.post("/api/casino/blackjack/deal", requireAuth, async (req, res) => {
       new_balance: updatedBalance,
       handState: {
         ...handState,
-        shoe: undefined // Don't leak full shoe to client
+        shoe: undefined
       }
     });
 
@@ -821,6 +860,10 @@ app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
       }
 
       activeBlackjackGames.delete(userId);
+      saveBlackjackHistory(userId, game);
+    } else if (game.isEnded) {
+      activeBlackjackGames.delete(userId);
+      saveBlackjackHistory(userId, game);
     }
 
     res.json({

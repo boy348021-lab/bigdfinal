@@ -224,40 +224,87 @@
   overflow: hidden;
 }
 
-/* Shoe / Deck in Top Right */
-.bj-shoe {
-  position: absolute;
-  top: 20px;
-  right: 24px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--bj-border-subtle);
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  color: var(--bj-text-secondary);
-}
-.bj-shoe-cards {
-  width: 24px;
-  height: 32px;
-  background: linear-gradient(135deg, #7000ff 0%, #a033ff 100%);
-  border-radius: 4px;
-  box-shadow: -2px 2px 0 #4000a0, -4px 4px 0 #200050;
-}
-
-/* Center Casino Ribbons */
-.bj-ribbons {
+/* Center Live Balance & Currency Badge */
+.bj-center-balance-badge {
   position: absolute;
   top: 48%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
-  gap: 8px;
   align-items: center;
-  opacity: 0.15;
+  gap: 4px;
+  background: rgba(13, 14, 18, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  padding: 8px 24px;
+  border-radius: 30px;
+  box-shadow: 0 0 25px rgba(201, 162, 39, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  z-index: 2;
+  transition: all 0.3s;
+}
+.bj-center-balance-label {
+  font-family: var(--font-ui, sans-serif);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-400, #e8c244);
+}
+.bj-center-balance-amount {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Casino Chips Selector */
+.bj-chips-selector {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 4px;
+}
+.bj-chip-btn {
+  flex: 1;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  background: radial-gradient(circle, #333 0%, #111 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.72rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bj-chip-btn:hover {
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.7);
+}
+.bj-chip-1   { background: radial-gradient(circle, #42a5f5 0%, #1565c0 100%); border-color: #bbdefb; }
+.bj-chip-5   { background: radial-gradient(circle, #ef5350 0%, #c62828 100%); border-color: #ffcdd2; }
+.bj-chip-25  { background: radial-gradient(circle, #66bb6a 0%, #2e7d32 100%); border-color: #c8e6c9; }
+.bj-chip-100 { background: radial-gradient(circle, #ab47bc 0%, #6a1b9a 100%); border-color: #e1bee7; }
+.bj-chip-500 { background: radial-gradient(circle, #ffa726 0%, #e65100 100%); border-color: #ffe0b2; }
+
+/* Center Casino Ribbons */
+.bj-ribbons {
+  position: absolute;
+  top: 36%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  opacity: 0.12;
   pointer-events: none;
 }
 .bj-ribbon-text {

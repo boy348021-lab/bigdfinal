@@ -30,11 +30,20 @@
             </div>
             <div class="bj-input-row">
               <span class="bj-currency-symbol">🪙</span>
-              <input type="number" id="bj-bet-input" class="bj-bet-input" value="10" min="1" step="1"/>
+              <input type="number" id="bj-bet-input" class="bj-bet-input" value="10" min="0" step="1"/>
               <div class="bj-multiplier-btns">
                 <button class="bj-mult-btn" id="bj-btn-half">½</button>
                 <button class="bj-mult-btn" id="bj-btn-double">2x</button>
               </div>
+            </div>
+            
+            <!-- Casino Chips Selector -->
+            <div class="bj-chips-selector">
+              <button class="bj-chip-btn bj-chip-1" onclick="addBetChip(1)">+1</button>
+              <button class="bj-chip-btn bj-chip-5" onclick="addBetChip(5)">+5</button>
+              <button class="bj-chip-btn bj-chip-25" onclick="addBetChip(25)">+25</button>
+              <button class="bj-chip-btn bj-chip-100" onclick="addBetChip(100)">+100</button>
+              <button class="bj-chip-btn bj-chip-500" onclick="addBetChip(500)">+500</button>
             </div>
           </div>
 
@@ -63,14 +72,15 @@
 
         <!-- Main Felt Table -->
         <div class="bj-table">
-          <div class="bj-shoe">
-            <div class="bj-shoe-cards"></div>
-            <span>Shoe: <strong id="bj-cards-left">312</strong></span>
-          </div>
-
           <div class="bj-ribbons">
             <div class="bj-ribbon-text">BLACKJACK PAYS 3 TO 2</div>
             <div class="bj-ribbon-text">INSURANCE PAYS 2 TO 1</div>
+          </div>
+
+          <!-- Center Live Balance Display -->
+          <div class="bj-center-balance-badge" id="bj-center-badge">
+            <div class="bj-center-balance-label">Live Balance</div>
+            <div class="bj-center-balance-amount">🪙 <span id="bj-center-balance-val">0</span> <span style="font-size:0.75rem; color:var(--gold-400); font-weight:700;">Coins</span></div>
           </div>
 
           <!-- Dealer Hand Area -->
@@ -122,10 +132,21 @@
     if (btnSplit) btnSplit.onclick = doSplit;
   }
 
+  window.addBetChip = function(amt) {
+    const betInput = document.getElementById('bj-bet-input');
+    if (betInput) {
+      const current = parseInt(betInput.value || 0, 10);
+      betInput.value = current + amt;
+    }
+  };
+
   async function syncBalance() {
     const balanceEl = document.getElementById('bj-balance-display');
+    const centerBalanceEl = document.getElementById('bj-center-balance-val');
+
+    let pts = 0;
     if (window.authUser) {
-      if (balanceEl) balanceEl.textContent = (window.authUser.points || 0).toLocaleString();
+      pts = window.authUser.points || 0;
     } else {
       const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
       if (token) {
@@ -134,11 +155,14 @@
           if (res.ok) {
             const data = await res.json();
             window.authUser = data;
-            if (balanceEl) balanceEl.textContent = (data.points || 0).toLocaleString();
+            pts = data.points || 0;
           }
         } catch {}
       }
     }
+
+    if (balanceEl) balanceEl.textContent = pts.toLocaleString();
+    if (centerBalanceEl) centerBalanceEl.textContent = pts.toLocaleString();
   }
 
   function renderCard(card, isHidden = false) {
@@ -157,16 +181,11 @@
     `;
   }
 
-  function updateShoeCount() {
-    const el = document.getElementById('bj-cards-left');
-    if (el && engine) el.textContent = engine.shoe.length;
-  }
-
   async function startDeal() {
     const betInput = document.getElementById('bj-bet-input');
-    const betVal = parseInt(betInput.value || 10, 10);
+    const betVal = parseInt(betInput.value || 0, 10);
 
-    if (isNaN(betVal) || betVal <= 0) {
+    if (isNaN(betVal) || betVal < 0) {
       alert("Please enter a valid bet amount.");
       return;
     }
@@ -200,7 +219,9 @@
 
       // Update UI balance
       const balanceEl = document.getElementById('bj-balance-display');
+      const centerBalanceEl = document.getElementById('bj-center-balance-val');
       if (balanceEl) balanceEl.textContent = (data.new_balance || 0).toLocaleString();
+      if (centerBalanceEl) centerBalanceEl.textContent = (data.new_balance || 0).toLocaleString();
       if (window.authUser) window.authUser.points = data.new_balance;
 
       renderHandState();
@@ -237,8 +258,6 @@
       playerScoreEl.textContent = activeHand.playerScore;
       playerScoreEl.className = 'bj-score-badge' + (activeHand.playerScore > 21 ? ' bust' : activeHand.outcome === 'win' || activeHand.outcome === 'blackjack' ? ' win' : '');
     }
-
-    updateShoeCount();
 
     // Toggle Action Buttons
     const btnHit = document.getElementById('bj-btn-hit');
@@ -287,7 +306,9 @@
       activeHand = data.handState;
       if (data.new_balance !== undefined) {
         const balanceEl = document.getElementById('bj-balance-display');
+        const centerBalanceEl = document.getElementById('bj-center-balance-val');
         if (balanceEl) balanceEl.textContent = (data.new_balance || 0).toLocaleString();
+        if (centerBalanceEl) centerBalanceEl.textContent = (data.new_balance || 0).toLocaleString();
         if (window.authUser) window.authUser.points = data.new_balance;
       }
 
