@@ -756,8 +756,18 @@ app.post("/api/casino/blackjack/deal", requireAuth, async (req, res) => {
     if (isEnded) {
       activeBlackjackGames.delete(userId);
       saveBlackjackHistory(userId, handState);
+      if (supabase) {
+        supabase.from("users").update({
+          metadata: { ...(req.user.metadata || {}), active_hand: null }
+        }).eq("id", userId).then(() => {}).catch(() => {});
+      }
     } else {
       activeBlackjackGames.set(userId, handState);
+      if (supabase) {
+        supabase.from("users").update({
+          metadata: { ...(req.user.metadata || {}), active_hand: handState }
+        }).eq("id", userId).then(() => {}).catch(() => {});
+      }
     }
 
     res.json({
@@ -780,7 +790,21 @@ app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
   if (!req.user) return res.status(401).json({ error: "Unauthorized" });
 
   const userId = req.user.id;
-  const game = activeBlackjackGames.get(userId);
+  let game = activeBlackjackGames.get(userId);
+
+  if (!game || game.isEnded) {
+    // Attempt recovery from Supabase user metadata
+    if (req.user && req.user.metadata && req.user.metadata.active_hand) {
+      const savedHand = req.user.metadata.active_hand;
+      if (savedHand && !savedHand.isEnded) {
+        if (!savedHand.shoe || savedHand.shoe.length === 0) {
+          savedHand.shoe = createBlackjackShoe(6);
+        }
+        game = savedHand;
+        activeBlackjackGames.set(userId, game);
+      }
+    }
+  }
 
   if (!game || game.isEnded) {
     return res.status(400).json({ error: "No active hand found. Please deal a new hand." });
@@ -799,11 +823,9 @@ app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
         game.isEnded = true;
         game.outcome = 'bust';
         game.payout = 0;
-        activeBlackjackGames.delete(userId);
       }
     } else if (action === 'stand' || action === 'double') {
       if (action === 'double') {
-        // Deduct extra bet
         const { data: newBal, error: rpcErr } = await supabase.rpc("modify_points", {
           p_user_id: userId,
           p_delta: -game.bet,
@@ -821,7 +843,7 @@ app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
         game.playerScore = calcHandScore(game.playerCards).score;
       }
 
-      // Dealer Turn (Stand on Soft 17)
+      // Dealer Turn
       if (game.playerScore <= 21) {
         let dCalc = calcHandScore(game.dealerCards);
         while (dCalc.score < 17 || (dCalc.score === 17 && dCalc.isSoft)) {
@@ -829,7 +851,6 @@ app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
           dCalc = calcHandScore(game.dealerCards);
         }
         game.dealerScore = dCalc.score;
-
         game.isEnded = true;
 
         if (dCalc.isBust) {
@@ -863,12 +884,23 @@ app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
           updatedBalance = balAfterPay;
         }
       }
+    }
 
+    if (game.isEnded) {
       activeBlackjackGames.delete(userId);
       saveBlackjackHistory(userId, game);
-    } else if (game.isEnded) {
-      activeBlackjackGames.delete(userId);
-      saveBlackjackHistory(userId, game);
+      if (supabase) {
+        supabase.from("users").update({
+          metadata: { ...(req.user.metadata || {}), active_hand: null }
+        }).eq("id", userId).then(() => {}).catch(() => {});
+      }
+    } else {
+      activeBlackjackGames.set(userId, game);
+      if (supabase) {
+        supabase.from("users").update({
+          metadata: { ...(req.user.metadata || {}), active_hand: game }
+        }).eq("id", userId).then(() => {}).catch(() => {});
+      }
     }
 
     res.json({
