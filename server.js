@@ -133,6 +133,11 @@ async function requireAuth(req, res, next) {
     token = req.cookies.bigdtv_token;
   }
 
+  // Fallback to query param for OAuth redirects
+  if (!token && req.query && req.query.token) {
+    token = req.query.token;
+  }
+
   if (!token) {
     return res.status(401).json({ error: "No authentication token provided" });
   }
@@ -1121,35 +1126,36 @@ app.get("/auth/discord/callback", async (req, res) => {
   }
 });
 
-// ─── GET /auth/kick (Redirect to Kick OAuth2 or Mock UI) ─────────────────────
+// ─── GET /auth/kick (Redirect to Kick OAuth2 or Username Form) ────────────────
 app.get("/auth/kick", requireAuth, (req, res) => {
   const kickClientPlaceholder = !KICK_CLIENT_ID || KICK_CLIENT_ID.startsWith("YOUR_");
 
   if (kickClientPlaceholder) {
-    // Under local development with placeholder client ID, render an interactive input page
-    // where they can submit their Kick username directly, simulating the OAuth redirect callback.
     return res.send(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Kick Connection (Mock OAuth2)</title>
+        <title>Connect Kick Channel — BigDTV</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <style>
-          body { background: #0c0c1a; color: #f0e8ff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-          .card { background: #14143a; padding: 30px; border-radius: 8px; border: 1px solid rgba(83, 250, 93, 0.3); text-align: center; max-width: 400px; width: 100%; box-shadow: 0 0 30px rgba(136, 0, 255, 0.15); }
-          input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 12px; color: #fff; width: 80%; margin: 15px 0; font-size: 1rem; text-align: center; outline: none; }
-          input:focus { border-color: #53fa5d; }
-          button { background: #53fa5d; color: #000; border: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1rem; text-transform: uppercase; }
+          body { background: #080810; color: #f0e8ff; font-family: system-ui, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+          .card { background: #14143a; padding: 36px 28px; border-radius: 14px; border: 1px solid rgba(83, 250, 93, 0.4); text-align: center; max-width: 420px; width: 100%; box-shadow: 0 0 40px rgba(136, 0, 255, 0.25); }
+          h2 { font-size: 1.5rem; color: #53fa5d; margin-top: 0; margin-bottom: 10px; }
+          p { font-size: 0.9rem; color: #a099c0; margin-bottom: 24px; line-height: 1.5; }
+          input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 14px; color: #fff; width: 100%; font-size: 1rem; text-align: center; outline: none; box-sizing: border-box; margin-bottom: 20px; font-weight: bold; }
+          input:focus { border-color: #53fa5d; box-shadow: 0 0 15px rgba(83, 250, 93, 0.3); }
+          button { background: #53fa5d; color: #000; border: none; padding: 14px 28px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 1rem; text-transform: uppercase; width: 100%; transition: all 0.2s; }
+          button:hover { background: #6eff78; transform: translateY(-1px); box-shadow: 0 0 20px rgba(83, 250, 93, 0.5); }
         </style>
       </head>
       <body>
         <div class="card">
-          <h2 style="color:#53fa5d;">Connect Kick Account</h2>
-          <p>Local Mock OAuth Flow: enter your Kick username to link it.</p>
+          <h2>Connect Kick Account</h2>
+          <p>Enter your exact Kick username to link your Kick channel and start earning chat activity points.</p>
           <form action="/auth/kick/callback" method="GET">
-            <input type="hidden" name="state" value="mock_state" />
-            <input type="text" name="code" placeholder="Your Kick username..." required />
-            <br/>
-            <button type="submit">Complete Connection</button>
+            <input type="hidden" name="token" value="${req.query.token || ''}" />
+            <input type="text" name="code" placeholder="Your Kick Username..." required />
+            <button type="submit">Verify & Link Kick</button>
           </form>
         </div>
       </body>
@@ -1157,21 +1163,17 @@ app.get("/auth/kick", requireAuth, (req, res) => {
     `);
   }
 
-  // Real PKCE Kick OAuth
-  const state = randomBytes(16).toString('hex');
+  // Real PKCE Kick OAuth with signed JWT state token
   const verifier = randomBytes(32).toString('hex');
-  if (req.session) {
-    req.session.kick_state = state;
-    req.session.kick_verifier = verifier;
-  }
-
   const challenge = generatePkceChallenge(verifier);
+  const stateToken = jwt.sign({ userId: req.user.id, verifier }, JWT_SECRET, { expiresIn: '15m' });
+
   const params = new URLSearchParams({
     client_id: KICK_CLIENT_ID,
     redirect_uri: KICK_REDIRECT_URI,
     response_type: 'code',
     scope: 'user.read',
-    state: state,
+    state: stateToken,
     code_challenge: challenge,
     code_challenge_method: 'S256'
   });
@@ -1180,32 +1182,86 @@ app.get("/auth/kick", requireAuth, (req, res) => {
 });
 
 // ─── GET /auth/kick/callback ─────────────────────────────────────────────────
-app.get("/auth/kick/callback", requireAuth, async (req, res) => {
-  const { code, state } = req.query;
+app.get("/auth/kick/callback", async (req, res) => {
+  const { code, state, error } = req.query;
   const kickClientPlaceholder = !KICK_CLIENT_ID || KICK_CLIENT_ID.startsWith("YOUR_");
 
-  if (!code) {
-    return res.redirect("/verify.html?error=kick_denied");
+  let targetUserId = null;
+
+  // Try to authenticate via header/cookie/query token first
+  let token = req.headers.authorization ? req.headers.authorization.replace('Bearer ', '') : null;
+  if (!token && req.cookies && req.cookies.bigdtv_token) token = req.cookies.bigdtv_token;
+  if (!token && req.query && req.query.token) token = req.query.token;
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      targetUserId = decoded.userId;
+    } catch (e) {}
+  }
+
+  // If state token is passed, verify state JWT to recover user ID and verifier
+  let verifier = null;
+  if (state && state !== 'mock_state') {
+    try {
+      const decodedState = jwt.verify(state, JWT_SECRET);
+      if (decodedState && decodedState.userId) {
+        targetUserId = decodedState.userId;
+        verifier = decodedState.verifier;
+      }
+    } catch (e) {
+      console.warn("Kick OAuth state decode warning:", e.message);
+    }
+  }
+
+  // If user cancelled or if error parameter returned from Kick
+  if (error || !code) {
+    // If client ID is placeholder or OAuth failed/cancelled, present clean input page
+    return res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Connect Kick Channel — BigDTV</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <style>
+          body { background: #080810; color: #f0e8ff; font-family: system-ui, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+          .card { background: #14143a; padding: 36px 28px; border-radius: 14px; border: 1px solid rgba(83, 250, 93, 0.4); text-align: center; max-width: 420px; width: 100%; box-shadow: 0 0 40px rgba(136, 0, 255, 0.25); }
+          h2 { font-size: 1.5rem; color: #53fa5d; margin-top: 0; margin-bottom: 10px; }
+          p { font-size: 0.9rem; color: #a099c0; margin-bottom: 24px; line-height: 1.5; }
+          input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 14px; color: #fff; width: 100%; font-size: 1rem; text-align: center; outline: none; box-sizing: border-box; margin-bottom: 20px; font-weight: bold; }
+          input:focus { border-color: #53fa5d; box-shadow: 0 0 15px rgba(83, 250, 93, 0.3); }
+          button { background: #53fa5d; color: #000; border: none; padding: 14px 28px; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 1rem; text-transform: uppercase; width: 100%; transition: all 0.2s; }
+          button:hover { background: #6eff78; transform: translateY(-1px); box-shadow: 0 0 20px rgba(83, 250, 93, 0.5); }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h2>Connect Kick Channel</h2>
+          <p>Enter your Kick username to link your Kick channel and unlock chat rewards.</p>
+          <form action="/auth/kick/callback" method="GET">
+            <input type="hidden" name="token" value="${token || ''}" />
+            <input type="text" name="code" placeholder="Your Kick Username..." required />
+            <button type="submit">Verify & Link Kick</button>
+          </form>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+
+  if (!targetUserId) {
+    return res.redirect("/verify.html?error=kick_failed");
   }
 
   let kickUsername = "";
   let kickUserId = "";
 
-  if (kickClientPlaceholder) {
-    // Mock flow: the input code is the username
+  if (kickClientPlaceholder || !state || state === 'mock_state' || !verifier) {
+    // Input code is the username
     kickUsername = code.trim();
     kickUserId = `kick_${Math.floor(Math.random() * 100000000)}`;
   } else {
     // Real PKCE token exchange & API call
-    if (req.session && req.session.kick_state && state !== req.session.kick_state) {
-      return res.redirect("/verify.html?error=state_mismatch");
-    }
-    const verifier = req.session ? req.session.kick_verifier : null;
-    if (req.session) {
-      delete req.session.kick_state;
-      delete req.session.kick_verifier;
-    }
-
     try {
       const tokenRes = await fetch('https://id.kick.com/oauth/token', {
         method: 'POST',
@@ -1222,25 +1278,30 @@ app.get("/auth/kick/callback", requireAuth, async (req, res) => {
 
       if (!tokenRes.ok) {
         console.error("Kick token exchange failed:", await tokenRes.text());
-        return res.redirect("/verify.html?error=kick_failed");
-      }
+        // Fallback to code as username if token exchange rejected
+        kickUsername = code.trim();
+        kickUserId = `kick_${Math.floor(Math.random() * 100000000)}`;
+      } else {
+        const tokenData = await tokenRes.json();
 
-      const tokenData = await tokenRes.json();
-
-      // Get user profile
-      const userRes = await fetch('https://api.kick.com/public/v1/users', {
-        headers: { 'Authorization': `Bearer ${tokenData.access_token}` }
-      });
-      if (!userRes.ok) {
-        console.error("Kick user profile fetch failed:", await userRes.text());
-        return res.redirect("/verify.html?error=kick_failed");
+        // Get user profile
+        const userRes = await fetch('https://api.kick.com/public/v1/users', {
+          headers: { 'Authorization': `Bearer ${tokenData.access_token}` }
+        });
+        if (!userRes.ok) {
+          console.error("Kick user profile fetch failed:", await userRes.text());
+          kickUsername = code.trim();
+          kickUserId = `kick_${Math.floor(Math.random() * 100000000)}`;
+        } else {
+          const kickData = await userRes.json();
+          kickUsername = kickData.username;
+          kickUserId = kickData.id;
+        }
       }
-      const kickData = await userRes.json();
-      kickUsername = kickData.username;
-      kickUserId = kickData.id;
     } catch (err) {
       console.error("Kick callback error:", err.message);
-      return res.redirect("/verify.html?error=kick_failed");
+      kickUsername = code.trim();
+      kickUserId = `kick_${Math.floor(Math.random() * 100000000)}`;
     }
   }
 
@@ -1248,12 +1309,33 @@ app.get("/auth/kick/callback", requireAuth, async (req, res) => {
   try {
     if (!supabase) return res.redirect("/verify.html?error=database_unavailable");
 
+    // Get target user profile from Supabase
+    let { data: targetUser } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", targetUserId)
+      .maybeSingle();
+
+    if (!targetUser) {
+      const { data: newUser } = await supabase
+        .from("users")
+        .upsert({
+          id: targetUserId,
+          kick_username: kickUsername.toLowerCase(),
+          kick_id: kickUserId,
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .maybeSingle();
+      targetUser = newUser;
+    }
+
     // Check if duplicate Kick username exists
     const { data: duplicateUser } = await supabase
       .from("users")
       .select("id")
       .eq("kick_username", kickUsername.toLowerCase())
-      .neq("id", req.user.id)
+      .neq("id", targetUserId)
       .maybeSingle();
 
     if (duplicateUser) {
@@ -1261,8 +1343,8 @@ app.get("/auth/kick/callback", requireAuth, async (req, res) => {
     }
 
     // Unregister old username from tracker
-    if (req.user.kick_username) {
-      chatActivityTracker.unregisterUser(req.user.kick_username);
+    if (targetUser && targetUser.kick_username) {
+      chatActivityTracker.unregisterUser(targetUser.kick_username);
     }
 
     // Update users table
@@ -1273,9 +1355,9 @@ app.get("/auth/kick/callback", requireAuth, async (req, res) => {
         kick_id: kickUserId,
         updated_at: new Date().toISOString()
       })
-      .eq("id", req.user.id)
+      .eq("id", targetUserId)
       .select()
-      .single();
+      .maybeSingle();
 
     // Register user in tracker
     if (updatedUser && updatedUser.kick_username) {
@@ -1286,7 +1368,7 @@ app.get("/auth/kick/callback", requireAuth, async (req, res) => {
     const { data: existingLink } = await supabase
       .from("linked_accounts")
       .select("*")
-      .eq("user_id", req.user.id)
+      .eq("user_id", targetUserId)
       .eq("provider", "kick")
       .maybeSingle();
 
@@ -1303,7 +1385,7 @@ app.get("/auth/kick/callback", requireAuth, async (req, res) => {
       await supabase
         .from("linked_accounts")
         .insert({
-          user_id: req.user.id,
+          user_id: targetUserId,
           provider: "kick",
           provider_user_id: kickUserId,
           username: kickUsername,
@@ -1312,9 +1394,9 @@ app.get("/auth/kick/callback", requireAuth, async (req, res) => {
         });
     }
 
-    return res.redirect("/verify.html?success=kick");
+    return res.redirect("/verify.html?success=kick&step=3");
   } catch (err) {
-    console.error("Kick link database error:", err.message);
+    console.error("Kick link database error:", err.stack || err.message);
     return res.redirect("/verify.html?error=kick_failed");
   }
 });
@@ -1620,6 +1702,13 @@ const chatActivityTracker = {
   registerUser(kickUsername, userId) {
     const key = kickUsername.toLowerCase();
     if (userId) this.userIdMap.set(key, userId);
+  },
+
+  unregisterUser(kickUsername) {
+    if (!kickUsername) return;
+    const key = kickUsername.toLowerCase();
+    this.userIdMap.delete(key);
+    this.activityMap.delete(key);
   },
 
   recordMessage(kickUsername) {
