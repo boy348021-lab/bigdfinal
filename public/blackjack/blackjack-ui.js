@@ -203,7 +203,6 @@
       return;
     }
 
-    // Call backend endpoint to place bet
     try {
       const res = await fetch('/api/casino/blackjack/deal', {
         method: 'POST',
@@ -230,11 +229,151 @@
       if (centerBalanceEl) centerBalanceEl.textContent = (data.new_balance || 0).toLocaleString();
       if (window.authUser) window.authUser.points = data.new_balance;
 
-      renderHandState();
+      await dealSequenceAnimated();
     } catch (err) {
       console.error("Deal error:", err);
       alert("Server error starting game.");
     }
+  }
+
+  function setButtonsDisabled(disabled) {
+    const btnHit = document.getElementById('bj-btn-hit');
+    const btnStand = document.getElementById('bj-btn-stand');
+    const btnDoubleDown = document.getElementById('bj-btn-double-down');
+    const btnSplit = document.getElementById('bj-btn-split');
+    const btnMain = document.getElementById('bj-btn-main');
+
+    if (btnHit) btnHit.disabled = disabled;
+    if (btnStand) btnStand.disabled = disabled;
+    if (btnDoubleDown) btnDoubleDown.disabled = disabled;
+    if (btnSplit) btnSplit.disabled = disabled;
+    if (btnMain) btnMain.disabled = disabled;
+  }
+
+  async function dealSequenceAnimated() {
+    if (!activeHand) return;
+
+    const dealerCardsEl = document.getElementById('bj-dealer-cards');
+    const playerCardsEl = document.getElementById('bj-player-cards');
+    const dealerScoreEl = document.getElementById('bj-dealer-score');
+    const playerScoreEl = document.getElementById('bj-player-score');
+    const overlay = document.getElementById('bj-result-overlay');
+
+    if (overlay) overlay.classList.remove('show');
+    if (dealerCardsEl) dealerCardsEl.innerHTML = '';
+    if (playerCardsEl) playerCardsEl.innerHTML = '';
+    if (dealerScoreEl) dealerScoreEl.textContent = '?';
+    if (playerScoreEl) playerScoreEl.textContent = '0';
+
+    setButtonsDisabled(true);
+    const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+    // 1. Card 1 -> Player (Face Up)
+    if (activeHand.playerCards[0]) {
+      playerCardsEl.innerHTML += renderCard(activeHand.playerCards[0]);
+      if (playerScoreEl) playerScoreEl.textContent = activeHand.playerCards[0].value;
+      playSound('deal');
+      await delay(400);
+    }
+
+    // 2. Card 1 -> Dealer (Face Up)
+    if (activeHand.dealerCards[0]) {
+      dealerCardsEl.innerHTML += renderCard(activeHand.dealerCards[0]);
+      if (dealerScoreEl) dealerScoreEl.textContent = activeHand.dealerVisibleScore;
+      playSound('deal');
+      await delay(400);
+    }
+
+    // 3. Card 2 -> Player (Face Up)
+    if (activeHand.playerCards[1]) {
+      playerCardsEl.innerHTML += renderCard(activeHand.playerCards[1]);
+      if (playerScoreEl) playerScoreEl.textContent = activeHand.playerScore;
+      playSound('deal');
+      await delay(400);
+    }
+
+    // 4. Card 2 -> Dealer (FACE DOWN HOLE CARD)
+    if (activeHand.dealerCards[1]) {
+      dealerCardsEl.innerHTML += `<div class="bj-card bj-card-back" id="bj-dealer-hole-card"></div>`;
+      playSound('deal');
+      await delay(400);
+    }
+
+    // If player has natural Blackjack immediately
+    if (activeHand.isEnded) {
+      await revealDealerTurnAnimated();
+    } else {
+      setButtonsDisabled(false);
+      const btnDoubleDown = document.getElementById('bj-btn-double-down');
+      const btnSplit = document.getElementById('bj-btn-split');
+      const btnMain = document.getElementById('bj-btn-main');
+
+      if (btnDoubleDown) btnDoubleDown.disabled = activeHand.playerCards.length !== 2;
+      if (btnSplit) btnSplit.disabled = activeHand.playerCards.length !== 2 || activeHand.playerCards[0].rank !== activeHand.playerCards[1].rank;
+      if (btnMain) { btnMain.textContent = 'Game in Progress'; btnMain.disabled = true; }
+    }
+  }
+
+  async function revealDealerTurnAnimated() {
+    const dealerCardsEl = document.getElementById('bj-dealer-cards');
+    const dealerScoreEl = document.getElementById('bj-dealer-score');
+    const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+    setButtonsDisabled(true);
+
+    // 1. Reveal Dealer Hole Card (Card 2)
+    if (dealerCardsEl && activeHand.dealerCards[1]) {
+      dealerCardsEl.innerHTML = activeHand.dealerCards.slice(0, 2).map(c => renderCard(c)).join('');
+      if (dealerScoreEl) {
+        dealerScoreEl.textContent = calcHandScore(activeHand.dealerCards.slice(0, 2)).score;
+      }
+      playSound('chip');
+      await delay(550);
+    }
+
+    // 2. Draw remaining Dealer cards sequentially
+    if (activeHand.dealerCards.length > 2) {
+      for (let i = 2; i < activeHand.dealerCards.length; i++) {
+        dealerCardsEl.innerHTML += renderCard(activeHand.dealerCards[i]);
+        const currentSubScore = calcHandScore(activeHand.dealerCards.slice(0, i + 1)).score;
+        if (dealerScoreEl) dealerScoreEl.textContent = currentSubScore;
+        playSound('deal');
+        await delay(500);
+      }
+    }
+
+    if (dealerScoreEl) {
+      dealerScoreEl.textContent = activeHand.dealerScore;
+      dealerScoreEl.className = 'bj-score-badge' + (activeHand.dealerScore > 21 ? ' bust' : '');
+    }
+
+    if (activeHand.outcome === 'win' || activeHand.outcome === 'blackjack') {
+      playSound('win');
+    } else if (activeHand.outcome === 'loss' || activeHand.outcome === 'bust') {
+      playSound('loss');
+    }
+
+    showResultBanner(activeHand.outcome, activeHand.payout);
+
+    const btnMain = document.getElementById('bj-btn-main');
+    if (btnMain) {
+      btnMain.textContent = 'Deal Again';
+      btnMain.disabled = false;
+    }
+  }
+
+  function calcHandScore(cards) {
+    let score = 0;
+    let aces = 0;
+    for (const c of cards) {
+      score += c.value;
+      if (c.rank === 'A') aces++;
+    }
+    while (score > 21 && aces > 0) {
+      score -= 10;
+      aces--;
+    }
+    return { score };
   }
 
   function renderHandState() {
@@ -294,6 +433,8 @@
     const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
     if (!token) return;
 
+    setButtonsDisabled(true);
+
     try {
       const res = await fetch('/api/casino/blackjack/action', {
         method: 'POST',
@@ -306,6 +447,7 @@
       const data = await res.json();
       if (!res.ok) {
         alert(data.error || "Action failed.");
+        setButtonsDisabled(false);
         return;
       }
 
@@ -318,9 +460,40 @@
         if (window.authUser) window.authUser.points = data.new_balance;
       }
 
-      renderHandState();
+      if (actionName === 'hit') {
+        const playerCardsEl = document.getElementById('bj-player-cards');
+        const playerScoreEl = document.getElementById('bj-player-score');
+        if (playerCardsEl) playerCardsEl.innerHTML = activeHand.playerCards.map(c => renderCard(c)).join('');
+        if (playerScoreEl) {
+          playerScoreEl.textContent = activeHand.playerScore;
+          playerScoreEl.className = 'bj-score-badge' + (activeHand.playerScore > 21 ? ' bust' : '');
+        }
+        playSound('deal');
+
+        if (activeHand.isEnded) {
+          await revealDealerTurnAnimated();
+        } else {
+          setButtonsDisabled(false);
+          const btnDoubleDown = document.getElementById('bj-btn-double-down');
+          const btnSplit = document.getElementById('bj-btn-split');
+          if (btnDoubleDown) btnDoubleDown.disabled = true;
+          if (btnSplit) btnSplit.disabled = true;
+        }
+      } else if (actionName === 'stand' || actionName === 'double') {
+        if (actionName === 'double') {
+          const playerCardsEl = document.getElementById('bj-player-cards');
+          const playerScoreEl = document.getElementById('bj-player-score');
+          if (playerCardsEl) playerCardsEl.innerHTML = activeHand.playerCards.map(c => renderCard(c)).join('');
+          if (playerScoreEl) playerScoreEl.textContent = activeHand.playerScore;
+          playSound('deal');
+          const delay = (ms) => new Promise(res => setTimeout(res, ms));
+          await delay(400);
+        }
+        await revealDealerTurnAnimated();
+      }
     } catch (err) {
       console.error("Action error:", err);
+      setButtonsDisabled(false);
     }
   }
 
