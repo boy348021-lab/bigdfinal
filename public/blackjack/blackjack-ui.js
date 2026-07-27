@@ -30,7 +30,7 @@
             </div>
             <div class="bj-input-row">
               <span class="bj-currency-symbol">🪙</span>
-              <input type="number" id="bj-bet-input" class="bj-bet-input" value="10" min="0" step="1"/>
+              <input type="number" id="bj-bet-input" class="bj-bet-input" value="0" min="0" step="1"/>
               <div class="bj-multiplier-btns">
                 <button class="bj-mult-btn" id="bj-btn-half">½</button>
                 <button class="bj-mult-btn" id="bj-btn-double">2x</button>
@@ -39,6 +39,7 @@
             
             <!-- Casino Chips Selector -->
             <div class="bj-chips-selector">
+              <button class="bj-chip-btn bj-chip-0" onclick="setBetChip(0)" title="Set Bet to 0">0</button>
               <button class="bj-chip-btn bj-chip-1" onclick="addBetChip(1)">+1</button>
               <button class="bj-chip-btn bj-chip-5" onclick="addBetChip(5)">+5</button>
               <button class="bj-chip-btn bj-chip-25" onclick="addBetChip(25)">+25</button>
@@ -131,6 +132,11 @@
     if (btnDoubleDown) btnDoubleDown.onclick = doDoubleDown;
     if (btnSplit) btnSplit.onclick = doSplit;
   }
+
+  window.setBetChip = function(amt) {
+    const betInput = document.getElementById('bj-bet-input');
+    if (betInput) betInput.value = amt;
+  };
 
   window.addBetChip = function(amt) {
     const betInput = document.getElementById('bj-bet-input');
