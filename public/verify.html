@@ -821,15 +821,31 @@ footer a:hover { color: var(--purple-200); }
 
   <div class="verify-card" id="kick-link-card" style="display:none; text-align:center;">
     <h1 class="verify-title">Kick <span>Connection</span></h1>
-    <p class="verify-sub" style="margin-bottom:20px;">Step 2: Link your Kick account to your profile</p>
-    <div class="input-group" style="text-align:left; margin-bottom:20px;">
-      <label class="input-label" for="kick-username-input">Kick Username</label>
-      <input type="text" id="kick-username-input" class="verify-input" placeholder="Enter your Kick username..." autocomplete="off"/>
+    <p class="verify-sub" id="kick-sub-text" style="margin-bottom:25px;">Step 2: Authenticate with Kick to link your channel and enable chat rewards</p>
+    
+    <div id="kick-not-connected-view">
+      <button id="kick-link-btn" class="verify-btn" onclick="linkWithKick()">
+        <span>Connect with Kick</span>
+        <span>→</span>
+      </button>
     </div>
-    <button id="kick-link-btn" class="verify-btn" onclick="doLinkKick()">
-      <span>Link Kick Account</span>
-      <span>→</span>
-    </button>
+
+    <div id="kick-connected-view" style="display:none;">
+      <div style="background:rgba(83,250,93,0.08); border:1px solid rgba(83,250,93,0.3); border-radius:8px; padding:18px; margin-bottom:24px;">
+        <div style="color:#53fa5d; font-weight:700; font-size:1.05rem; margin-bottom:4px;">✓ Kick Account Connected</div>
+        <div style="font-family:var(--font-mono); font-size:1.1rem; color:#fff; font-weight:700;" id="kick-connected-username">—</div>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">Earns 10 BigD Coins / 5 minutes of chat activity</div>
+      </div>
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <button class="verify-btn" onclick="goToStep3()">
+          <span>Continue to Step 3 (DegenCity)</span>
+          <span>→</span>
+        </button>
+        <button onclick="linkWithKick()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:#fff; border-radius:4px; padding:12px 18px; font-family:inherit; font-size:0.85rem; font-weight:600; cursor:pointer; transition:all 0.2s;">
+          Change Kick Account
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="verify-card" id="main-verify-card" style="display:none;">
@@ -885,12 +901,22 @@ footer a:hover { color: var(--purple-200); }
 <script>
   let activeToken = null;
 
-  async function checkUserVerificationSteps(clerk) {
+  function goToStep3() {
+    const kickCard = document.getElementById("kick-link-card");
+    const verifyCard = document.getElementById("main-verify-card");
+    if (kickCard) kickCard.style.display = "none";
+    if (verifyCard) verifyCard.style.display = "block";
+  }
+
+  async function checkUserVerificationSteps(user) {
     const loginCard = document.getElementById("login-card");
     const kickCard = document.getElementById("kick-link-card");
     const verifyCard = document.getElementById("main-verify-card");
+    const notConnectedView = document.getElementById("kick-not-connected-view");
+    const connectedView = document.getElementById("kick-connected-view");
+    const connectedUsernameEl = document.getElementById("kick-connected-username");
 
-    if (!clerk || !clerk.user) {
+    if (!user) {
       if (loginCard) loginCard.style.display = "block";
       if (kickCard) kickCard.style.display = "none";
       if (verifyCard) verifyCard.style.display = "none";
@@ -898,24 +924,39 @@ footer a:hover { color: var(--purple-200); }
     }
 
     try {
-      activeToken = await clerk.session.getToken();
+      activeToken = getAuthToken();
       const res = await fetch("/auth/me", {
         headers: { "Authorization": `Bearer ${activeToken}` }
       });
       if (!res.ok) throw new Error("Me fetch failed");
       const userProfile = await res.json();
 
+      if (loginCard) loginCard.style.display = "none";
+
       // Step 2: Check if Kick username is linked
       if (!userProfile.kickUsername) {
-        if (loginCard) loginCard.style.display = "none";
         if (kickCard) kickCard.style.display = "block";
         if (verifyCard) verifyCard.style.display = "none";
+        if (notConnectedView) notConnectedView.style.display = "block";
+        if (connectedView) connectedView.style.display = "none";
+        return;
+      }
+
+      // Kick IS connected
+      if (connectedUsernameEl) connectedUsernameEl.textContent = userProfile.kickUsername;
+
+      // If just linked Kick or step=2 requested in URL, show Step 2 with connected badge
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("success") === "kick" || urlParams.get("step") === "2") {
+        if (kickCard) kickCard.style.display = "block";
+        if (verifyCard) verifyCard.style.display = "none";
+        if (notConnectedView) notConnectedView.style.display = "none";
+        if (connectedView) connectedView.style.display = "block";
         return;
       }
 
       // Step 3: Check if DegenCity username is linked
       if (!userProfile.degencityUsername) {
-        if (loginCard) loginCard.style.display = "none";
         if (kickCard) kickCard.style.display = "none";
         if (verifyCard) verifyCard.style.display = "block";
         return;
@@ -933,45 +974,34 @@ footer a:hover { color: var(--purple-200); }
     }
   }
 
-  onClerkAuth((clerk) => {
-    checkUserVerificationSteps(clerk);
+  onAuthReady((user) => {
+    checkUserVerificationSteps(user);
   });
 
-  async function doLinkKick() {
-    const usernameInput = document.getElementById("kick-username-input");
-    const username = usernameInput ? usernameInput.value.trim() : "";
-    if (!username) {
-      showToast("Kick username is required");
-      return;
+  // Handle URL callback notifications
+  (function handleCallbacks() {
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get("success");
+    const error = params.get("error");
+
+    if (success === "kick") {
+      showToast("✓ Kick account connected successfully!");
+    } else if (error === "kick_already_linked") {
+      showToast("✕ This Kick account is already connected to another player.");
+    } else if (error === "kick_failed") {
+      showToast("✕ Kick connection failed. Please try again.");
+    } else if (error === "kick_denied") {
+      showToast("✕ Kick connection cancelled.");
     }
 
-    const btn = document.getElementById("kick-link-btn");
-    if (btn) btn.disabled = true;
-
-    try {
-      const res = await fetch("/profile/kick", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${activeToken}`
-        },
-        body: JSON.stringify({ kick_username: username })
-      });
-      
-      const data = await res.json();
-      if (res.ok) {
-        showToast("Kick account linked successfully!");
-        initClerk().then(clerk => checkUserVerificationSteps(clerk));
-      } else {
-        showToast(data.error || "Failed to link Kick account");
-      }
-    } catch (err) {
-      console.error("Link Kick error:", err);
-      showToast("Server error linking Kick account");
-    } finally {
-      if (btn) btn.disabled = false;
+    if (success || error) {
+      params.delete("success");
+      params.delete("error");
+      const cleanSearch = params.toString();
+      const newUrl = window.location.pathname + (cleanSearch ? '?' + cleanSearch : '') + window.location.hash;
+      history.replaceState({}, '', newUrl);
     }
-  }
+  })();
 
   function showToast(msg) {
     const toast = document.getElementById("copy-toast");
@@ -1123,44 +1153,43 @@ async function doVerify() {
           </div>
         </div>
       `;
-      // Call PATCH /profile/degencity with Clerk token
-      getClerkToken().then(token => {
-        if (!token) {
-          showToast("Authentication session lost. Please log in again.");
-          return;
-        }
-        fetch('/profile/degencity', {
-          method: 'PATCH',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ degencity_username: match.username })
-        })
-        .then(res => {
-          if (res.ok) {
-            setTimeout(() => {
-              window.location.href = "/store.html";
-            }, 1500);
-          } else {
-            res.json().then(data => {
-              showToast(data.error || "Failed to link DegenCity account");
-              resultBox.innerHTML = `
-                <div class="result-card error">
-                  <div class="result-badge">✕ Linking Failed</div>
-                  <div class="result-message">
-                    ${escHtml(data.error || "Failed to link DegenCity account")}
-                  </div>
+      // Call PATCH /profile/degencity with JWT token
+      const token = getAuthToken();
+      if (!token) {
+        showToast("Authentication session lost. Please log in again.");
+        return;
+      }
+      fetch('/profile/degencity', {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ degencity_username: match.username })
+      })
+      .then(res => {
+        if (res.ok) {
+          setTimeout(() => {
+            window.location.href = "/store.html";
+          }, 1500);
+        } else {
+          res.json().then(data => {
+            showToast(data.error || "Failed to link DegenCity account");
+            resultBox.innerHTML = `
+              <div class="result-card error">
+                <div class="result-badge">✕ Linking Failed</div>
+                <div class="result-message">
+                  ${escHtml(data.error || "Failed to link DegenCity account")}
                 </div>
-              `;
-              resultBox.style.display = 'block';
-            });
-          }
-        })
-        .catch(err => {
-          console.error("Error linking DegenCity account:", err);
-          showToast("Server error during account linking");
-        });
+              </div>
+            `;
+            resultBox.style.display = 'block';
+          });
+        }
+      })
+      .catch(err => {
+        console.error("Error linking DegenCity account:", err);
+        showToast("Server error during account linking");
       });
     } else {
       resultBox.innerHTML = `

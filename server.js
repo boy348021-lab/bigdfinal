@@ -13,8 +13,6 @@ import { createHash, randomBytes } from "crypto";
 import fs from "fs";
 import { readFile } from "fs/promises";
 import { WebSocket } from "ws";
-import { createClerkClient } from "@clerk/backend";
-import { Webhook } from "svix";
 
 dotenv.config();
 
@@ -78,110 +76,22 @@ console.log(`BASE_URL: ${BASE_URL}`);
 // Admin secret for admin endpoints (set ADMIN_SECRET in .env)
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "bigdtv-admin-change-me";
 
-// ─── Clerk & Middleware ────────────────────────────────────────────────────────
-const CLERK_SECRET_KEY = process.env.CLERK_SECRET_KEY || "";
-const CLERK_PUBLISHABLE_KEY = process.env.CLERK_PUBLISHABLE_KEY || "";
+// ─── JWT & OAuth Configuration ────────────────────────────────────────────────
+const JWT_SECRET = process.env.SESSION_SECRET || "bigdtv-dev-secret-change-in-production";
 
-const clerkClient = createClerkClient({ secretKey: CLERK_SECRET_KEY });
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || "";
+const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "";
+const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || `${BASE_URL}/auth/discord/callback`;
+
+const KICK_CLIENT_ID = process.env.KICK_CLIENT_ID || "";
+const KICK_CLIENT_SECRET = process.env.KICK_CLIENT_SECRET || "";
+const KICK_REDIRECT_URI = process.env.KICK_REDIRECT_URI || `${BASE_URL}/auth/kick/callback`;
 
 app.use(cors());
-
-// Clerk webhook endpoint (defined before global express.json() to get raw body)
-app.post("/api/webhooks/clerk", express.raw({ type: "application/json" }), async (req, res) => {
-  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
-
-  if (!WEBHOOK_SECRET) {
-    console.error("Missing CLERK_WEBHOOK_SECRET environment variable");
-    return res.status(500).json({ error: "Webhook secret not configured" });
-  }
-
-  const svix_id = req.headers["svix-id"];
-  const svix_timestamp = req.headers["svix-timestamp"];
-  const svix_signature = req.headers["svix-signature"];
-
-  if (!svix_id || !svix_timestamp || !svix_signature) {
-    return res.status(400).json({ error: "Error occurred -- no svix headers" });
-  }
-
-  const payload = req.body;
-  const body = payload.toString();
-  const wh = new Webhook(WEBHOOK_SECRET);
-
-  let evt;
-  try {
-    evt = wh.verify(body, {
-      "svix-id": svix_id,
-      "svix-timestamp": svix_timestamp,
-      "svix-signature": svix_signature,
-    });
-  } catch (err) {
-    console.error("Error verifying webhook:", err.message);
-    return res.status(400).json({ error: err.message });
-  }
-
-  const { id } = evt.data;
-  const eventType = evt.type;
-
-  console.log(`Clerk webhook received: ${eventType} (User ID: ${id})`);
-
-  try {
-    if (eventType === "user.created" || eventType === "user.updated") {
-      const email = evt.data.email_addresses?.[0]?.email_address || null;
-      const displayName = `${evt.data.first_name || ""} ${evt.data.last_name || ""}`.trim() || evt.data.username || "Guest";
-      const avatarUrl = evt.data.image_url || null;
-
-      if (supabase) {
-        const { data: existingUser } = await supabase
-          .from("users")
-          .select("*")
-          .eq("clerk_id", id)
-          .maybeSingle();
-
-        if (existingUser) {
-          await supabase
-            .from("users")
-            .update({
-              email: email,
-              display_name: displayName,
-              avatar_url: avatarUrl,
-              updated_at: new Date().toISOString()
-            })
-            .eq("clerk_id", id);
-        } else {
-          await supabase
-            .from("users")
-            .insert({
-              clerk_id: id,
-              email: email,
-              display_name: displayName,
-              avatar_url: avatarUrl,
-              auth_provider: 'clerk',
-              points: 0,
-              created_at: new Date().toISOString(),
-              last_login: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            });
-        }
-      }
-    } else if (eventType === "user.deleted") {
-      if (supabase) {
-        await supabase
-          .from("users")
-          .delete()
-          .eq("clerk_id", id);
-      }
-    }
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Webhook processing failed:", err.message);
-    res.status(500).json({ error: "Internal processing error" });
-  }
-});
 
 app.use(express.json());
 app.use(cookieParser(process.env.SESSION_SECRET || "bigdtv-dev-secret-change-in-production"));
 
-// Keep express-session for non-auth legacy requirements if any, but clean up active session dependency
 app.use(session({
   secret:            process.env.SESSION_SECRET || "bigdtv-dev-secret-change-in-production",
   resave:            false,
@@ -195,48 +105,47 @@ app.use(session({
 
 app.use(express.static(path.join(__dirname, "public")));
 
-// Reusable Clerk verification middleware
-async function requireClerkAuth(req, res, next) {
+// PKCE Helper Functions (for Kick OAuth2)
+function base64url(buffer) {
+  return buffer.toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+
+function generatePkceChallenge(verifier) {
+  const hash = createHash('sha256').update(verifier).digest();
+  return base64url(hash);
+}
+
+// JWT verification middleware
+async function requireAuth(req, res, next) {
+  let token = null;
+
+  // Check Authorization header first
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: "No authentication token provided" });
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
   }
-  const token = authHeader.split(' ')[1];
 
-  // Support Mock Mode JWTs
-  if (token.startsWith('mock_jwt_')) {
-    try {
-      const payloadStr = Buffer.from(token.replace('mock_jwt_', ''), 'base64').toString('utf8');
-      const payload = JSON.parse(payloadStr);
-      req.auth = { sub: payload.id };
+  // Fallback to cookie
+  if (!token && req.cookies && req.cookies.bigdtv_token) {
+    token = req.cookies.bigdtv_token;
+  }
 
-      if (supabase) {
-        const { data: user } = await supabase
-          .from("users")
-          .select("*")
-          .eq("clerk_id", payload.id)
-          .maybeSingle();
-
-        if (user) {
-          req.user = user;
-        }
-      }
-      return next();
-    } catch (err) {
-      console.error("Mock authentication error:", err.message);
-      return res.status(401).json({ error: "Invalid mock token" });
-    }
+  if (!token) {
+    return res.status(401).json({ error: "No authentication token provided" });
   }
 
   try {
-    const verified = await clerkClient.verifyToken(token);
-    req.auth = verified;
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.auth = { sub: decoded.userId, ...decoded };
 
-    if (supabase) {
+    if (supabase && decoded.userId) {
       const { data: user } = await supabase
         .from("users")
         .select("*")
-        .eq("clerk_id", verified.sub)
+        .eq("id", decoded.userId)
         .maybeSingle();
 
       if (user) {
@@ -245,10 +154,13 @@ async function requireClerkAuth(req, res, next) {
     }
     next();
   } catch (err) {
-    console.error("Clerk authentication error:", err.message);
+    console.error("Authentication error:", err.message);
     res.status(401).json({ error: "Invalid or expired token" });
   }
 }
+
+// Alias for backwards compatibility
+const requireClerkAuth = requireAuth;
 
 // ─── Kick Live Status ─────────────────────────────────────────────────────────
 let kickCache = { live: false, checkedAt: null };
@@ -602,9 +514,17 @@ app.post("/api/webhooks/wager", async (req, res) => {
 });
 
 // ─── Store Redemption ─────────────────────────────────────────────────────────
-app.post("/api/store/redeem", requireClerkAuth, async (req, res) => {
+app.post("/api/store/redeem", requireAuth, async (req, res) => {
   if (!supabase) return res.status(503).json({ error: "Database not configured" });
-  if (!req.user) return res.status(404).json({ error: "User profile not found. Please sync first." });
+  if (!req.user) return res.status(404).json({ error: "User profile not found. Please log in first." });
+
+  // Mandatory validation: Kick & DegenCity connections required
+  if (!req.user.kick_username) {
+    return res.status(400).json({ error: "Kick account connection required before redeeming rewards. Please connect Kick on the Store page." });
+  }
+  if (!req.user.degencity_username) {
+    return res.status(400).json({ error: "DegenCity username verification required before redeeming rewards. Please verify code BIGD on Code Check page." });
+  }
 
   const { reward_id } = req.body;
   const userId        = req.user.id;
@@ -712,100 +632,121 @@ app.post("/api/admin/redemptions/:id", requireAdmin, async (req, res) => {
   }
 });
 
-// ─── Auth — Session Info ──────────────────────────────────────────────────────
-// ─── GET Clerk Publishable Key config ─────────────────────────────────────────
-app.get("/api/auth/config", (req, res) => {
-  res.json({ publishableKey: CLERK_PUBLISHABLE_KEY });
+// ─── GET /auth/discord (Redirect to Discord OAuth2) ───────────────────────────
+app.get("/auth/discord", (req, res) => {
+  const state = randomBytes(16).toString('hex');
+  if (req.session) req.session.oauth_state = state;
+
+  const params = new URLSearchParams({
+    client_id: DISCORD_CLIENT_ID,
+    redirect_uri: DISCORD_REDIRECT_URI,
+    response_type: 'code',
+    scope: 'identify',
+    state: state
+  });
+
+  res.redirect(`https://discord.com/oauth2/authorize?${params.toString()}`);
 });
 
-// ─── POST /auth/sync (Verify Clerk JWT & sync Supabase profile/linked_accounts) 
-app.post("/auth/sync", async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'No authentication token provided' });
+// ─── GET /auth/discord/callback ───────────────────────────────────────────────
+app.get("/auth/discord/callback", async (req, res) => {
+  const { code, state } = req.query;
+
+  if (!code) {
+    return res.redirect("/verify.html?error=discord_denied");
   }
-  const token = authHeader.split(' ')[1];
+
+  if (req.session && req.session.oauth_state && state !== req.session.oauth_state) {
+    return res.redirect("/verify.html?error=state_mismatch");
+  }
+  if (req.session) delete req.session.oauth_state;
+
   try {
-    let clerkUserId, email, displayName, avatarUrl;
-    let discordUserId, discordUsername, discordAvatar;
+    // Exchange code for access token
+    const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'BigDTV-OAuth/1.0'
+      },
+      body: new URLSearchParams({
+        client_id: DISCORD_CLIENT_ID,
+        client_secret: DISCORD_CLIENT_SECRET,
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: DISCORD_REDIRECT_URI
+      })
+    });
 
-    if (token.startsWith('mock_jwt_')) {
-      const payloadStr = Buffer.from(token.replace('mock_jwt_', ''), 'base64').toString('utf8');
-      const payload = JSON.parse(payloadStr);
-      
-      clerkUserId = payload.id;
-      email = payload.email;
-      displayName = payload.displayName;
-      avatarUrl = payload.avatarUrl;
-      
-      discordUserId = payload.discordId;
-      discordUsername = payload.username;
-      discordAvatar = payload.avatarUrl;
-    } else {
-      const verified = await clerkClient.verifyToken(token);
-      clerkUserId = verified.sub;
-
-      const clerkUser = await clerkClient.users.getUser(clerkUserId);
-      email = clerkUser.emailAddresses?.[0]?.emailAddress || null;
-      displayName = `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() || clerkUser.username || "Guest";
-      avatarUrl = clerkUser.imageUrl || null;
-
-      const discordAccount = clerkUser.externalAccounts?.find(acc => acc.provider === 'oauth_discord' || acc.provider === 'discord');
-      discordUserId = discordAccount?.providerUserId || null;
-      discordUsername = discordAccount?.username || null;
-      discordAvatar = discordAccount?.avatarUrl || null;
+    if (!tokenRes.ok) {
+      const errText = await tokenRes.text();
+      console.error("Discord token exchange failed:", tokenRes.status, errText);
+      return res.redirect("/verify.html?error=discord_failed");
     }
+
+    const tokenData = await tokenRes.json();
+
+    // Fetch Discord user profile
+    const userRes = await fetch('https://discord.com/api/users/@me', {
+      headers: {
+        'Authorization': `Bearer ${tokenData.access_token}`,
+        'User-Agent': 'BigDTV-OAuth/1.0'
+      }
+    });
+
+    if (!userRes.ok) {
+      const errText = await userRes.text();
+      console.error("Discord user fetch failed:", userRes.status, errText);
+      return res.redirect("/verify.html?error=discord_failed");
+    }
+
+    const discordUser = await userRes.json();
+    const discordId = discordUser.id;
+    const discordUsername = discordUser.username;
+    const discordAvatar = discordUser.avatar 
+      ? `https://cdn.discordapp.com/avatars/${discordId}/${discordUser.avatar}.png`
+      : `https://cdn.discordapp.com/embed/avatars/${parseInt(discordUser.discriminator || '0') % 5}.png`;
 
     if (!supabase) {
-      return res.status(500).json({ error: "Database unavailable" });
+      return res.redirect("/verify.html?error=database_unavailable");
     }
 
-    // Step 1: Look up existing user by clerk_id
+    // Look up or create user by discord_id
     let { data: dbUser } = await supabase
       .from("users")
       .select("*")
-      .eq("clerk_id", clerkUserId)
+      .eq("discord_id", discordId)
       .maybeSingle();
 
-    // Step 2: If not found, look up by discord_id for migration/preventing duplicates
-    if (!dbUser && discordUserId) {
-      const { data: legacyUser } = await supabase
+    if (dbUser) {
+      // Update existing user
+      const { data: updatedUser } = await supabase
         .from("users")
-        .select("*")
-        .eq("discord_id", discordUserId)
-        .maybeSingle();
+        .update({
+          discord_username: discordUsername,
+          discord_avatar: discordAvatar,
+          display_name: discordUser.global_name || discordUsername,
+          avatar_url: discordAvatar,
+          last_login: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", dbUser.id)
+        .select()
+        .single();
 
-      if (legacyUser) {
-        // Link clerk_id to legacy user
-        const { data: updatedLegacy } = await supabase
-          .from("users")
-          .update({
-            clerk_id: clerkUserId,
-            email: email,
-            display_name: displayName,
-            avatar_url: avatarUrl,
-            last_login: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", legacyUser.id)
-          .select()
-          .single();
-
-        dbUser = updatedLegacy;
-        console.log(`Migrated legacy user ${discordUsername} (${discordUserId}) to Clerk ${clerkUserId}`);
-      }
-    }
-
-    // Step 3: If still not found, create a new user
-    if (!dbUser) {
+      dbUser = updatedUser || dbUser;
+      console.log(`Discord login: returning user ${discordUsername} (${discordId})`);
+    } else {
+      // Create new user
       const { data: newUser, error: createError } = await supabase
         .from("users")
         .insert({
-          clerk_id: clerkUserId,
-          email: email,
-          display_name: displayName,
-          avatar_url: avatarUrl,
-          auth_provider: 'clerk',
+          discord_id: discordId,
+          discord_username: discordUsername,
+          discord_avatar: discordAvatar,
+          display_name: discordUser.global_name || discordUsername,
+          avatar_url: discordAvatar,
+          auth_provider: 'discord',
           points: 0,
           created_at: new Date().toISOString(),
           last_login: new Date().toISOString(),
@@ -814,74 +755,275 @@ app.post("/auth/sync", async (req, res) => {
         .select()
         .single();
 
-      if (createError) throw createError;
+      if (createError) {
+        console.error("Create user error:", createError.message);
+        return res.redirect("/verify.html?error=discord_failed");
+      }
       dbUser = newUser;
-      console.log(`Created new Clerk user: ${clerkUserId} (${displayName})`);
-    } else {
-      // Update existing user profile
-      const { data: updatedUser } = await supabase
-        .from("users")
+      console.log(`Discord login: created new user ${discordUsername} (${discordId})`);
+    }
+
+    // Sync discord linked account
+    const { data: existingLink } = await supabase
+      .from("linked_accounts")
+      .select("*")
+      .eq("user_id", dbUser.id)
+      .eq("provider", "discord")
+      .maybeSingle();
+
+    if (existingLink) {
+      await supabase
+        .from("linked_accounts")
         .update({
-          display_name: displayName,
-          avatar_url: avatarUrl,
-          last_login: new Date().toISOString(),
+          provider_user_id: discordId,
+          username: discordUsername,
+          display_name: discordUser.global_name || discordUsername,
+          avatar_url: discordAvatar,
           updated_at: new Date().toISOString()
         })
-        .eq("clerk_id", clerkUserId)
-        .select()
-        .single();
-
-      dbUser = updatedUser;
-    }
-
-    // Step 4: Sync Discord linked account in linked_accounts table
-    if (discordUserId) {
-      // Check if linked account exists
-      const { data: existingLink } = await supabase
+        .eq("id", existingLink.id);
+    } else {
+      await supabase
         .from("linked_accounts")
-        .select("*")
-        .eq("user_id", dbUser.id)
-        .eq("provider", "discord")
-        .maybeSingle();
-
-      if (existingLink) {
-        await supabase
-          .from("linked_accounts")
-          .update({
-            provider_user_id: discordUserId,
-            username: discordUsername,
-            display_name: displayName,
-            avatar_url: discordAvatar,
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", existingLink.id);
-      } else {
-        await supabase
-          .from("linked_accounts")
-          .insert({
-            user_id: dbUser.id,
-            provider: "discord",
-            provider_user_id: discordUserId,
-            username: discordUsername,
-            display_name: displayName,
-            avatar_url: discordAvatar,
-            linked_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
-      }
+        .insert({
+          user_id: dbUser.id,
+          provider: "discord",
+          provider_user_id: discordId,
+          username: discordUsername,
+          display_name: discordUser.global_name || discordUsername,
+          avatar_url: discordAvatar,
+          linked_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
     }
 
-    res.json({ success: true, user: dbUser });
+    // Issue JWT
+    const jwtPayload = {
+      userId: dbUser.id,
+      discordId: discordId,
+      discordUsername: discordUsername
+    };
+    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: '7d' });
+
+    // Set cookie
+    res.cookie('bigdtv_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/'
+    });
+
+    res.redirect(`/verify.html?token=${encodeURIComponent(token)}&success=discord`);
+
   } catch (err) {
-    console.error("Clerk sync error:", err.message);
-    res.status(500).json({ error: "Failed to synchronize session: " + err.message });
+    console.error("Discord OAuth callback error:", err.message, err.cause || "");
+    res.redirect("/verify.html?error=discord_failed");
+  }
+});
+
+// ─── GET /auth/kick (Redirect to Kick OAuth2 or Mock UI) ─────────────────────
+app.get("/auth/kick", requireAuth, (req, res) => {
+  const kickClientPlaceholder = !KICK_CLIENT_ID || KICK_CLIENT_ID.startsWith("YOUR_");
+
+  if (kickClientPlaceholder) {
+    // Under local development with placeholder client ID, render an interactive input page
+    // where they can submit their Kick username directly, simulating the OAuth redirect callback.
+    return res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Kick Connection (Mock OAuth2)</title>
+        <style>
+          body { background: #0c0c1a; color: #f0e8ff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+          .card { background: #14143a; padding: 30px; border-radius: 8px; border: 1px solid rgba(83, 250, 93, 0.3); text-align: center; max-width: 400px; width: 100%; box-shadow: 0 0 30px rgba(136, 0, 255, 0.15); }
+          input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 12px; color: #fff; width: 80%; margin: 15px 0; font-size: 1rem; text-align: center; outline: none; }
+          input:focus { border-color: #53fa5d; }
+          button { background: #53fa5d; color: #000; border: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1rem; text-transform: uppercase; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h2 style="color:#53fa5d;">Connect Kick Account</h2>
+          <p>Local Mock OAuth Flow: enter your Kick username to link it.</p>
+          <form action="/auth/kick/callback" method="GET">
+            <input type="hidden" name="state" value="mock_state" />
+            <input type="text" name="code" placeholder="Your Kick username..." required />
+            <br/>
+            <button type="submit">Complete Connection</button>
+          </form>
+        </div>
+      </body>
+      </html>
+    `);
+  }
+
+  // Real PKCE Kick OAuth
+  const state = randomBytes(16).toString('hex');
+  const verifier = randomBytes(32).toString('hex');
+  if (req.session) {
+    req.session.kick_state = state;
+    req.session.kick_verifier = verifier;
+  }
+
+  const challenge = generatePkceChallenge(verifier);
+  const params = new URLSearchParams({
+    client_id: KICK_CLIENT_ID,
+    redirect_uri: KICK_REDIRECT_URI,
+    response_type: 'code',
+    scope: 'user.read',
+    state: state,
+    code_challenge: challenge,
+    code_challenge_method: 'S256'
+  });
+
+  res.redirect(`https://id.kick.com/oauth/authorize?${params.toString()}`);
+});
+
+// ─── GET /auth/kick/callback ─────────────────────────────────────────────────
+app.get("/auth/kick/callback", requireAuth, async (req, res) => {
+  const { code, state } = req.query;
+  const kickClientPlaceholder = !KICK_CLIENT_ID || KICK_CLIENT_ID.startsWith("YOUR_");
+
+  if (!code) {
+    return res.redirect("/verify.html?error=kick_denied");
+  }
+
+  let kickUsername = "";
+  let kickUserId = "";
+
+  if (kickClientPlaceholder) {
+    // Mock flow: the input code is the username
+    kickUsername = code.trim();
+    kickUserId = `kick_${Math.floor(Math.random() * 100000000)}`;
+  } else {
+    // Real PKCE token exchange & API call
+    if (req.session && req.session.kick_state && state !== req.session.kick_state) {
+      return res.redirect("/verify.html?error=state_mismatch");
+    }
+    const verifier = req.session ? req.session.kick_verifier : null;
+    if (req.session) {
+      delete req.session.kick_state;
+      delete req.session.kick_verifier;
+    }
+
+    try {
+      const tokenRes = await fetch('https://id.kick.com/oauth/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: KICK_CLIENT_ID,
+          client_secret: KICK_CLIENT_SECRET,
+          grant_type: 'authorization_code',
+          code: code,
+          redirect_uri: KICK_REDIRECT_URI,
+          code_verifier: verifier
+        })
+      });
+
+      if (!tokenRes.ok) {
+        console.error("Kick token exchange failed:", await tokenRes.text());
+        return res.redirect("/verify.html?error=kick_failed");
+      }
+
+      const tokenData = await tokenRes.json();
+
+      // Get user profile
+      const userRes = await fetch('https://api.kick.com/public/v1/users', {
+        headers: { 'Authorization': `Bearer ${tokenData.access_token}` }
+      });
+      if (!userRes.ok) {
+        console.error("Kick user profile fetch failed:", await userRes.text());
+        return res.redirect("/verify.html?error=kick_failed");
+      }
+      const kickData = await userRes.json();
+      kickUsername = kickData.username;
+      kickUserId = kickData.id;
+    } catch (err) {
+      console.error("Kick callback error:", err.message);
+      return res.redirect("/verify.html?error=kick_failed");
+    }
+  }
+
+  // Link user's Kick account in Supabase
+  try {
+    if (!supabase) return res.redirect("/verify.html?error=database_unavailable");
+
+    // Check if duplicate Kick username exists
+    const { data: duplicateUser } = await supabase
+      .from("users")
+      .select("id")
+      .eq("kick_username", kickUsername.toLowerCase())
+      .neq("id", req.user.id)
+      .maybeSingle();
+
+    if (duplicateUser) {
+      return res.redirect("/verify.html?error=kick_already_linked");
+    }
+
+    // Unregister old username from tracker
+    if (req.user.kick_username) {
+      chatActivityTracker.unregisterUser(req.user.kick_username);
+    }
+
+    // Update users table
+    const { data: updatedUser } = await supabase
+      .from("users")
+      .update({
+        kick_username: kickUsername.toLowerCase(),
+        kick_id: kickUserId,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", req.user.id)
+      .select()
+      .single();
+
+    // Register user in tracker
+    if (updatedUser && updatedUser.kick_username) {
+      chatActivityTracker.registerUser(updatedUser.kick_username, updatedUser.id);
+    }
+
+    // Update linked_accounts table
+    const { data: existingLink } = await supabase
+      .from("linked_accounts")
+      .select("*")
+      .eq("user_id", req.user.id)
+      .eq("provider", "kick")
+      .maybeSingle();
+
+    if (existingLink) {
+      await supabase
+        .from("linked_accounts")
+        .update({
+          provider_user_id: kickUserId,
+          username: kickUsername,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", existingLink.id);
+    } else {
+      await supabase
+        .from("linked_accounts")
+        .insert({
+          user_id: req.user.id,
+          provider: "kick",
+          provider_user_id: kickUserId,
+          username: kickUsername,
+          linked_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+    }
+
+    return res.redirect("/verify.html?success=kick");
+  } catch (err) {
+    console.error("Kick link database error:", err.message);
+    return res.redirect("/verify.html?error=kick_failed");
   }
 });
 
 // ─── GET /auth/me (Read-only Supabase profile details) ───────────────────────
 app.get("/auth/me", requireClerkAuth, async (req, res) => {
   if (!req.user) {
-    return res.status(404).json({ error: "User profile not found. Please sync first." });
+    return res.status(404).json({ error: "User profile not found. Please login first." });
   }
 
   // Fetch linked accounts
@@ -897,7 +1039,7 @@ app.get("/auth/me", requireClerkAuth, async (req, res) => {
   res.json({
     loggedIn:          true,
     userId:            req.user.id,
-    clerkId:           req.user.clerk_id,
+    clerkId:           req.user.clerk_id || null,
     email:             req.user.email,
     displayName:       req.user.display_name,
     avatarUrl:         req.user.avatar_url,
@@ -910,7 +1052,13 @@ app.get("/auth/me", requireClerkAuth, async (req, res) => {
 
 // ─── POST /auth/logout ────────────────────────────────────────────────────────
 app.post("/auth/logout", (req, res) => {
+  res.clearCookie('bigdtv_token', { path: '/' });
   res.clearCookie("verified_degencity_username", { path: '/' });
+  if (req.session) {
+    req.session.destroy((err) => {
+      if (err) console.error("Session destroy error:", err);
+    });
+  }
   res.json({ success: true });
 });
 
@@ -1208,13 +1356,18 @@ const chatActivityTracker = {
 };
 
 // ─── Kick WebSocket Chat Listener ─────────────────────────────────────────────
-const KICK_PUSHER_APP_KEY = "eb1d5f283081a78b932c";
+const KICK_PUSHER_APP_KEY = process.env.KICK_PUSHER_APP_KEY || "32cbd69e4b950bf97679";
 let kickWs                = null;
-let kickChatroomId        = null;
+let kickChatroomId        = process.env.KICK_CHATROOM_ID || null;
 
 async function fetchKickChatroomId(slug) {
+  if (process.env.KICK_CHATROOM_ID) return process.env.KICK_CHATROOM_ID;
   try {
-    const res  = await fetch(`https://kick.com/api/v2/channels/${slug}`);
+    const res = await fetch(`https://kick.com/api/v2/channels/${slug}`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
     if (!res.ok) return null;
     const data = await res.json();
     return data?.chatroom?.id || null;
@@ -1228,7 +1381,7 @@ function connectKickChat() {
   kickWs      = new WebSocket(wsUrl);
 
   kickWs.on("open", () => {
-    console.log("✅ Kick chat WebSocket connected");
+    console.log(`✅ Kick chat WebSocket connected for chatroom ${kickChatroomId}`);
     kickWs.send(JSON.stringify({
       event: "pusher:subscribe",
       data:  { auth: "", channel: `chatrooms.${kickChatroomId}.v2` }
@@ -1247,9 +1400,9 @@ function connectKickChat() {
       if (msg.event === "App\\Events\\ChatMessageEvent") {
         const payload = typeof msg.data === "string" ? JSON.parse(msg.data) : msg.data;
         const sender  = payload?.sender?.username || payload?.sender?.slug;
-        // Only record if this sender is a registered Kick-OAuth user
         if (sender && chatActivityTracker.userIdMap.has(sender.toLowerCase())) {
           chatActivityTracker.recordMessage(sender);
+          console.log(`💬 Kick chat activity recorded for ${sender}`);
         }
       }
     } catch { /* ignore malformed */ }
@@ -1272,12 +1425,29 @@ async function startKickChatListener() {
     console.log(`✅ Kick chatroom ID: ${kickChatroomId}`);
     connectKickChat();
   } else {
-    console.warn(`⚠️  Could not fetch Kick chatroom ID for '${KICK_CHANNEL}'. Chat listener inactive.`);
+    console.warn(`⚠️  Kick chatroom auto-lookup blocked by Cloudflare for '${KICK_CHANNEL}'. (Set KICK_CHATROOM_ID in .env or use chat simulator)`);
   }
 }
 
 // Award points every 5 minutes
 setInterval(() => chatActivityTracker.awardInterval(), INTERVAL_MS);
+
+// ─── POST /api/test/record-chat (For local testing of chat points) ────────────
+app.post("/api/test/record-chat", requireAuth, (req, res) => {
+  const { kick_username } = req.body;
+  const username = kick_username || (req.user ? req.user.kick_username : null);
+
+  if (!username) {
+    return res.status(400).json({ error: "Kick username required" });
+  }
+
+  chatActivityTracker.recordMessage(username);
+  console.log(`[TEST] Recorded chat activity for Kick user: ${username}`);
+  res.json({
+    success: true,
+    message: `Recorded chat activity for ${username}. Points will be awarded at next 5m interval.`
+  });
+});
 
 // ─── Load All Kick-Linked Users Into Memory on Startup ───────────────────────
 async function loadRegisteredUsers() {

@@ -820,19 +820,40 @@ footer a:hover { color: var(--purple-200); }
 <!-- ── MAIN ───────────────────────────────────────────────── -->
 <main style="display:flex;flex-direction:column;align-items:center;padding:40px 20px;">
 
-  <!-- User Points Bar -->
-  <div id="store-user-bar" class="store-user-bar" style="display:none;">
-    <div>
-      <div class="ub-label">Your Balance</div>
-      <div class="ub-points" id="store-points-val">0</div>
+  <!-- Store Integration & Connection Header -->
+  <div id="store-user-bar" class="store-user-bar" style="display:none; width:100%; max-width:800px; flex-direction:column; gap:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+      <div>
+        <div class="ub-label">Your Balance</div>
+        <div class="ub-points" id="store-points-val">0</div>
+      </div>
+      <div class="ub-right" style="text-align:right;">
+        <span style="font-size:1.8rem;">🪙</span>
+        <div style="font-family:var(--font-ui);font-size:0.75rem;letter-spacing:0.18em;color:var(--text-muted);text-transform:uppercase;">BigD Coins</div>
+      </div>
     </div>
-    <div class="ub-right">
-      <span style="font-size:1.6rem;">🪙</span>
-      <span style="font-family:var(--font-ui);font-size:0.72rem;letter-spacing:0.18em;color:var(--text-muted);">BigD Coins</span>
+    
+    <!-- Integration Badges -->
+    <div style="display:flex; gap:10px; flex-wrap:wrap; width:100%; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;" id="store-badges-container">
+      <div id="badge-discord" style="font-size:0.8rem; background:rgba(88,101,242,0.12); border:1px solid rgba(88,101,242,0.3); color:#fff; padding:6px 12px; border-radius:4px; display:inline-flex; align-items:center; gap:6px;">
+        <span style="color:#5865f2;">●</span> Discord: <strong id="store-discord-name">—</strong>
+      </div>
+      <div id="badge-kick" style="font-size:0.8rem; background:rgba(83,250,93,0.12); border:1px solid rgba(83,250,93,0.3); color:#fff; padding:6px 12px; border-radius:4px; display:inline-flex; align-items:center; gap:6px;">
+        <span style="color:#53fa5d;">●</span> Kick: <strong id="store-kick-name">Not Connected</strong>
+        <button id="store-kick-btn" onclick="linkWithKick()" style="background:#53fa5d; color:#000; border:none; border-radius:3px; padding:3px 10px; font-weight:700; font-size:0.75rem; cursor:pointer; margin-left:4px;">Connect</button>
+      </div>
+      <div id="badge-degencity" style="font-size:0.8rem; background:rgba(0,255,229,0.12); border:1px solid rgba(0,255,229,0.3); color:#fff; padding:6px 12px; border-radius:4px; display:inline-flex; align-items:center; gap:6px;">
+        <span style="color:#00ffe5;">●</span> DegenCity: <strong id="store-degen-name">Not Verified</strong>
+        <a id="store-degen-btn" href="verify.html" style="background:#00ffe5; color:#000; text-decoration:none; border-radius:3px; padding:3px 10px; font-weight:700; font-size:0.75rem; margin-left:4px;">Verify</a>
+      </div>
     </div>
   </div>
-  <div id="store-login-prompt" class="store-user-bar" style="display:none;justify-content:center;">
-    <p class="store-login-prompt">Please <a href="verify.html">verify your DegenCity account</a> to access the store.</p>
+
+  <div id="store-login-prompt" class="store-user-bar" style="display:none; justify-content:center; text-align:center; padding:24px; max-width:800px; width:100%;">
+    <div>
+      <p style="margin-bottom:12px; font-size:0.95rem; color:var(--text-secondary);" id="store-prompt-msg">Log in with Discord and connect Kick to start earning 10 BigD Coins / 5 minutes of chat activity!</p>
+      <button onclick="loginWithDiscord()" class="nav-btn-auth" style="padding:10px 20px; font-size:0.9rem;">Login with Discord</button>
+    </div>
   </div>
 
   <!-- Rewards Grid -->
@@ -915,7 +936,7 @@ footer a:hover { color: var(--purple-200); }
   } catch {}
 })();
 
-/* ── Clerk Session / User Badge ─────────────────────────── */
+/* ── Auth Session / User Badge ─────────────────────────── */
 let currentAuthToken = null;
 
 async function loadRedemptions(token) {
@@ -1030,7 +1051,7 @@ async function initStore() {
   }
 }
 
-onClerkAuth(async (clerk) => {
+onAuthReady(async (user) => {
   const badge  = document.getElementById('user-badge');
   const name   = document.getElementById('user-name');
   const coins  = document.getElementById('user-coin-count');
@@ -1038,9 +1059,9 @@ onClerkAuth(async (clerk) => {
   const userBar = document.getElementById('store-user-bar');
   const loginPrompt = document.getElementById('store-login-prompt');
   
-  if (clerk && clerk.user) {
+  if (user) {
     try {
-      const token = await clerk.session.getToken();
+      const token = getAuthToken();
       currentAuthToken = token;
       
       const r = await fetch('/auth/me', {
@@ -1048,7 +1069,7 @@ onClerkAuth(async (clerk) => {
       });
       if (r.ok) {
         const d = await r.json();
-        name.textContent = d.degencityUsername || 'Player';
+        name.textContent = d.displayName || 'Player';
         val.textContent = (d.points || 0).toLocaleString();
         
         const storePointsVal = document.getElementById('store-points-val');
@@ -1056,10 +1077,43 @@ onClerkAuth(async (clerk) => {
           storePointsVal.textContent = (d.points || 0).toLocaleString();
         }
 
+        // Update Discord badge
+        const discordNameEl = document.getElementById('store-discord-name');
+        if (discordNameEl) discordNameEl.textContent = d.displayName || 'Connected';
+
+        // Update Kick badge & action
+        const kickNameEl = document.getElementById('store-kick-name');
+        const kickBtnEl = document.getElementById('store-kick-btn');
+        if (d.kickUsername) {
+          if (kickNameEl) kickNameEl.textContent = d.kickUsername;
+          if (kickBtnEl) kickBtnEl.style.display = 'none';
+        } else {
+          if (kickNameEl) kickNameEl.textContent = 'Not Connected';
+          if (kickBtnEl) kickBtnEl.style.display = 'inline-block';
+        }
+
+        // Update DegenCity badge & action
+        const degenNameEl = document.getElementById('store-degen-name');
+        const degenBtnEl = document.getElementById('store-degen-btn');
+        if (d.degencityUsername) {
+          if (degenNameEl) degenNameEl.textContent = d.degencityUsername;
+          if (degenBtnEl) degenBtnEl.style.display = 'none';
+        } else {
+          if (degenNameEl) degenNameEl.textContent = 'Not Verified';
+          if (degenBtnEl) degenBtnEl.style.display = 'inline-block';
+        }
+
         badge.classList.add('visible');
         coins.classList.add('visible');
+
+        // Always show userBar for logged-in users so they see Kick & DegenCity connect options!
         if (userBar) userBar.style.display = 'flex';
         if (loginPrompt) loginPrompt.style.display = 'none';
+
+        // Toast prompt if Kick is not connected
+        if (!d.kickUsername) {
+          showToast("⚡ Connect your Kick account to earn 10 BigD Coins / 5 minutes of chat activity!");
+        }
 
         await loadRedemptions(token);
       }

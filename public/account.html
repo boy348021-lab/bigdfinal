@@ -505,6 +505,7 @@ footer a:hover { color: var(--purple-200); }
       <span class="status-dot"></span>
       <span id="kick-live-text">Offline</span>
     </a>
+    <button id="nav-auth-btn" class="nav-btn-auth">Login</button>
     <button id="hamburger" aria-label="Toggle menu">
       <span></span><span></span><span></span>
     </button>
@@ -519,6 +520,7 @@ footer a:hover { color: var(--purple-200); }
   <a href="verify.html">Code Check</a>
   <a href="store.html">Store</a>
   <a href="account.html" class="active">Account</a>
+  <a href="#" id="mobile-nav-auth-btn" class="mobile-auth-btn">Login</a>
 </div>
 
 <!-- ─── MAIN ─────────────────────────────────────────────────── -->
@@ -536,13 +538,64 @@ footer a:hover { color: var(--purple-200); }
       <p class="page-desc">Connect your accounts and start earning BigD Coins by chatting in the stream.</p>
     </div>
 
+    <!-- Points Balance -->
+    <div class="panel" id="points-panel" style="display:none;">
+      <div class="panel-header">
+        <div class="panel-icon" style="background:rgba(201,162,39,0.08);">🪙</div>
+        <div class="panel-title">BigD Coins Balance</div>
+      </div>
+      <div class="panel-body">
+        <div class="points-display">
+          <div>
+            <div class="points-value" id="account-points-val">0</div>
+            <div class="points-label">BigD Coins</div>
+          </div>
+          <div class="points-coin">🪙</div>
+        </div>
+      </div>
+    </div>
 
+    <!-- Discord Connection -->
+    <div class="panel" id="discord-panel">
+      <div class="panel-header">
+        <div class="panel-icon" style="background:rgba(88,101,242,0.08);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="color:#5865f2">
+            <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="panel-title">Discord Connection</div>
+        <span id="discord-pill" class="status-pill disconnected" style="margin-left:auto;">Not Connected</span>
+      </div>
+      <div class="panel-body">
+        <div id="discord-connected" style="display:none;">
+          <div class="status-row">
+            <div class="status-info">
+              <img id="discord-avatar-img" src="" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(88,101,242,0.3);" />
+              <div>
+                <div class="status-name" id="discord-username-display">—</div>
+                <div class="status-sub">Discord Account Connected</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="discord-not-connected">
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:14px;">
+            Discord is automatically connected when you log in. Click the button below to connect.
+          </p>
+          <button onclick="loginWithDiscord()" class="login-btn discord" style="width:100%;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;">
+              <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" fill="currentColor"/>
+            </svg>
+            <span>Connect with Discord</span>
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Kick Connection -->
     <div class="panel">
       <div class="panel-header">
         <div class="panel-icon" style="background:rgba(83,250,93,0.08);">
-          <!-- Kick icon -->
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="color:#53fa5d">
             <path d="M5 3L19 12L5 21V3Z" fill="currentColor"/>
           </svg>
@@ -557,7 +610,7 @@ footer a:hover { color: var(--purple-200); }
               <div class="status-avatar placeholder">🎮</div>
               <div>
                 <div class="status-name" id="kick-username-display">—</div>
-                <div class="status-sub">Kick Account Linked — Chat activity tracked</div>
+                <div class="status-sub">Kick Account Connected — Chat activity tracked</div>
               </div>
             </div>
             <button onclick="unlinkKick()" style="font-family:var(--font-ui);font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);padding:6px 12px;border:1px solid rgba(255,50,50,0.2);border-radius:4px;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(255,50,50,0.4)';this.style.color='#ff3232'" onmouseout="this.style.borderColor='rgba(255,50,50,0.2)';this.style.color='var(--text-muted)'">Unlink</button>
@@ -567,10 +620,9 @@ footer a:hover { color: var(--purple-200); }
           <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:14px;">
             Link your Kick username to enable point earning for watching the stream and chatting.
           </p>
-          <div style="display:flex; gap:10px;">
-            <input type="text" id="kick-input" style="flex:1; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:10px 14px; color:#fff; font-family:var(--font-mono); font-size:0.9rem; transition:border-color 0.2s;" placeholder="Your Kick username..." autocomplete="off"/>
-            <button onclick="linkKick()" style="background:var(--glow-purple); border:none; border-radius:4px; color:#fff; font-family:var(--font-ui); font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; padding:10px 20px; cursor:pointer; transition:all 0.2s;">Link</button>
-          </div>
+          <button onclick="linkWithKick()" class="login-btn kick" style="width:100%;">
+            Connect with Kick
+          </button>
           <div id="kick-error" style="display:none; color:#ff4444; font-size:0.8rem; margin-top:8px;"></div>
         </div>
       </div>
@@ -654,6 +706,7 @@ footer a:hover { color: var(--purple-200); }
   <canvas id="racecar-canvas" width="192" height="104" aria-label="Ferrari edge bot" tabindex="0">Ferrari</canvas>
 </div>
 
+<script src="/auth-helper.js"></script>
 <script>
 /* ── URL Feedback Banners ─────────────────────────────────── */
 (function(){
@@ -698,13 +751,24 @@ footer a:hover { color: var(--purple-200); }
 let currentUser = null;
 async function loadSession() {
   const localDegen = localStorage.getItem('verified_degencity_username');
+  const token = getAuthToken();
+
+  if (!token) {
+    if (localDegen) {
+      renderAccountState({ loggedIn: false, tempDegencityUsername: localDegen });
+    } else {
+      window.location.href = "/verify.html";
+    }
+    return;
+  }
 
   try {
-    const r = await fetch('/auth/me');
+    const r = await fetch('/auth/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
     if (!r.ok) {
       console.warn("Session fetch failed with status:", r.status);
       if (localDegen) {
-        // We have local verification, let them stay and render fallback state
         renderAccountState({ loggedIn: false, tempDegencityUsername: localDegen });
         return;
       } else {
@@ -716,15 +780,7 @@ async function loadSession() {
     const d = await r.json();
     currentUser = d;
 
-    // Enforce Step 1: Redirect to verify.html if they have not completed Code Verification
-    // (neither logged-in DB link nor cookie nor localStorage)
-    const hasDegen = d.degencityUsername || d.tempDegencityUsername || localDegen;
-    if (!hasDegen) {
-      window.location.href = "/verify.html";
-      return;
-    }
-
-    // If backend confirmed the DegenCity username is linked or we have a cookie, sync it to localStorage
+    // Sync localStorage
     if (d.degencityUsername) {
       localStorage.setItem('verified_degencity_username', d.degencityUsername);
     } else if (d.tempDegencityUsername) {
@@ -735,7 +791,6 @@ async function loadSession() {
   } catch (err) {
     console.error("Session load error:", err);
     if (localDegen) {
-      // Network/Syntax error, but we have local verification, let them stay
       renderAccountState({ loggedIn: false, tempDegencityUsername: localDegen });
     } else {
       window.location.href = "/verify.html";
@@ -746,6 +801,43 @@ async function loadSession() {
 function renderAccountState(d) {
   const isLoggedIn = d.loggedIn;
   const degencityUsername = d.degencityUsername || d.tempDegencityUsername || localStorage.getItem('verified_degencity_username') || null;
+
+  // Points panel
+  const pointsPanel = document.getElementById('points-panel');
+  if (pointsPanel && isLoggedIn) {
+    pointsPanel.style.display = 'block';
+    const pointsVal = document.getElementById('account-points-val');
+    if (pointsVal) pointsVal.textContent = (d.points || 0).toLocaleString();
+  }
+
+  // Discord panel
+  const discordPill = document.getElementById('discord-pill');
+  const discordConnected = document.getElementById('discord-connected');
+  const discordNotConnected = document.getElementById('discord-not-connected');
+  if (isLoggedIn) {
+    // Find discord info from linkedAccounts or top-level fields
+    const discordLink = (d.linkedAccounts || []).find(a => a.provider === 'discord');
+    const discordUsername = discordLink ? discordLink.username : d.displayName;
+    const discordAvatar = discordLink ? discordLink.avatar_url : d.avatarUrl;
+
+    if (discordConnected) discordConnected.style.display = 'block';
+    if (discordNotConnected) discordNotConnected.style.display = 'none';
+    const discordUsernameEl = document.getElementById('discord-username-display');
+    if (discordUsernameEl) discordUsernameEl.textContent = discordUsername || '—';
+    const discordAvatarImg = document.getElementById('discord-avatar-img');
+    if (discordAvatarImg && discordAvatar) discordAvatarImg.src = discordAvatar;
+    if (discordPill) {
+      discordPill.textContent = 'Connected';
+      discordPill.className = 'status-pill connected';
+    }
+  } else {
+    if (discordConnected) discordConnected.style.display = 'none';
+    if (discordNotConnected) discordNotConnected.style.display = 'block';
+    if (discordPill) {
+      discordPill.textContent = 'Not Connected';
+      discordPill.className = 'status-pill disconnected';
+    }
+  }
 
   // Kick panel
   const kickPill = document.getElementById('kick-pill');
@@ -760,8 +852,6 @@ function renderAccountState(d) {
   } else {
     document.getElementById('kick-login').style.display      = 'block';
     document.getElementById('kick-connected').style.display  = 'none';
-    const inputField = document.getElementById('kick-input');
-    if (inputField) inputField.value = '';
     const errorDiv = document.getElementById('kick-error');
     if (errorDiv) errorDiv.style.display = 'none';
     if (kickPill) {
@@ -783,7 +873,8 @@ function renderAccountState(d) {
   }
 
   // Logout wrap visibility
-  document.getElementById('logout-wrap').style.display = isLoggedIn ? 'block' : 'none';
+  const logoutWrap = document.getElementById('logout-wrap');
+  if (logoutWrap) logoutWrap.style.display = isLoggedIn ? 'block' : 'none';
 }
 
 function showToast(msg, type = 'success') {
@@ -795,50 +886,25 @@ function showToast(msg, type = 'success') {
   t._timer = setTimeout(() => { t.classList.remove('show'); }, 3800);
 }
 
-/* ── Kick Username Linking ── */
-async function linkKick() {
-  const input = document.getElementById('kick-input');
-  const errorDiv = document.getElementById('kick-error');
-  if (!input || !errorDiv) return;
-
-  const val = input.value.trim();
-  if (!val) {
-    errorDiv.textContent = 'Please enter your Kick username.';
-    errorDiv.style.display = 'block';
-    return;
-  }
-
-  errorDiv.style.display = 'none';
-  try {
-    const r = await fetch('/api/user/kick', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ kick_username: val })
-    });
-    const d = await r.json();
-    if (d.success) {
-      showToast('✓ Kick username linked successfully!', 'success');
-      loadSession();
-    } else {
-      errorDiv.textContent = d.error || 'Linking failed. Please try again.';
-      errorDiv.style.display = 'block';
-    }
-  } catch (e) {
-    errorDiv.textContent = 'Network error. Please try again.';
-    errorDiv.style.display = 'block';
-  }
-}
-
+/* ── Kick Username Unlinking ── */
 async function unlinkKick() {
   if (!confirm('Are you sure you want to unlink your Kick username?')) return;
+  const token = getAuthToken();
+  if (!token) {
+    showToast('Please log in first.', 'error');
+    return;
+  }
   try {
-    const r = await fetch('/api/user/kick', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const r = await fetch('/profile/kick', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({ kick_username: null })
     });
     const d = await r.json();
-    if (d.success) {
+    if (r.ok) {
       showToast('✓ Kick username unlinked successfully!', 'success');
       loadSession();
     } else {
@@ -849,13 +915,9 @@ async function unlinkKick() {
   }
 }
 
-// Heartbeat timer removed
-
 /* ── Logout ──────────────────────────────────────────────── */
 async function doLogout() {
-  localStorage.removeItem('verified_degencity_username');
-  await fetch('/auth/logout', { method: 'POST' });
-  window.location.href = "/verify.html";
+  await logoutUser();
 }
 
 /* ── Hamburger ───────────────────────────────────────────── */
@@ -1104,8 +1166,10 @@ hamburger.addEventListener('click', () => {
   };
 })();
 
-// Init
-loadSession();
+// Init — wait for auth to be ready before loading session
+onAuthReady(() => {
+  loadSession();
+});
 </script>
 
 <!-- Toast notification element -->
