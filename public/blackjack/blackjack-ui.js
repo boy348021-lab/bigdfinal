@@ -367,16 +367,17 @@
         overlay = document.createElement('div');
         overlay.id = 'bj-insurance-modal';
         overlay.className = 'bj-result-overlay show';
-        overlay.style.cssText = 'background:rgba(10,10,25,0.94); backdrop-filter:blur(10px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:25px; text-align:center; z-index:100;';
         document.querySelector('.bj-table').appendChild(overlay);
       }
+
+      overlay.style.cssText = 'background:rgba(10,10,25,0.96); backdrop-filter:blur(12px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center; z-index:9999; pointer-events:auto; border:2px solid #53fa5d; border-radius:14px; box-shadow:0 0 40px rgba(83,250,93,0.35);';
 
       overlay.innerHTML = `
         <div style="font-size:1.6rem; font-weight:900; color:#53fa5d; margin-bottom:10px; text-shadow:0 0 15px rgba(83,250,93,0.5);">🛡️ DEALER SHOWS AN ACE</div>
         <div style="font-size:0.95rem; color:#d0c8ef; margin-bottom:24px; max-width:340px; line-height:1.5;">Buy Insurance for 50% of your bet (${activeHand.insuranceCost} BigD Coins)? Pays 2:1 if Dealer has Blackjack.</div>
-        <div style="display:flex; gap:14px;">
-          <button id="bj-ins-yes" style="background:#53fa5d; color:#000; border:none; padding:12px 22px; border-radius:6px; font-weight:800; cursor:pointer; font-size:0.95rem; text-transform:uppercase;">Accept Insurance</button>
-          <button id="bj-ins-no" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:12px 22px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.95rem;">Decline</button>
+        <div style="display:flex; gap:14px; position:relative; z-index:10000;">
+          <button id="bj-ins-yes" style="background:#53fa5d; color:#000; border:none; padding:14px 24px; border-radius:8px; font-weight:900; cursor:pointer; font-size:1rem; text-transform:uppercase; pointer-events:auto; box-shadow:0 0 15px rgba(83,250,93,0.4);">Accept Insurance</button>
+          <button id="bj-ins-no" style="background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.25); padding:14px 24px; border-radius:8px; font-weight:800; cursor:pointer; font-size:1rem; pointer-events:auto;">Decline</button>
         </div>
       `;
 
@@ -384,6 +385,7 @@
 
       const handleChoice = async (buy) => {
         overlay.classList.remove('show');
+        overlay.style.display = 'none';
         const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
         if (token) {
           try {
@@ -416,8 +418,12 @@
         resolve();
       };
 
-      document.getElementById('bj-ins-yes').onclick = () => handleChoice(true);
-      document.getElementById('bj-ins-no').onclick = () => handleChoice(false);
+      setTimeout(() => {
+        const btnYes = document.getElementById('bj-ins-yes');
+        const btnNo = document.getElementById('bj-ins-no');
+        if (btnYes) btnYes.onclick = () => handleChoice(true);
+        if (btnNo) btnNo.onclick = () => handleChoice(false);
+      }, 50);
     });
   }
 
