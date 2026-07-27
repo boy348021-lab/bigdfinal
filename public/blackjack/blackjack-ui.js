@@ -645,12 +645,29 @@
     const payoutEl = document.getElementById('bj-result-payout');
     if (!overlay || !titleEl || !payoutEl) return;
 
-    if (outcome === 'win' || outcome === 'blackjack') {
-      titleEl.textContent = outcome === 'blackjack' ? 'BLACKJACK!' : 'YOU WIN!';
+    let finalOutcome = outcome;
+
+    // Defensive score enforcement to guarantee strict rule compliance
+    if (activeHand && !activeHand.isSplit) {
+      if (activeHand.playerScore > 21) {
+        finalOutcome = 'bust';
+      } else if (activeHand.dealerScore > 21) {
+        finalOutcome = 'win';
+      } else if (activeHand.playerScore > activeHand.dealerScore) {
+        finalOutcome = 'win';
+      } else if (activeHand.playerScore < activeHand.dealerScore) {
+        finalOutcome = 'loss';
+      } else if (activeHand.playerScore === activeHand.dealerScore) {
+        finalOutcome = 'push';
+      }
+    }
+
+    if (finalOutcome === 'win' || finalOutcome === 'blackjack') {
+      titleEl.textContent = finalOutcome === 'blackjack' ? 'BLACKJACK!' : 'YOU WIN!';
       titleEl.className = 'bj-result-title win';
-      payoutEl.textContent = `+${payout.toLocaleString()} BigD Coins`;
-    } else if (outcome === 'loss' || outcome === 'bust') {
-      titleEl.textContent = outcome === 'bust' ? 'PLAYER BUST' : 'DEALER WINS';
+      payoutEl.textContent = `+${(payout || 0).toLocaleString()} BigD Coins`;
+    } else if (finalOutcome === 'loss' || finalOutcome === 'bust') {
+      titleEl.textContent = finalOutcome === 'bust' ? 'PLAYER BUST' : 'DEALER WINS';
       titleEl.className = 'bj-result-title loss';
       payoutEl.textContent = `-${currentBet.toLocaleString()} BigD Coins`;
     } else {
