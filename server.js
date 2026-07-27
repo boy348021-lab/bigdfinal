@@ -570,7 +570,7 @@ app.post("/api/store/redeem", requireAuth, async (req, res) => {
 });
 
 // ─── User Redemption History ──────────────────────────────────────────────────
-app.get("/api/store/redemptions", requireClerkAuth, async (req, res) => {
+app.get("/api/store/redemptions", requireAuth, async (req, res) => {
   if (!supabase) return res.status(503).json({ error: "Database not configured" });
   if (!req.user) return res.status(404).json({ error: "User profile not found. Please sync first." });
   const { data, error } = await supabase
@@ -580,6 +580,262 @@ app.get("/api/store/redemptions", requireClerkAuth, async (req, res) => {
     .order("created_at", { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   res.json({ redemptions: data || [] });
+});
+
+// ─── CASINO: BLACKJACK MODULE ─────────────────────────────────────────────────
+const activeBlackjackGames = new Map();
+
+const SUITS_LIST = ['♥', '♦', '♣', '♠'];
+const RANKS_LIST = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+
+function createBlackjackShoe(numDecks = 6) {
+  const cards = [];
+  for (let i = 0; i < numDecks; i++) {
+    for (const suit of SUITS_LIST) {
+      for (const rank of RANKS_LIST) {
+        cards.push({
+          suit,
+          rank,
+          isRed: suit === '♥' || suit === '♦',
+          value: ['J', 'Q', 'K'].includes(rank) ? 10 : (rank === 'A' ? 11 : parseInt(rank, 10))
+        });
+      }
+    }
+  }
+  // Fisher-Yates Shuffle
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
+  return cards;
+}
+
+function calcHandScore(cards) {
+  let score = 0;
+  let aces = 0;
+  for (const c of cards) {
+    score += c.value;
+    if (c.rank === 'A') aces++;
+  }
+  while (score > 21 && aces > 0) {
+    score -= 10;
+    aces--;
+  }
+  return {
+    score,
+    isBust: score > 21,
+    isBlackjack: score === 21 && cards.length === 2,
+    isSoft: aces > 0 && score <= 21
+  };
+}
+
+app.post("/api/casino/blackjack/deal", requireAuth, async (req, res) => {
+  if (!supabase) return res.status(503).json({ error: "Database not configured" });
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
+  const bet = parseInt(req.body.bet, 10);
+  if (isNaN(bet) || bet <= 0) {
+    return res.status(400).json({ error: "Invalid bet amount" });
+  }
+
+  const userId = req.user.id;
+
+  try {
+    // Deduct bet atomically via modify_points RPC
+    const { data: newBalance, error: rpcErr } = await supabase.rpc("modify_points", {
+      p_user_id: userId,
+      p_delta: -bet,
+      p_action: "blackjack_bet",
+      p_source: "blackjack",
+      p_ref: `bj_bet_${Date.now()}`
+    });
+
+    if (rpcErr) {
+      if (rpcErr.message.toLowerCase().includes("insufficient")) {
+        return res.status(402).json({ error: "Insufficient BigD Coins balance" });
+      }
+      throw new Error(rpcErr.message);
+    }
+
+    // Get or create shoe for user session
+    let shoe = createBlackjackShoe(6);
+
+    const playerCards = [shoe.pop(), shoe.pop()];
+    const dealerCards = [shoe.pop(), shoe.pop()];
+
+    const playerCalc = calcHandScore(playerCards);
+    const dealerCalc = calcHandScore(dealerCards);
+
+    let isEnded = false;
+    let outcome = null;
+    let payout = 0;
+
+    if (playerCalc.isBlackjack) {
+      isEnded = true;
+      if (dealerCalc.isBlackjack) {
+        outcome = 'push';
+        payout = bet; // Return bet
+      } else {
+        outcome = 'blackjack';
+        payout = Math.floor(bet * 2.5); // 3:2 payout (bet + 1.5x)
+      }
+    }
+
+    let updatedBalance = newBalance;
+
+    if (isEnded && payout > 0) {
+      const { data: balAfterPayout } = await supabase.rpc("modify_points", {
+        p_user_id: userId,
+        p_delta: payout,
+        p_action: "blackjack_payout",
+        p_source: "blackjack",
+        p_ref: `bj_pay_${Date.now()}`
+      });
+      if (balAfterPayout !== null && balAfterPayout !== undefined) {
+        updatedBalance = balAfterPayout;
+      }
+    }
+
+    const handState = {
+      handId: `bj_${Date.now()}`,
+      bet,
+      playerCards,
+      dealerCards,
+      playerScore: playerCalc.score,
+      dealerScore: dealerCalc.score,
+      dealerVisibleScore: calcHandScore([dealerCards[0]]).score,
+      isEnded,
+      outcome,
+      payout,
+      shoe
+    };
+
+    if (!isEnded) {
+      activeBlackjackGames.set(userId, handState);
+    } else {
+      activeBlackjackGames.delete(userId);
+    }
+
+    res.json({
+      ok: true,
+      new_balance: updatedBalance,
+      handState: {
+        ...handState,
+        shoe: undefined // Don't leak full shoe to client
+      }
+    });
+
+  } catch (err) {
+    console.error("Blackjack deal error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
+  if (!supabase) return res.status(503).json({ error: "Database not configured" });
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
+  const userId = req.user.id;
+  const game = activeBlackjackGames.get(userId);
+
+  if (!game || game.isEnded) {
+    return res.status(400).json({ error: "No active hand found. Please deal a new hand." });
+  }
+
+  const { action } = req.body;
+  let updatedBalance = undefined;
+
+  try {
+    if (action === 'hit') {
+      game.playerCards.push(game.shoe.pop());
+      const pCalc = calcHandScore(game.playerCards);
+      game.playerScore = pCalc.score;
+
+      if (pCalc.isBust) {
+        game.isEnded = true;
+        game.outcome = 'bust';
+        game.payout = 0;
+        activeBlackjackGames.delete(userId);
+      }
+    } else if (action === 'stand' || action === 'double') {
+      if (action === 'double') {
+        // Deduct extra bet
+        const { data: newBal, error: rpcErr } = await supabase.rpc("modify_points", {
+          p_user_id: userId,
+          p_delta: -game.bet,
+          p_action: "blackjack_double",
+          p_source: "blackjack",
+          p_ref: `bj_dbl_${Date.now()}`
+        });
+
+        if (rpcErr) {
+          return res.status(402).json({ error: "Insufficient balance to double down" });
+        }
+        updatedBalance = newBal;
+        game.bet *= 2;
+        game.playerCards.push(game.shoe.pop());
+        game.playerScore = calcHandScore(game.playerCards).score;
+      }
+
+      // Dealer Turn (Stand on Soft 17)
+      if (game.playerScore <= 21) {
+        let dCalc = calcHandScore(game.dealerCards);
+        while (dCalc.score < 17 || (dCalc.score === 17 && dCalc.isSoft)) {
+          game.dealerCards.push(game.shoe.pop());
+          dCalc = calcHandScore(game.dealerCards);
+        }
+        game.dealerScore = dCalc.score;
+
+        game.isEnded = true;
+
+        if (dCalc.isBust) {
+          game.outcome = 'win';
+          game.payout = game.bet * 2;
+        } else if (game.playerScore > game.dealerScore) {
+          game.outcome = 'win';
+          game.payout = game.bet * 2;
+        } else if (game.playerScore < game.dealerScore) {
+          game.outcome = 'loss';
+          game.payout = 0;
+        } else {
+          game.outcome = 'push';
+          game.payout = game.bet;
+        }
+      } else {
+        game.isEnded = true;
+        game.outcome = 'bust';
+        game.payout = 0;
+      }
+
+      if (game.payout > 0) {
+        const { data: balAfterPay } = await supabase.rpc("modify_points", {
+          p_user_id: userId,
+          p_delta: game.payout,
+          p_action: "blackjack_payout",
+          p_source: "blackjack",
+          p_ref: `bj_pay_${Date.now()}`
+        });
+        if (balAfterPay !== null && balAfterPay !== undefined) {
+          updatedBalance = balAfterPay;
+        }
+      }
+
+      activeBlackjackGames.delete(userId);
+    }
+
+    res.json({
+      ok: true,
+      new_balance: updatedBalance,
+      handState: {
+        ...game,
+        shoe: undefined
+      }
+    });
+
+  } catch (err) {
+    console.error("Blackjack action error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ─── Admin — Redemptions ──────────────────────────────────────────────────────

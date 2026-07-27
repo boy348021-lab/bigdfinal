@@ -1,0 +1,444 @@
+/* ============================================================
+   BLACKJACK CASINO MODULE STYLES (Shuffle-inspired aesthetic)
+   ============================================================ */
+
+:root {
+  --bj-bg: #0d0e12;
+  --bj-panel-bg: #151821;
+  --bj-table-bg: #12141d;
+  --bj-felt-gradient: radial-gradient(circle at 50% 40%, #1e2230 0%, #12141c 100%);
+  --bj-accent-purple: #8800ff;
+  --bj-accent-purple-bright: #9e2bff;
+  --bj-accent-green: #00e676;
+  --bj-accent-red: #ff3366;
+  --bj-card-bg: #ffffff;
+  --bj-text-primary: #ffffff;
+  --bj-text-secondary: #9098b1;
+  --bj-border-subtle: rgba(255, 255, 255, 0.08);
+}
+
+/* Container */
+.bj-container {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 560px;
+  background: var(--bj-bg);
+  border: 1px solid var(--bj-border-subtle);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  font-family: var(--font-ui, 'Inter', -apple-system, sans-serif);
+  margin: 20px auto;
+  position: relative;
+}
+
+/* Left Sidebar Controls */
+.bj-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  background: var(--bj-panel-bg);
+  border-right: 1px solid var(--bj-border-subtle);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 2;
+}
+
+/* Mode Selector Tabs (Standard / Side Bet) */
+.bj-mode-tabs {
+  display: flex;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--bj-border-subtle);
+}
+.bj-mode-btn {
+  flex: 1;
+  padding: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--bj-text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.bj-mode-btn.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Bet Inputs & Balance Display */
+.bj-bet-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bj-bet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--bj-text-secondary);
+  font-weight: 600;
+}
+.bj-balance-val {
+  font-family: var(--font-mono, monospace);
+  color: #00e676;
+  font-weight: 700;
+}
+
+.bj-input-row {
+  display: flex;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--bj-border-subtle);
+  border-radius: 8px;
+  padding: 4px;
+  align-items: center;
+  transition: border-color 0.2s;
+}
+.bj-input-row:focus-within {
+  border-color: var(--bj-accent-purple-bright);
+  box-shadow: 0 0 10px rgba(136, 0, 255, 0.2);
+}
+
+.bj-currency-symbol {
+  padding: 0 12px;
+  font-size: 1rem;
+  color: var(--gold-400, #c9a227);
+  font-weight: 700;
+}
+
+.bj-bet-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: var(--font-mono, monospace);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 10px 0;
+  outline: none;
+  width: 100%;
+}
+
+.bj-multiplier-btns {
+  display: flex;
+  gap: 4px;
+  padding-right: 4px;
+}
+.bj-mult-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.bj-mult-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Action Button Grid (Hit, Stand, Split, Double) */
+.bj-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.bj-action-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--bj-border-subtle);
+  border-radius: 8px;
+  padding: 14px 12px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bj-action-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+.bj-action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+.bj-action-icon {
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+/* Primary Bet / Deal Button */
+.bj-main-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--bj-accent-purple) 0%, var(--bj-accent-purple-bright) 100%);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(136, 0, 255, 0.4);
+  transition: all 0.2s;
+  margin-top: auto;
+}
+.bj-main-btn:hover:not(:disabled) {
+  box-shadow: 0 6px 25px rgba(136, 0, 255, 0.6);
+  transform: translateY(-2px);
+}
+.bj-main-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Main Table Felt Area */
+.bj-table {
+  flex: 1;
+  background: var(--bj-felt-gradient);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px;
+  user-select: none;
+  overflow: hidden;
+}
+
+/* Shoe / Deck in Top Right */
+.bj-shoe {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--bj-border-subtle);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  color: var(--bj-text-secondary);
+}
+.bj-shoe-cards {
+  width: 24px;
+  height: 32px;
+  background: linear-gradient(135deg, #7000ff 0%, #a033ff 100%);
+  border-radius: 4px;
+  box-shadow: -2px 2px 0 #4000a0, -4px 4px 0 #200050;
+}
+
+/* Center Casino Ribbons */
+.bj-ribbons {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  opacity: 0.15;
+  pointer-events: none;
+}
+.bj-ribbon-text {
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #ffffff;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 4px 16px;
+}
+
+/* Hands Area (Dealer & Player) */
+.bj-hand-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  z-index: 1;
+}
+
+/* Score Pill Badges */
+.bj-score-badge {
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid var(--bj-border-subtle);
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-family: var(--font-mono, monospace);
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s;
+}
+.bj-score-badge.win {
+  background: #00e676;
+  color: #000;
+  box-shadow: 0 0 15px rgba(0, 230, 118, 0.6);
+}
+.bj-score-badge.bust {
+  background: #ff3366;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255, 51, 102, 0.6);
+}
+
+/* Cards Row */
+.bj-cards-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  min-height: 140px;
+  padding: 10px;
+}
+
+/* Card Styling */
+.bj-card {
+  width: 90px;
+  height: 130px;
+  background: var(--bj-card-bg);
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px 10px;
+  position: relative;
+  user-select: none;
+  animation: bjDealCard 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+@keyframes bjDealCard {
+  0% {
+    opacity: 0;
+    transform: translateY(-60px) scale(0.7) rotate(-10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+.bj-card.red { color: #e53935; }
+.bj-card.black { color: #1e222d; }
+
+.bj-card-top {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1;
+}
+.bj-card-value {
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+.bj-card-suit-small {
+  font-size: 1rem;
+  margin-top: 2px;
+}
+.bj-card-suit-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.2rem;
+  opacity: 0.95;
+}
+
+.bj-card-back {
+  background: linear-gradient(135deg, #6200ea 0%, #b388ff 100%);
+  border: 3px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bj-card-back::after {
+  content: '♦';
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 2.5rem;
+}
+
+/* Result Overlay Banner */
+.bj-result-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(13, 14, 18, 0.92);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--bj-accent-purple-bright);
+  padding: 16px 36px;
+  border-radius: 12px;
+  text-align: center;
+  z-index: 10;
+  box-shadow: 0 0 40px rgba(136, 0, 255, 0.5);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.bj-result-overlay.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.bj-result-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #fff;
+}
+.bj-result-title.win { color: #00e676; text-shadow: 0 0 20px rgba(0, 230, 118, 0.6); }
+.bj-result-title.loss { color: #ff3366; text-shadow: 0 0 20px rgba(255, 51, 102, 0.6); }
+.bj-result-title.push { color: #ffd600; text-shadow: 0 0 20px rgba(255, 214, 0, 0.6); }
+.bj-result-payout {
+  font-size: 0.9rem;
+  color: var(--bj-text-secondary);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* Responsive Scaling */
+@media (max-width: 900px) {
+  .bj-container {
+    flex-direction: column-reverse;
+    min-height: auto;
+  }
+  .bj-sidebar {
+    width: 100%;
+    border-right: none;
+    border-top: 1px solid var(--bj-border-subtle);
+  }
+  .bj-table {
+    min-height: 420px;
+    padding: 20px 15px;
+  }
+  .bj-card {
+    width: 75px;
+    height: 110px;
+  }
+  .bj-card-value { font-size: 1.1rem; }
+  .bj-card-suit-center { font-size: 1.8rem; }
+}

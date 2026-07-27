@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Blackjack Casino — BigDGamesTV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/style.css"/>
+<link rel="stylesheet" href="/blackjack/blackjack.css"/>
+</head>
+<body style="background:var(--bg-void); color:#fff; min-height:100vh; display:flex; flex-direction:column;">
+
+<nav id="nav">
+  <div class="nav-logo"><a href="index.html" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;"><img src="/logo.png" alt="BigDGamesTV" style="height:44px;width:44px;object-fit:contain;border-radius:4px;"/><span class="nav-logo-text">BIG<em>D</em>TV</span></a></div>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="blackjack.html" class="active">Blackjack ♠️</a></li>
+    <li><a href="verify.html">Code Check</a></li>
+    <li><a href="store.html">Store</a></li>
+    <li style="display:flex;align-items:center;margin-left:8px;"><button id="nav-auth-btn" class="nav-btn-auth">Login</button></li>
+  </ul>
+</nav>
+
+<main style="flex:1; display:flex; flex-direction:column; align-items:center; padding:100px 20px 40px 20px;">
+  <div style="text-align:center; margin-bottom:20px;">
+    <h1 style="font-family:var(--font-display); font-size:2.5rem; font-weight:900; letter-spacing:0.05em; margin-bottom:6px;">High Stakes <span>Blackjack</span></h1>
+    <p style="color:var(--text-secondary); font-size:0.95rem;">Test your strategy against the dealer and double your BigD Coins</p>
+  </div>
+
+  <div id="blackjack-app" style="width:100%; max-width:1200px;"></div>
+</main>
+
+<script src="/auth-helper.js"></script>
+<script src="/blackjack/blackjack-engine.js"></script>
+<script src="/blackjack/blackjack-ui.js"></script>
+</body>
+</html>
