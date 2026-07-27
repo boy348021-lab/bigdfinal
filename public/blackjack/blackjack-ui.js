@@ -78,12 +78,6 @@
             <div class="bj-ribbon-text">INSURANCE PAYS 2 TO 1</div>
           </div>
 
-          <!-- Center Live Balance Display -->
-          <div class="bj-center-balance-badge" id="bj-center-badge">
-            <div class="bj-center-balance-label">Live Balance</div>
-            <div class="bj-center-balance-amount">🪙 <span id="bj-center-balance-val">0</span> <span style="font-size:0.75rem; color:var(--gold-400); font-weight:700;">Coins</span></div>
-          </div>
-
           <!-- Dealer Hand Area -->
           <div class="bj-hand-area">
             <div class="bj-score-badge" id="bj-dealer-score">?</div>
@@ -185,6 +179,55 @@
         <span class="bj-card-suit-center">${card.suit}</span>
       </div>
     `;
+  }
+
+  function playSound(type) {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      const now = ctx.currentTime;
+
+      if (type === 'deal') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === 'chip') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.05);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      } else if (type === 'win') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.1);
+        osc.frequency.setValueAtTime(783.99, now + 0.2);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'loss') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.2);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      }
+    } catch (e) {}
   }
 
   async function startDeal() {
