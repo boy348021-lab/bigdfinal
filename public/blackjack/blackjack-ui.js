@@ -301,11 +301,13 @@
     const playerScoreEl = document.getElementById('bj-player-score');
     const overlay = document.getElementById('bj-result-overlay');
 
+    const insModal = document.getElementById('bj-insurance-modal');
+    if (insModal) { insModal.classList.remove('show'); insModal.style.display = 'none'; }
     if (overlay) overlay.classList.remove('show');
     if (dealerCardsEl) dealerCardsEl.innerHTML = '';
     if (playerCardsEl) playerCardsEl.innerHTML = '';
-    if (dealerScoreEl) dealerScoreEl.textContent = '?';
-    if (playerScoreEl) playerScoreEl.textContent = '0';
+    if (dealerScoreEl) { dealerScoreEl.textContent = '?'; dealerScoreEl.className = 'bj-score-badge'; }
+    if (playerScoreEl) { playerScoreEl.style.display = 'block'; playerScoreEl.textContent = '0'; playerScoreEl.className = 'bj-score-badge'; }
 
     setButtonsDisabled(true);
     const delay = (ms) => new Promise(res => setTimeout(res, ms));

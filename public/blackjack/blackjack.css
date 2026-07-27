@@ -297,25 +297,25 @@
 /* Center Casino Ribbons */
 .bj-ribbons {
   position: absolute;
-  top: 36%;
+  top: 20%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
-  opacity: 0.12;
+  opacity: 0.05;
   pointer-events: none;
 }
 .bj-ribbon-text {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 900;
   letter-spacing: 0.25em;
   text-transform: uppercase;
   color: #ffffff;
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 4px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 3px 12px;
 }
 
 /* Hands Area (Dealer & Player) */
@@ -323,14 +323,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
   z-index: 1;
 }
 
 /* Score Pill Badges */
 .bj-score-badge {
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.75);
   border: 1px solid var(--bj-border-subtle);
   padding: 4px 14px;
   border-radius: 20px;
@@ -338,7 +338,7 @@
   font-weight: 800;
   font-size: 0.9rem;
   color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   transition: all 0.3s;
 }
 .bj-score-badge.win {
@@ -356,18 +356,18 @@
 .bj-cards-row {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  min-height: 140px;
-  padding: 10px;
+  align-items: center;
+  min-height: 135px;
+  padding: 4px;
 }
 
-/* Card Styling */
+/* Card Styling & Fanning */
 .bj-card {
-  width: 90px;
-  height: 130px;
+  width: 86px;
+  height: 124px;
   background: var(--bj-card-bg);
   border-radius: 8px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -378,14 +378,18 @@
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
+.bj-cards-row .bj-card + .bj-card {
+  margin-left: -18px;
+}
+
 @keyframes bjDealCard {
   0% {
     opacity: 0;
-    transform: translateY(-60px) scale(0.7) rotate(-10deg);
+    transform: translateY(-40px) scale(0.8);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1) rotate(0deg);
+    transform: translateY(0) scale(1);
   }
 }
 
