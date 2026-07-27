@@ -797,20 +797,20 @@ app.get("/auth/discord/callback", async (req, res) => {
         });
     }
 
-    // Issue JWT
+    // Issue long-lived 365-day JWT
     const jwtPayload = {
       userId: dbUser.id,
       discordId: discordId,
       discordUsername: discordUsername
     };
-    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: '365d' });
 
-    // Set cookie
+    // Set persistent 365-day cookie
     res.cookie('bigdtv_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 365 * 24 * 60 * 60 * 1000,
       path: '/'
     });
 
@@ -1038,6 +1038,7 @@ app.get("/auth/me", requireClerkAuth, async (req, res) => {
 
   res.json({
     loggedIn:          true,
+    token:             req.cookies.bigdtv_token || (req.headers.authorization ? req.headers.authorization.split(' ')[1] : null),
     userId:            req.user.id,
     clerkId:           req.user.clerk_id || null,
     email:             req.user.email,

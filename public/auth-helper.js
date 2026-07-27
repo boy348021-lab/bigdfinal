@@ -87,17 +87,18 @@ window.authListeners = [];
 async function bootAuth() {
   try {
     const token = getAuthToken();
-    if (token) {
-      const res = await fetch('/auth/me', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        window.authUser = data;
-      } else {
-        clearAuthToken();
-        window.authUser = null;
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    const res = await fetch('/auth/me', { headers });
+
+    if (res.ok) {
+      const data = await res.json();
+      window.authUser = data;
+      if (data.token) {
+        setAuthToken(data.token);
       }
+    } else {
+      clearAuthToken();
+      window.authUser = null;
     }
     window.authLoaded = true;
     for (const listener of window.authListeners) {
