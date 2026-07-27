@@ -509,12 +509,34 @@
     // Render Player Cards
     const playerCardsEl = document.getElementById('bj-player-cards');
     const playerScoreEl = document.getElementById('bj-player-score');
-    if (playerCardsEl) {
-      playerCardsEl.innerHTML = activeHand.playerCards.map(c => renderCard(c)).join('');
-    }
-    if (playerScoreEl) {
-      playerScoreEl.textContent = activeHand.playerScore;
-      playerScoreEl.className = 'bj-score-badge' + (activeHand.playerScore > 21 ? ' bust' : activeHand.outcome === 'win' || activeHand.outcome === 'blackjack' ? ' win' : '');
+
+    if (activeHand.isSplit && activeHand.splitHands) {
+      if (playerCardsEl) {
+        playerCardsEl.innerHTML = `
+          <div style="display:flex; gap:20px; justify-content:center; align-items:flex-start; margin:10px 0;">
+            <div style="display:flex; flex-direction:column; align-items:center; border:${activeHand.activeSplitIndex === 0 && !activeHand.isEnded ? '2px solid #53fa5d' : '1px solid rgba(255,255,255,0.15)'}; padding:10px 14px; border-radius:10px; background:rgba(0,0,0,0.35); box-shadow:${activeHand.activeSplitIndex === 0 && !activeHand.isEnded ? '0 0 15px rgba(83,250,93,0.3)' : 'none'};">
+              <div style="font-size:0.75rem; font-weight:800; color:${activeHand.activeSplitIndex === 0 && !activeHand.isEnded ? '#53fa5d' : '#a09bbd'}; margin-bottom:6px;">HAND 1 ${activeHand.activeSplitIndex === 0 && !activeHand.isEnded ? '● PLAYING' : ''}</div>
+              <div style="display:flex; gap:8px;">${activeHand.splitHands[0].playerCards.map(c => renderCard(c)).join('')}</div>
+              <div class="bj-score-badge ${activeHand.splitHands[0].playerScore > 21 ? 'bust' : ''}" style="margin-top:6px;">${activeHand.splitHands[0].playerScore}</div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; border:${activeHand.activeSplitIndex === 1 && !activeHand.isEnded ? '2px solid #53fa5d' : '1px solid rgba(255,255,255,0.15)'}; padding:10px 14px; border-radius:10px; background:rgba(0,0,0,0.35); box-shadow:${activeHand.activeSplitIndex === 1 && !activeHand.isEnded ? '0 0 15px rgba(83,250,93,0.3)' : 'none'};">
+              <div style="font-size:0.75rem; font-weight:800; color:${activeHand.activeSplitIndex === 1 && !activeHand.isEnded ? '#53fa5d' : '#a09bbd'}; margin-bottom:6px;">HAND 2 ${activeHand.activeSplitIndex === 1 && !activeHand.isEnded ? '● PLAYING' : ''}</div>
+              <div style="display:flex; gap:8px;">${activeHand.splitHands[1].playerCards.map(c => renderCard(c)).join('')}</div>
+              <div class="bj-score-badge ${activeHand.splitHands[1].playerScore > 21 ? 'bust' : ''}" style="margin-top:6px;">${activeHand.splitHands[1].playerScore}</div>
+            </div>
+          </div>
+        `;
+      }
+      if (playerScoreEl) playerScoreEl.style.display = 'none';
+    } else {
+      if (playerCardsEl) {
+        playerCardsEl.innerHTML = activeHand.playerCards.map(c => renderCard(c)).join('');
+      }
+      if (playerScoreEl) {
+        playerScoreEl.style.display = 'block';
+        playerScoreEl.textContent = activeHand.playerScore;
+        playerScoreEl.className = 'bj-score-badge' + (activeHand.playerScore > 21 ? ' bust' : activeHand.outcome === 'win' || activeHand.outcome === 'blackjack' ? ' win' : '');
+      }
     }
 
     // Toggle Action Buttons
@@ -524,7 +546,9 @@
     const btnSplit = document.getElementById('bj-btn-split');
     const btnMain = document.getElementById('bj-btn-main');
 
-    const canSplit = activeHand.canSplit || (activeHand.playerCards.length === 2 && (activeHand.playerCards[0].rank === activeHand.playerCards[1].rank || activeHand.playerCards[0].value === activeHand.playerCards[1].value));
+    const canAction = !activeHand.isEnded;
+    const canSplit = !activeHand.isSplit && (activeHand.canSplit || (activeHand.playerCards.length === 2 && (activeHand.playerCards[0].rank === activeHand.playerCards[1].rank || activeHand.playerCards[0].value === activeHand.playerCards[1].value)));
+
     if (btnHit) btnHit.disabled = !canAction;
     if (btnStand) btnStand.disabled = !canAction;
     if (btnDoubleDown) btnDoubleDown.disabled = !canAction || activeHand.playerCards.length !== 2;

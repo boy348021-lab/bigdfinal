@@ -896,7 +896,105 @@ app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
   let updatedBalance = undefined;
 
   try {
-    if (action === 'hit') {
+    if (game.isSplit) {
+      const activeIdx = game.activeSplitIndex || 0;
+      const curHand = game.splitHands[activeIdx];
+
+      if (action === 'hit') {
+        curHand.playerCards.push(game.shoe.pop());
+        curHand.playerScore = calcHandScore(curHand.playerCards).score;
+        if (curHand.playerScore > 21) {
+          curHand.isEnded = true;
+          curHand.outcome = 'bust';
+          if (activeIdx === 0) {
+            game.activeSplitIndex = 1;
+            game.playerCards = game.splitHands[1].playerCards;
+            game.playerScore = game.splitHands[1].playerScore;
+          } else {
+            game.isEnded = true;
+          }
+        } else {
+          game.playerCards = curHand.playerCards;
+          game.playerScore = curHand.playerScore;
+        }
+      } else if (action === 'stand' || action === 'double') {
+        if (action === 'double') {
+          const { data: newBal, error: rpcErr } = await supabase.rpc("modify_points", {
+            p_user_id: userId,
+            p_delta: -curHand.bet,
+            p_action: "blackjack_double",
+            p_source: "blackjack",
+            p_ref: `bj_dbl_${Date.now()}`
+          });
+          if (rpcErr) return res.status(402).json({ error: "Insufficient balance to double down" });
+          updatedBalance = newBal;
+          curHand.bet *= 2;
+          curHand.playerCards.push(game.shoe.pop());
+          curHand.playerScore = calcHandScore(curHand.playerCards).score;
+        }
+        curHand.isEnded = true;
+
+        if (activeIdx === 0) {
+          game.activeSplitIndex = 1;
+          game.playerCards = game.splitHands[1].playerCards;
+          game.playerScore = game.splitHands[1].playerScore;
+        } else {
+          game.isEnded = true;
+        }
+      }
+
+      // If both split hands finished, resolve dealer & payouts
+      if (game.isEnded || (game.splitHands[0].isEnded && game.splitHands[1].isEnded)) {
+        game.isEnded = true;
+
+        const nonBustHands = game.splitHands.filter(h => h.playerScore <= 21);
+        if (nonBustHands.length > 0) {
+          let dCalc = calcHandScore(game.dealerCards);
+          while (dCalc.score < 17 || (dCalc.score === 17 && dCalc.isSoft)) {
+            game.dealerCards.push(game.shoe.pop());
+            dCalc = calcHandScore(game.dealerCards);
+          }
+          game.dealerScore = dCalc.score;
+        } else {
+          game.dealerScore = calcHandScore(game.dealerCards).score;
+        }
+
+        let totalPayout = 0;
+        for (const h of game.splitHands) {
+          if (h.playerScore > 21) {
+            h.outcome = 'bust';
+            h.payout = 0;
+          } else if (game.dealerScore > 21) {
+            h.outcome = 'win';
+            h.payout = h.bet * 2;
+          } else if (h.playerScore > game.dealerScore) {
+            h.outcome = 'win';
+            h.payout = h.bet * 2;
+          } else if (h.playerScore < game.dealerScore) {
+            h.outcome = 'loss';
+            h.payout = 0;
+          } else {
+            h.outcome = 'push';
+            h.payout = h.bet;
+          }
+          totalPayout += h.payout;
+        }
+
+        game.payout = totalPayout;
+        if (totalPayout > 0) {
+          const { data: balAfterPay } = await supabase.rpc("modify_points", {
+            p_user_id: userId,
+            p_delta: totalPayout,
+            p_action: "blackjack_payout",
+            p_source: "blackjack",
+            p_ref: `bj_pay_${Date.now()}`
+          });
+          if (balAfterPay !== null && balAfterPay !== undefined) {
+            updatedBalance = balAfterPay;
+          }
+        }
+      }
+    } else if (action === 'hit') {
       game.playerCards.push(game.shoe.pop());
       const pCalc = calcHandScore(game.playerCards);
       game.playerScore = pCalc.score;
