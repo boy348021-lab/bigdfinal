@@ -385,24 +385,32 @@ export default class Engine {
       ? (visibleDealerCards[0].numericValue || visibleDealerCards[0].value)
       : dEval.score;
 
+    const primaryHand = this.playerHands[0] ? this.playerHands[0].toJSON() : null;
+
     return {
       gameId: this.gameId,
       state: this.fsm.getState(),
       isEnded: this.roundCompleted || this.fsm.isInState(STATES.ROUND_COMPLETE),
       initialBet: this.initialBet,
+      bet: this.initialBet,
       dealerCards: visibleDealerCards.map(c => c.toJSON()),
       dealerScore: dEval.score,
       dealerVisibleScore: visibleDealerScore,
       dealerIsBust: dEval.isBust,
       dealerIsBlackjack: dEval.isBlackjack,
       playerHands: this.playerHands.map(h => h.toJSON()),
+      playerCards: primaryHand ? primaryHand.cards : [],
+      playerScore: primaryHand ? primaryHand.score : 0,
       activeHandIndex: this.activeHandIndex,
       isSplit: this.playerHands.length > 1,
       insuranceOffered: this.insuranceOffered,
+      insuranceCost: Math.floor(this.initialBet * 0.5),
       insuranceTaken: this.insuranceTaken,
       insuranceBet: this.insuranceBet,
       totalPayout: this.totalPayout,
       totalProfit: this.totalProfit,
+      payout: this.totalPayout,
+      outcome: primaryHand ? primaryHand.outcome : null,
       remainingCards: this.shoe.getRemainingCardsCount()
     };
   }

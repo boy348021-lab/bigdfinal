@@ -313,9 +313,10 @@
     const delay = (ms) => new Promise(res => setTimeout(res, ms));
 
     // 1. Card 1 -> Player (Face Up)
-    if (activeHand.playerCards[0]) {
-      playerCardsEl.innerHTML += renderCard(activeHand.playerCards[0]);
-      if (playerScoreEl) playerScoreEl.textContent = activeHand.playerCards[0].value;
+    const cardsList = activeHand.playerCards || (activeHand.playerHands && activeHand.playerHands[0] ? activeHand.playerHands[0].cards : []);
+    if (cardsList[0]) {
+      playerCardsEl.innerHTML += renderCard(cardsList[0]);
+      if (playerScoreEl) playerScoreEl.textContent = cardsList[0].value || cardsList[0].numericValue;
       playSound('deal');
       await delay(400);
     }
@@ -329,19 +330,17 @@
     }
 
     // 3. Card 2 -> Player (Face Up)
-    if (activeHand.playerCards[1]) {
-      playerCardsEl.innerHTML += renderCard(activeHand.playerCards[1]);
+    if (cardsList[1]) {
+      playerCardsEl.innerHTML += renderCard(cardsList[1]);
       if (playerScoreEl) playerScoreEl.textContent = activeHand.playerScore;
       playSound('deal');
       await delay(400);
     }
 
     // 4. Card 2 -> Dealer (FACE DOWN HOLE CARD)
-    if (activeHand.dealerCards[1]) {
-      dealerCardsEl.innerHTML += `<div class="bj-card bj-card-back" id="bj-dealer-hole-card"></div>`;
-      playSound('deal');
-      await delay(400);
-    }
+    dealerCardsEl.innerHTML += `<div class="bj-card bj-card-back" id="bj-dealer-hole-card"></div>`;
+    playSound('deal');
+    await delay(400);
 
     // If Dealer shows an Ace, offer Insurance
     if (activeHand.offerInsurance && !activeHand.isEnded) {
