@@ -362,7 +362,7 @@
         document.querySelector('.bj-table').appendChild(overlay);
       }
 
-      overlay.style.cssText = 'background:rgba(10,10,25,0.96); backdrop-filter:blur(12px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center; z-index:9999; pointer-events:auto; border:2px solid #53fa5d; border-radius:14px; box-shadow:0 0 40px rgba(83,250,93,0.35);';
+      overlay.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(10,10,25,0.95); backdrop-filter:blur(12px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center; z-index:999999; pointer-events:auto; border:2px solid #53fa5d; border-radius:14px; box-shadow:0 0 40px rgba(83,250,93,0.35);';
 
       overlay.innerHTML = `
         <div style="font-size:1.6rem; font-weight:900; color:#53fa5d; margin-bottom:10px; text-shadow:0 0 15px rgba(83,250,93,0.5);">🛡️ DEALER SHOWS AN ACE</div>
