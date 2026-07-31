@@ -255,51 +255,7 @@ app.get("/api/leaderboard", async (req, res) => {
       const dateParts = isoAfter.split("-");
       const targetMonth = dateParts.length >= 2 ? `${dateParts[0]}-${dateParts[1]}` : new Date().toISOString().slice(0, 7);
 
-      // Check for manual override data from degencity_leaderboard_override.json
-      const overridePath = path.join(__dirname, "degencity_leaderboard_override.json");
-      if (fs.existsSync(overridePath)) {
-        try {
-          const overrideContent = fs.readFileSync(overridePath, "utf8");
-          const overrideData = JSON.parse(overrideContent);
-          if (Array.isArray(overrideData) && overrideData.length > 0) {
-            const formatted = overrideData.map(u => ({
-              user_id: u.user_id || 1,
-              username: u.username,
-              wager_data: [
-                {
-                  month: targetMonth,
-                  total_wager_usd: Number(u.wager) || 0
-                }
-              ],
-              _currentWager: Number(u.wager) || 0
-            })).sort((a, b) => b.wager_data[0].total_wager_usd - a.wager_data[0].total_wager_usd);
 
-            res.set("Cache-Control", "no-store");
-            return res.json({ data: formatted });
-          }
-        } catch (err) {
-          console.error("Failed to parse degencity_leaderboard_override.json:", err);
-        }
-      }
-
-      // Determine baseline date dynamically (day before start date)
-      let userBaselines = {};
-      if (isoAfter && /^\d{4}-\d{2}-\d{2}$/.test(isoAfter)) {
-        try {
-          const startDate = new Date(isoAfter + "T00:00:00Z");
-          startDate.setUTCDate(startDate.getUTCDate() - 1);
-          const baselineDateStr = startDate.toISOString().slice(0, 10);
-          
-          const baselinesPath = path.join(__dirname, "baselines.json");
-          if (fs.existsSync(baselinesPath)) {
-            const baselinesContent = fs.readFileSync(baselinesPath, "utf8");
-            const baselinesObj = JSON.parse(baselinesContent);
-            userBaselines = baselinesObj[baselineDateStr] || {};
-          }
-        } catch (err) {
-          console.error("Error loading baseline from baselines.json:", err);
-        }
-      }
 
 
       // Fetch current data from DegenCity API with robust fallback on error/timeout
