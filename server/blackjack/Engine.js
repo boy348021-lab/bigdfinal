@@ -318,7 +318,7 @@ export default class Engine {
   }
 
   advanceToNextHandOrResolve() {
-    const nextUnplayedIndex = this.playerHands.findIndex((h, idx) => idx > this.activeHandIndex && !h.isEnded);
+    const nextUnplayedIndex = this.playerHands.findIndex(h => !h.isEnded);
 
     if (nextUnplayedIndex !== -1) {
       this.activeHandIndex = nextUnplayedIndex;
@@ -397,10 +397,15 @@ export default class Engine {
 
     const primaryHand = this.playerHands[0] ? this.playerHands[0].toJSON() : null;
 
+    const isEnded = this.roundCompleted || this.fsm.isInState(STATES.ROUND_COMPLETE);
+    const curHand = this.playerHands[this.activeHandIndex];
+    const curCards = curHand ? curHand.cards : [];
+
     return {
       gameId: this.gameId,
       state: this.fsm.getState(),
-      isEnded: this.roundCompleted || this.fsm.isInState(STATES.ROUND_COMPLETE),
+      isEnded: isEnded,
+      roundComplete: isEnded,
       initialBet: this.initialBet,
       bet: this.initialBet,
       dealerCards: visibleDealerCards.map(c => c.toJSON()),
@@ -422,7 +427,14 @@ export default class Engine {
       totalProfit: this.totalProfit,
       payout: this.totalPayout,
       outcome: primaryHand ? primaryHand.outcome : null,
-      remainingCards: this.shoe.getRemainingCardsCount()
+      remainingCards: this.shoe.getRemainingCardsCount(),
+      canHit: !isEnded && curHand && !curHand.isEnded && curHand.score < 21,
+      canStand: !isEnded && curHand && !curHand.isEnded,
+      canDouble: !isEnded && curHand && !curHand.isEnded && this.rules.canDoubleDown(curHand, curHand.isSplitHand),
+      canSplit: !isEnded && curHand && !curHand.isEnded && this.rules.canSplit(curHand, this.playerHands.length),
+      canInsure: this.insuranceOffered && !this.insuranceResolved,
+      canSurrender: !isEnded && this.rules.surrenderAllowed && curCards.length === 2 && !this.playerHands.length > 1,
+      dealerMustDraw: !isEnded && dEval.score < 17
     };
   }
 }

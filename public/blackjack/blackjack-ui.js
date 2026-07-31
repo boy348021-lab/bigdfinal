@@ -550,13 +550,17 @@
 
     const canAction = !activeHand.isEnded;
     const curHand = hands[activeIdx] || hands[0];
-    const curCards = curHand.cards || curHand.playerCards || activeHand.playerCards || [];
-    const canSplit = !activeHand.isSplit && curCards.length === 2 && (curCards[0].rank === curCards[1].rank || curCards[0].value === curCards[1].value);
+    const curCards = curHand ? (curHand.cards || curHand.playerCards || activeHand.playerCards || []) : [];
 
-    if (btnHit) btnHit.disabled = !canAction;
-    if (btnStand) btnStand.disabled = !canAction;
-    if (btnDoubleDown) btnDoubleDown.disabled = !canAction || curCards.length !== 2;
-    if (btnSplit) btnSplit.disabled = !canAction || !canSplit;
+    const canHit = activeHand.canHit !== undefined ? activeHand.canHit : canAction;
+    const canStand = activeHand.canStand !== undefined ? activeHand.canStand : canAction;
+    const canDouble = activeHand.canDouble !== undefined ? activeHand.canDouble : (canAction && curCards.length === 2);
+    const canSplit = activeHand.canSplit !== undefined ? activeHand.canSplit : (!activeHand.isSplit && curCards.length === 2 && (curCards[0].rank === curCards[1].rank || curCards[0].value === curCards[1].value));
+
+    if (btnHit) btnHit.disabled = !canHit;
+    if (btnStand) btnStand.disabled = !canStand;
+    if (btnDoubleDown) btnDoubleDown.disabled = !canDouble;
+    if (btnSplit) btnSplit.disabled = !canSplit;
 
     if (btnMain) {
       btnMain.textContent = activeHand.isEnded ? 'Deal Again' : 'Game in Progress';
