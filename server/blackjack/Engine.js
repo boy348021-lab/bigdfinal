@@ -299,6 +299,12 @@ export default class Engine {
 
   validateActionState() {
     const currentState = this.fsm.getState();
+    if (currentState === STATES.WAITING_FOR_BET || currentState === STATES.RESET_ROUND) {
+      if (this.dealerCards && this.dealerCards.length >= 1 && this.playerHands && this.playerHands[0] && this.playerHands[0].cards.length >= 2) {
+        this.fsm = new FiniteStateMachine(STATES.PLAYING_HAND_1);
+        return;
+      }
+    }
     const validStates = [
       STATES.WAITING_FOR_PLAYER_ACTION,
       STATES.PLAYING_HAND_1,

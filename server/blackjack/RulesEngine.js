@@ -27,13 +27,19 @@ export default class RulesEngine {
   }
 
   canSplit(hand, currentSplitCount = 1) {
-    if (!hand || hand.cards.length !== 2) return false;
+    if (!hand || !hand.cards || hand.cards.length !== 2) return false;
     if (currentSplitCount >= this.maxSplits) return false;
 
     const card1 = hand.cards[0];
     const card2 = hand.cards[1];
+    if (!card1 || !card2) return false;
 
-    return card1.rank === card2.rank || card1.numericValue === card2.numericValue;
+    const rank1 = String(card1.rank || '').toUpperCase();
+    const rank2 = String(card2.rank || '').toUpperCase();
+    const val1 = card1.numericValue || card1.value || card1.faceValue || 0;
+    const val2 = card2.numericValue || card2.value || card2.faceValue || 0;
+
+    return (rank1.length > 0 && rank1 === rank2) || (val1 > 0 && val1 === val2);
   }
 
   canInsure(dealerUpcard) {
