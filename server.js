@@ -357,27 +357,28 @@ app.get("/api/leaderboard", async (req, res) => {
 
       const formatted = rawList.map(u => {
         const uname = u.username || "";
-        const unameKey = uname.toLowerCase();
 
-        const monthObj = (u.wager_data || []).find(m => m.month === targetMonth);
+        let monthObj = (u.wager_data || []).find(m => m.month === targetMonth);
+        if (!monthObj && (u.wager_data || []).length > 0) {
+          const sortedMonths = [...u.wager_data].sort((a, b) => b.month.localeCompare(a.month));
+          monthObj = sortedMonths[0];
+        }
+
         const currentWager = monthObj ? (Number(monthObj.total_wager_usd) || 0) : 0;
-
-        // Subtracted net wager: Current MTD - July 15 Baseline
-        const baseWager = Number(userBaselines[unameKey] || 0);
-        const netWager = Math.max(0, currentWager - baseWager);
+        const activeMonth = monthObj ? monthObj.month : targetMonth;
 
         return {
           user_id: u.user_id || 1,
           username: uname,
           wager_data: [
             {
-              month: targetMonth,
-              total_wager_usd: netWager
+              month: activeMonth,
+              total_wager_usd: currentWager
             }
           ],
           _currentWager: currentWager
         };
-      }).sort((a, b) => (b.wager_data[0].total_wager_usd - a.wager_data[0].total_wager_usd) || (b._currentWager - a._currentWager));
+      }).filter(u => u._currentWager > 0).sort((a, b) => b._currentWager - a._currentWager);
 
       res.set("Cache-Control", "no-store");
       return res.json({ data: formatted });
