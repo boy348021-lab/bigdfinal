@@ -392,9 +392,73 @@ app.get("/api/store-items", (req, res) => {
   res.json({ rewards: STORE_REWARDS });
 });
 
+// ─── Wager-to-Points Synchronization Helper ────────────────────────────
+// Automatically converts DegenCity slot wagers into wallet points ($1 wagered = 10 points)
+async function syncWagerPointsForUser(userId) {
+  if (!supabase || !userId) return 0;
+  try {
+    const { data: user, error: uErr } = await supabase
+      .from("users")
+      .select("id, degencity_username, metadata, points")
+      .eq("id", userId)
+      .single();
+
+    if (uErr || !user || !user.degencity_username) return user?.points || 0;
+
+    const degenUsername = user.degencity_username.trim().toLowerCase();
+    const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+    const res = await fetch("https://api.degencity.com/api/v1/partner/affiliates/leaderboard", {
+      headers: { "x-api-key": API_KEY, "Accept": "application/json", "User-Agent": USER_AGENT }
+    });
+
+    if (!res.ok) return user.points || 0;
+
+    const data = await res.json();
+    const rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+    const match = rawList.find(u => (u.username || "").trim().toLowerCase() === degenUsername);
+
+    if (!match) return user.points || 0;
+
+    const totalWagerUsd = (match.wager_data || []).reduce((sum, m) => sum + (Number(m.total_wager_usd) || 0), 0);
+    const totalWagerPoints = Math.floor(totalWagerUsd * 10);
+
+    const userMeta = user.metadata || {};
+    const creditedWagerPoints = Number(userMeta.credited_wager_points || 0);
+    const deltaPoints = totalWagerPoints - creditedWagerPoints;
+
+    if (deltaPoints > 0) {
+      const { data: newBalance, error: rpcErr } = await supabase.rpc("modify_points", {
+        p_user_id: user.id,
+        p_delta:   deltaPoints,
+        p_action:  "wager_points",
+        p_source:  "degencity_wager_sync",
+        p_ref:     `wager_sync_${Date.now()}`
+      });
+
+      if (!rpcErr) {
+        const updatedMeta = { ...userMeta, credited_wager_points: totalWagerPoints };
+        await supabase
+          .from("users")
+          .update({ metadata: updatedMeta, updated_at: new Date().toISOString() })
+          .eq("id", user.id);
+
+        console.log(`💸 Wager-to-Points Sync: Credited +${deltaPoints} points to user ${user.id} (${degenUsername}) [$${totalWagerUsd.toFixed(2)} wagered → ${totalWagerPoints} total pts]`);
+        return newBalance ?? (user.points + deltaPoints);
+      }
+    }
+
+    return user.points || 0;
+  } catch (err) {
+    console.error("syncWagerPointsForUser error:", err.message);
+    return 0;
+  }
+}
+
 // ─── Points API ───────────────────────────────────────────────────────────────
 app.get("/api/points/:userId", async (req, res) => {
   if (!supabase) return res.status(503).json({ error: "Database not configured" });
+  await syncWagerPointsForUser(req.params.userId);
   const { data, error } = await supabase
     .from("users")
     .select("points, kick_username")
@@ -1634,6 +1698,14 @@ app.get("/auth/me", requireClerkAuth, async (req, res) => {
     linkedAccounts = data || [];
   }
 
+  // Automatically sync wager-to-points for user ($1 wagered = 10 points credited to wallet)
+  if (req.user && req.user.id) {
+    const freshPoints = await syncWagerPointsForUser(req.user.id);
+    if (freshPoints !== undefined && freshPoints !== null) {
+      req.user.points = freshPoints;
+    }
+  }
+
   res.json({
     loggedIn:          true,
     token:             req.cookies.bigdtv_token || (req.headers.authorization ? req.headers.authorization.split(' ')[1] : null),
@@ -1787,7 +1859,10 @@ app.patch("/profile/degencity", requireClerkAuth, async (req, res) => {
           });
       }
 
-      return res.json({ success: true, degencity_username: degenUsername, verified: true });
+      // Immediately convert slot wagers to points ($1 = 10 pts) and credit user wallet
+      const newPoints = await syncWagerPointsForUser(req.user.id);
+
+      return res.json({ success: true, degencity_username: degenUsername, verified: true, points: newPoints });
     } else {
       return res.status(500).json({ error: "Database connection unavailable" });
     }
