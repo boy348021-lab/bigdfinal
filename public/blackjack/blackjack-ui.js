@@ -599,13 +599,25 @@
         if (window.authUser) window.authUser.points = data.new_balance;
       }
 
-      if (actionName === 'hit') {
-        const playerCardsEl = document.getElementById('bj-player-cards');
-        const playerScoreEl = document.getElementById('bj-player-score');
-        if (playerCardsEl) playerCardsEl.innerHTML = activeHand.playerCards.map(c => renderCard(c)).join('');
-        if (playerScoreEl) {
-          playerScoreEl.textContent = activeHand.playerScore;
-          playerScoreEl.className = 'bj-score-badge' + (activeHand.playerScore > 21 ? ' bust' : '');
+      if (actionName === 'split') {
+        playSound('chip');
+        renderHandState();
+        setButtonsDisabled(false);
+        const btnDoubleDown = document.getElementById('bj-btn-double-down');
+        const btnSplit = document.getElementById('bj-btn-split');
+        if (btnDoubleDown) btnDoubleDown.disabled = true;
+        if (btnSplit) btnSplit.disabled = true; // Single split only
+      } else if (actionName === 'hit') {
+        if (activeHand.isSplit) {
+          renderHandState();
+        } else {
+          const playerCardsEl = document.getElementById('bj-player-cards');
+          const playerScoreEl = document.getElementById('bj-player-score');
+          if (playerCardsEl) playerCardsEl.innerHTML = activeHand.playerCards.map(c => renderCard(c)).join('');
+          if (playerScoreEl) {
+            playerScoreEl.textContent = activeHand.playerScore;
+            playerScoreEl.className = 'bj-score-badge' + (activeHand.playerScore > 21 ? ' bust' : '');
+          }
         }
         playSound('deal');
 
@@ -619,16 +631,26 @@
           if (btnSplit) btnSplit.disabled = true;
         }
       } else if (actionName === 'stand' || actionName === 'double') {
-        if (actionName === 'double') {
-          const playerCardsEl = document.getElementById('bj-player-cards');
-          const playerScoreEl = document.getElementById('bj-player-score');
-          if (playerCardsEl) playerCardsEl.innerHTML = activeHand.playerCards.map(c => renderCard(c)).join('');
-          if (playerScoreEl) playerScoreEl.textContent = activeHand.playerScore;
+        if (activeHand.isSplit && !activeHand.isEnded) {
+          renderHandState();
           playSound('deal');
-          const delay = (ms) => new Promise(res => setTimeout(res, ms));
-          await delay(400);
+          setButtonsDisabled(false);
+          const btnDoubleDown = document.getElementById('bj-btn-double-down');
+          const btnSplit = document.getElementById('bj-btn-split');
+          if (btnDoubleDown) btnDoubleDown.disabled = true;
+          if (btnSplit) btnSplit.disabled = true;
+        } else {
+          if (actionName === 'double') {
+            const playerCardsEl = document.getElementById('bj-player-cards');
+            const playerScoreEl = document.getElementById('bj-player-score');
+            if (playerCardsEl) playerCardsEl.innerHTML = activeHand.playerCards.map(c => renderCard(c)).join('');
+            if (playerScoreEl) playerScoreEl.textContent = activeHand.playerScore;
+            playSound('deal');
+            const delay = (ms) => new Promise(res => setTimeout(res, ms));
+            await delay(400);
+          }
+          await revealDealerTurnAnimated();
         }
-        await revealDealerTurnAnimated();
       }
     } catch (err) {
       console.error("Action error:", err);

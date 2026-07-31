@@ -918,6 +918,10 @@ app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
 
   try {
     if (game.isSplit) {
+      if (action === 'split') {
+        return res.status(400).json({ error: "Only a single split is allowed per game." });
+      }
+
       const activeIdx = game.activeSplitIndex || 0;
       const curHand = game.splitHands[activeIdx];
 
@@ -1026,6 +1030,9 @@ app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
         game.payout = 0;
       }
     } else if (action === 'split') {
+      if (game.isSplit) {
+        return res.status(400).json({ error: "Only a single split is allowed per game." });
+      }
       if (game.playerCards.length !== 2 || (game.playerCards[0].rank !== game.playerCards[1].rank && game.playerCards[0].value !== game.playerCards[1].value)) {
         return res.status(400).json({ error: "Hand cannot be split" });
       }
