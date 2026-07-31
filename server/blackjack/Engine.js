@@ -45,8 +45,12 @@ export default class Engine {
     this.isProcessingAction = true;
 
     try {
-      if (!this.fsm.isInState(STATES.WAITING_FOR_BET) && !this.fsm.isInState(STATES.ROUND_COMPLETE)) {
-        throw new Error(`Cannot deal: Current state is '${this.fsm.getState()}'`);
+      // Re-initialize FSM cleanly for new round deal if coming from completed or active round
+      if (this.fsm.isInState(STATES.ROUND_COMPLETE)) {
+        this.fsm.transitionTo(STATES.RESET_ROUND);
+        this.fsm.transitionTo(STATES.WAITING_FOR_BET);
+      } else if (!this.fsm.isInState(STATES.WAITING_FOR_BET)) {
+        this.fsm = new FiniteStateMachine(STATES.WAITING_FOR_BET);
       }
 
       if (isNaN(betAmount) || Number(betAmount) < 0) {
@@ -65,7 +69,10 @@ export default class Engine {
       this.insuranceResolved = false;
       this.totalPayout = 0;
       this.totalProfit = 0;
-      this.roundCompleted = false;
+      if (this.fsm.isInState(STATES.ROUND_COMPLETE)) {
+        this.fsm.transitionTo(STATES.RESET_ROUND);
+        this.fsm.transitionTo(STATES.WAITING_FOR_BET);
+      }
 
       this.fsm.transitionTo(STATES.BET_PLACED);
       this.fsm.transitionTo(STATES.DEALING_INITIAL_CARDS);
