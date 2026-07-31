@@ -1990,7 +1990,7 @@ transition:transform .1s linear;
 <section id="tabs-section">
   <div class="tabs-nav">
     <button class="tab-btn active" data-panel="leaderboard">Lifetime Wager</button>
-    <button class="tab-btn" data-panel="biweekly">15 Days Leaderboard</button>
+    <button class="tab-btn" data-panel="biweekly">Monthly Leaderboard</button>
     <button class="tab-btn" data-panel="challenges">Challenges</button>
     <button class="tab-btn" data-panel="milestones">Milestones</button>
     <button class="tab-btn" data-panel="store">Socials</button>
@@ -2104,13 +2104,13 @@ transition:transform .1s linear;
       </div>
     </div>
 
-    <!-- 14-DAY LEADERBOARD PANEL -->
+    <!-- MONTHLY LEADERBOARD PANEL -->
     <div class="tab-panel" id="panel-biweekly">
 
       <!-- Period Header -->
       <div class="bw-period-header">
         <div class="bw-period-info">
-          <div class="bw-period-label">ACTIVE SEMI-MONTHLY PERIOD</div>
+          <div class="bw-period-label">ACTIVE MONTHLY PERIOD</div>
           <div class="bw-period-dates" id="bw-period-dates">Loading period…</div>
         </div>
         <div class="bw-period-countdown">
@@ -2148,7 +2148,7 @@ transition:transform .1s linear;
       <!-- Prize Pool -->
       <div class="prize-pool-banner" style="margin-bottom:32px">
         <div>
-          <div class="prize-pool-label">14-Day Prize Pool</div>
+          <div class="prize-pool-label">Monthly Prize Pool</div>
           <div class="prize-pool-total">$750</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
@@ -2160,12 +2160,12 @@ transition:transform .1s linear;
           <span class="prize-badge prize-badge-n">6th $25</span>
           <span class="prize-badge prize-badge-n">7th $25</span>
         </div>
-        <span class="prize-pool-cadence">⏱ Semi-Monthly Reset</span>
+        <span class="prize-pool-cadence">⏱ Monthly Reset</span>
       </div>
 
       <!-- Rankings Table -->
       <div class="leaderboard-header">
-        <div class="section-title">14-Day <span>Rankings</span></div>
+        <div class="section-title">Monthly <span>Rankings</span></div>
       </div>
       <div id="bw-lb-content">
         <div class="lb-loading"><div class="spinner"></div>Loading period data…</div>
@@ -2881,7 +2881,7 @@ function getETDate(year, month, day, hour, minute, second) {
   return new Date(loc.getTime() + diff);
 }
 
-function getSemiMonthPeriod() {
+function getMonthlyPeriod() {
   const nowETStr = new Date().toLocaleString("en-US", { timeZone: "America/New_York", hour12: false });
   const match = nowETStr.match(/(\d+)\/(\d+)\/(\d+),\s+(\d+):(\d+):(\d+)/);
   if (!match) {
@@ -2889,21 +2889,18 @@ function getSemiMonthPeriod() {
     return { start: now, end: now, displayEnd: now, now };
   }
   const year = Number(match[3]);
-  const month = Number(match[1]) - 1;
-  const date = Number(match[2]);
+  const month = Number(match[1]) - 1; // 0-indexed month
   
-  let start, end, displayEnd;
-  if (date <= 15) {
-    start = getETDate(year, month, 1, 0, 0, 0);
-    end   = getETDate(year, month, 16, 0, 0, 0);
-    displayEnd = getETDate(year, month, 15, 12, 0, 0);
-  } else {
-    start = getETDate(year, month, 16, 0, 0, 0);
-    end   = getETDate(year, month + 1, 1, 0, 0, 0);
-    const lastDay = new Date(year, month + 1, 0).getDate();
-    displayEnd = getETDate(year, month, lastDay, 12, 0, 0);
-  }
+  const start = getETDate(year, month, 1, 0, 0, 0);
+  const end   = getETDate(year, month + 1, 1, 0, 0, 0);
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const displayEnd = getETDate(year, month, lastDay, 23, 59, 59);
+
   return { start, end, displayEnd, now: new Date() };
+}
+
+function getSemiMonthPeriod() {
+  return getMonthlyPeriod();
 }
 
 
@@ -3010,23 +3007,23 @@ const BW_PRIZE_POOL = [350, 150, 100, 50, 50, 25, 25];
 async function fetchBiweeklyLeaderboard() {
   const bwContent = document.getElementById('bw-lb-content');
   if (!bwContent) return;
-  bwContent.innerHTML = '<div class="lb-loading"><div class="spinner"></div>Loading 14-day rankings…</div>';
+  bwContent.innerHTML = '<div class="lb-loading"><div class="spinner"></div>Loading monthly rankings…</div>';
 
-  const { start, end } = getSemiMonthPeriod();
+  const { start, end } = getMonthlyPeriod();
   const after  = bwFmtISO(start);
   const before = bwFmtISO(end);
 
   try {
-    const url = API_BASE + '?after=' + encodeURIComponent(after) + '&before=' + encodeURIComponent(before) + '&period=biweekly';
+    const url = API_BASE + '?after=' + encodeURIComponent(after) + '&before=' + encodeURIComponent(before) + '&period=monthly';
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) {
-      bwContent.innerHTML = '<div class="lb-error">⚠️ Error loading 14-day data (' + res.status + '). Try again.</div>';
+      bwContent.innerHTML = '<div class="lb-error">⚠️ Error loading monthly data (' + res.status + '). Try again.</div>';
       return;
     }
     const json = await res.json();
     renderBiweeklyLeaderboard(json.data || []);
   } catch (err) {
-    console.error('14-day leaderboard error:', err);
+    console.error('Monthly leaderboard error:', err);
     bwContent.innerHTML = '<div class="lb-error">⚠️ Network error. Check your connection.</div>';
   }
 }

@@ -247,8 +247,8 @@ app.get("/api/leaderboard", async (req, res) => {
 
   const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-  // ─── LEADERBOARD B: 15-Day (Biweekly) Leaderboard ───────────────────────────
-  if (req.query.period === "biweekly") {
+  // ─── LEADERBOARD B: Monthly Leaderboard ───────────────────────────
+  if (req.query.period === "biweekly" || req.query.period === "monthly") {
     try {
       const afterStr = after || "";
       const isoAfter = parseToISODate(afterStr);
@@ -382,7 +382,7 @@ app.get("/api/leaderboard", async (req, res) => {
       res.set("Cache-Control", "no-store");
       return res.json({ data: formatted });
     } catch (err) {
-      console.error("Biweekly leaderboard calculation error:", err);
+      console.error("Monthly leaderboard calculation error:", err);
       return res.status(500).json({ success: false, message: err.message });
     }
   }
