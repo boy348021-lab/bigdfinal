@@ -69,9 +69,13 @@ export default class Engine {
       this.insuranceResolved = false;
       this.totalPayout = 0;
       this.totalProfit = 0;
+      this.roundCompleted = false;
+
       if (this.fsm.isInState(STATES.ROUND_COMPLETE)) {
         this.fsm.transitionTo(STATES.RESET_ROUND);
         this.fsm.transitionTo(STATES.WAITING_FOR_BET);
+      } else if (!this.fsm.isInState(STATES.WAITING_FOR_BET)) {
+        this.fsm = new FiniteStateMachine(STATES.WAITING_FOR_BET);
       }
 
       this.fsm.transitionTo(STATES.BET_PLACED);
@@ -404,6 +408,7 @@ export default class Engine {
       activeHandIndex: this.activeHandIndex,
       isSplit: this.playerHands.length > 1,
       insuranceOffered: this.insuranceOffered,
+      offerInsurance: this.insuranceOffered,
       insuranceCost: Math.floor(this.initialBet * 0.5),
       insuranceTaken: this.insuranceTaken,
       insuranceBet: this.insuranceBet,
