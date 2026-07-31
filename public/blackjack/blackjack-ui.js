@@ -501,43 +501,47 @@
     const dealerCardsEl = document.getElementById('bj-dealer-cards');
     const dealerScoreEl = document.getElementById('bj-dealer-score');
     if (dealerCardsEl) {
-      dealerCardsEl.innerHTML = activeHand.dealerCards.map((c, idx) => renderCard(c, idx === 1 && !activeHand.isEnded)).join('');
+      dealerCardsEl.innerHTML = activeHand.dealerCards.map((c, idx) => renderCard(c, idx === 1 && !activeHand.isEnded && activeHand.dealerCards.length === 1)).join('');
     }
     if (dealerScoreEl) {
       dealerScoreEl.textContent = activeHand.isEnded ? activeHand.dealerScore : activeHand.dealerVisibleScore;
       dealerScoreEl.className = 'bj-score-badge' + (activeHand.isEnded && activeHand.dealerScore > 21 ? ' bust' : '');
     }
 
-    // Render Player Cards
+    // Render Player Cards (supporting single or split hands)
     const playerCardsEl = document.getElementById('bj-player-cards');
     const playerScoreEl = document.getElementById('bj-player-score');
 
-    if (activeHand.isSplit && activeHand.splitHands) {
+    const hands = activeHand.playerHands || [{ playerCards: activeHand.playerCards, playerScore: activeHand.playerScore }];
+    const activeIdx = activeHand.activeHandIndex || 0;
+
+    if (hands.length > 1) {
       if (playerCardsEl) {
         playerCardsEl.innerHTML = `
           <div style="display:flex; gap:20px; justify-content:center; align-items:flex-start; margin:10px 0;">
-            <div style="display:flex; flex-direction:column; align-items:center; border:${activeHand.activeSplitIndex === 0 && !activeHand.isEnded ? '2px solid #53fa5d' : '1px solid rgba(255,255,255,0.15)'}; padding:10px 14px; border-radius:10px; background:rgba(0,0,0,0.35); box-shadow:${activeHand.activeSplitIndex === 0 && !activeHand.isEnded ? '0 0 15px rgba(83,250,93,0.3)' : 'none'};">
-              <div style="font-size:0.75rem; font-weight:800; color:${activeHand.activeSplitIndex === 0 && !activeHand.isEnded ? '#53fa5d' : '#a09bbd'}; margin-bottom:6px;">HAND 1 ${activeHand.activeSplitIndex === 0 && !activeHand.isEnded ? '● PLAYING' : ''}</div>
-              <div style="display:flex; gap:8px;">${activeHand.splitHands[0].playerCards.map(c => renderCard(c)).join('')}</div>
-              <div class="bj-score-badge ${activeHand.splitHands[0].playerScore > 21 ? 'bust' : ''}" style="margin-top:6px;">${activeHand.splitHands[0].playerScore}</div>
-            </div>
-            <div style="display:flex; flex-direction:column; align-items:center; border:${activeHand.activeSplitIndex === 1 && !activeHand.isEnded ? '2px solid #53fa5d' : '1px solid rgba(255,255,255,0.15)'}; padding:10px 14px; border-radius:10px; background:rgba(0,0,0,0.35); box-shadow:${activeHand.activeSplitIndex === 1 && !activeHand.isEnded ? '0 0 15px rgba(83,250,93,0.3)' : 'none'};">
-              <div style="font-size:0.75rem; font-weight:800; color:${activeHand.activeSplitIndex === 1 && !activeHand.isEnded ? '#53fa5d' : '#a09bbd'}; margin-bottom:6px;">HAND 2 ${activeHand.activeSplitIndex === 1 && !activeHand.isEnded ? '● PLAYING' : ''}</div>
-              <div style="display:flex; gap:8px;">${activeHand.splitHands[1].playerCards.map(c => renderCard(c)).join('')}</div>
-              <div class="bj-score-badge ${activeHand.splitHands[1].playerScore > 21 ? 'bust' : ''}" style="margin-top:6px;">${activeHand.splitHands[1].playerScore}</div>
-            </div>
+            ${hands.map((h, i) => `
+              <div style="display:flex; flex-direction:column; align-items:center; border:${activeIdx === i && !activeHand.isEnded ? '2px solid #53fa5d' : '1px solid rgba(255,255,255,0.15)'}; padding:10px 14px; border-radius:10px; background:rgba(0,0,0,0.35); box-shadow:${activeIdx === i && !activeHand.isEnded ? '0 0 15px rgba(83,250,93,0.3)' : 'none'};">
+                <div style="font-size:0.75rem; font-weight:800; color:${activeIdx === i && !activeHand.isEnded ? '#53fa5d' : '#a09bbd'}; margin-bottom:6px;">HAND ${i + 1} ${activeIdx === i && !activeHand.isEnded ? '● PLAYING' : ''}</div>
+                <div style="display:flex; gap:8px;">${(h.cards || h.playerCards || []).map(c => renderCard(c)).join('')}</div>
+                <div class="bj-score-badge ${h.score > 21 || h.playerScore > 21 ? 'bust' : ''}" style="margin-top:6px;">${h.score !== undefined ? h.score : h.playerScore}</div>
+              </div>
+            `).join('')}
           </div>
         `;
       }
       if (playerScoreEl) playerScoreEl.style.display = 'none';
     } else {
+      const curHand = hands[0];
+      const cardsList = curHand.cards || curHand.playerCards || activeHand.playerCards || [];
+      const currentScore = curHand.score !== undefined ? curHand.score : (curHand.playerScore !== undefined ? curHand.playerScore : activeHand.playerScore);
+
       if (playerCardsEl) {
-        playerCardsEl.innerHTML = activeHand.playerCards.map(c => renderCard(c)).join('');
+        playerCardsEl.innerHTML = cardsList.map(c => renderCard(c)).join('');
       }
       if (playerScoreEl) {
         playerScoreEl.style.display = 'block';
-        playerScoreEl.textContent = activeHand.playerScore;
-        playerScoreEl.className = 'bj-score-badge' + (activeHand.playerScore > 21 ? ' bust' : activeHand.outcome === 'win' || activeHand.outcome === 'blackjack' ? ' win' : '');
+        playerScoreEl.textContent = currentScore;
+        playerScoreEl.className = 'bj-score-badge' + (currentScore > 21 ? ' bust' : activeHand.outcome === 'win' || activeHand.outcome === 'blackjack' ? ' win' : '');
       }
     }
 
@@ -549,11 +553,13 @@
     const btnMain = document.getElementById('bj-btn-main');
 
     const canAction = !activeHand.isEnded;
-    const canSplit = !activeHand.isSplit && (activeHand.canSplit || (activeHand.playerCards.length === 2 && (activeHand.playerCards[0].rank === activeHand.playerCards[1].rank || activeHand.playerCards[0].value === activeHand.playerCards[1].value)));
+    const curHand = hands[activeIdx] || hands[0];
+    const curCards = curHand.cards || curHand.playerCards || activeHand.playerCards || [];
+    const canSplit = !activeHand.isSplit && curCards.length === 2 && (curCards[0].rank === curCards[1].rank || curCards[0].value === curCards[1].value);
 
     if (btnHit) btnHit.disabled = !canAction;
     if (btnStand) btnStand.disabled = !canAction;
-    if (btnDoubleDown) btnDoubleDown.disabled = !canAction || activeHand.playerCards.length !== 2;
+    if (btnDoubleDown) btnDoubleDown.disabled = !canAction || curCards.length !== 2;
     if (btnSplit) btnSplit.disabled = !canAction || !canSplit;
 
     if (btnMain) {
@@ -562,7 +568,7 @@
     }
 
     if (activeHand.isEnded) {
-      showResultBanner(activeHand.outcome, activeHand.payout);
+      showResultBanner(activeHand.outcome, activeHand.totalPayout !== undefined ? activeHand.totalPayout : activeHand.payout);
     }
   }
 

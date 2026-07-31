@@ -13,6 +13,7 @@ import { createHash, randomBytes } from "crypto";
 import fs from "fs";
 import { readFile } from "fs/promises";
 import { WebSocket } from "ws";
+import ActionDispatcher from "./server/blackjack/ActionDispatcher.js";
 
 dotenv.config();
 
@@ -595,6 +596,73 @@ app.post("/api/store/redeem", requireAuth, async (req, res) => {
   }
 });
 
+// ─── CASINO: ENTERPRISE BLACKJACK SUBSYSTEM ──────────────────────────────────
+const activeBlackjackGames = new Map(); // Map<userId, Engine>
+const actionDispatcher = new ActionDispatcher(activeBlackjackGames, supabase);
+
+// GET /api/casino/blackjack/state (Fetch active round snapshot)
+app.get("/api/casino/blackjack/state", requireAuth, (req, res) => {
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+  const engine = activeBlackjackGames.get(req.user.id);
+  if (!engine) return res.json({ active: false });
+  res.json({ active: true, snapshot: engine.getSnapshot() });
+});
+
+// POST /api/casino/blackjack/deal (Place bet & deal initial round)
+app.post("/api/casino/blackjack/deal", requireAuth, async (req, res) => {
+  if (!supabase) return res.status(503).json({ error: "Database not configured" });
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+    const bet = parseInt(req.body.bet, 10);
+    const { snapshot, updatedBalance } = await actionDispatcher.dispatch(req.user.id, 'DEAL', { bet });
+    res.json({ ok: true, new_balance: updatedBalance, handState: snapshot });
+  } catch (err) {
+    if (err.message.toLowerCase().includes("insufficient")) {
+      return res.status(402).json({ error: "Insufficient point balance" });
+    }
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// POST /api/casino/blackjack/insurance (Buy or Decline Insurance)
+app.post("/api/casino/blackjack/insurance", requireAuth, async (req, res) => {
+  if (!supabase) return res.status(503).json({ error: "Database not configured" });
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+    const actionType = req.body.buyInsurance ? 'INSURANCE_BUY' : 'INSURANCE_DECLINE';
+    const { snapshot, updatedBalance } = await actionDispatcher.dispatch(req.user.id, actionType);
+    res.json({ ok: true, new_balance: updatedBalance, handState: snapshot });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// POST /api/casino/blackjack/action (Dispatch HIT, STAND, DOUBLE, SPLIT, SURRENDER)
+app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
+  if (!supabase) return res.status(503).json({ error: "Database not configured" });
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+    const rawAction = (req.body.action || '').toUpperCase();
+    const actionMap = {
+      'HIT': 'HIT',
+      'STAND': 'STAND',
+      'DOUBLE': 'DOUBLE',
+      'SPLIT': 'SPLIT',
+      'SURRENDER': 'SURRENDER'
+    };
+    const targetAction = actionMap[rawAction];
+    if (!targetAction) return res.status(400).json({ error: `Invalid action '${req.body.action}'` });
+
+    const { snapshot, updatedBalance } = await actionDispatcher.dispatch(req.user.id, targetAction);
+    res.json({ ok: true, new_balance: updatedBalance, handState: snapshot });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 // ─── User Redemption History ──────────────────────────────────────────────────
 app.get("/api/store/redemptions", requireAuth, async (req, res) => {
   if (!supabase) return res.status(503).json({ error: "Database not configured" });
@@ -606,572 +674,6 @@ app.get("/api/store/redemptions", requireAuth, async (req, res) => {
     .order("created_at", { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   res.json({ redemptions: data || [] });
-});
-
-// ─── CASINO: BLACKJACK MODULE ─────────────────────────────────────────────────
-const activeBlackjackGames = new Map();
-
-const SUITS_LIST = ['♥', '♦', '♣', '♠'];
-const RANKS_LIST = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-
-function createBlackjackShoe(numDecks = 6) {
-  const cards = [];
-  for (let i = 0; i < numDecks; i++) {
-    for (const suit of SUITS_LIST) {
-      for (const rank of RANKS_LIST) {
-        cards.push({
-          suit,
-          rank,
-          isRed: suit === '♥' || suit === '♦',
-          value: ['J', 'Q', 'K'].includes(rank) ? 10 : (rank === 'A' ? 11 : parseInt(rank, 10))
-        });
-      }
-    }
-  }
-  // Fisher-Yates Shuffle
-  for (let i = cards.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [cards[i], cards[j]] = [cards[j], cards[i]];
-  }
-  return cards;
-}
-
-function calcHandScore(cards) {
-  let score = 0;
-  let aces = 0;
-  for (const c of cards) {
-    score += c.value;
-    if (c.rank === 'A') aces++;
-  }
-  while (score > 21 && aces > 0) {
-    score -= 10;
-    aces--;
-  }
-  return {
-    score,
-    isBust: score > 21,
-    isBlackjack: score === 21 && cards.length === 2,
-    isSoft: aces > 0 && score <= 21
-  };
-}
-
-async function saveBlackjackHistory(userId, handState) {
-  if (!supabase) return;
-  try {
-    const { error } = await supabase
-      .from("blackjack_history")
-      .insert({
-        user_id: userId,
-        bet_amount: handState.bet,
-        payout: handState.payout,
-        outcome: handState.outcome,
-        player_score: handState.playerScore,
-        dealer_score: handState.dealerScore,
-        player_cards: handState.playerCards,
-        dealer_cards: handState.dealerCards,
-        created_at: new Date().toISOString()
-      });
-
-    if (error && (error.message.includes("relation") || error.code === "42P01")) {
-      // Fallback: log to points_ledger if blackjack_history table is not created yet
-      await supabase.from("points_ledger").insert({
-        user_id: userId,
-        delta: handState.payout - handState.bet,
-        action: "blackjack_hand",
-        source: "blackjack",
-        ref_id: `${handState.outcome}_bet${handState.bet}_pay${handState.payout}`,
-        created_at: new Date().toISOString()
-      }).catch(() => {});
-    }
-  } catch (e) {
-    console.warn("Could not save blackjack history:", e.message);
-  }
-}
-
-app.post("/api/casino/blackjack/deal", requireAuth, async (req, res) => {
-  if (!supabase) return res.status(503).json({ error: "Database not configured" });
-  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
-
-  const bet = parseInt(req.body.bet, 10);
-  if (isNaN(bet) || bet < 0) {
-    return res.status(400).json({ error: "Invalid bet amount" });
-  }
-
-  const userId = req.user.id;
-
-  try {
-    let newBalance = req.user.points || 0;
-
-    // Deduct bet atomically if bet > 0
-    if (bet > 0) {
-      const { data: balData, error: rpcErr } = await supabase.rpc("modify_points", {
-        p_user_id: userId,
-        p_delta: -bet,
-        p_action: "blackjack_bet",
-        p_source: "blackjack",
-        p_ref: `bj_bet_${Date.now()}`
-      });
-
-      if (rpcErr) {
-        if (rpcErr.message.toLowerCase().includes("insufficient")) {
-          return res.status(402).json({ error: "Insufficient BigD Coins balance" });
-        }
-        throw new Error(rpcErr.message);
-      }
-      newBalance = balData;
-    }
-
-    // Get or create shoe for user session
-    let shoe = createBlackjackShoe(6);
-
-    const playerCards = [shoe.pop(), shoe.pop()];
-    const dealerCards = [shoe.pop(), shoe.pop()];
-
-    const playerCalc = calcHandScore(playerCards);
-    const dealerCalc = calcHandScore(dealerCards);
-
-    let isEnded = false;
-    let outcome = null;
-    let payout = 0;
-
-    if (playerCalc.isBlackjack) {
-      isEnded = true;
-      if (dealerCalc.isBlackjack) {
-        outcome = 'push';
-        payout = bet; // Return bet
-      } else {
-        outcome = 'blackjack';
-        payout = Math.floor(bet * 2.5); // 3:2 payout (bet + 1.5x)
-      }
-    }
-
-    let updatedBalance = newBalance;
-
-    if (isEnded && payout > 0) {
-      const { data: balAfterPayout } = await supabase.rpc("modify_points", {
-        p_user_id: userId,
-        p_delta: payout,
-        p_action: "blackjack_payout",
-        p_source: "blackjack",
-        p_ref: `bj_pay_${Date.now()}`
-      });
-      if (balAfterPayout !== null && balAfterPayout !== undefined) {
-        updatedBalance = balAfterPayout;
-      }
-    }
-
-    const offerInsurance = dealerCards[0].rank === 'A' && !playerCalc.isBlackjack;
-    const insuranceCost = offerInsurance ? Math.floor(bet * 0.5) : 0;
-    const canSplit = playerCards.length === 2 && (playerCards[0].rank === playerCards[1].rank || playerCards[0].value === playerCards[1].value);
-
-    const handState = {
-      handId: `bj_${Date.now()}`,
-      bet,
-      playerCards,
-      dealerCards,
-      playerScore: playerCalc.score,
-      dealerScore: dealerCalc.score,
-      dealerVisibleScore: calcHandScore([dealerCards[0]]).score,
-      isEnded,
-      outcome,
-      payout,
-      offerInsurance,
-      insuranceCost,
-      insuranceBought: false,
-      canSplit,
-      shoe
-    };
-
-    if (isEnded) {
-      activeBlackjackGames.delete(userId);
-      saveBlackjackHistory(userId, handState);
-      if (supabase) {
-        supabase.from("users").update({
-          metadata: { ...(req.user.metadata || {}), active_hand: null }
-        }).eq("id", userId).then(() => {}).catch(() => {});
-      }
-    } else {
-      activeBlackjackGames.set(userId, handState);
-      if (supabase) {
-        supabase.from("users").update({
-          metadata: { ...(req.user.metadata || {}), active_hand: handState }
-        }).eq("id", userId).then(() => {}).catch(() => {});
-      }
-    }
-
-    res.json({
-      ok: true,
-      new_balance: updatedBalance,
-      handState: {
-        ...handState,
-        shoe: undefined
-      }
-    });
-
-  } catch (err) {
-    console.error("Blackjack deal error:", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ─── POST /api/casino/blackjack/insurance (Buy or Decline Insurance) ─────────
-app.post("/api/casino/blackjack/insurance", requireAuth, async (req, res) => {
-  if (!supabase) return res.status(503).json({ error: "Database not configured" });
-  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
-
-  const userId = req.user.id;
-  let game = activeBlackjackGames.get(userId);
-
-  if (!game || game.isEnded || !game.offerInsurance) {
-    return res.status(400).json({ error: "No active insurance offer." });
-  }
-
-  const { buyInsurance } = req.body;
-  let updatedBalance = undefined;
-  game.offerInsurance = false;
-
-  try {
-    if (buyInsurance && game.insuranceCost > 0) {
-      const { data: newBal, error: rpcErr } = await supabase.rpc("modify_points", {
-        p_user_id: userId,
-        p_delta: -game.insuranceCost,
-        p_action: "blackjack_insurance",
-        p_source: "blackjack",
-        p_ref: `bj_ins_${Date.now()}`
-      });
-
-      if (rpcErr) {
-        return res.status(402).json({ error: "Insufficient balance for Insurance" });
-      }
-      updatedBalance = newBal;
-      game.insuranceBought = true;
-    }
-
-    // Check if Dealer has Blackjack (Card 2 value is 10)
-    const dealerCalc = calcHandScore(game.dealerCards);
-    if (dealerCalc.isBlackjack) {
-      game.isEnded = true;
-      let insurancePayout = 0;
-
-      if (game.insuranceBought) {
-        insurancePayout = game.insuranceCost * 3; // 2:1 payout
-        const { data: balAfterIns } = await supabase.rpc("modify_points", {
-          p_user_id: userId,
-          p_delta: insurancePayout,
-          p_action: "blackjack_insurance_payout",
-          p_source: "blackjack",
-          p_ref: `bj_inspay_${Date.now()}`
-        });
-        if (balAfterIns !== null && balAfterIns !== undefined) {
-          updatedBalance = balAfterIns;
-        }
-      }
-
-      game.outcome = game.insuranceBought ? 'insurance_win' : 'loss';
-      game.payout = insurancePayout;
-      activeBlackjackGames.delete(userId);
-      saveBlackjackHistory(userId, game);
-    }
-
-    res.json({
-      ok: true,
-      new_balance: updatedBalance,
-      handState: {
-        ...game,
-        shoe: undefined
-      }
-    });
-
-  } catch (err) {
-    console.error("Insurance error:", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
-  if (!supabase) return res.status(503).json({ error: "Database not configured" });
-  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
-
-  const userId = req.user.id;
-  let game = activeBlackjackGames.get(userId);
-
-  if (!game || game.isEnded) {
-    // Attempt recovery from Supabase user metadata
-    if (req.user && req.user.metadata && req.user.metadata.active_hand) {
-      const savedHand = req.user.metadata.active_hand;
-      if (savedHand && !savedHand.isEnded) {
-        if (!savedHand.shoe || savedHand.shoe.length === 0) {
-          savedHand.shoe = createBlackjackShoe(6);
-        }
-        game = savedHand;
-        activeBlackjackGames.set(userId, game);
-      }
-    }
-  }
-
-  if (!game || game.isEnded) {
-    return res.status(400).json({ error: "No active hand found. Please deal a new hand." });
-  }
-
-  const { action } = req.body;
-  let updatedBalance = undefined;
-
-  try {
-    if (game.isSplit) {
-      if (action === 'split') {
-        return res.status(400).json({ error: "Only a single split is allowed per game." });
-      }
-
-      const activeIdx = game.activeSplitIndex || 0;
-      const curHand = game.splitHands[activeIdx];
-
-      if (action === 'hit') {
-        curHand.playerCards.push(game.shoe.pop());
-        curHand.playerScore = calcHandScore(curHand.playerCards).score;
-        if (curHand.playerScore > 21) {
-          curHand.isEnded = true;
-          curHand.outcome = 'bust';
-          if (activeIdx === 0) {
-            game.activeSplitIndex = 1;
-            game.playerCards = game.splitHands[1].playerCards;
-            game.playerScore = game.splitHands[1].playerScore;
-          } else {
-            game.isEnded = true;
-          }
-        } else {
-          game.playerCards = curHand.playerCards;
-          game.playerScore = curHand.playerScore;
-        }
-      } else if (action === 'stand' || action === 'double') {
-        if (action === 'double') {
-          const { data: newBal, error: rpcErr } = await supabase.rpc("modify_points", {
-            p_user_id: userId,
-            p_delta: -curHand.bet,
-            p_action: "blackjack_double",
-            p_source: "blackjack",
-            p_ref: `bj_dbl_${Date.now()}`
-          });
-          if (rpcErr) return res.status(402).json({ error: "Insufficient balance to double down" });
-          updatedBalance = newBal;
-          curHand.bet *= 2;
-          curHand.playerCards.push(game.shoe.pop());
-          curHand.playerScore = calcHandScore(curHand.playerCards).score;
-        }
-        curHand.isEnded = true;
-
-        if (activeIdx === 0) {
-          game.activeSplitIndex = 1;
-          game.playerCards = game.splitHands[1].playerCards;
-          game.playerScore = game.splitHands[1].playerScore;
-        } else {
-          game.isEnded = true;
-        }
-      }
-
-      // If both split hands finished, resolve dealer & payouts
-      if (game.isEnded || (game.splitHands[0].isEnded && game.splitHands[1].isEnded)) {
-        game.isEnded = true;
-
-        const nonBustHands = game.splitHands.filter(h => h.playerScore <= 21);
-        if (nonBustHands.length > 0) {
-          let dCalc = calcHandScore(game.dealerCards);
-          while (dCalc.score < 17 || (dCalc.score === 17 && dCalc.isSoft)) {
-            game.dealerCards.push(game.shoe.pop());
-            dCalc = calcHandScore(game.dealerCards);
-          }
-          game.dealerScore = dCalc.score;
-        } else {
-          game.dealerScore = calcHandScore(game.dealerCards).score;
-        }
-
-        let totalPayout = 0;
-        for (const h of game.splitHands) {
-          if (h.playerScore > 21) {
-            h.outcome = 'bust';
-            h.payout = 0;
-          } else if (game.dealerScore > 21) {
-            h.outcome = 'win';
-            h.payout = h.bet * 2;
-          } else if (h.playerScore > game.dealerScore) {
-            h.outcome = 'win';
-            h.payout = h.bet * 2;
-          } else if (h.playerScore < game.dealerScore) {
-            h.outcome = 'loss';
-            h.payout = 0;
-          } else {
-            h.outcome = 'push';
-            h.payout = h.bet;
-          }
-          totalPayout += h.payout;
-        }
-
-        game.payout = totalPayout;
-        if (totalPayout > 0) {
-          const { data: balAfterPay } = await supabase.rpc("modify_points", {
-            p_user_id: userId,
-            p_delta: totalPayout,
-            p_action: "blackjack_payout",
-            p_source: "blackjack",
-            p_ref: `bj_pay_${Date.now()}`
-          });
-          if (balAfterPay !== null && balAfterPay !== undefined) {
-            updatedBalance = balAfterPay;
-          }
-        }
-      }
-    } else if (action === 'hit') {
-      game.playerCards.push(game.shoe.pop());
-      const pCalc = calcHandScore(game.playerCards);
-      game.playerScore = pCalc.score;
-
-      if (pCalc.isBust) {
-        game.isEnded = true;
-        game.outcome = 'bust';
-        game.payout = 0;
-      }
-    } else if (action === 'split') {
-      if (game.isSplit) {
-        return res.status(400).json({ error: "Only a single split is allowed per game." });
-      }
-      if (game.playerCards.length !== 2 || (game.playerCards[0].rank !== game.playerCards[1].rank && game.playerCards[0].value !== game.playerCards[1].value)) {
-        return res.status(400).json({ error: "Hand cannot be split" });
-      }
-
-      if (game.bet > 0) {
-        const { data: newBal, error: rpcErr } = await supabase.rpc("modify_points", {
-          p_user_id: userId,
-          p_delta: -game.bet,
-          p_action: "blackjack_split",
-          p_source: "blackjack",
-          p_ref: `bj_split_${Date.now()}`
-        });
-
-        if (rpcErr) {
-          return res.status(402).json({ error: "Insufficient balance to split" });
-        }
-        updatedBalance = newBal;
-      }
-
-      // Split into two hands
-      const card1 = game.playerCards[0];
-      const card2 = game.playerCards[1];
-
-      const splitHand1 = {
-        playerCards: [card1, game.shoe.pop()],
-        bet: game.bet,
-        isEnded: false,
-        outcome: null,
-        payout: 0
-      };
-      splitHand1.playerScore = calcHandScore(splitHand1.playerCards).score;
-
-      const splitHand2 = {
-        playerCards: [card2, game.shoe.pop()],
-        bet: game.bet,
-        isEnded: false,
-        outcome: null,
-        payout: 0
-      };
-      splitHand2.playerScore = calcHandScore(splitHand2.playerCards).score;
-
-      game.isSplit = true;
-      game.splitHands = [splitHand1, splitHand2];
-      game.activeSplitIndex = 0;
-      game.playerCards = splitHand1.playerCards;
-      game.playerScore = splitHand1.playerScore;
-      game.canSplit = false;
-    } else if (action === 'stand' || action === 'double') {
-      if (action === 'double') {
-        const { data: newBal, error: rpcErr } = await supabase.rpc("modify_points", {
-          p_user_id: userId,
-          p_delta: -game.bet,
-          p_action: "blackjack_double",
-          p_source: "blackjack",
-          p_ref: `bj_dbl_${Date.now()}`
-        });
-
-        if (rpcErr) {
-          return res.status(402).json({ error: "Insufficient balance to double down" });
-        }
-        updatedBalance = newBal;
-        game.bet *= 2;
-        game.playerCards.push(game.shoe.pop());
-        game.playerScore = calcHandScore(game.playerCards).score;
-      }
-
-      // Dealer Turn
-      if (game.playerScore <= 21) {
-        let dCalc = calcHandScore(game.dealerCards);
-        while (dCalc.score < 17 || (dCalc.score === 17 && dCalc.isSoft)) {
-          game.dealerCards.push(game.shoe.pop());
-          dCalc = calcHandScore(game.dealerCards);
-        }
-        game.dealerScore = dCalc.score;
-        game.isEnded = true;
-
-        if (dCalc.isBust) {
-          game.outcome = 'win';
-          game.payout = game.bet * 2;
-        } else if (game.playerScore > game.dealerScore) {
-          game.outcome = 'win';
-          game.payout = game.bet * 2;
-        } else if (game.playerScore < game.dealerScore) {
-          game.outcome = 'loss';
-          game.payout = 0;
-        } else {
-          game.outcome = 'push';
-          game.payout = game.bet;
-        }
-      } else {
-        game.isEnded = true;
-        game.outcome = 'bust';
-        game.payout = 0;
-      }
-
-      if (game.payout > 0) {
-        const { data: balAfterPay } = await supabase.rpc("modify_points", {
-          p_user_id: userId,
-          p_delta: game.payout,
-          p_action: "blackjack_payout",
-          p_source: "blackjack",
-          p_ref: `bj_pay_${Date.now()}`
-        });
-        if (balAfterPay !== null && balAfterPay !== undefined) {
-          updatedBalance = balAfterPay;
-        }
-      }
-    }
-
-    if (game.isEnded) {
-      activeBlackjackGames.delete(userId);
-      saveBlackjackHistory(userId, game);
-      if (supabase) {
-        supabase.from("users").update({
-          metadata: { ...(req.user.metadata || {}), active_hand: null }
-        }).eq("id", userId).then(() => {}).catch(() => {});
-      }
-    } else {
-      activeBlackjackGames.set(userId, game);
-      if (supabase) {
-        supabase.from("users").update({
-          metadata: { ...(req.user.metadata || {}), active_hand: game }
-        }).eq("id", userId).then(() => {}).catch(() => {});
-      }
-    }
-
-    res.json({
-      ok: true,
-      new_balance: updatedBalance,
-      handState: {
-        ...game,
-        shoe: undefined
-      }
-    });
-
-  } catch (err) {
-    console.error("Blackjack action error:", err.message);
-    res.status(500).json({ error: err.message });
-  }
 });
 
 // ─── Admin — Redemptions ──────────────────────────────────────────────────────
