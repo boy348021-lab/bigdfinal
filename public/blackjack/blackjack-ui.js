@@ -491,7 +491,13 @@
     const dealerCardsEl = document.getElementById('bj-dealer-cards');
     const dealerScoreEl = document.getElementById('bj-dealer-score');
     if (dealerCardsEl) {
-      dealerCardsEl.innerHTML = activeHand.dealerCards.map((c, idx) => renderCard(c, idx === 1 && !activeHand.isEnded && activeHand.dealerCards.length === 1)).join('');
+      if (activeHand.isEnded) {
+        dealerCardsEl.innerHTML = activeHand.dealerCards.map(c => renderCard(c)).join('');
+      } else {
+        const upcardHtml = activeHand.dealerCards[0] ? renderCard(activeHand.dealerCards[0]) : '';
+        const holeCardHtml = `<div class="bj-card bj-card-back" id="bj-dealer-hole-card"></div>`;
+        dealerCardsEl.innerHTML = upcardHtml + holeCardHtml;
+      }
     }
     if (dealerScoreEl) {
       dealerScoreEl.textContent = activeHand.isEnded ? activeHand.dealerScore : activeHand.dealerVisibleScore;
