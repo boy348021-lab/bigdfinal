@@ -60,6 +60,9 @@ export default class ActionDispatcher {
       }
 
       case 'HIT': {
+        if (engine.fsm.isInState(STATES.WAITING_FOR_BET) || engine.fsm.isInState(STATES.ROUND_COMPLETE)) {
+          return { snapshot: engine.getSnapshot(), updatedBalance };
+        }
         const snapshot = engine.hit();
         if (snapshot.isEnded && snapshot.totalPayout > 0 && this.supabase) {
           const { data: balAfterPay } = await this.supabase.rpc("modify_points", {
@@ -77,6 +80,9 @@ export default class ActionDispatcher {
       }
 
       case 'STAND': {
+        if (engine.fsm.isInState(STATES.WAITING_FOR_BET) || engine.fsm.isInState(STATES.ROUND_COMPLETE)) {
+          return { snapshot: engine.getSnapshot(), updatedBalance };
+        }
         const snapshot = engine.stand();
         if (snapshot.isEnded && snapshot.totalPayout > 0 && this.supabase) {
           const { data: balAfterPay } = await this.supabase.rpc("modify_points", {
@@ -94,6 +100,9 @@ export default class ActionDispatcher {
       }
 
       case 'DOUBLE': {
+        if (engine.fsm.isInState(STATES.WAITING_FOR_BET) || engine.fsm.isInState(STATES.ROUND_COMPLETE)) {
+          return { snapshot: engine.getSnapshot(), updatedBalance };
+        }
         const currentHand = engine.playerHands[engine.activeHandIndex];
         const doubleBet = currentHand ? currentHand.bet : 0;
 
@@ -126,6 +135,9 @@ export default class ActionDispatcher {
       }
 
       case 'SPLIT': {
+        if (engine.fsm.isInState(STATES.WAITING_FOR_BET) || engine.fsm.isInState(STATES.ROUND_COMPLETE)) {
+          return { snapshot: engine.getSnapshot(), updatedBalance };
+        }
         const currentHand = engine.playerHands[engine.activeHandIndex];
         const splitBet = currentHand ? currentHand.bet : 0;
 
