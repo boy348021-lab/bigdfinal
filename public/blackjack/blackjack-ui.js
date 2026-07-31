@@ -348,16 +348,7 @@
     } else if (activeHand.isEnded) {
       await revealDealerTurnAnimated();
     } else {
-      setButtonsDisabled(false);
-      const btnDoubleDown = document.getElementById('bj-btn-double-down');
-      const btnSplit = document.getElementById('bj-btn-split');
-      const btnMain = document.getElementById('bj-btn-main');
-
-      const canSplit = activeHand.canSplit || (activeHand.playerCards.length === 2 && (activeHand.playerCards[0].rank === activeHand.playerCards[1].rank || activeHand.playerCards[0].value === activeHand.playerCards[1].value));
-
-      if (btnDoubleDown) btnDoubleDown.disabled = activeHand.playerCards.length !== 2;
-      if (btnSplit) btnSplit.disabled = !canSplit;
-      if (btnMain) { btnMain.textContent = 'Game in Progress'; btnMain.disabled = true; }
+      renderHandState();
     }
   }
 
