@@ -1518,30 +1518,9 @@ const chatActivityTracker = {
   },
 
   async awardInterval() {
-    if (!supabase) return;
-    const now      = Date.now();
-    const cutoff   = now - ACTIVE_WINDOW_MS;
-    let awardCount = 0;
-
-    for (const [username, lastSeen] of this.activityMap.entries()) {
-      if (lastSeen < cutoff) continue;     // inactive in chat
-      const userId = this.userIdMap.get(username);
-      if (!userId) continue;               // not a registered Kick-OAuth user
-
-      try {
-        await supabase.rpc("modify_points", {
-          p_user_id: userId,
-          p_delta:   POINTS_PER_INTERVAL,
-          p_action:  "chat_points",
-          p_source:  "kick_chat",
-          p_ref:     `chat_${username}_${Math.floor(now / INTERVAL_MS)}`
-        });
-        awardCount++;
-      } catch (e) {
-        console.error("Point award failed for", username, e.message);
-      }
-    }
-    if (awardCount > 0) console.log(`🏆 Awarded ${POINTS_PER_INTERVAL} pts to ${awardCount} active chatters`);
+    // Points are strictly awarded via DegenCity slot wager synchronization ($1 = 10 pts).
+    // Random background chat activity point awards are disabled to guarantee wager-only points integrity.
+    return;
   },
 };
 

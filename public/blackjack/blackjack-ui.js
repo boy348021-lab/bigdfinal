@@ -400,12 +400,7 @@
         if (activeHand.isEnded) {
           await revealDealerTurnAnimated();
         } else {
-          setButtonsDisabled(false);
-          const btnDoubleDown = document.getElementById('bj-btn-double-down');
-          const btnSplit = document.getElementById('bj-btn-split');
-          const canSplit = activeHand.canSplit || (activeHand.playerCards.length === 2 && (activeHand.playerCards[0].rank === activeHand.playerCards[1].rank || activeHand.playerCards[0].value === activeHand.playerCards[1].value));
-          if (btnDoubleDown) btnDoubleDown.disabled = activeHand.playerCards.length !== 2;
-          if (btnSplit) btnSplit.disabled = !canSplit;
+          renderHandState();
         }
         resolve();
       };
@@ -574,6 +569,12 @@
 
   async function performAction(actionName) {
     if (!activeHand || activeHand.isEnded) return;
+
+    // Strict client-side action validation guards: Prevent invalid action execution
+    if (actionName === 'split' && activeHand.canSplit === false) return;
+    if (actionName === 'double' && activeHand.canDouble === false) return;
+    if (actionName === 'hit' && activeHand.canHit === false) return;
+    if (actionName === 'stand' && activeHand.canStand === false) return;
 
     const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
     if (!token) return;
