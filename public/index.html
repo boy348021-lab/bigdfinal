@@ -2149,16 +2149,19 @@ transition:transform .1s linear;
       <div class="prize-pool-banner" style="margin-bottom:32px">
         <div>
           <div class="prize-pool-label">Monthly Prize Pool</div>
-          <div class="prize-pool-total">$750</div>
+          <div class="prize-pool-total">$1,500</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-          <span class="prize-badge prize-badge-1">🥇 $350</span>
-          <span class="prize-badge prize-badge-2">🥈 $150</span>
-          <span class="prize-badge prize-badge-3">🥉 $100</span>
-          <span class="prize-badge prize-badge-n">4th $50</span>
-          <span class="prize-badge prize-badge-n">5th $50</span>
-          <span class="prize-badge prize-badge-n">6th $25</span>
-          <span class="prize-badge prize-badge-n">7th $25</span>
+          <span class="prize-badge prize-badge-1">🥇 $800</span>
+          <span class="prize-badge prize-badge-2">🥈 $250</span>
+          <span class="prize-badge prize-badge-3">🥉 $150</span>
+          <span class="prize-badge prize-badge-n">4th $90</span>
+          <span class="prize-badge prize-badge-n">5th $60</span>
+          <span class="prize-badge prize-badge-n">6th $45</span>
+          <span class="prize-badge prize-badge-n">7th $35</span>
+          <span class="prize-badge prize-badge-n">8th $30</span>
+          <span class="prize-badge prize-badge-n">9th $20</span>
+          <span class="prize-badge prize-badge-n">10th $20</span>
         </div>
         <span class="prize-pool-cadence">⏱ Monthly Reset</span>
       </div>
@@ -2672,8 +2675,8 @@ async function fetchLeaderboard(after, before, rangeLabel) {
 
 
 /* ── PRIZE POOL ────────────────────────────────────── */
-const PRIZE_POOL = [350, 150, 100, 50, 50, 25, 25]; // biweekly $750
-const PRIZE_TOTAL = 750;
+const PRIZE_POOL = [800, 250, 150, 90, 60, 45, 35, 30, 20, 20]; // monthly $1,500
+const PRIZE_TOTAL = 1500;
 
 function renderLeaderboard(data, rangeLabel) {
   const lbContent = document.getElementById('lb-content');
@@ -3002,7 +3005,7 @@ function initBiweeklyProgress(isIntervalUpdate = false) {
   if (endNode && pct >= 100) endNode.classList.add('active');
 }
 
-const BW_PRIZE_POOL = [350, 150, 100, 50, 50, 25, 25];
+const BW_PRIZE_POOL = [800, 250, 150, 90, 60, 45, 35, 30, 20, 20];
 
 async function fetchBiweeklyLeaderboard() {
   const bwContent = document.getElementById('bw-lb-content');
