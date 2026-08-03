@@ -1862,6 +1862,194 @@ transition:transform .1s linear;
   transition: transform 0.2s;
 }
 .social-card:hover .social-arrow { transform: translateX(4px); }
+
+/* ============================================================
+   CHALLENGES SECTION
+   ============================================================ */
+.challenges-header {
+  margin-bottom: 36px;
+  text-align: left;
+}
+.challenges-sub {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  max-width: 650px;
+}
+.challenges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
+  width: 100%;
+}
+.challenge-card {
+  background: rgba(17, 17, 42, 0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(136, 0, 255, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), 0 0 20px rgba(136, 0, 255, 0.1);
+}
+.challenge-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--purple-500) 50%, var(--cyan-500) 100%);
+  opacity: 0.6;
+  transition: opacity 0.35s ease;
+}
+.challenge-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  border-color: rgba(0, 255, 229, 0.45);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.6),
+              0 0 35px rgba(136, 0, 255, 0.25),
+              0 0 15px rgba(0, 255, 229, 0.15);
+}
+.challenge-card:hover::before {
+  opacity: 1;
+}
+.challenge-card-badge {
+  position: absolute;
+  top: 36px;
+  right: 36px;
+  z-index: 5;
+  background: rgba(8, 8, 16, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(232, 194, 68, 0.5);
+  color: var(--gold-400);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 10px rgba(232, 194, 68, 0.2);
+}
+.challenge-img-wrap {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.challenge-img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--radius-md);
+  transition: transform 0.4s ease;
+}
+.challenge-card:hover .challenge-img {
+  transform: scale(1.025);
+}
+.challenge-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex-grow: 1;
+  justify-content: space-between;
+}
+.challenge-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.challenge-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+.challenge-prize-tag {
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--gold-400);
+  background: rgba(201, 162, 39, 0.12);
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+.challenge-desc {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.btn-claim-challenge {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 16px 28px;
+  background: linear-gradient(135deg, var(--purple-600) 0%, var(--purple-500) 100%);
+  border: 1px solid var(--purple-400);
+  border-radius: var(--radius-sm);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  box-shadow: 0 4px 16px rgba(136, 0, 255, 0.3);
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn-claim-challenge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0, 255, 229, 0.2) 0%, rgba(136, 0, 255, 0.4) 100%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.btn-claim-challenge:hover {
+  background: linear-gradient(135deg, var(--purple-500) 0%, var(--purple-400) 100%);
+  border-color: var(--cyan-400);
+  color: #ffffff;
+  box-shadow: 0 0 25px rgba(0, 255, 229, 0.45), 0 0 15px rgba(136, 0, 255, 0.4);
+  transform: translateY(-2px);
+}
+.btn-claim-challenge:hover::before {
+  opacity: 1;
+}
+.btn-claim-challenge svg, .btn-claim-challenge span {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .challenges-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .challenge-card {
+    padding: 18px;
+  }
+  .challenge-card-badge {
+    top: 28px;
+    right: 28px;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+  }
+}
 </style>
 </head>
 <body>
@@ -2006,10 +2194,49 @@ transition:transform .1s linear;
 
     <!-- CHALLENGES PANEL -->
     <div class="tab-panel" id="panel-challenges">
-      <div class="coming-soon-wrap">
-        <div class="coming-soon-icon">[ ? ]</div>
-        <div class="coming-soon-title">Challenges <span>Coming Soon</span></div>
-        <p class="coming-soon-sub">Weekly &amp; monthly challenges are being crafted. Check back soon.</p>
+      <div class="challenges-header">
+        <div class="section-title">Community <span>Challenges</span></div>
+        <p class="challenges-sub">Complete live game challenges to claim cash prizes! Join our Discord community to submit your entry.</p>
+      </div>
+
+      <div class="challenges-grid">
+        <!-- Challenge Card 1: Sweet Bonanza 2500 -->
+        <div class="challenge-card">
+          <div class="challenge-card-badge">🔥 LIVE CHALLENGE</div>
+          <div class="challenge-img-wrap">
+            <img src="/challenges/sweet-bonanza-challenge.jpg" alt="Sweet Bonanza 2500 - 1000x Bomb Challenge" class="challenge-img" loading="lazy" />
+          </div>
+          <div class="challenge-card-body">
+            <div class="challenge-card-meta">
+              <span class="challenge-title">Sweet Bonanza 2500</span>
+              <span class="challenge-prize-tag">$20 CASH</span>
+            </div>
+            <p class="challenge-desc">First person to hit the 1000x Bomb wins $20 Cash! Min bet $0.20. No bonus buys. Ends 08/31.</p>
+            <a href="https://discord.gg/B2K2U5sF37" target="_blank" rel="noopener" class="btn-claim-challenge">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/></svg>
+              <span>Claim</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Challenge Card 2: Le Prechaun -->
+        <div class="challenge-card">
+          <div class="challenge-card-badge">🔥 LIVE CHALLENGE</div>
+          <div class="challenge-img-wrap">
+            <img src="/challenges/le-prechaun-challenge.jpg" alt="Le Prechaun - Community Challenge" class="challenge-img" loading="lazy" />
+          </div>
+          <div class="challenge-card-body">
+            <div class="challenge-card-meta">
+              <span class="challenge-title">Le Prechaun Challenge</span>
+              <span class="challenge-prize-tag">$60 CASH</span>
+            </div>
+            <p class="challenge-desc">First person to hit 5 Scatter wins $60 Cash! Min bet $0.20. Challenge ends 08/31.</p>
+            <a href="https://discord.gg/B2K2U5sF37" target="_blank" rel="noopener" class="btn-claim-challenge">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/></svg>
+              <span>Claim</span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 
