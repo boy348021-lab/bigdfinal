@@ -896,6 +896,355 @@ body::after {
 .hof-badge-tag { font-family: var(--font-ui); font-size: 0.7rem; font-weight: 800; color: var(--gold-400); letter-spacing: 0.12em; margin-top: 2px; }
 .hof-wager-amount { font-family: var(--font-display); font-size: 1.1rem; font-weight: 900; color: var(--gold-400); text-shadow: 0 0 10px rgba(255,215,0,0.3); }
 
+/* ============================================================
+   STORYTELLING HOMEPAGE SECTIONS CSS
+   ============================================================ */
+
+/* ============================================================
+   ULTRA-GAMIFIED INTERACTIVE EXPERIENCE CSS
+   ============================================================ */
+
+/* Interactive Mouse-Follow Spotlight Glow */
+.mouse-glow-follower {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(650px at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(157, 0, 255, 0.12), transparent 78%);
+  will-change: background;
+}
+
+/* Button Shimmer Light Sweep & Micro Bounce */
+.hero-btn, .btn-primary, .btn-cta-primary, .btn-claim-challenge, .btn-filter {
+  position: relative;
+  overflow: hidden;
+  will-change: transform, box-shadow;
+}
+.hero-btn::after, .btn-primary::after, .btn-cta-primary::after, .btn-claim-challenge::after, .btn-filter::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -60%;
+  width: 50%; height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  transform: rotate(25deg);
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.hero-btn:hover::after, .btn-primary:hover::after, .btn-cta-primary:hover::after, .btn-claim-challenge:hover::after, .btn-filter:hover::after {
+  transform: rotate(25deg) translateX(420%);
+}
+.hero-btn:active, .btn-primary:active, .btn-cta-primary:active, .btn-claim-challenge:active, .btn-filter:active {
+  transform: scale(0.96) translateY(0) !important;
+}
+
+/* Card GPU 3D Elevation & Depth */
+.top5-card, .social-cyber-card, .how-card, .challenge-card, .winner-card, .stat-item {
+  will-change: transform, box-shadow, border-color;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Scroll Reveal Animations */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px) scale(0.98);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal-on-scroll.revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Interactive Leaderboard Table Rows */
+.lb-table tbody tr {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.lb-table tbody tr:hover {
+  background: rgba(157, 0, 255, 0.14) !important;
+  transform: translateX(6px);
+  box-shadow: 0 4px 20px rgba(157, 0, 255, 0.25);
+}
+
+/* 1. Live Activity Feed Marquee Ticker */
+.ticker-bar-wrap {
+  width: 100%;
+  background: rgba(6, 4, 18, 0.92);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(157, 0, 255, 0.25);
+  border-bottom: 1px solid rgba(157, 0, 255, 0.25);
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+  padding: 10px 0;
+  margin-bottom: 30px;
+}
+.ticker-track {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  white-space: nowrap;
+  animation: tickerScroll 35s linear infinite;
+  width: max-content;
+}
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.ticker-tag {
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.ticker-tag.tag-reward { background: rgba(255, 215, 0, 0.18); color: var(--gold-400); border: 1px solid rgba(255, 215, 0, 0.4); }
+.ticker-tag.tag-rank   { background: rgba(0, 255, 229, 0.18); color: var(--cyan-400); border: 1px solid rgba(0, 255, 229, 0.4); }
+.ticker-tag.tag-code   { background: rgba(157, 0, 255, 0.18); color: var(--purple-300); border: 1px solid rgba(157, 0, 255, 0.4); }
+.ticker-tag.tag-live   { background: rgba(0, 255, 102, 0.18); color: #00ff66; border: 1px solid rgba(0, 255, 102, 0.4); }
+
+/* Story Section Global Container */
+.story-section {
+  position: relative;
+  z-index: 2;
+  padding: 60px 24px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+.story-section-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.story-eyebrow {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  color: var(--purple-400);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+.story-title {
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+.story-title span {
+  background: linear-gradient(135deg, var(--purple-400), var(--cyan-400));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.story-sub {
+  font-family: var(--font-body);
+  font-size: 1.02rem;
+  color: var(--text-secondary);
+  max-width: 650px;
+  margin: 12px auto 0;
+  line-height: 1.6;
+}
+
+/* 2. Leaderboard Top 5 Spotlight */
+.top5-spotlight-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 18px;
+  width: 100%;
+}
+.top5-card {
+  background: rgba(13, 8, 32, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(157, 0, 255, 0.22);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+.top5-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--cyan-400);
+  box-shadow: var(--glow-cyan), 0 16px 40px rgba(0,0,0,0.6);
+}
+.top5-card.rank-1-card {
+  border-color: var(--gold-400);
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.1) 0%, rgba(13, 8, 32, 0.88) 100%);
+  box-shadow: var(--gold-glow);
+}
+.top5-rank-badge {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+.top5-avatar-wrap {
+  position: relative;
+  width: 60px; height: 60px;
+  margin-bottom: 12px;
+}
+.top5-avatar {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--purple-400);
+  background: var(--purple-600);
+}
+.top5-flag {
+  position: absolute;
+  bottom: -2px; right: -2px;
+  font-size: 1.1rem;
+}
+.top5-username {
+  font-family: var(--font-ui);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+.top5-wager {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--gold-400);
+  margin-bottom: 12px;
+  text-shadow: 0 0 10px rgba(255,215,0,0.3);
+}
+.top5-prog-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.top5-prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--purple-500), var(--cyan-400));
+  border-radius: 3px;
+}
+
+/* 3. Latest Winners Auto Carousel */
+.winners-carousel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  width: 100%;
+}
+.winner-card {
+  background: rgba(13, 8, 32, 0.75);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(157, 0, 255, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.3s ease;
+}
+.winner-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--gold-400);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.25);
+}
+.winner-avatar {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple-600), var(--purple-400));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  border: 1px solid var(--border-gold);
+}
+.winner-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.winner-name {
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+.winner-prize {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--gold-400);
+}
+.winner-time {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* 4. How It Works Cards */
+.how-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 22px;
+  width: 100%;
+}
+.how-card {
+  background: rgba(13, 8, 32, 0.75);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(157, 0, 255, 0.22);
+  border-radius: var(--radius-xl);
+  padding: 32px 26px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s ease;
+}
+.how-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--purple-400);
+  box-shadow: var(--glow-intense);
+}
+.how-step-num {
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: rgba(157, 0, 255, 0.35);
+  margin-bottom: 12px;
+  line-height: 1;
+}
+.how-card:hover .how-step-num {
+  color: var(--cyan-400);
+  text-shadow: 0 0 15px rgba(0, 255, 229, 0.4);
+}
+.how-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+.how-desc {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
 .hero-actions {
   display: flex;
   align-items: center;
@@ -2475,6 +2824,7 @@ transition:transform .1s linear;
 </style>
 </head>
 <body>
+<div id="mouse-glow-follower" class="mouse-glow-follower"></div>
 
 <!-- ================================================================
      NAVIGATION
@@ -2655,6 +3005,26 @@ transition:transform .1s linear;
 </section>
 
 <!-- ================================================================
+     LIVE MARQUEE ACTIVITY TICKER
+     ================================================================ -->
+<div class="ticker-bar-wrap">
+  <div class="ticker-track">
+    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>armedupmused</strong> holds 1st place with $9,314.12 wagered!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-reward">REWARD</span> 🎁 <strong>bigballszs34</strong> unlocked $60 Le Prechaun Cash Bonus!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>thatonet</strong> linked Kick account under code <strong>BIGD</strong>!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-live">LIVE NOW</span> 🟢 <strong>BigDgamesTV</strong> is streaming live on Kick!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #4</span> ⚡ <strong>soysolos</strong> pushed to 4th place on August Monthly Leaderboard!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-reward">REWARD</span> 🎯 <strong>supermustang</strong> claimed Sweet Bonanza 2500 Cash Drop!</div>
+    <!-- Loop repeat for smooth marquee -->
+    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>armedupmused</strong> holds 1st place with $9,314.12 wagered!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-reward">REWARD</span> 🎁 <strong>bigballszs34</strong> unlocked $60 Le Prechaun Cash Bonus!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>thatonet</strong> linked Kick account under code <strong>BIGD</strong>!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-live">LIVE NOW</span> 🟢 <strong>BigDgamesTV</strong> is streaming live on Kick!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #4</span> ⚡ <strong>soysolos</strong> pushed to 4th place on August Monthly Leaderboard!</div>
+  </div>
+</div>
+
+<!-- ================================================================
      STATS STRIP
      ================================================================ -->
 <section id="stats-strip">
@@ -2674,6 +3044,161 @@ transition:transform .1s linear;
     <div class="stat-item">
       <div class="stat-value"><span>1</span></div>
       <div class="stat-label">Partnered Sites</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     LEADERBOARD TOP 5 SPOTLIGHT
+     ================================================================ -->
+<section id="leaderboard-spotlight" class="story-section">
+  <div class="story-section-header">
+    <span class="story-eyebrow">HALL OF CHAMPIONS</span>
+    <h2 class="story-title">Leaderboard <span>Top 5 Spotlight</span></h2>
+    <p class="story-sub">Real-time ranking of top players dominating the August 2026 wager leaderboard.</p>
+  </div>
+
+  <div class="top5-spotlight-grid">
+    <!-- Rank 1 -->
+    <div class="top5-card rank-1-card">
+      <div class="top5-rank-badge">🥇 #1</div>
+      <div class="top5-avatar-wrap">
+        <img src="/logo.png" alt="armedupmused" class="top5-avatar"/>
+        <span class="top5-flag">🇺🇸</span>
+      </div>
+      <div class="top5-username">armedupmused</div>
+      <div class="top5-wager">$9,314.12</div>
+      <div class="top5-prog-track"><div class="top5-prog-fill" style="width:100%"></div></div>
+    </div>
+
+    <!-- Rank 2 -->
+    <div class="top5-card">
+      <div class="top5-rank-badge">🥈 #2</div>
+      <div class="top5-avatar-wrap">
+        <img src="/logo.png" alt="bigballszs34" class="top5-avatar"/>
+        <span class="top5-flag">🇨🇦</span>
+      </div>
+      <div class="top5-username">bigballszs34</div>
+      <div class="top5-wager">$1,132.15</div>
+      <div class="top5-prog-track"><div class="top5-prog-fill" style="width:68%"></div></div>
+    </div>
+
+    <!-- Rank 3 -->
+    <div class="top5-card">
+      <div class="top5-rank-badge">🥉 #3</div>
+      <div class="top5-avatar-wrap">
+        <img src="/logo.png" alt="thatonet" class="top5-avatar"/>
+        <span class="top5-flag">🇬🇧</span>
+      </div>
+      <div class="top5-username">thatonet</div>
+      <div class="top5-wager">$922.76</div>
+      <div class="top5-prog-track"><div class="top5-prog-fill" style="width:52%"></div></div>
+    </div>
+
+    <!-- Rank 4 -->
+    <div class="top5-card">
+      <div class="top5-rank-badge">#4</div>
+      <div class="top5-avatar-wrap">
+        <img src="/logo.png" alt="soysolos" class="top5-avatar"/>
+        <span class="top5-flag">🇩🇪</span>
+      </div>
+      <div class="top5-username">soysolos</div>
+      <div class="top5-wager">$225.28</div>
+      <div class="top5-prog-track"><div class="top5-prog-fill" style="width:30%"></div></div>
+    </div>
+
+    <!-- Rank 5 -->
+    <div class="top5-card">
+      <div class="top5-rank-badge">#5</div>
+      <div class="top5-avatar-wrap">
+        <img src="/logo.png" alt="supermustang" class="top5-avatar"/>
+        <span class="top5-flag">🇦🇺</span>
+      </div>
+      <div class="top5-username">supermustang</div>
+      <div class="top5-wager">$122.41</div>
+      <div class="top5-prog-track"><div class="top5-prog-fill" style="width:18%"></div></div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:36px;">
+    <button class="btn-primary" onclick="document.getElementById('tabs-section').scrollIntoView({behavior:'smooth'})">
+      <span>View Full Leaderboards & Filters</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- ================================================================
+     LAST WINNERS & COMMUNITY PAYOUTS
+     ================================================================ -->
+<section id="latest-winners" class="story-section">
+  <div class="story-section-header">
+    <span class="story-eyebrow">RECENT PAYOUTS</span>
+    <h2 class="story-title">Last Month's <span>Winners</span></h2>
+    <p class="story-sub">Live cash rewards transferred to players across DegenCity & Kick challenges.</p>
+  </div>
+
+  <div class="winners-carousel-grid">
+    <div class="winner-card">
+      <div class="winner-avatar">🥇</div>
+      <div class="winner-info">
+        <div class="winner-name">armedupmused</div>
+        <div class="winner-prize">$800 CASH</div>
+        <div class="winner-time">Monthly #1 Champion • 2h ago</div>
+      </div>
+    </div>
+    <div class="winner-card">
+      <div class="winner-avatar">🎁</div>
+      <div class="winner-info">
+        <div class="winner-name">bigballszs34</div>
+        <div class="winner-prize">$60 CASH</div>
+        <div class="winner-time">Le Prechaun Challenge • 5h ago</div>
+      </div>
+    </div>
+    <div class="winner-card">
+      <div class="winner-avatar">🥈</div>
+      <div class="winner-info">
+        <div class="winner-name">thatonet</div>
+        <div class="winner-prize">$250 CASH</div>
+        <div class="winner-time">Monthly #2 Runner-Up • 12h ago</div>
+      </div>
+    </div>
+    <div class="winner-card">
+      <div class="winner-avatar">🎯</div>
+      <div class="winner-info">
+        <div class="winner-name">soysolos</div>
+        <div class="winner-prize">$20 CASH</div>
+        <div class="winner-time">Sweet Bonanza 2500 • 1d ago</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     HOW IT WORKS
+     ================================================================ -->
+<section id="how-it-works" class="story-section">
+  <div class="story-section-header">
+    <span class="story-eyebrow">SIMPLE 3-STEP FLOW</span>
+    <h2 class="story-title">How <span>BigDTV Works</span></h2>
+    <p class="story-sub">Join the community, rack up wagers under affiliate code BIGD, and claim cash payouts.</p>
+  </div>
+
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-step-num">01</div>
+      <h3 class="how-title">Link Account</h3>
+      <p class="how-desc">Sign up on DegenCity or Stake using code <strong class="text-cyan">BIGD</strong> and verify your account in seconds.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-step-num">02</div>
+      <h3 class="how-title">Play & Compete</h3>
+      <p class="how-desc">Wager on your favorite casino games. Every dollar wagered automatically tracks on live leaderboards.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-step-num">03</div>
+      <h3 class="how-title">Claim Cash Prizes</h3>
+      <p class="how-desc">Finish in top leaderboard ranks or complete slot challenges to receive instant cash payouts in Discord.</p>
     </div>
   </div>
 </section>
@@ -3304,6 +3829,29 @@ window.addEventListener('click', (e) => {
   if (modal && e.target === modal) {
     modal.classList.remove('open');
   }
+});
+
+/* ──────────────────────────────────────────
+   MOUSE-FOLLOW LIGHTING & SCROLL REVEAL & GAMIFIED INTERACTIONS
+   ────────────────────────────────────────── */
+window.addEventListener('mousemove', (e) => {
+  document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+  document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const elementsToReveal = document.querySelectorAll('.story-section, .top5-card, .winner-card, .how-card, .stat-item, .challenge-card');
+  elementsToReveal.forEach(el => el.classList.add('reveal-on-scroll'));
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+      }
+    });
+  }, { threshold: 0.12 });
+
+  elementsToReveal.forEach(el => observer.observe(el));
 });
 
 /* ──────────────────────────────────────────
