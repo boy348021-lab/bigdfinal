@@ -474,6 +474,143 @@ body::after {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
+/* ──────────────────────────────────────────
+   3 HERO BUTTONS GRID (Join Discord | Watch Live | Kick)
+   ────────────────────────────────────────── */
+.hero-3btn-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 880px;
+  margin: 32px auto 36px;
+}
+
+.hero-btn {
+  flex: 1 1 240px;
+  max-width: 270px;
+  min-width: 210px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: 0.96rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Button 1: Join Discord (Purple Gradient Primary) */
+.hero-btn-discord {
+  background: linear-gradient(135deg, var(--purple-600) 0%, var(--purple-500) 100%);
+  border: 1px solid var(--purple-400);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(157, 0, 255, 0.4);
+}
+.hero-btn-discord:hover {
+  background: linear-gradient(135deg, var(--purple-500) 0%, var(--purple-400) 100%);
+  border-color: var(--cyan-400);
+  box-shadow: 0 0 30px rgba(0, 255, 229, 0.5), 0 0 20px rgba(157, 0, 255, 0.5);
+  transform: translateY(-3px);
+}
+
+/* Button 2: Watch Live (Dynamic Status Button) */
+.hero-btn-watch-live {
+  border-radius: var(--radius-sm);
+}
+
+/* 🟢 Watch Live: LIVE State */
+.hero-btn-watch-live.is-live {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border: 1px solid #34d399;
+  color: #ffffff;
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.6), 0 0 45px rgba(52, 211, 153, 0.3);
+  animation: pulse-watch-live 1.8s ease-in-out infinite;
+}
+.hero-btn-watch-live.is-live:hover {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  border-color: #6ee7b7;
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.85), 0 0 65px rgba(52, 211, 153, 0.5);
+  transform: translateY(-3px);
+}
+@keyframes pulse-watch-live {
+  0%, 100% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.6), 0 0 45px rgba(52, 211, 153, 0.3); }
+  50%      { box-shadow: 0 0 38px rgba(16, 185, 129, 0.85), 0 0 60px rgba(52, 211, 153, 0.5); }
+}
+
+/* 🔴 Watch Live: OFFLINE State */
+.hero-btn-watch-live.is-offline {
+  background: linear-gradient(135deg, rgba(153, 27, 27, 0.6) 0%, rgba(185, 28, 28, 0.75) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.6);
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(185, 28, 28, 0.3);
+}
+.hero-btn-watch-live.is-offline:hover {
+  background: linear-gradient(135deg, rgba(185, 28, 28, 0.85) 0%, rgba(220, 38, 38, 0.95) 100%);
+  border-color: rgba(248, 113, 113, 0.8);
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Status Badge Tag on Watch Live Button */
+.btn-status-tag {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+.hero-btn-watch-live.is-live .btn-status-tag {
+  background: rgba(6, 78, 59, 0.9);
+  color: #6ee7b7;
+  border: 1px solid #34d399;
+}
+.hero-btn-watch-live.is-offline .btn-status-tag {
+  background: rgba(127, 29, 29, 0.8);
+  color: #fecaca;
+  border: 1px solid rgba(248, 113, 113, 0.6);
+}
+
+/* Button 3: Kick Channel (Secondary Glass Button) */
+.hero-btn-kick {
+  background: rgba(13, 8, 32, 0.78);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(157, 0, 255, 0.3);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.hero-btn-kick:hover {
+  background: rgba(24, 16, 52, 0.92);
+  border-color: var(--cyan-400);
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .hero-3btn-grid {
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .hero-btn {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
 .hero-actions {
   display: flex;
   align-items: center;
@@ -2127,30 +2264,25 @@ transition:transform .1s linear;
     <span>Tipped out <strong class="text-gold">$2,500+</strong> in live community rewards</span>
   </div>
 
-  <!-- 4 Action Buttons Suite (2 Primary + 2 Secondary) -->
-  <div class="hero-actions-grid">
-    <!-- Primary CTA 1: Start Competing -->
-    <button class="btn-cta-primary" onclick="scrollToTabs()">
-      <span>Start Competing</span>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-    </button>
-
-    <!-- Primary CTA 2: Join Discord -->
-    <a href="https://discord.gg/aHSVMX4DCr" target="_blank" rel="noopener" class="btn-cta-primary btn-cta-discord">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/></svg>
+  <!-- 3 Hero Action Buttons (Join Discord | Watch Live | Kick Channel) -->
+  <div class="hero-3btn-grid">
+    <!-- Button 1: Join Discord (Purple Gradient Primary) -->
+    <a href="https://discord.gg/aHSVMX4DCr" target="_blank" rel="noopener" class="hero-btn hero-btn-discord">
+      <svg class="hero-btn-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/></svg>
       <span>Join Discord</span>
     </a>
 
-    <!-- Secondary CTA 1: Verify / Login -->
-    <button class="btn-cta-secondary" id="hero-login-btn">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span>Verify / Login</span>
-    </button>
+    <!-- Button 2: Watch Live (Dynamic Status Button) -->
+    <a href="https://kick.com/BigDgamesTV" target="_blank" rel="noopener" id="hero-watch-live-btn" class="hero-btn hero-btn-watch-live is-offline">
+      <svg class="hero-btn-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span>Watch Live</span>
+      <span class="btn-status-tag" id="watch-live-status-tag">OFFLINE</span>
+    </a>
 
-    <!-- Secondary CTA 2: Rewards Store -->
-    <a href="store.html" class="btn-cta-secondary">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
-      <span>Rewards Store</span>
+    <!-- Button 3: Kick Channel (Secondary Glass Button) -->
+    <a href="https://kick.com/BigDgamesTV" target="_blank" rel="noopener" class="hero-btn hero-btn-kick">
+      <svg class="hero-btn-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 3h15a1.5 1.5 0 0 1 1.5 1.5v15a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5v-15A1.5 1.5 0 0 1 4.5 3zm4.5 4.5v9h2.25v-3.375L14.25 16.5H17l-3.562-4.5L17 7.5h-2.75l-3 3.375V7.5H9z"/></svg>
+      <span>Kick Channel</span>
     </a>
   </div>
 
@@ -2781,14 +2913,22 @@ const kickLiveBadge = document.getElementById('kick-live-badge');
 const kickLiveText = document.getElementById('kick-live-text');
 
 function setKickLiveStatus(isLive) {
-  if (!kickLiveBadge || !kickLiveText) return;
+  if (kickLiveBadge && kickLiveText) {
+    kickLiveBadge.classList.toggle('is-live', isLive);
+    kickLiveText.textContent = isLive ? 'Live' : 'Offline';
+    kickLiveBadge.setAttribute(
+      'title',
+      isLive ? 'BigDgamesTV is live on Kick' : 'BigDgamesTV is offline on Kick'
+    );
+  }
 
-  kickLiveBadge.classList.toggle('is-live', isLive);
-  kickLiveText.textContent = isLive ? 'Live' : 'Offline';
-  kickLiveBadge.setAttribute(
-    'title',
-    isLive ? 'BigDgamesTV is live on Kick' : 'BigDgamesTV is offline on Kick'
-  );
+  const watchLiveBtn = document.getElementById('hero-watch-live-btn');
+  const watchLiveTag = document.getElementById('watch-live-status-tag');
+  if (watchLiveBtn && watchLiveTag) {
+    watchLiveBtn.classList.toggle('is-live', isLive);
+    watchLiveBtn.classList.toggle('is-offline', !isLive);
+    watchLiveTag.textContent = isLive ? 'LIVE NOW' : 'OFFLINE';
+  }
 }
 
 async function refreshKickLiveStatus() {
