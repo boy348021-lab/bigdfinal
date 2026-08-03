@@ -966,6 +966,52 @@ body::after {
   box-shadow: 0 4px 20px rgba(157, 0, 255, 0.25);
 }
 
+/* ============================================================
+   AWWWARDS SITE OF THE DAY POLISH & ACCESSIBILITY SYSTEM
+   ============================================================ */
+
+/* Keyboard Navigation Focus Ring */
+:focus-visible {
+  outline: 2px solid var(--cyan-400) !important;
+  outline-offset: 4px !important;
+  border-radius: var(--radius-sm);
+}
+
+/* Reduced Motion Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ticker-track { animation: none !important; }
+}
+
+/* Skeleton Loading State for Dynamic Tables */
+.skeleton-row {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(157,0,255,0.12) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.8s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+  height: 48px;
+  margin-bottom: 8px;
+}
+@keyframes skeletonPulse {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Top Edge Light Reflection Lines */
+.top5-card::before, .how-card::before, .winner-card::before, .challenge-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 229, 0.45), transparent);
+  pointer-events: none;
+}
+
 /* 1. Live Activity Feed Marquee Ticker */
 .ticker-bar-wrap {
   width: 100%;
