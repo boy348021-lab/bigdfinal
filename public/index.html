@@ -320,25 +320,49 @@ body::after {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 34px;
-  padding: 0 12px;
-  border: 1px solid rgba(248, 113, 113, 0.45);
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(239, 68, 68, 0.6);
   border-radius: var(--radius-sm);
-  background: rgba(248, 113, 113, 0.12);
-  color: #f87171;
+  background: linear-gradient(135deg, rgba(153, 27, 27, 0.4) 0%, rgba(185, 28, 28, 0.6) 100%);
+  color: #fecaca;
   font-family: var(--font-ui);
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   white-space: nowrap;
-  transition: color 0.25s, border-color 0.25s, background 0.25s, box-shadow 0.25s;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
+.kick-live-badge:hover {
+  transform: translateY(-1px);
+}
+
+.kick-live-badge .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  transition: all 0.3s ease;
+}
+
 .kick-live-badge.is-live {
-  color: #22c55e;
-  border-color: rgba(34, 197, 94, 0.5);
-  background: rgba(34, 197, 94, 0.12);
-  box-shadow: 0 0 16px rgba(34, 197, 94, 0.2);
+  color: #6ee7b7;
+  border-color: #34d399;
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.4) 0%, rgba(16, 185, 129, 0.6) 100%);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+.kick-live-badge.is-live .status-dot {
+  background: #00ff66;
+  box-shadow: 0 0 10px #00ff66;
+  animation: pulse-live-dot 1.5s ease-in-out infinite;
+}
+@keyframes pulse-live-dot {
+  0%, 100% { transform: scale(1); opacity: 1; opacity: 1; }
+  50%      { transform: scale(1.3); opacity: 0.7; }
 }
 .btn-login-nav {
   font-family: var(--font-ui);
@@ -3232,10 +3256,11 @@ const kickLiveText = document.getElementById('kick-live-text');
 function setKickLiveStatus(isLive) {
   if (kickLiveBadge && kickLiveText) {
     kickLiveBadge.classList.toggle('is-live', isLive);
-    kickLiveText.textContent = isLive ? 'Live' : 'Offline';
+    kickLiveBadge.classList.toggle('is-offline', !isLive);
+    kickLiveText.textContent = isLive ? 'LIVE NOW' : 'OFFLINE';
     kickLiveBadge.setAttribute(
       'title',
-      isLive ? 'BigDgamesTV is live on Kick' : 'BigDgamesTV is offline on Kick'
+      isLive ? 'BigDgamesTV is LIVE NOW on Kick' : 'BigDgamesTV is OFFLINE on Kick'
     );
   }
 
