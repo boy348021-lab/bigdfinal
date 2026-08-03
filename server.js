@@ -254,19 +254,14 @@ app.get("/api/leaderboard", async (req, res) => {
       const afterStr = after || "";
       const isoAfter = parseToISODate(afterStr);
       const dateParts = isoAfter.split("-");
-      const targetMonth = dateParts.length >= 2 ? `${dateParts[0]}-${dateParts[1]}` : new Date().toISOString().slice(0, 7);
+      const targetMonth = (dateParts.length >= 2 && dateParts[0] && dateParts[1]) 
+        ? `${dateParts[0]}-${dateParts[1]}` 
+        : new Date().toISOString().slice(0, 7);
 
-
-
-
-      // Fetch current data from DegenCity API with robust fallback on error/timeout
+      // Fetch complete unfiltered data directly from DegenCity API
       let rawList = [];
       try {
         let url = "https://api.degencity.com/api/v1/partner/affiliates/leaderboard";
-        const params = new URLSearchParams();
-        if (after) params.append("after", after);
-        if (before) params.append("before", before);
-        if (params.toString()) url += "?" + params.toString();
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 seconds timeout
@@ -312,24 +307,18 @@ app.get("/api/leaderboard", async (req, res) => {
         }
       }
 
+      // Calculate exact monthly wager totals strictly matching targetMonth (e.g. "2026-08")
       const formatted = rawList.map(u => {
         const uname = u.username || "";
-
-        let monthObj = (u.wager_data || []).find(m => m.month === targetMonth);
-        if (!monthObj && (u.wager_data || []).length > 0) {
-          const sortedMonths = [...u.wager_data].sort((a, b) => b.month.localeCompare(a.month));
-          monthObj = sortedMonths[0];
-        }
-
+        const monthObj = (u.wager_data || []).find(m => m.month === targetMonth);
         const currentWager = monthObj ? (Number(monthObj.total_wager_usd) || 0) : 0;
-        const activeMonth = monthObj ? monthObj.month : targetMonth;
 
         return {
           user_id: u.user_id || 1,
           username: uname,
           wager_data: [
             {
-              month: activeMonth,
+              month: targetMonth,
               total_wager_usd: currentWager
             }
           ],
