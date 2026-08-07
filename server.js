@@ -292,7 +292,13 @@ function parseToISODate(dateStr) {
   return dateStr;
 }
 
+// ==============================================================================
+// 🚨 PROTECTED CODE SECTION – DO NOT MODIFY 🚨
+// The entire Leaderboard module (Lifetime, Monthly, UI, API, Ranking) is LOCKED.
+// Treat all leaderboard code as READ-ONLY unless explicitly instructed by user.
+// ==============================================================================
 app.get("/api/leaderboard", async (req, res) => {
+
   const { after, before, period } = req.query;
   const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
