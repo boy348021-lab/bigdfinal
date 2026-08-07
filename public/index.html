@@ -3893,10 +3893,10 @@ function setKickLiveStatus(isLive) {
   if (kickLiveBadge && kickLiveText) {
     kickLiveBadge.classList.toggle('is-live', isLive);
     kickLiveBadge.classList.toggle('is-offline', !isLive);
-    kickLiveText.textContent = isLive ? 'LIVE NOW' : 'OFFLINE';
+    kickLiveText.textContent = isLive ? 'ONLINE' : 'OFFLINE';
     kickLiveBadge.setAttribute(
       'title',
-      isLive ? 'BigDgamesTV is LIVE NOW on Kick' : 'BigDgamesTV is OFFLINE on Kick'
+      isLive ? 'BigDgamesTV is ONLINE on Kick' : 'BigDgamesTV is OFFLINE on Kick'
     );
   }
 
@@ -3905,7 +3905,7 @@ function setKickLiveStatus(isLive) {
   if (watchLiveBtn && watchLiveTag) {
     watchLiveBtn.classList.toggle('is-live', isLive);
     watchLiveBtn.classList.toggle('is-offline', !isLive);
-    watchLiveTag.textContent = isLive ? 'LIVE NOW' : 'OFFLINE';
+    watchLiveTag.textContent = isLive ? 'ONLINE' : 'OFFLINE';
   }
 }
 
@@ -3922,7 +3922,19 @@ async function refreshKickLiveStatus() {
 }
 
 refreshKickLiveStatus();
-setInterval(refreshKickLiveStatus, 60000);
+setInterval(refreshKickLiveStatus, 25000);
+
+// Watch Time Heartbeat for stream presence points
+async function sendStreamHeartbeat() {
+  try {
+    await fetch('/api/stream-heartbeat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (e) {}
+}
+setInterval(sendStreamHeartbeat, 180000);
+
 
 /* ──────────────────────────────────────────
    HALL OF FAME MODAL HANDLERS

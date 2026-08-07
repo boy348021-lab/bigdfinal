@@ -175,7 +175,7 @@ const KICK_CACHE_TTL = 45_000;
 function fetchKickViaPython() {
   return new Promise((resolve) => {
     const script = path.join(__dirname, "kick_status.py");
-    execFile("python3", [script], { timeout: 12_000 }, (err, stdout) => {
+    execFile("/usr/bin/python3", [script], { timeout: 12_000 }, (err, stdout) => {
       if (err) {
         console.error("Kick Python helper error:", err.message);
         return resolve({ live: false, ok: false });
@@ -185,6 +185,55 @@ function fetchKickViaPython() {
     });
   });
 }
+
+
+async function getKickLiveStatus() {
+  const now = Date.now();
+  if (kickCache.checkedAt && (now - kickCache.checkedAt < KICK_CACHE_TTL)) {
+    return kickCache;
+  }
+  
+  let result = await fetchKickViaPython();
+  
+  // Fallback: Node fetch if Python helper had an issue
+  if (!result || !result.ok) {
+    try {
+      const channel = process.env.KICK_CHANNEL || "bigdgamestv";
+      const res = await fetch(`https://kick.com/api/v2/channels/${channel}`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'application/json'
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const livestream = data.livestream;
+        result = { live: Boolean(livestream && livestream.is_live !== false), ok: true };
+      }
+    } catch (e) {
+      // Keep previous live state or offline on network error
+    }
+  }
+
+  kickCache = {
+    live: Boolean(result && result.live),
+    channel: process.env.KICK_CHANNEL || "bigdgamestv",
+    checkedAt: now,
+    ok: Boolean(result && result.ok)
+  };
+  return kickCache;
+}
+
+
+app.get("/api/kick-live", async (req, res) => {
+  try {
+    const status = await getKickLiveStatus();
+    res.json(status);
+  } catch (err) {
+    res.json({ live: false, channel: process.env.KICK_CHANNEL || "bigdgamestv", error: err.message });
+  }
+});
+
 
 function etDateStringToUTC(dateStr, timeStr = "00:00:00") {
   // Parse YYYY-MM-DD + HH:MM:SS as Eastern Time and return the correct UTC Date.
@@ -244,70 +293,66 @@ function parseToISODate(dateStr) {
 }
 
 app.get("/api/leaderboard", async (req, res) => {
-  const { after, before } = req.query;
-
+  const { after, before, period } = req.query;
   const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-  // ─── LEADERBOARD B: Monthly Leaderboard ───────────────────────────
-  if (req.query.period === "biweekly" || req.query.period === "monthly") {
+  // Helper to load fallback dataset from file
+  function getFallbackLeaderboard() {
     try {
-      const afterStr = after || "";
-      const isoAfter = parseToISODate(afterStr);
-      const dateParts = isoAfter.split("-");
-      const targetMonth = (dateParts.length >= 2 && dateParts[0] && dateParts[1]) 
-        ? `${dateParts[0]}-${dateParts[1]}` 
-        : new Date().toISOString().slice(0, 7);
+      const fallbackPath = path.join(__dirname, "degencity_leaderboard_fallback.json");
+      if (fs.existsSync(fallbackPath)) {
+        const fallbackContent = fs.readFileSync(fallbackPath, "utf8");
+        const data = JSON.parse(fallbackContent);
+        return Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+      }
+    } catch (readErr) {
+      console.error("Local fallback JSON read error:", readErr);
+    }
+    return [];
+  }
 
-      // Fetch complete unfiltered data directly from DegenCity API
+  // ─── LEADERBOARD B: Monthly Leaderboard (Wagered amounts from August 1st) ───
+  if (period === "biweekly" || period === "monthly") {
+    try {
       let rawList = [];
       try {
-        let url = "https://api.degencity.com/api/v1/partner/affiliates/leaderboard";
-
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6 seconds timeout
-        
-        const response = await fetch(url, {
-          method:  "GET",
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        // Query DegenCity API for wagers from August 1st onwards
+        const response = await fetch("https://api.degencity.com/api/v1/partner/affiliates/leaderboard?after=2026-08-01T00:00:00.000Z", {
+          method: "GET",
           headers: { 
-            "x-api-key": API_KEY, 
+            "x-api-key": API_KEY || "", 
             "Accept": "application/json",
             "User-Agent": USER_AGENT
           },
-          signal:  controller.signal
+          signal: controller.signal
         });
         clearTimeout(timeoutId);
-        
+
         if (response.ok) {
           const data = await response.json();
           rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-          
-          // Cache successful response to degencity_leaderboard_fallback.json
-          try {
-            const fallbackPath = path.join(__dirname, "degencity_leaderboard_fallback.json");
-            fs.writeFileSync(fallbackPath, JSON.stringify(data, null, 2));
-          } catch (writeErr) {
-            console.error("Failed to write to local fallback JSON:", writeErr);
-          }
-        } else {
-          throw new Error(`HTTP Error: ${response.status}`);
         }
-      } catch (fetchErr) {
-        console.warn("DegenCity API fetch failed, loading from local JSON fallback:", fetchErr.message);
-        try {
-          const fallbackPath = path.join(__dirname, "degencity_leaderboard_fallback.json");
-          if (fs.existsSync(fallbackPath)) {
-            const fallbackContent = fs.readFileSync(fallbackPath, "utf8");
-            const data = JSON.parse(fallbackContent);
-            rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-          } else {
-            console.error("Local fallback JSON does not exist at:", fallbackPath);
-          }
-        } catch (readErr) {
-          console.error("Failed to read local fallback JSON:", readErr);
+      } catch (e) {}
+
+      if (!rawList || rawList.length === 0) {
+        rawList = getFallbackLeaderboard();
+      }
+
+      let targetMonth = "2026-08";
+
+      // Check if targetMonth has wagers in dataset; if not, use latest available month in rawList
+      const hasTargetWagers = rawList.some(u => (u.wager_data || []).some(m => m.month === targetMonth));
+      if (!hasTargetWagers) {
+        const allMonths = new Set();
+        rawList.forEach(u => (u.wager_data || []).forEach(m => { if (m.month) allMonths.add(m.month); }));
+        const sortedMonths = Array.from(allMonths).sort().reverse();
+        if (sortedMonths.length > 0) {
+          targetMonth = sortedMonths[0];
         }
       }
 
-      // Calculate exact monthly wager totals strictly matching targetMonth (e.g. "2026-08")
       const formatted = rawList.map(u => {
         const uname = u.username || "";
         const monthObj = (u.wager_data || []).find(m => m.month === targetMonth);
@@ -329,35 +374,48 @@ app.get("/api/leaderboard", async (req, res) => {
       res.set("Cache-Control", "no-store");
       return res.json({ data: formatted });
     } catch (err) {
-      console.error("Monthly leaderboard calculation error:", err);
+      console.error("Monthly leaderboard error:", err);
       return res.status(500).json({ success: false, message: err.message });
     }
   }
 
-  // ─── LEADERBOARD A: Lifetime Leaderboard (Direct Proxy to DegenCity API) ─────────────
+  // ─── LEADERBOARD A: Lifetime Leaderboard (Entire dataset from the beginning - June 1st) ───
   try {
-    let url = "https://api.degencity.com/api/v1/partner/affiliates/leaderboard";
-    const params = new URLSearchParams();
-    if (after)  params.append("after",  after);
-    if (before) params.append("before", before);
-    if (params.toString()) url += "?" + params.toString();
+    let rawList = [];
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const response = await fetch("https://api.degencity.com/api/v1/partner/affiliates/leaderboard?after=2026-06-01T00:00:00.000Z", {
+        method: "GET",
+        headers: { 
+          "x-api-key": API_KEY || "", 
+          "Accept": "application/json",
+          "User-Agent": USER_AGENT
+        },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
 
-    const response = await fetch(url, {
-      method:  "GET",
-      headers: { 
-        "x-api-key": API_KEY, 
-        "Accept": "application/json",
-        "User-Agent": USER_AGENT
+      if (response.ok) {
+        const data = await response.json();
+        rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
       }
-    });
-    const data = await response.json();
+    } catch (e) {}
+
+    if (!rawList || rawList.length === 0) {
+      rawList = getFallbackLeaderboard();
+    }
+
     res.set("Cache-Control", "no-store");
-    res.status(response.status).json(data);
+    return res.json({ data: rawList });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: err.message });
+    console.error("Lifetime leaderboard error:", err);
+    return res.status(500).json({ success: false, message: err.message });
   }
 });
+
+
+
 
 // ─── Store Items ──────────────────────────────────────────────────────────────
 const STORE_REWARDS = [
@@ -1507,11 +1565,80 @@ const chatActivityTracker = {
   },
 
   async awardInterval() {
-    // Points are strictly awarded via DegenCity slot wager synchronization ($1 = 10 pts).
-    // Random background chat activity point awards are disabled to guarantee wager-only points integrity.
-    return;
+    try {
+      const status = await getKickLiveStatus();
+      if (!status.live) {
+        return; // Only award points when Kick stream is live
+      }
+
+      const now = Date.now();
+      const cutoff = now - ACTIVE_WINDOW_MS;
+      let awardedCount = 0;
+
+      for (const [kickUser, lastMsgTime] of this.activityMap.entries()) {
+        if (lastMsgTime >= cutoff) {
+          const userId = this.userIdMap.get(kickUser);
+          if (userId && supabase) {
+            try {
+              await supabase.rpc("award_points", {
+                p_user_id: userId,
+                p_points: POINTS_PER_INTERVAL,
+                p_reason: "Kick Chat Activity (5m)"
+              });
+              awardedCount++;
+              console.log(`🎁 Awarded ${POINTS_PER_INTERVAL} points to ${kickUser} for active Kick chat presence.`);
+            } catch (err) {
+              console.error(`Failed to award points to ${kickUser}:`, err.message);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Error in chat activity awardInterval:", e.message);
+    }
   },
 };
+
+// ─── Stream Watch Time Heartbeat Endpoint ──────────────────────────────────────
+const watchAwardCache = new Map();
+
+app.post("/api/stream-heartbeat", requireAuth, async (req, res) => {
+  try {
+    const status = await getKickLiveStatus();
+    if (!status.live) {
+      return res.json({ success: false, reason: "offline", message: "Stream is offline" });
+    }
+
+    if (!req.user || !req.user.kick_username) {
+      return res.json({ success: false, reason: "no_kick_linked", message: "Kick account not linked" });
+    }
+
+    const userId = req.user.id;
+    const now = Date.now();
+    const lastAward = watchAwardCache.get(userId) || 0;
+
+    // Minimum 2.5 minutes between watch time awards
+    if (now - lastAward < 150_000) {
+      return res.json({ success: true, awarded: false, message: "Heartbeat recorded" });
+    }
+
+    watchAwardCache.set(userId, now);
+    const WATCH_POINTS = 5;
+
+    if (supabase) {
+      await supabase.rpc("award_points", {
+        p_user_id: userId,
+        p_points: WATCH_POINTS,
+        p_reason: "Stream Watch Presence (3m)"
+      });
+    }
+
+    res.json({ success: true, awarded: true, points: WATCH_POINTS, message: "Watch points awarded" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // ─── Kick WebSocket Chat Listener ─────────────────────────────────────────────
 const KICK_PUSHER_APP_KEY = process.env.KICK_PUSHER_APP_KEY || "32cbd69e4b950bf97679";
