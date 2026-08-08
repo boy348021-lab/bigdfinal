@@ -618,8 +618,35 @@ footer a:hover { color: var(--purple-200); }
   #hamburger { display: flex; }
 }
 
+.store-user-bar {
+  background: rgba(14, 10, 32, 0.85);
+  border: 1px solid rgba(157, 0, 255, 0.35);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+}
+.ub-label {
+  font-family: var(--font-ui, 'Rajdhani', sans-serif);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+.ub-points {
+  font-family: var(--font-display, 'Orbitron', sans-serif);
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #ffd700;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+  margin-top: 4px;
+}
+
 /* Rewards Grid & Cards */
 .rewards-grid {
+
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
@@ -811,7 +838,8 @@ footer a:hover { color: var(--purple-200); }
 </div>
 
 <!-- ── MAIN ───────────────────────────────────────────────── -->
-<main style="display:flex;flex-direction:column;align-items:center;padding:40px 20px;">
+<main style="display:flex;flex-direction:column;align-items:center;padding:110px 20px 60px;">
+
 
   <!-- Store Integration & Connection Header -->
   <div id="store-user-bar" class="store-user-bar" style="display:none; width:100%; max-width:800px; flex-direction:column; gap:16px;">
