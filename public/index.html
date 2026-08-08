@@ -3924,16 +3924,6 @@ async function refreshKickLiveStatus() {
 refreshKickLiveStatus();
 setInterval(refreshKickLiveStatus, 25000);
 
-// Watch Time Heartbeat for stream presence points
-async function sendStreamHeartbeat() {
-  try {
-    await fetch('/api/stream-heartbeat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    });
-  } catch (e) {}
-}
-setInterval(sendStreamHeartbeat, 180000);
 
 
 /* ──────────────────────────────────────────

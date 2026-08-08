@@ -447,7 +447,7 @@ app.get("/api/store-items", (req, res) => {
 });
 
 // ─── Wager-to-Points Synchronization Helper ────────────────────────────
-// Automatically converts DegenCity slot wagers into wallet points ($1 wagered = 10 points)
+// Automatically converts DegenCity slot wagers into wallet points ($1 wagered = 10 points) starting August 1st (EST)
 async function syncWagerPointsForUser(userId) {
   if (!supabase || !userId) return 0;
   try {
@@ -462,44 +462,72 @@ async function syncWagerPointsForUser(userId) {
     const degenUsername = user.degencity_username.trim().toLowerCase();
     const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-    const res = await fetch("https://api.degencity.com/api/v1/partner/affiliates/leaderboard", {
-      headers: { "x-api-key": API_KEY, "Accept": "application/json", "User-Agent": USER_AGENT }
-    });
+    // Fetch leaderboard wagers from DegenCity API starting August 1st EST
+    let rawList = [];
+    try {
+      const res = await fetch("https://api.degencity.com/api/v1/partner/affiliates/leaderboard?after=2026-08-01T00:00:00.000Z", {
+        headers: { "x-api-key": API_KEY, "Accept": "application/json", "User-Agent": USER_AGENT }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+      }
+    } catch (e) {}
 
-    if (!res.ok) return user.points || 0;
+    // Fallback to local dataset if offline
+    if (!rawList || rawList.length === 0) {
+      try {
+        const fallbackPath = path.join(__dirname, "degencity_leaderboard_fallback.json");
+        if (fs.existsSync(fallbackPath)) {
+          const data = JSON.parse(fs.readFileSync(fallbackPath, "utf8"));
+          rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+        }
+      } catch (e) {}
+    }
 
-    const data = await res.json();
-    const rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
     const match = rawList.find(u => (u.username || "").trim().toLowerCase() === degenUsername);
+    
+    // Time-gated cutoff: Filter wager_data strictly for month >= "2026-08" (August 1st EST onwards)
+    const augustWagerUsd = match ? (match.wager_data || [])
+      .filter(m => m.month >= "2026-08")
+      .reduce((sum, m) => sum + (Number(m.total_wager_usd) || 0), 0) : 0;
 
-    if (!match) return user.points || 0;
+    const augustWagerPoints = Math.floor(augustWagerUsd * 10);
 
-    const totalWagerUsd = (match.wager_data || []).reduce((sum, m) => sum + (Number(m.total_wager_usd) || 0), 0);
-    const totalWagerPoints = Math.floor(totalWagerUsd * 10);
+    // Subtract redeemed points from Supabase redemptions table
+    let redeemedPoints = 0;
+    try {
+      const { data: redemptions } = await supabase
+        .from("redemptions")
+        .select("points_cost")
+        .eq("user_id", userId)
+        .neq("status", "rejected");
+
+      if (redemptions) {
+        redeemedPoints = redemptions.reduce((sum, r) => sum + (Number(r.points_cost) || 0), 0);
+      }
+    } catch (rErr) {}
 
     const userMeta = user.metadata || {};
-    const creditedWagerPoints = Number(userMeta.credited_wager_points || 0);
-    const deltaPoints = totalWagerPoints - creditedWagerPoints;
+    const targetBalance = Math.max(0, augustWagerPoints - redeemedPoints);
 
-    if (deltaPoints > 0) {
-      const { data: newBalance, error: rpcErr } = await supabase.rpc("modify_points", {
-        p_user_id: user.id,
-        p_delta:   deltaPoints,
-        p_action:  "wager_points",
-        p_source:  "degencity_wager_sync",
-        p_ref:     `wager_sync_${Date.now()}`
-      });
+    // Update user point wallet balance if it differs from targetBalance
+    if (user.points !== targetBalance || userMeta.august_wager_points !== augustWagerPoints) {
+      const updatedMeta = { 
+        ...userMeta, 
+        august_wager_usd: augustWagerUsd,
+        august_wager_points: augustWagerPoints,
+        redeemed_points: redeemedPoints,
+        last_synced_at: new Date().toISOString()
+      };
 
-      if (!rpcErr) {
-        const updatedMeta = { ...userMeta, credited_wager_points: totalWagerPoints };
-        await supabase
-          .from("users")
-          .update({ metadata: updatedMeta, updated_at: new Date().toISOString() })
-          .eq("id", user.id);
+      await supabase
+        .from("users")
+        .update({ points: targetBalance, metadata: updatedMeta, updated_at: new Date().toISOString() })
+        .eq("id", user.id);
 
-        console.log(`💸 Wager-to-Points Sync: Credited +${deltaPoints} points to user ${user.id} (${degenUsername}) [$${totalWagerUsd.toFixed(2)} wagered → ${totalWagerPoints} total pts]`);
-        return newBalance ?? (user.points + deltaPoints);
-      }
+      console.log(`💸 Wager-Only Points Sync (August 1st EST Cutoff): User ${user.id} (${degenUsername}) -> $${augustWagerUsd.toFixed(2)} August wagered = ${augustWagerPoints} pts earned - ${redeemedPoints} redeemed = ${targetBalance} wallet balance.`);
+      return targetBalance;
     }
 
     return user.points || 0;
@@ -508,6 +536,7 @@ async function syncWagerPointsForUser(userId) {
     return 0;
   }
 }
+
 
 // ─── Points API ───────────────────────────────────────────────────────────────
 app.get("/api/points/:userId", async (req, res) => {
@@ -1268,6 +1297,8 @@ app.get("/auth/me", requireClerkAuth, async (req, res) => {
     }
   }
 
+  const userMeta = req.user.metadata || {};
+
   res.json({
     loggedIn:          true,
     token:             req.cookies.bigdtv_token || (req.headers.authorization ? req.headers.authorization.split(' ')[1] : null),
@@ -1277,11 +1308,15 @@ app.get("/auth/me", requireClerkAuth, async (req, res) => {
     displayName:       req.user.display_name,
     avatarUrl:         req.user.avatar_url,
     points:            req.user.points ?? 0,
+    augustWagerUsd:    userMeta.august_wager_usd ?? 0,
+    augustWagerPoints: userMeta.august_wager_points ?? 0,
+    redeemedPoints:    userMeta.redeemed_points ?? 0,
     degencityUsername: req.user.degencity_username || null,
     kickUsername:      req.user.kick_username || null,
     linkedAccounts:    linkedAccounts
   });
 });
+
 
 // ─── POST /auth/logout ────────────────────────────────────────────────────────
 app.post("/auth/logout", (req, res) => {
@@ -1571,79 +1606,17 @@ const chatActivityTracker = {
   },
 
   async awardInterval() {
-    try {
-      const status = await getKickLiveStatus();
-      if (!status.live) {
-        return; // Only award points when Kick stream is live
-      }
-
-      const now = Date.now();
-      const cutoff = now - ACTIVE_WINDOW_MS;
-      let awardedCount = 0;
-
-      for (const [kickUser, lastMsgTime] of this.activityMap.entries()) {
-        if (lastMsgTime >= cutoff) {
-          const userId = this.userIdMap.get(kickUser);
-          if (userId && supabase) {
-            try {
-              await supabase.rpc("award_points", {
-                p_user_id: userId,
-                p_points: POINTS_PER_INTERVAL,
-                p_reason: "Kick Chat Activity (5m)"
-              });
-              awardedCount++;
-              console.log(`🎁 Awarded ${POINTS_PER_INTERVAL} points to ${kickUser} for active Kick chat presence.`);
-            } catch (err) {
-              console.error(`Failed to award points to ${kickUser}:`, err.message);
-            }
-          }
-        }
-      }
-    } catch (e) {
-      console.error("Error in chat activity awardInterval:", e.message);
-    }
+    // Legacy chat points disabled. Points are strictly wager-based ($1 = 10 pts) starting August 1st EST.
+    return;
   },
 };
 
-// ─── Stream Watch Time Heartbeat Endpoint ──────────────────────────────────────
-const watchAwardCache = new Map();
-
+// ─── Stream Watch Time Heartbeat Endpoint (Disabled) ─────────────────────────
 app.post("/api/stream-heartbeat", requireAuth, async (req, res) => {
-  try {
-    const status = await getKickLiveStatus();
-    if (!status.live) {
-      return res.json({ success: false, reason: "offline", message: "Stream is offline" });
-    }
-
-    if (!req.user || !req.user.kick_username) {
-      return res.json({ success: false, reason: "no_kick_linked", message: "Kick account not linked" });
-    }
-
-    const userId = req.user.id;
-    const now = Date.now();
-    const lastAward = watchAwardCache.get(userId) || 0;
-
-    // Minimum 2.5 minutes between watch time awards
-    if (now - lastAward < 150_000) {
-      return res.json({ success: true, awarded: false, message: "Heartbeat recorded" });
-    }
-
-    watchAwardCache.set(userId, now);
-    const WATCH_POINTS = 5;
-
-    if (supabase) {
-      await supabase.rpc("award_points", {
-        p_user_id: userId,
-        p_points: WATCH_POINTS,
-        p_reason: "Stream Watch Presence (3m)"
-      });
-    }
-
-    res.json({ success: true, awarded: true, points: WATCH_POINTS, message: "Watch points awarded" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  // Legacy watch time points disabled. Points are strictly wager-based ($1 = 10 pts) starting August 1st EST.
+  res.json({ success: true, awarded: false, message: "Watch points disabled; points are wager-only ($1 = 10 pts)" });
 });
+
 
 
 // ─── Kick WebSocket Chat Listener ─────────────────────────────────────────────
