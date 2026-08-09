@@ -3415,11 +3415,19 @@ transition:transform .1s linear;
 
     <!-- MILESTONES PANEL -->
     <div class="tab-panel" id="panel-milestones">
-      <div class="coming-soon-wrap">
-        <div class="coming-soon-icon">[ $ ]</div>
-        <div class="coming-soon-title">Milestones <span>Coming Soon</span></div>
-        <p class="coming-soon-sub">Wager milestone rewards are being set up. Stay tuned.</p>
+      <div class="milestones-card-wrap" style="max-width:800px; margin:32px auto; padding:36px 28px; background:var(--bg-card); border:1px solid var(--border-glow); border-radius:var(--radius-lg); text-align:center; box-shadow:var(--glow-purple);">
+        <div style="font-size:3rem; margin-bottom:16px;">🏆</div>
+        <div style="font-family:var(--font-display); font-size: clamp(1.4rem, 3vw, 2rem); font-weight:900; letter-spacing:0.06em; text-transform:uppercase; color:#fff; margin-bottom:14px;">
+          $100,000 <span>Wager Milestone</span>
+        </div>
+        <p style="font-family:var(--font-ui); font-size:0.95rem; color:var(--text-secondary); line-height:1.6; max-width:640px; margin:0 auto 24px;">
+          When the community reaches a total wager of <strong>$100,000</strong> on DegenCity using code <strong>BIGD</strong>, three participants from the current wagering pool will be selected at random to receive a <strong>$100 Bonus Buy</strong> each.
+        </p>
+        <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(0,255,229,0.12); border:1px solid rgba(0,255,229,0.3); color:var(--cyan-400); padding:10px 24px; border-radius:30px; font-family:var(--font-ui); font-size:0.85rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase;">
+          <span>●</span> Active Community Goal: $100,000 Wager
+        </div>
       </div>
+
     </div>
 
     <!-- MONTHLY LEADERBOARD PANEL -->
@@ -3556,7 +3564,9 @@ transition:transform .1s linear;
 <!-- ================================================================
      BONUSES SECTION
      ================================================================ -->
-<section id="bonuses">
+<section class="section-container" id="bonuses-section" style="position:relative;">
+  <div class="shard shard-tl"></div>
+  <div class="shard shard-tr"></div>
   <div class="shard shard-bl"></div>
   <div class="shard shard-br"></div>
   <div class="section-header">
@@ -3571,11 +3581,11 @@ transition:transform .1s linear;
         <div class="bonus-site-badge">DEGENCITY</div>
       </div>
       <div class="bonus-body">
-        <div class="bonus-name">Wager Milestone</div>
-        <div class="bonus-desc">Coming soon. Wager milestone rewards are being set up for code BIGD on DEGENCITY.</div>
+        <div class="bonus-name">$100,000 Wager Milestone</div>
+        <div class="bonus-desc" style="font-size: 0.85rem; line-height: 1.5; margin-bottom: 16px;">When the community reaches a total wager of <strong>$100,000</strong> on DegenCity using code <strong>BIGD</strong>, three participants from the current wagering pool will be selected at random to receive a <strong>$100 Bonus Buy</strong> each.</div>
         <div class="bonus-code-row">
           <span class="code-label">Status:</span>
-          <span class="code-value">COMING SOON</span>
+          <span class="code-value" style="color:var(--cyan-400);">ACTIVE</span>
         </div>
       </div>
     </div>
@@ -3587,10 +3597,8 @@ transition:transform .1s linear;
       </div>
       <div class="bonus-body">
         <div class="bonus-name">Community Wager Draw</div>
-        <div class="bonus-desc" style="font-size: 0.8rem; line-height: 1.4; min-height: 135px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px;">
-          <span>• When the community reaches a total wager of <strong>$50,000</strong>, four participants from the current wagering pool will be selected at random to receive a <strong>$40</strong> Bonus Buy each.</span>
-          <span>• When the community reaches a total wager of <strong>$100,000</strong>, three participants from the current wagering pool will be selected at random to receive a <strong>$100</strong> Bonus Buy each.</span>
-          <span style="color: var(--text-muted); font-size: 0.76rem;">Selections will be made live during the Kick stream using a random draw. Every participant on the current wagering leaderboard has an equal chance of being selected. Rankings do not increase or decrease a participant's chances of winning.</span>
+        <div class="bonus-desc" style="font-size: 0.82rem; line-height: 1.5; min-height: 100px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px;">
+          <span style="color: var(--text-secondary);">Selections will be made live during the Kick stream using a random draw. Every participant on the current wagering leaderboard has an equal chance of being selected. Rankings do not increase or decrease a participant's chances of winning.</span>
         </div>
         <div class="bonus-code-row">
           <span class="code-label">Selection:</span>
@@ -4023,7 +4031,6 @@ tabBtns.forEach(btn => {
   btn.addEventListener('click', () => activateTab(btn.dataset.panel));
 });
 
-// nav links also control tabs
 document.querySelectorAll('.nav-links a[data-tab]').forEach(a => {
   a.addEventListener('click', (e) => {
     e.preventDefault();
@@ -4031,6 +4038,19 @@ document.querySelectorAll('.nav-links a[data-tab]').forEach(a => {
     document.getElementById('tabs-section').scrollIntoView({ behavior: 'smooth' });
   });
 });
+
+window.addEventListener('DOMContentLoaded', () => {
+  const hash = window.location.hash;
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get('tab') || (hash.includes('milestones') ? 'milestones' : (hash.includes('challenges') ? 'challenges' : null));
+  if (tab) {
+    activateTab(tab);
+    setTimeout(() => {
+      document.getElementById('tabs-section')?.scrollIntoView({ behavior: 'smooth' });
+    }, 150);
+  }
+});
+
 
 function scrollToTabs() {
   document.getElementById('tabs-section').scrollIntoView({ behavior: 'smooth' });
