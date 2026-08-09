@@ -445,14 +445,16 @@ main {
 
 .earn-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(2, minmax(240px, 360px));
+  justify-content: center;
+  gap: 20px;
 }
-@media (max-width: 960px) {
+@media (max-width: 600px) {
   .earn-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 }
+
 @media (max-width: 580px) {
   .earn-grid {
     grid-template-columns: 1fr;
@@ -872,7 +874,7 @@ footer a:hover { color: var(--purple-200); }
 
   <div id="store-login-prompt" class="store-user-bar" style="display:none; justify-content:center; text-align:center; padding:24px; max-width:800px; width:100%;">
     <div>
-      <p style="margin-bottom:12px; font-size:0.95rem; color:var(--text-secondary);" id="store-prompt-msg">Log in with Discord and connect Kick to start earning 10 BigD Coins / 5 minutes of chat activity!</p>
+      <p style="margin-bottom:12px; font-size:0.95rem; color:var(--text-secondary);" id="store-prompt-msg">Log in with Discord and verify your DegenCity account to use your BigD Coins!</p>
       <button onclick="loginWithDiscord()" class="nav-btn-auth" style="padding:10px 20px; font-size:0.9rem;">Login with Discord</button>
     </div>
   </div>
@@ -899,18 +901,6 @@ footer a:hover { color: var(--purple-200); }
     <div class="section-label">How to Earn BigD Coins</div>
     <div class="earn-grid">
       <div class="earn-card">
-        <span class="earn-card-icon">📺</span>
-        <div class="earn-card-title">Watch Live</div>
-        <p class="earn-card-desc">Be present while BigD is live on Kick and start accumulating coins.</p>
-        <span class="earn-card-badge">Required</span>
-      </div>
-      <div class="earn-card">
-        <span class="earn-card-icon">💬</span>
-        <div class="earn-card-title">Chat Actively</div>
-        <p class="earn-card-desc">Send messages in the Kick chat to prove your presence every 5 minutes.</p>
-        <span class="earn-card-badge">+10 coins / 5 min</span>
-      </div>
-      <div class="earn-card">
         <span class="earn-card-icon">🎲</span>
         <div class="earn-card-title">Wager on DegenCity</div>
         <p class="earn-card-desc">Every $1 wagered on DegenCity using code BIGD earns you 10 coins automatically.</p>
@@ -925,6 +915,7 @@ footer a:hover { color: var(--purple-200); }
     </div>
   </section>
 </main>
+
 
 
 <footer>
