@@ -1,7 +1,3 @@
-/**
- * EventEmitter - Decoupled Event System
- * Emits state snapshot events for UI and logging without modifying DOM or game logic.
- */
 export default class EventEmitter {
   constructor() {
     this.listeners = new Map();
@@ -14,13 +10,18 @@ export default class EventEmitter {
     this.listeners.get(event).push(callback);
   }
 
+  off(event, callback) {
+    if (!this.listeners.has(event)) return;
+    const cbs = this.listeners.get(event);
+    const idx = cbs.indexOf(callback);
+    if (idx !== -1) cbs.splice(idx, 1);
+  }
+
   emit(event, data) {
     if (this.listeners.has(event)) {
-      for (const callback of this.listeners.get(event)) {
-        try {
-          callback(data);
-        } catch (err) {
-          console.error(`EventEmitter error on event '${event}':`, err);
+      for (const cb of this.listeners.get(event)) {
+        try { cb(data); } catch (err) {
+          console.error(`EventEmitter error on '${event}':`, err);
         }
       }
     }

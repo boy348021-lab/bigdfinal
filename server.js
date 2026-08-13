@@ -168,6 +168,55 @@ async function requireAuth(req, res, next) {
 // Alias for backwards compatibility
 const requireClerkAuth = requireAuth;
 
+// Optional auth for guest modes
+async function optionalAuth(req, res, next) {
+  let token = null;
+
+  // Check Authorization header first
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  }
+
+  // Fallback to cookie (except for blackjack API endpoints)
+  if (!token && !req.path.startsWith('/api/casino/blackjack') && req.cookies && req.cookies.bigdtv_token) {
+    token = req.cookies.bigdtv_token;
+  }
+
+  // Fallback to query param for OAuth redirects
+  if (!token && req.query && req.query.token) {
+    token = req.query.token;
+  }
+
+  if (!token) {
+    if (req.session) {
+      req.session.isGuest = true;
+    }
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.auth = { sub: decoded.userId, ...decoded };
+
+    if (supabase && decoded.userId) {
+      const { data: user } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", decoded.userId)
+        .maybeSingle();
+
+      if (user) {
+        req.user = user;
+      }
+    }
+    next();
+  } catch (err) {
+    console.error("Optional authentication error:", err.message);
+    next(); // Proceed as guest if token is invalid
+  }
+}
+
 // ─── Kick Live Status ─────────────────────────────────────────────────────────
 let kickCache = { live: false, checkedAt: null };
 const KICK_CACHE_TTL = 45_000;
@@ -683,21 +732,36 @@ const activeBlackjackGames = new Map(); // Map<userId, Engine>
 const actionDispatcher = new ActionDispatcher(activeBlackjackGames, supabase);
 
 // GET /api/casino/blackjack/state (Fetch active round snapshot)
-app.get("/api/casino/blackjack/state", requireAuth, (req, res) => {
-  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
-  const engine = activeBlackjackGames.get(req.user.id);
+app.get("/api/casino/blackjack/state", optionalAuth, (req, res) => {
+  const userId = req.user ? req.user.id : `guest_${req.sessionID || 'session'}`;
+  const engine = activeBlackjackGames.get(userId);
   if (!engine) return res.json({ active: false });
   res.json({ active: true, snapshot: engine.getSnapshot() });
 });
 
 // POST /api/casino/blackjack/deal (Place bet & deal initial round)
-app.post("/api/casino/blackjack/deal", requireAuth, async (req, res) => {
-  if (!supabase) return res.status(503).json({ error: "Database not configured" });
-  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+app.post("/api/casino/blackjack/deal", optionalAuth, async (req, res) => {
+  const userId = req.user ? req.user.id : `guest_${req.sessionID || 'session'}`;
+  const isGuest = userId.startsWith('guest');
+  if (!supabase && !isGuest) {
+    return res.status(503).json({ error: "Database not configured" });
+  }
 
   try {
     const bet = parseInt(req.body.bet, 10);
-    const { snapshot, updatedBalance } = await actionDispatcher.dispatch(req.user.id, 'DEAL', { bet });
+
+    const sessionProfit = req.session.blackjackProfit || 0;
+    if (sessionProfit >= 10000) {
+      return res.status(400).json({ error: "Session profit limit of 10,000 points reached. Please cash out or start a new session." });
+    }
+    if (bet > 5000) {
+      return res.status(400).json({ error: "Maximum bet is 5,000 points." });
+    }
+
+    const { snapshot, updatedBalance } = await actionDispatcher.dispatch(userId, 'DEAL', { bet });
+    if (snapshot.isEnded) {
+      req.session.blackjackProfit = (req.session.blackjackProfit || 0) + snapshot.totalProfit;
+    }
     res.json({ ok: true, new_balance: updatedBalance, handState: snapshot });
   } catch (err) {
     if (err.message.toLowerCase().includes("insufficient")) {
@@ -708,13 +772,19 @@ app.post("/api/casino/blackjack/deal", requireAuth, async (req, res) => {
 });
 
 // POST /api/casino/blackjack/insurance (Buy or Decline Insurance)
-app.post("/api/casino/blackjack/insurance", requireAuth, async (req, res) => {
-  if (!supabase) return res.status(503).json({ error: "Database not configured" });
-  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+app.post("/api/casino/blackjack/insurance", optionalAuth, async (req, res) => {
+  const userId = req.user ? req.user.id : `guest_${req.sessionID || 'session'}`;
+  const isGuest = userId.startsWith('guest');
+  if (!supabase && !isGuest) {
+    return res.status(503).json({ error: "Database not configured" });
+  }
 
   try {
     const actionType = req.body.buyInsurance ? 'INSURANCE_BUY' : 'INSURANCE_DECLINE';
-    const { snapshot, updatedBalance } = await actionDispatcher.dispatch(req.user.id, actionType);
+    const { snapshot, updatedBalance } = await actionDispatcher.dispatch(userId, actionType);
+    if (snapshot.isEnded) {
+      req.session.blackjackProfit = (req.session.blackjackProfit || 0) + snapshot.totalProfit;
+    }
     res.json({ ok: true, new_balance: updatedBalance, handState: snapshot });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -722,9 +792,12 @@ app.post("/api/casino/blackjack/insurance", requireAuth, async (req, res) => {
 });
 
 // POST /api/casino/blackjack/action (Dispatch HIT, STAND, DOUBLE, SPLIT, SURRENDER)
-app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
-  if (!supabase) return res.status(503).json({ error: "Database not configured" });
-  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+app.post("/api/casino/blackjack/action", optionalAuth, async (req, res) => {
+  const userId = req.user ? req.user.id : `guest_${req.sessionID || 'session'}`;
+  const isGuest = userId.startsWith('guest');
+  if (!supabase && !isGuest) {
+    return res.status(503).json({ error: "Database not configured" });
+  }
 
   try {
     const rawAction = (req.body.action || '').toUpperCase();
@@ -738,10 +811,101 @@ app.post("/api/casino/blackjack/action", requireAuth, async (req, res) => {
     const targetAction = actionMap[rawAction];
     if (!targetAction) return res.status(400).json({ error: `Invalid action '${req.body.action}'` });
 
-    const { snapshot, updatedBalance } = await actionDispatcher.dispatch(req.user.id, targetAction);
+    const { snapshot, updatedBalance } = await actionDispatcher.dispatch(userId, targetAction);
+    if (snapshot.isEnded) {
+      req.session.blackjackProfit = (req.session.blackjackProfit || 0) + snapshot.totalProfit;
+    }
     res.json({ ok: true, new_balance: updatedBalance, handState: snapshot });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+// GET /api/casino/blackjack/history (Get completed game logs and stats)
+app.get("/api/casino/blackjack/history", optionalAuth, async (req, res) => {
+  const userId = req.user ? req.user.id : `guest_${req.sessionID || 'session'}`;
+  const isGuest = userId.startsWith('guest');
+  if (!supabase && !isGuest) {
+    return res.status(503).json({ error: "Database not configured" });
+  }
+
+  if (isGuest) {
+    return res.json({ ok: true, history: [], stats: { gamesPlayed: 0, wins: 0, losses: 0, pushes: 0, totalWagered: 0, totalWon: 0, netPoints: 0 } });
+  }
+
+  try {
+    const { data: logs, error } = await supabase
+      .from('audit_logs')
+      .select('*')
+      .eq('user_id', userId)
+      .in('action', ['BLACKJACK_BET', 'BLACKJACK_PAYOUT', 'BLACKJACK_INSURANCE', 'BLACKJACK_DOUBLE', 'BLACKJACK_SPLIT'])
+      .order('created_at', { ascending: false })
+      .limit(500); // Fetching 500 to ensure we can group into at least 100 games
+
+    if (error) throw error;
+
+    const gameMap = {};
+    for (const log of (logs || [])) {
+      if (!log.transaction_reference) continue;
+      
+      // Extract gameId from transaction_reference (e.g. bj_bet_bj_userId_timestamp_timestamp)
+      // Assuming prefix is always two parts like "bj_bet_" or "bj_payout_"
+      const refParts = log.transaction_reference.split('_');
+      let gameId = log.transaction_reference;
+      if (refParts.length >= 3) {
+        // Strip the first two parts (e.g., bj_bet)
+        gameId = refParts.slice(2).join('_');
+      }
+
+      if (!gameMap[gameId]) {
+        gameMap[gameId] = { gameId, date: log.created_at, bet: 0, payout: 0, net: 0, actions: [] };
+      }
+      
+      const g = gameMap[gameId];
+      g.actions.push(log);
+      
+      const actionName = log.action.toUpperCase();
+      if (['BLACKJACK_BET', 'BLACKJACK_INSURANCE', 'BLACKJACK_DOUBLE', 'BLACKJACK_SPLIT'].includes(actionName)) {
+        // Bets are usually recorded as negative points, we sum absolute value
+        g.bet += Math.abs(log.points_change || 0);
+      } else if (actionName === 'BLACKJACK_PAYOUT') {
+        g.payout += Math.abs(log.points_change || 0);
+      }
+    }
+
+    const historyList = Object.values(gameMap)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 100);
+
+    let wins = 0;
+    let losses = 0;
+    let pushes = 0;
+    let totalWagered = 0;
+    let totalWon = 0;
+
+    for (const g of historyList) {
+      g.net = g.payout - g.bet;
+      if (g.net > 0) wins++;
+      else if (g.net < 0) losses++;
+      else pushes++;
+      
+      totalWagered += g.bet;
+      totalWon += g.payout;
+    }
+
+    const stats = {
+      gamesPlayed: historyList.length,
+      wins,
+      losses,
+      pushes,
+      totalWagered,
+      totalWon,
+      netPoints: totalWon - totalWagered
+    };
+
+    res.json({ ok: true, history: historyList, stats });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

@@ -9,31 +9,439 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/style.css"/>
 <link rel="stylesheet" href="/blackjack/blackjack.css"/>
-</head>
-<body style="background:var(--bg-void); color:#fff; min-height:100vh; display:flex; flex-direction:column;">
+<style>
+/* ============================================================
+   DESIGN TOKENS & BASE LAYOUT (MATCHES THE BRAND DESIGN SYSTEM)
+   ============================================================ */
+:root {
+  --bg-void:        #030208;
+  --bg-deep:        #060412;
+  --bg-surface:     #0d0820;
+  --bg-card:        rgba(14, 10, 32, 0.72);
+  --bg-card-hover:  rgba(24, 16, 52, 0.88);
 
+  --purple-900:     #120026;
+  --purple-800:     #24004d;
+  --purple-700:     #420085;
+  --purple-600:     #6a00d5;
+  --purple-500:     #9d00ff;
+  --purple-400:     #be4dff;
+  --purple-300:     #d980ff;
+  --purple-200:     #edb3ff;
+  --purple-100:     #f8e6ff;
+
+  --gold-500:       #cca010;
+  --gold-400:       #ffd700;
+  --gold-300:       #ffe45c;
+
+  --cyan-500:       #00ffe5;
+  --cyan-400:       #33fff0;
+
+  --text-primary:   #f4efff;
+  --text-secondary: #a49bc2;
+  --text-muted:     #625884;
+
+  --border-subtle:  rgba(157, 0, 255, 0.2);
+  --border-glow:    rgba(157, 0, 255, 0.5);
+
+  --glow-purple:    0 0 25px rgba(157,0,255,0.45), 0 0 70px rgba(157,0,255,0.2);
+  --glow-gold:      0 0 25px rgba(255,215,0,0.45), 0 0 60px rgba(255,215,0,0.18);
+  --glow-intense:   0 0 45px rgba(157,0,255,0.7), 0 0 110px rgba(0,255,229,0.3);
+
+  --font-display:   'Orbitron', sans-serif;
+  --font-ui:        'Rajdhani', sans-serif;
+  --font-body:      'Space Grotesk', sans-serif;
+
+  --radius-sm:      6px;
+  --radius-md:      12px;
+  --radius-lg:      20px;
+  --radius-xl:      30px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; background: none; font: inherit; }
+ul { list-style: none; }
+img { display: block; max-width: 100%; }
+
+/* ============================================================
+   NEBULA BACKDROP
+   ============================================================ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(80,0,180,0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(120,0,220,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(60,0,120,0.1) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.brand-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.brand-bg::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    linear-gradient(115deg, transparent 20%, rgba(0,255,229,0.035) 45%, rgba(232,194,68,0.04) 50%, transparent 72%),
+    radial-gradient(circle at 25% 20%, rgba(136,0,255,0.12), transparent 28%),
+    radial-gradient(circle at 78% 72%, rgba(201,162,39,0.08), transparent 30%);
+  animation: brand-bg-sweep 24s linear infinite;
+  opacity: 0.85;
+}
+@keyframes brand-bg-sweep {
+  0% { transform: translate3d(-4%, -3%, 0) rotate(0deg); }
+  50% { transform: translate3d(4%, 3%, 0) rotate(2deg); }
+  100% { transform: translate3d(-4%, -3%, 0) rotate(0deg); }
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+#nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 64px;
+  background: rgba(8, 8, 16, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-logo-text {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+}
+.nav-logo-text em {
+  font-style: normal;
+  color: var(--purple-400);
+  text-shadow: var(--glow-purple);
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nav-links a {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(136, 0, 255, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+.nav-links a:hover {
+  color: var(--text-primary);
+  background: rgba(136, 0, 255, 0.08);
+  border-color: rgba(136, 0, 255, 0.35);
+  box-shadow: 0 0 15px rgba(136, 0, 255, 0.15);
+  transform: translateY(-1px);
+}
+.nav-links a.active {
+  color: #ffffff;
+  background: rgba(136, 0, 255, 0.15);
+  border-color: var(--purple-400);
+  box-shadow: 
+    0 0 15px rgba(136, 0, 255, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  font-weight: 700;
+}
+.nav-links a[href="verify.html"] {
+  border-color: rgba(0, 255, 229, 0.15);
+  background: rgba(0, 255, 229, 0.02);
+}
+.nav-links a[href="verify.html"]:hover {
+  background: rgba(0, 255, 229, 0.08);
+  border-color: rgba(0, 255, 229, 0.5);
+  box-shadow: 0 0 15px rgba(0, 255, 229, 0.25);
+}
+.nav-links a[href="verify.html"].active {
+  background: rgba(0, 255, 229, 0.15);
+  border-color: var(--cyan-500);
+  box-shadow: 
+    0 0 15px rgba(0, 255, 229, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+/* Store nav — gold accent */
+.nav-links a[href="store.html"] { border-color: rgba(201,162,39,0.18); background: rgba(201,162,39,0.03); }
+.nav-links a[href="store.html"]:hover { color: #e8c244; background: rgba(201,162,39,0.1); border-color: rgba(201,162,39,0.45); box-shadow: 0 0 15px rgba(201,162,39,0.2); }
+.nav-links a[href="store.html"].active { color: #e8c244; background: rgba(201,162,39,0.15); border-color: #e8c244; box-shadow: 0 0 15px rgba(201,162,39,0.35); font-weight: 700; }
+
+/* Account nav — cyan */
+.nav-links a[href="account.html"] { border-color: rgba(0,255,229,0.15); background: rgba(0,255,229,0.02); }
+.nav-links a[href="account.html"]:hover { background: rgba(0,255,229,0.08); border-color: rgba(0,255,229,0.5); box-shadow: 0 0 15px rgba(0,255,229,0.25); }
+.nav-links a[href="account.html"].active { background: rgba(0,255,229,0.15); border-color: var(--cyan-500); box-shadow: 0 0 15px rgba(0,255,229,0.4); font-weight: 700; }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.kick-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  border-radius: var(--radius-sm);
+  background: rgba(248, 113, 113, 0.05);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #f87171;
+  transition: all 0.3s ease;
+}
+.kick-live-badge.is-live {
+  background: rgba(83, 250, 93, 0.08);
+  border-color: rgba(83, 250, 93, 0.55);
+  color: #53fa5d;
+  box-shadow: 0 0 12px rgba(83, 250, 93, 0.2);
+}
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1.6s infinite alternate;
+}
+@keyframes pulse {
+  from { opacity: 0.4; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1.1); }
+}
+
+/* HAMBURGER */
+#hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px; height: 36px;
+  padding: 4px;
+  background: rgba(136,0,255,0.1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  z-index: 200;
+}
+#hamburger span {
+  display: block;
+  height: 2px;
+  background: var(--purple-300);
+  border-radius: 1px;
+  transition: all 0.25s;
+}
+#hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+#hamburger.open span:nth-child(2) { opacity: 0; }
+#hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* MOBILE DRAWER */
+#mobile-nav-drawer {
+  display: none;
+  position: fixed;
+  top: 64px; left: 0; right: 0;
+  z-index: 99;
+  background: rgba(8,8,20,0.97);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 20px 24px;
+  flex-direction: column;
+  gap: 8px;
+}
+#mobile-nav-drawer.open { display: flex; }
+#mobile-nav-drawer a {
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(136, 0, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.25s ease;
+}
+#mobile-nav-drawer a:hover,
+#mobile-nav-drawer a.active {
+  color: #ffffff;
+  background: rgba(136, 0, 255, 0.08);
+  border-color: rgba(136, 0, 255, 0.35);
+  box-shadow: 0 0 12px rgba(136, 0, 255, 0.15);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  font-weight: 700;
+}
+#mobile-nav-drawer a[href="verify.html"] {
+  border-color: rgba(0, 255, 229, 0.12);
+  background: rgba(0, 255, 229, 0.01);
+}
+#mobile-nav-drawer a[href="verify.html"]:hover,
+#mobile-nav-drawer a[href="verify.html"].active {
+  border-color: rgba(0, 255, 229, 0.5);
+  background: rgba(0, 255, 229, 0.08);
+  box-shadow: 0 0 12px rgba(0, 255, 229, 0.2);
+}
+
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  #hamburger { display: flex; }
+}
+</style>
+</head>
+<body style="background:var(--bg-void); color:#fff; min-height:100vh; display:flex; flex-direction:column; position:relative; z-index:1;">
+
+<div class="brand-bg"></div>
+
+<!-- ================================================================
+     NAVIGATION
+     ================================================================ -->
 <nav id="nav">
-  <div class="nav-logo"><a href="index.html" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;"><img src="/logo.png" alt="BigDGamesTV" style="height:44px;width:44px;object-fit:contain;border-radius:4px;"/><span class="nav-logo-text">BIG<em>D</em>TV</span></a></div>
+  <div class="nav-logo">
+    <a href="index.html" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;">
+      <img src="/logo.png" alt="BigDGamesTV" style="height:44px;width:44px;object-fit:contain;border-radius:4px;"/>
+      <span class="nav-logo-text">BIG<em>D</em>TV</span>
+    </a>
+  </div>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
+    <li><a href="index.html#tabs-section" data-tab="leaderboard">Leaderboards</a></li>
+    <li><a href="index.html#tabs-section" data-tab="challenges">Challenges</a></li>
+    <li><a href="index.html#tabs-section" data-tab="milestones">Milestones</a></li>
     <li><a href="blackjack.html" class="active">Blackjack ♠️</a></li>
     <li><a href="verify.html">Code Check</a></li>
     <li><a href="store.html">Store</a></li>
     <li style="display:flex;align-items:center;margin-left:8px;"><button id="nav-auth-btn" class="nav-btn-auth">Login</button></li>
   </ul>
+  <div class="nav-right">
+    <a class="kick-live-badge" id="kick-live-badge" href="https://kick.com/BigDgamesTV" target="_blank" rel="noopener">
+      <span class="status-dot"></span>
+      <span id="kick-live-text">Offline</span>
+    </a>
+    <button id="hamburger" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
 </nav>
 
-<main style="flex:1; display:flex; flex-direction:column; align-items:center; padding:100px 20px 40px 20px;">
+<!-- MOBILE NAV DRAWER -->
+<div id="mobile-nav-drawer">
+  <a href="index.html#tabs-section" data-tab="leaderboard">Leaderboards</a>
+  <a href="index.html#tabs-section" data-tab="challenges">Challenges</a>
+  <a href="index.html#tabs-section" data-tab="milestones">Milestones</a>
+  <a href="blackjack.html" class="active">Blackjack ♠️</a>
+  <a href="verify.html">Code Check</a>
+  <a href="store.html">Store</a>
+  <a href="#" id="mobile-nav-auth-btn" class="mobile-auth-btn">Login</a>
+</div>
+
+<main style="flex:1; display:flex; flex-direction:column; align-items:center; padding:100px 20px 40px 20px; position:relative; z-index:1;">
   <div style="text-align:center; margin-bottom:20px;">
-    <h1 style="font-family:var(--font-display); font-size:2.5rem; font-weight:900; letter-spacing:0.05em; margin-bottom:6px;">High Stakes <span>Blackjack</span></h1>
+    <h1 style="font-family:var(--font-display); font-size:2.5rem; font-weight:900; letter-spacing:0.05em; margin-bottom:6px; text-transform:uppercase; color:#fff; text-shadow:var(--glow-purple);">High Stakes <span>Blackjack</span></h1>
     <p style="color:var(--text-secondary); font-size:0.95rem;">Test your strategy against the dealer and double your BigD Coins</p>
   </div>
 
   <div id="blackjack-app" style="width:100%; max-width:1200px;"></div>
+
+  <div id="blackjack-history" style="width:100%; max-width:1200px; margin-top:40px; padding:24px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:16px; backdrop-filter:blur(24px); box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+    <h2 style="font-family:var(--font-display); font-size:1.5rem; color:#fff; margin-bottom:18px; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:10px;">📊 Statistics & History</h2>
+    
+    <!-- Stats Grid -->
+    <div id="bj-stats-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:12px; margin-bottom:24px;">
+      <!-- stats details injected dynamically -->
+    </div>
+
+    <!-- History Table -->
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; color:#fff; font-family:var(--font-ui); text-align:left;">
+        <thead>
+          <tr style="border-bottom:2px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase;">
+            <th style="padding:12px 8px;">Date</th>
+            <th style="padding:12px 8px;">Bet</th>
+            <th style="padding:12px 8px;">Payout</th>
+            <th style="padding:12px 8px;">Net Result</th>
+            <th style="padding:12px 8px;">Outcome</th>
+          </tr>
+        </thead>
+        <tbody id="bj-history-rows" style="font-size:0.9rem;">
+          <!-- history rows injected dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
 </main>
 
 <script src="/auth-helper.js"></script>
-<script src="/blackjack/blackjack-engine.js"></script>
 <script src="/blackjack/blackjack-ui.js"></script>
+
+<!-- Hamburger & Mobile Nav Drawer Control Toggle -->
+<script>
+const hamburger = document.getElementById('hamburger');
+const mobileDrawer = document.getElementById('mobile-nav-drawer');
+
+function toggleDrawer(force) {
+  if (!hamburger || !mobileDrawer) return;
+  const open = typeof force === 'boolean' ? force : !hamburger.classList.contains('open');
+  hamburger.classList.toggle('open', open);
+  mobileDrawer.classList.toggle('open', open);
+}
+
+if (hamburger) hamburger.addEventListener('click', () => toggleDrawer());
+document.addEventListener('click', (e) => {
+  if (hamburger && mobileDrawer && !hamburger.contains(e.target) && !mobileDrawer.contains(e.target)) {
+    toggleDrawer(false);
+  }
+});
+</script>
 </body>
 </html>

@@ -1,61 +1,103 @@
 /**
- * RulesEngine - Casino Rules & Policy Engine
- * Defines and enforces configurable casino table rules.
+ * RulesEngine - Central configuration for all Blackjack table rules.
+ * All game logic references this single config. No hardcoded values elsewhere.
  */
+
+export const DEFAULT_RULES = {
+  numDecks: 6,
+  dealerStandsSoft17: true,
+  blackjackPays: 1.5,        // 3:2
+  insurancePays: 2,           // 2:1
+  maxSplitDepth: 3,           // max 3 splits = 4 total hands
+  doubleAfterSplit: true,
+  splitAcesReceiveOneCard: true,
+  splitAcesCannotHit: true,
+  surrenderAllowed: false,
+  insuranceAvailable: true,
+  doubleDownOn: 'any',        // 'any' | '9_10_11' | '10_11'
+  minBet: 0,
+  maxBet: 5000
+};
+
 export default class RulesEngine {
-  constructor(config = {}) {
-    this.dealerStandSoft17 = config.dealerStandSoft17 !== undefined ? config.dealerStandSoft17 : true;
-    this.doubleDownRule = config.doubleDownRule || 'any_two_cards'; // 'any_two_cards' | '9_10_11'
-    this.doubleAfterSplit = config.doubleAfterSplit !== undefined ? config.doubleAfterSplit : true;
-    this.maxSplits = config.maxSplits || 4; // Max 4 hands (3 splits)
-    this.splitAcesOneCard = config.splitAcesOneCard !== undefined ? config.splitAcesOneCard : true;
-    this.insuranceAvailable = config.insuranceAvailable !== undefined ? config.insuranceAvailable : true;
-    this.insurancePayoutRatio = config.insurancePayoutRatio || 2.0; // 2:1
-    this.blackjackPayoutRatio = config.blackjackPayoutRatio || 1.5; // 3:2
-    this.surrenderAllowed = config.surrenderAllowed !== undefined ? config.surrenderAllowed : true;
+  constructor(overrides = {}) {
+    this.config = { ...DEFAULT_RULES, ...overrides };
   }
 
-  canDoubleDown(hand, isSplitHand = false) {
-    if (!hand || hand.cards.length !== 2) return false;
-    if (isSplitHand && !this.doubleAfterSplit) return false;
+  get(key) {
+    return this.config[key];
+  }
 
-    if (this.doubleDownRule === '9_10_11') {
-      const score = hand.evaluation.score;
-      return score >= 9 && score <= 11;
-    }
+  canHit(hand) {
+    if (!hand || hand.isEnded) return false;
+    if (hand.isFromSplitAces && this.config.splitAcesCannotHit) return false;
+    const eval_ = hand.evaluation;
+    return !eval_.isBust && eval_.score < 21;
+  }
+
+  canStand(hand) {
+    if (!hand || hand.isEnded) return false;
     return true;
   }
 
-  canSplit(hand, currentSplitCount = 1) {
-    if (!hand || !hand.cards || hand.cards.length !== 2) return false;
-    if (currentSplitCount >= this.maxSplits) return false;
+  canDouble(hand, isSplitHand = false) {
+    if (!hand || hand.isEnded) return false;
+    if (hand.cards.length !== 2) return false;
+    if (isSplitHand && !this.config.doubleAfterSplit) return false;
+    if (hand.isFromSplitAces) return false;  // can't double split aces
 
-    const card1 = hand.cards[0];
-    const card2 = hand.cards[1];
-    if (!card1 || !card2) return false;
+    if (this.config.doubleDownOn === '9_10_11') {
+      const score = hand.evaluation.score;
+      return score >= 9 && score <= 11;
+    }
+    if (this.config.doubleDownOn === '10_11') {
+      const score = hand.evaluation.score;
+      return score >= 10 && score <= 11;
+    }
+    return true; // 'any'
+  }
 
-    const rank1 = String(card1.rank || '').toUpperCase();
-    const rank2 = String(card2.rank || '').toUpperCase();
-    const val1 = card1.numericValue || card1.value || card1.faceValue || 0;
-    const val2 = card2.numericValue || card2.value || card2.faceValue || 0;
+  canSplit(hand, currentHandCount = 1) {
+    if (!hand || hand.isEnded) return false;
+    if (hand.cards.length !== 2) return false;
+    if (currentHandCount > this.config.maxSplitDepth) return false;
 
-    return (rank1.length > 0 && rank1 === rank2) || (val1 > 0 && val1 === val2);
+    const c1 = hand.cards[0];
+    const c2 = hand.cards[1];
+    // Cards can be split if they have the same rank OR same value (e.g., K and Q both = 10)
+    return c1.rank === c2.rank || c1.value === c2.value;
   }
 
   canInsure(dealerUpcard) {
-    if (!this.insuranceAvailable || !dealerUpcard) return false;
+    if (!this.config.insuranceAvailable || !dealerUpcard) return false;
     return dealerUpcard.rank === 'A';
   }
 
   canSurrender(hand) {
-    if (!this.surrenderAllowed || !hand) return false;
-    return hand.cards.length === 2 && !hand.isSplitHand;
+    if (!this.config.surrenderAllowed) return false;
+    if (!hand || hand.isEnded) return false;
+    if (hand.cards.length !== 2) return false;
+    if (hand.isSplitHand) return false;
+    return true;
   }
 
-  shouldDealerHit(dealerEvaluation) {
-    const { score, isSoft } = dealerEvaluation;
+  shouldDealerHit(dealerEval) {
+    const { score, isSoft } = dealerEval;
     if (score < 17) return true;
-    if (score === 17 && isSoft && !this.dealerStandSoft17) return true;
+    if (score === 17 && isSoft && !this.config.dealerStandsSoft17) return true;
     return false;
+  }
+
+  validateBet(amount) {
+    if (typeof amount !== 'number' || !Number.isInteger(amount)) {
+      return { valid: false, reason: 'Bet must be an integer' };
+    }
+    if (amount < this.config.minBet) {
+      return { valid: false, reason: `Minimum bet is ${this.config.minBet}` };
+    }
+    if (amount > this.config.maxBet) {
+      return { valid: false, reason: `Maximum bet is ${this.config.maxBet}` };
+    }
+    return { valid: true };
   }
 }

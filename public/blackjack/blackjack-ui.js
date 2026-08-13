@@ -3,23 +3,24 @@
    ============================================================ */
 
 (function () {
-  let engine = null;
+  let activeHand = null;          // Holds the final authoritative snapshot
   let currentBet = 10;
-  let activeHand = null;
-  let isGameActive = false;
+  let expectedSequenceNumber = 1;
+  let eventQueue = [];
+  let isAnimating = false;
+  let processedEventIds = new Set();
+  let loadingMessage = "";
 
   function initBlackjackUI(containerId = 'blackjack-app') {
     const container = document.getElementById(containerId);
     if (!container) return;
-
-    engine = new window.BlackjackEngine(6);
 
     container.innerHTML = `
       <div class="bj-container">
         <!-- Left Sidebar Controls -->
         <div class="bj-sidebar">
           <div class="bj-mode-tabs">
-            <button class="bj-mode-btn active" id="bj-mode-std" style="width:100%;">Standard</button>
+            <button class="bj-mode-btn active" id="bj-mode-std" style="width:100%;">Standard Mode</button>
           </div>
 
           <div class="bj-bet-box">
@@ -29,7 +30,7 @@
             </div>
             <div class="bj-input-row">
               <span class="bj-currency-symbol">🪙</span>
-              <input type="number" id="bj-bet-input" class="bj-bet-input" value="0" min="0" step="1"/>
+              <input type="number" id="bj-bet-input" class="bj-bet-input" value="10" min="1" step="1"/>
               <div class="bj-multiplier-btns">
                 <button class="bj-mult-btn" id="bj-btn-half">½</button>
                 <button class="bj-mult-btn" id="bj-btn-double">2x</button>
@@ -38,7 +39,6 @@
             
             <!-- Casino Chips Selector -->
             <div class="bj-chips-selector">
-              <button class="bj-chip-btn bj-chip-0" onclick="setBetChip(0)" title="Set Bet to 0">0</button>
               <button class="bj-chip-btn bj-chip-1" onclick="addBetChip(1)">+1</button>
               <button class="bj-chip-btn bj-chip-5" onclick="addBetChip(5)">+5</button>
               <button class="bj-chip-btn bj-chip-25" onclick="addBetChip(25)">+25</button>
@@ -48,30 +48,30 @@
           </div>
 
           <!-- Action Grid -->
-          <div class="bj-actions-grid">
-            <button class="bj-action-btn" id="bj-btn-hit" disabled>
+          <div class="bj-actions-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <button class="bj-action-btn" id="bj-btn-hit" disabled style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:#fff; font-weight:700; cursor:pointer;">
               <span>Hit</span>
-              <span class="bj-action-icon">📥</span>
+              <span style="font-size:1.1rem; margin-top:4px;">📥</span>
             </button>
-            <button class="bj-action-btn" id="bj-btn-stand" disabled>
+            <button class="bj-action-btn" id="bj-btn-stand" disabled style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:#fff; font-weight:700; cursor:pointer;">
               <span>Stand</span>
-              <span class="bj-action-icon">✋</span>
+              <span style="font-size:1.1rem; margin-top:4px;">✋</span>
             </button>
-            <button class="bj-action-btn" id="bj-btn-split" disabled>
-              <span>Split</span>
-              <span class="bj-action-icon">🔀</span>
-            </button>
-            <button class="bj-action-btn" id="bj-btn-double-down" disabled>
+            <button class="bj-action-btn" id="bj-btn-double-down" disabled style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:#fff; font-weight:700; cursor:pointer;">
               <span>Double</span>
-              <span class="bj-action-icon">⚡</span>
+              <span style="font-size:1.1rem; margin-top:4px;">⚡</span>
+            </button>
+            <button class="bj-action-btn" id="bj-btn-split" disabled style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:#fff; font-weight:700; cursor:pointer;">
+              <span>Split</span>
+              <span style="font-size:1.1rem; margin-top:4px;">🔀</span>
             </button>
           </div>
 
-          <button class="bj-main-btn" id="bj-btn-main">Bet</button>
+          <button class="bj-main-btn" id="bj-btn-main" style="width:100%; padding:14px; border-radius:8px; background:linear-gradient(90deg, #8800ff, #5500aa); color:#fff; font-weight:800; text-transform:uppercase; font-size:1rem; border:none; cursor:pointer; box-shadow:0 4px 15px rgba(136,0,255,0.3);">Deal Hand</button>
         </div>
 
         <!-- Main Felt Table -->
-        <div class="bj-table">
+        <div class="bj-table" style="position:relative; flex:1; display:flex; flex-direction:column; justify-content:space-between; padding:40px 20px; background:radial-gradient(circle at 50% 50%, #17122e 0%, #060412 100%);">
           <div class="bj-ribbons">
             <div class="bj-ribbon-text">BLACKJACK PAYS 3 TO 2</div>
             <div class="bj-ribbon-text">INSURANCE PAYS 2 TO 1</div>
@@ -79,11 +79,15 @@
 
           <!-- Dealer Hand Area -->
           <div class="bj-hand-area">
+            <div style="font-size:0.8rem; font-weight:800; color:#a09bbd; letter-spacing:0.1em; text-transform:uppercase;">Dealer</div>
             <div class="bj-score-badge" id="bj-dealer-score">?</div>
             <div class="bj-cards-row" id="bj-dealer-cards">
               <!-- Cards rendered dynamically -->
             </div>
           </div>
+
+          <!-- Loading / Status Box -->
+          <div id="bj-status-indicator" style="text-align:center; color:#ffd700; font-family:var(--font-display); font-size:1.1rem; font-weight:800; min-height:24px; text-shadow:0 0 10px rgba(255,215,0,0.3);"></div>
 
           <!-- Result Overlay -->
           <div class="bj-result-overlay" id="bj-result-overlay">
@@ -91,8 +95,19 @@
             <div class="bj-result-payout" id="bj-result-payout">+20 BigD Coins</div>
           </div>
 
+          <!-- Insurance Overlay -->
+          <div class="bj-result-overlay" id="bj-insurance-overlay" style="display:none; flex-direction:column; justify-content:center; align-items:center; background:rgba(6, 4, 18, 0.95); z-index:10;">
+            <div style="font-family:var(--font-display); font-size:1.6rem; color:#ffd700; margin-bottom:10px; text-shadow:0 0 10px rgba(255,215,0,0.5);">INSURANCE OFFERED</div>
+            <p id="bj-insurance-cost-text" style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:20px; max-width:320px; text-align:center; line-height:1.4;"></p>
+            <div style="display:flex; gap:16px;">
+              <button id="bj-btn-ins-yes" style="padding:12px 24px; font-weight:800; text-transform:uppercase; background:#00e676; color:#000; border-radius:8px; cursor:pointer; font-family:var(--font-ui); font-size:1rem; min-width:120px; border:none; transition:transform 0.2s;">Buy Yes</button>
+              <button id="bj-btn-ins-no" style="padding:12px 24px; font-weight:800; text-transform:uppercase; background:#ff3b30; color:#fff; border-radius:8px; cursor:pointer; font-family:var(--font-ui); font-size:1rem; min-width:120px; border:none; transition:transform 0.2s;">Decline No</button>
+            </div>
+          </div>
+
           <!-- Player Hand Area -->
           <div class="bj-hand-area">
+            <div style="font-size:0.8rem; font-weight:800; color:#a09bbd; letter-spacing:0.1em; text-transform:uppercase;">Your Hand</div>
             <div class="bj-cards-row" id="bj-player-cards">
               <!-- Cards rendered dynamically -->
             </div>
@@ -104,6 +119,8 @@
 
     bindEvents();
     syncBalance();
+    restoreActiveGame();
+    loadHistoryAndStats();
   }
 
   function bindEvents() {
@@ -120,64 +137,50 @@
     if (btnDouble) btnDouble.onclick = () => { betInput.value = Math.max(1, parseInt(betInput.value || 10, 10) * 2); };
 
     if (btnMain) btnMain.onclick = startDeal;
-    if (btnHit) btnHit.onclick = doHit;
-    if (btnStand) btnStand.onclick = doStand;
-    if (btnDoubleDown) btnDoubleDown.onclick = doDoubleDown;
-    if (btnSplit) btnSplit.onclick = doSplit;
-  }
+    if (btnHit) btnHit.onclick = () => performAction('hit');
+    if (btnStand) btnStand.onclick = () => performAction('stand');
+    if (btnDoubleDown) btnDoubleDown.onclick = () => performAction('double');
+    if (btnSplit) btnSplit.onclick = () => performAction('split');
 
-  window.setBetChip = function(amt) {
-    const betInput = document.getElementById('bj-bet-input');
-    if (betInput) betInput.value = amt;
-  };
+    const btnInsYes = document.getElementById('bj-btn-ins-yes');
+    const btnInsNo = document.getElementById('bj-btn-ins-no');
+    if (btnInsYes) btnInsYes.addEventListener('click', () => buyOrDeclineInsurance(true));
+    if (btnInsNo) btnInsNo.addEventListener('click', () => buyOrDeclineInsurance(false));
+  }
 
   window.addBetChip = function(amt) {
     const betInput = document.getElementById('bj-bet-input');
     if (betInput) {
+      playSound('chip');
       const current = parseInt(betInput.value || 0, 10);
       betInput.value = current + amt;
     }
   };
 
-  async function syncBalance() {
-    const balanceEl = document.getElementById('bj-balance-display');
-    const centerBalanceEl = document.getElementById('bj-center-balance-val');
-
-    let pts = 0;
-    if (window.authUser) {
-      pts = window.authUser.points || 0;
-    } else {
-      const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
-      if (token) {
-        try {
-          const res = await fetch('/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
-          if (res.ok) {
-            const data = await res.json();
-            window.authUser = data;
-            pts = data.points || 0;
-          }
-        } catch {}
-      }
-    }
-
-    if (balanceEl) balanceEl.textContent = pts.toLocaleString();
-    if (centerBalanceEl) centerBalanceEl.textContent = pts.toLocaleString();
+  function generateActionId() {
+    return 'act_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   }
 
-  function renderCard(card, isHidden = false) {
-    if (isHidden) {
-      return `<div class="bj-card bj-card-back"></div>`;
+  async function syncBalance() {
+    const balanceEl = document.getElementById('bj-balance-display');
+    const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
+    if (token) {
+      try {
+        const res = await fetch('/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+          const data = await res.json();
+          window.authUser = data;
+          if (balanceEl) balanceEl.textContent = (data.points || 0).toLocaleString();
+        }
+      } catch {}
+    } else {
+      let guestBalance = Number(localStorage.getItem('bj_guest_balance'));
+      if (isNaN(guestBalance) || guestBalance === null || localStorage.getItem('bj_guest_balance') === null) {
+        guestBalance = 10000;
+        localStorage.setItem('bj_guest_balance', guestBalance);
+      }
+      if (balanceEl) balanceEl.textContent = `${Number(guestBalance).toLocaleString()} (Guest)`;
     }
-    const colorClass = card.isRed ? 'red' : 'black';
-    return `
-      <div class="bj-card ${colorClass}">
-        <div class="bj-card-top">
-          <span class="bj-card-value">${card.rank}</span>
-          <span class="bj-card-suit-small">${card.suit}</span>
-        </div>
-        <span class="bj-card-suit-center">${card.suit}</span>
-      </div>
-    `;
   }
 
   function playSound(type) {
@@ -229,6 +232,427 @@
     } catch (e) {}
   }
 
+  // ─── EVENT ANIMATION & QUEUEING ENGINE ─────────────────────────
+
+  function queueEvents(events) {
+    for (const evt of events) {
+      if (evt.sequenceNumber < expectedSequenceNumber) {
+        // Skip duplicate sequence numbers
+        continue;
+      }
+      if (processedEventIds.has(evt.eventId)) {
+        // Skip processed IDs
+        continue;
+      }
+      // Check if event already in queue
+      if (!eventQueue.find(e => e.eventId === evt.eventId)) {
+        eventQueue.push(evt);
+      }
+    }
+    // Ensure strict sequence ordering
+    eventQueue.sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+    processNextEvent();
+  }
+
+  async function processNextEvent() {
+    if (isAnimating) return;
+    if (eventQueue.length === 0) {
+      isAnimating = false;
+      renderCurrentUIState();
+      return;
+    }
+
+    const nextEvent = eventQueue[0];
+    if (nextEvent.sequenceNumber !== expectedSequenceNumber) {
+      console.log(`Gap in event sequence: expected ${expectedSequenceNumber}, got ${nextEvent.sequenceNumber}. Awaiting...`);
+      return;
+    }
+
+    // Dequeue
+    eventQueue.shift();
+    isAnimating = true;
+    processedEventIds.add(nextEvent.eventId);
+
+    try {
+      await animateEvent(nextEvent);
+      expectedSequenceNumber++;
+    } catch (err) {
+      console.error("Error during event animation:", err);
+    } finally {
+      isAnimating = false;
+      processNextEvent();
+    }
+  }
+
+  const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+  async function animateEvent(evt) {
+    const statusEl = document.getElementById('bj-status-indicator');
+    const type = evt.eventType;
+    const payload = evt.payload || {};
+
+    switch (type) {
+      case 'ROUND_CREATED':
+        clearBoardVisuals();
+        setStatusText("");
+        await delay(300);
+        break;
+
+      case 'BET_ACCEPTED':
+        setStatusText("");
+        playSound('chip');
+        await delay(400);
+        break;
+
+      case 'DEALING_STARTED':
+        setStatusText("DEALING CARDS...");
+        await delay(300);
+        break;
+
+      case 'DEAL_PLAYER_CARD': {
+        const row = document.getElementById('bj-player-cards');
+        if (row) row.innerHTML += renderCardMarkup(payload.card);
+        playSound('deal');
+        setStatusText("");
+        await delay(500);
+        break;
+      }
+
+      case 'DEAL_DEALER_VISIBLE_CARD': {
+        const row = document.getElementById('bj-dealer-cards');
+        if (row) row.innerHTML += renderCardMarkup(payload.card);
+        playSound('deal');
+        setStatusText("");
+        await delay(500);
+        break;
+      }
+
+      case 'DEAL_DEALER_HIDDEN_CARD': {
+        const row = document.getElementById('bj-dealer-cards');
+        if (row) row.innerHTML += `<div class="bj-card bj-card-back" id="bj-dealer-hole-card"></div>`;
+        playSound('deal');
+        setStatusText("");
+        await delay(500);
+        break;
+      }
+
+      case 'INITIAL_DEAL_COMPLETE':
+        setStatusText("");
+        await delay(300);
+        break;
+
+      case 'CHECK_BLACKJACK':
+        setStatusText("");
+        await delay(400);
+        break;
+
+      case 'PLAYER_TURN_STARTED':
+        setStatusText("YOUR TURN");
+        await delay(350);
+        break;
+
+      case 'PLAYER_ACTION':
+        setStatusText("");
+        await delay(300);
+        break;
+
+      case 'PLAYER_CARD_DEALT': {
+        const row = document.getElementById('bj-player-cards');
+        if (row) row.innerHTML += renderCardMarkup(payload.card);
+        playSound('deal');
+        setStatusText("");
+        await delay(500);
+        break;
+      }
+
+      case 'PLAYER_STAND':
+        setStatusText("");
+        await delay(400);
+        break;
+
+      case 'DOUBLE_REQUESTED':
+        setStatusText("");
+        await delay(200);
+        break;
+
+      case 'DOUBLE_CONFIRMED':
+        setStatusText("");
+        playSound('chip');
+        await delay(300);
+        break;
+
+      case 'ONE_CARD_DEALT': {
+        const row = document.getElementById('bj-player-cards');
+        if (row) row.innerHTML += renderCardMarkup(payload.card);
+        playSound('deal');
+        setStatusText("");
+        await delay(500);
+        break;
+      }
+
+      case 'HAND_COMPLETED':
+        setStatusText("");
+        await delay(300);
+        break;
+
+      case 'DEALER_TURN_STARTED':
+        setStatusText("DEALER'S TURN");
+        await delay(400);
+        break;
+
+      case 'DEALER_REVEAL_HIDDEN_CARD': {
+        const row = document.getElementById('bj-dealer-cards');
+        if (row && payload.dealerCards) {
+          row.innerHTML = payload.dealerCards.map(c => renderCardMarkup(c)).join('');
+        }
+        playSound('chip');
+        setStatusText("");
+        await delay(600);
+        break;
+      }
+
+      case 'DEALER_CARD_DEALT': {
+        const row = document.getElementById('bj-dealer-cards');
+        if (row) row.innerHTML += renderCardMarkup(payload.card);
+        playSound('deal');
+        setStatusText("");
+        await delay(500);
+        break;
+      }
+
+      case 'EVALUATE_DEALER_HAND':
+        setStatusText("");
+        await delay(300);
+        break;
+
+      case 'DEALER_TURN_COMPLETED':
+        setStatusText("");
+        await delay(300);
+        break;
+
+      case 'RESULT_CALCULATED':
+        setStatusText("");
+        await delay(400);
+        break;
+
+      case 'PAYOUT_PROCESSED':
+        setStatusText("");
+        await delay(300);
+        break;
+
+      case 'ROUND_COMPLETED':
+        setStatusText("");
+        await delay(200);
+        break;
+        
+      default:
+        console.log("Unhandled event animation type:", type);
+    }
+  }
+
+  function setStatusText(txt) {
+    const el = document.getElementById('bj-status-indicator');
+    if (el) el.textContent = txt;
+  }
+
+  function clearBoardVisuals() {
+    const dealerCardsEl = document.getElementById('bj-dealer-cards');
+    const playerCardsEl = document.getElementById('bj-player-cards');
+    const dealerScoreEl = document.getElementById('bj-dealer-score');
+    const playerScoreEl = document.getElementById('bj-player-score');
+    const overlay = document.getElementById('bj-result-overlay');
+    const insOverlay = document.getElementById('bj-insurance-overlay');
+
+    if (overlay) overlay.classList.remove('show');
+    if (insOverlay) {
+      insOverlay.style.display = 'none';
+      insOverlay.classList.remove('show');
+    }
+    if (dealerCardsEl) dealerCardsEl.innerHTML = '';
+    if (playerCardsEl) playerCardsEl.innerHTML = '';
+    if (dealerScoreEl) { dealerScoreEl.textContent = '?'; dealerScoreEl.className = 'bj-score-badge'; }
+    if (playerScoreEl) { playerScoreEl.textContent = '0'; playerScoreEl.className = 'bj-score-badge'; }
+  }
+
+  function renderCardMarkup(card) {
+    if (!card || card.visibility === 'face_down') {
+      return `<div class="bj-card bj-card-back"></div>`;
+    }
+    const isRed = card.suit === 'hearts' || card.suit === 'diamonds';
+    const colorClass = isRed ? 'red' : 'black';
+    
+    // Map suits to shapes
+    const suitSymbol = {
+      spades: '♠',
+      hearts: '♥',
+      diamonds: '♦',
+      clubs: '♣'
+    }[card.suit] || '';
+
+    return `
+      <div class="bj-card ${colorClass}">
+        <div class="bj-card-top">
+          <span class="bj-card-value">${card.rank}</span>
+          <span class="bj-card-suit-small">${suitSymbol}</span>
+        </div>
+        <span class="bj-card-suit-center" style="font-size:2rem; align-self:center; margin-top:2px;">${suitSymbol}</span>
+      </div>
+    `;
+  }
+
+  // ─── authoritative rendering after animation sequence completes ───
+
+  function renderCurrentUIState() {
+    if (!activeHand) return;
+
+    // sync points headers & balance displays
+    syncBalance();
+
+    const overlay = document.getElementById('bj-result-overlay');
+    if (overlay && !activeHand.isEnded) overlay.classList.remove('show');
+
+    // 1. Render dealer cards
+    const dealerCardsEl = document.getElementById('bj-dealer-cards');
+    const dealerScoreEl = document.getElementById('bj-dealer-score');
+    if (dealerCardsEl) {
+      dealerCardsEl.innerHTML = activeHand.dealerCards.map(c => renderCardMarkup(c)).join('');
+    }
+    if (dealerScoreEl) {
+      dealerScoreEl.textContent = activeHand.dealerScore;
+      dealerScoreEl.className = 'bj-score-badge' + (activeHand.dealerIsBust ? ' bust' : '');
+    }
+
+    // 2. Render player hands (handles splits)
+    const playerCardsEl = document.getElementById('bj-player-cards');
+    const playerScoreEl = document.getElementById('bj-player-score');
+
+    if (activeHand.isSplit) {
+      if (playerCardsEl) {
+        playerCardsEl.innerHTML = `
+          <div style="display:flex; gap:20px; justify-content:center; align-items:flex-start; margin:10px 0; width:100%; flex-wrap:wrap;">
+            ${activeHand.playerHands.map((h, i) => {
+              const isActive = activeHand.activeHandIndex === i && !activeHand.isEnded;
+              return `
+                <div style="display:flex; flex-direction:column; align-items:center; border:${isActive ? '2px solid #00e676' : '1px solid rgba(255,255,255,0.1)'}; padding:12px; border-radius:10px; background:rgba(0,0,0,0.3); box-shadow:${isActive ? '0 0 15px rgba(0,230,118,0.25)' : 'none'}; min-width:140px;">
+                  <div style="font-size:0.75rem; font-weight:800; color:${isActive ? '#00e676' : '#a09bbd'}; margin-bottom:6px; text-transform:uppercase;">
+                    Hand ${i + 1} ${isActive ? '● Active' : ''}
+                  </div>
+                  <div style="display:flex; gap:6px;">
+                    ${h.cards.map(c => renderCardMarkup(c)).join('')}
+                  </div>
+                  <div class="bj-score-badge ${h.isBust ? 'bust' : ''}" style="margin-top:8px;">${h.score}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+      if (playerScoreEl) playerScoreEl.style.display = 'none';
+    } else {
+      const primaryHand = activeHand.playerHands[0];
+      if (primaryHand && playerCardsEl) {
+        playerCardsEl.innerHTML = primaryHand.cards.map(c => renderCardMarkup(c)).join('');
+      }
+      if (primaryHand && playerScoreEl) {
+        playerScoreEl.style.display = 'block';
+        playerScoreEl.textContent = primaryHand.score;
+        playerScoreEl.className = 'bj-score-badge' + (primaryHand.isBust ? ' bust' : primaryHand.isBlackjack ? ' win' : '');
+      }
+    }
+
+    // 3. Update Action Buttons
+    const btnHit = document.getElementById('bj-btn-hit');
+    const btnStand = document.getElementById('bj-btn-stand');
+    const btnDoubleDown = document.getElementById('bj-btn-double-down');
+    const btnSplit = document.getElementById('bj-btn-split');
+    const btnMain = document.getElementById('bj-btn-main');
+
+    if (btnHit) btnHit.disabled = !activeHand.canHit;
+    if (btnStand) btnStand.disabled = !activeHand.canStand;
+    if (btnDoubleDown) btnDoubleDown.disabled = !activeHand.canDouble;
+    if (btnSplit) btnSplit.disabled = !activeHand.canSplit;
+
+    if (btnMain) {
+      btnMain.textContent = activeHand.isEnded ? 'Deal Hand' : 'Game In Progress';
+      btnMain.disabled = !activeHand.isEnded;
+    }
+
+    // 3.5 Check if insurance is offered
+    const insOverlay = document.getElementById('bj-insurance-overlay');
+    if (insOverlay) {
+      if (activeHand.insuranceOffered && !activeHand.insuranceTaken && activeHand.insuranceBet === 0 && !activeHand.isEnded) {
+        insOverlay.style.display = 'flex';
+        insOverlay.classList.add('show');
+        const costText = document.getElementById('bj-insurance-cost-text');
+        if (costText) {
+          costText.textContent = `Dealer shows Ace. Buy insurance for ${activeHand.insuranceCost} coins? (Pays 2:1 if dealer has Blackjack)`;
+        }
+      } else {
+        insOverlay.style.display = 'none';
+        insOverlay.classList.remove('show');
+      }
+    }
+
+    // 4. Handle End of Round overlay
+    if (activeHand.isEnded) {
+      const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
+      if (!token && (!window.guestPayoutHandledForGame || window.guestPayoutHandledForGame !== activeHand.gameId)) {
+        let guestBalance = Number(localStorage.getItem('bj_guest_balance'));
+        if (isNaN(guestBalance) || guestBalance === null || localStorage.getItem('bj_guest_balance') === null) {
+          guestBalance = 10000;
+          localStorage.setItem('bj_guest_balance', guestBalance);
+        }
+        guestBalance += activeHand.totalPayout;
+        localStorage.setItem('bj_guest_balance', guestBalance);
+        syncBalance();
+        window.guestPayoutHandledForGame = activeHand.gameId;
+      }
+      displayRoundOutcome();
+      loadHistoryAndStats();
+    }
+  }
+
+  function displayRoundOutcome() {
+    const overlay = document.getElementById('bj-result-overlay');
+    const titleEl = document.getElementById('bj-result-title');
+    const payoutEl = document.getElementById('bj-result-payout');
+    if (!overlay || !titleEl || !payoutEl) return;
+
+    const outcomes = activeHand.playerHands.map(h => h.outcome);
+    let titleText = 'DEALER WINS';
+    let titleClass = 'bj-result-title loss';
+    
+    // Exact Points result strings: Show BET, profit, return explicitly
+    let profitDetailsText = `Bet: ${activeHand.initialBet} | Return: ${activeHand.totalPayout}`;
+
+    if (outcomes.includes('PLAYER_BLACKJACK')) {
+      titleText = 'BLACKJACK!';
+      titleClass = 'bj-result-title win';
+      playSound('win');
+    } else if (outcomes.includes('PLAYER_WIN')) {
+      titleText = 'YOU WIN!';
+      titleClass = 'bj-result-title win';
+      playSound('win');
+    } else if (outcomes.includes('PUSH')) {
+      titleText = 'PUSH (TIE)';
+      titleClass = 'bj-result-title push';
+      playSound('deal');
+    } else {
+      playSound('loss');
+    }
+
+    titleEl.textContent = titleText;
+    titleEl.className = titleClass;
+
+    const profitVal = activeHand.totalProfit;
+    const profitSign = profitVal >= 0 ? `+${profitVal}` : `${profitVal}`;
+    payoutEl.textContent = `Outcome: ${profitSign} Coins (${profitDetailsText})`;
+
+    overlay.classList.add('show');
+  }
+
+  // ─── BACKEND API DISPATCH CALLS ──────────────────────────────
+
   async function startDeal() {
     const betInput = document.getElementById('bj-bet-input');
     const betVal = parseInt(betInput.value || 0, 10);
@@ -240,41 +664,156 @@
 
     const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
     if (!token) {
-      alert("Please log in to play Blackjack!");
-      if (typeof loginWithDiscord === 'function') loginWithDiscord();
-      return;
+      let guestBalance = Number(localStorage.getItem('bj_guest_balance'));
+      if (isNaN(guestBalance) || guestBalance === null || localStorage.getItem('bj_guest_balance') === null) {
+        guestBalance = 10000;
+        localStorage.setItem('bj_guest_balance', guestBalance);
+      }
+      if (guestBalance < betVal) {
+        alert("Insufficient guest balance.");
+        return;
+      }
+      guestBalance -= betVal;
+      localStorage.setItem('bj_guest_balance', guestBalance);
+      syncBalance();
     }
 
+    setButtonsDisabled(true);
+    setStatusText("PROCESSING BET...");
+
     try {
+      const actionId = generateActionId();
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch('/api/casino/blackjack/deal', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ bet: betVal })
+        headers,
+        body: JSON.stringify({ bet: betVal, actionId })
       });
       const data = await res.json();
       if (!res.ok) {
         alert(data.error || "Deal failed.");
+        setStatusText("ERROR");
+        syncBalance();
+        renderCurrentUIState();
         return;
       }
 
       currentBet = betVal;
-      isGameActive = true;
       activeHand = data.handState;
+      expectedSequenceNumber = 1;
+      eventQueue = [];
+      processedEventIds.clear();
+      isAnimating = false;
 
-      // Update UI balance
-      const balanceEl = document.getElementById('bj-balance-display');
-      const centerBalanceEl = document.getElementById('bj-center-balance-val');
-      if (balanceEl) balanceEl.textContent = (data.new_balance || 0).toLocaleString();
-      if (centerBalanceEl) centerBalanceEl.textContent = (data.new_balance || 0).toLocaleString();
-      if (window.authUser) window.authUser.points = data.new_balance;
-
-      await dealSequenceAnimated();
+      // Queue the deal event stream
+      queueEvents(activeHand.events || []);
     } catch (err) {
       console.error("Deal error:", err);
       alert("Server error starting game.");
+      setStatusText("ERROR");
+      setButtonsDisabled(false);
+    }
+  }
+
+  async function performAction(actionName) {
+    if (!activeHand || activeHand.isEnded) return;
+
+    const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
+
+    if (!token) {
+      let guestBalance = Number(localStorage.getItem('bj_guest_balance'));
+      if (isNaN(guestBalance) || guestBalance === null || localStorage.getItem('bj_guest_balance') === null) {
+        guestBalance = 10000;
+        localStorage.setItem('bj_guest_balance', guestBalance);
+      }
+      if (actionName === 'double' || actionName === 'split') {
+        guestBalance -= currentBet;
+      } else if (actionName === 'buyInsurance') {
+        guestBalance -= Math.floor(currentBet / 2);
+      }
+      localStorage.setItem('bj_guest_balance', guestBalance);
+      syncBalance();
+    }
+
+    setButtonsDisabled(true);
+    setStatusText("PROCESSING...");
+
+    try {
+      const actionId = generateActionId();
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/casino/blackjack/action', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ action: actionName.toUpperCase(), actionId })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Action failed.");
+        setStatusText("ERROR");
+        renderCurrentUIState();
+        return;
+      }
+
+      activeHand = data.handState;
+      queueEvents(activeHand.events || []);
+    } catch (err) {
+      console.error("Action error:", err);
+      setStatusText("ERROR");
+      renderCurrentUIState();
+    }
+  }
+
+  async function buyOrDeclineInsurance(buyInsurance) {
+    if (!activeHand || activeHand.isEnded) return;
+
+    const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
+
+    if (buyInsurance && !token) {
+      let guestBalance = Number(localStorage.getItem('bj_guest_balance'));
+      if (isNaN(guestBalance) || guestBalance === null || localStorage.getItem('bj_guest_balance') === null) {
+        guestBalance = 10000;
+        localStorage.setItem('bj_guest_balance', guestBalance);
+      }
+      if (guestBalance < activeHand.insuranceCost) {
+        alert("Insufficient guest balance for insurance.");
+        return;
+      }
+      guestBalance -= activeHand.insuranceCost;
+      localStorage.setItem('bj_guest_balance', guestBalance);
+      syncBalance();
+    }
+
+    setButtonsDisabled(true);
+    setStatusText("PROCESSING INSURANCE...");
+
+    try {
+      const actionId = generateActionId();
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/casino/blackjack/insurance', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ buyInsurance, actionId })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Insurance action failed.");
+        setStatusText("ERROR");
+        renderCurrentUIState();
+        return;
+      }
+
+      activeHand = data.handState;
+      queueEvents(activeHand.events || []);
+    } catch (err) {
+      console.error("Insurance error:", err);
+      setStatusText("ERROR");
+      renderCurrentUIState();
     }
   }
 
@@ -292,423 +831,113 @@
     if (btnMain) btnMain.disabled = disabled;
   }
 
-  async function dealSequenceAnimated() {
-    if (!activeHand) return;
+  // ─── RECONNECTION & RESTORATION ────────────────────────────────
 
-    const dealerCardsEl = document.getElementById('bj-dealer-cards');
-    const playerCardsEl = document.getElementById('bj-player-cards');
-    const dealerScoreEl = document.getElementById('bj-dealer-score');
-    const playerScoreEl = document.getElementById('bj-player-score');
-    const overlay = document.getElementById('bj-result-overlay');
+  async function restoreActiveGame() {
+    const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
 
-    const insModal = document.getElementById('bj-insurance-modal');
-    if (insModal) { insModal.classList.remove('show'); insModal.style.display = 'none'; }
-    if (overlay) overlay.classList.remove('show');
-    if (dealerCardsEl) dealerCardsEl.innerHTML = '';
-    if (playerCardsEl) playerCardsEl.innerHTML = '';
-    if (dealerScoreEl) { dealerScoreEl.textContent = '?'; dealerScoreEl.className = 'bj-score-badge'; }
-    if (playerScoreEl) { playerScoreEl.style.display = 'block'; playerScoreEl.textContent = '0'; playerScoreEl.className = 'bj-score-badge'; }
+    setStatusText("RECONNECTING...");
+    try {
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    setButtonsDisabled(true);
-    const delay = (ms) => new Promise(res => setTimeout(res, ms));
+      const res = await fetch('/api/casino/blackjack/state', {
+        headers
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.active && data.snapshot) {
+          activeHand = data.snapshot;
+          expectedSequenceNumber = 1;
+          eventQueue = [];
+          processedEventIds.clear();
 
-    // 1. Card 1 -> Player (Face Up)
-    const cardsList = activeHand.playerCards || (activeHand.playerHands && activeHand.playerHands[0] ? activeHand.playerHands[0].cards : []);
-    if (cardsList[0]) {
-      playerCardsEl.innerHTML += renderCard(cardsList[0]);
-      if (playerScoreEl) playerScoreEl.textContent = cardsList[0].value || cardsList[0].numericValue;
-      playSound('deal');
-      await delay(400);
-    }
-
-    // 2. Card 1 -> Dealer (Face Up)
-    if (activeHand.dealerCards[0]) {
-      dealerCardsEl.innerHTML += renderCard(activeHand.dealerCards[0]);
-      if (dealerScoreEl) dealerScoreEl.textContent = activeHand.dealerVisibleScore;
-      playSound('deal');
-      await delay(400);
-    }
-
-    // 3. Card 2 -> Player (Face Up)
-    if (cardsList[1]) {
-      playerCardsEl.innerHTML += renderCard(cardsList[1]);
-      if (playerScoreEl) playerScoreEl.textContent = activeHand.playerScore;
-      playSound('deal');
-      await delay(400);
-    }
-
-    // 4. Card 2 -> Dealer (FACE DOWN HOLE CARD)
-    dealerCardsEl.innerHTML += `<div class="bj-card bj-card-back" id="bj-dealer-hole-card"></div>`;
-    playSound('deal');
-    await delay(400);
-
-    // If Dealer shows an Ace, offer Insurance
-    if (activeHand.offerInsurance && !activeHand.isEnded) {
-      await showInsuranceModal();
-    } else if (activeHand.isEnded) {
-      await revealDealerTurnAnimated();
-    } else {
-      renderHandState();
-    }
-  }
-
-  async function showInsuranceModal() {
-    return new Promise((resolve) => {
-      let overlay = document.getElementById('bj-insurance-modal');
-      if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'bj-insurance-modal';
-        overlay.className = 'bj-result-overlay show';
-        document.querySelector('.bj-table').appendChild(overlay);
-      }
-
-      overlay.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(10,10,25,0.95); backdrop-filter:blur(12px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px; text-align:center; z-index:999999; pointer-events:auto; border:2px solid #53fa5d; border-radius:14px; box-shadow:0 0 40px rgba(83,250,93,0.35);';
-
-      overlay.innerHTML = `
-        <div style="font-size:1.6rem; font-weight:900; color:#53fa5d; margin-bottom:10px; text-shadow:0 0 15px rgba(83,250,93,0.5);">🛡️ DEALER SHOWS AN ACE</div>
-        <div style="font-size:0.95rem; color:#d0c8ef; margin-bottom:24px; max-width:340px; line-height:1.5;">Buy Insurance for 50% of your bet (${activeHand.insuranceCost} BigD Coins)? Pays 2:1 if Dealer has Blackjack.</div>
-        <div style="display:flex; gap:14px; position:relative; z-index:10000;">
-          <button id="bj-ins-yes" style="background:#53fa5d; color:#000; border:none; padding:14px 24px; border-radius:8px; font-weight:900; cursor:pointer; font-size:1rem; text-transform:uppercase; pointer-events:auto; box-shadow:0 0 15px rgba(83,250,93,0.4);">Accept Insurance</button>
-          <button id="bj-ins-no" style="background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.25); padding:14px 24px; border-radius:8px; font-weight:800; cursor:pointer; font-size:1rem; pointer-events:auto;">Decline</button>
-        </div>
-      `;
-
-      overlay.classList.add('show');
-
-      const handleChoice = async (buy) => {
-        overlay.classList.remove('show');
-        overlay.style.display = 'none';
-        const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
-        if (token) {
-          try {
-            const res = await fetch('/api/casino/blackjack/insurance', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-              body: JSON.stringify({ buyInsurance: buy })
-            });
-            const data = await res.json();
-            if (res.ok) {
-              activeHand = data.handState;
-              if (data.new_balance !== undefined) {
-                const balanceEl = document.getElementById('bj-balance-display');
-                if (balanceEl) balanceEl.textContent = (data.new_balance || 0).toLocaleString();
-              }
-            }
-          } catch (e) { console.error("Insurance error:", e); }
+          // Instantly fast-forward events list to sync UI
+          const events = activeHand.events || [];
+          for (const evt of events) {
+            await animateEvent(evt);
+            expectedSequenceNumber++;
+            processedEventIds.add(evt.eventId);
+          }
+          renderCurrentUIState();
         }
-
-        if (activeHand.isEnded) {
-          await revealDealerTurnAnimated();
-        } else {
-          renderHandState();
-        }
-        resolve();
-      };
-
-      setTimeout(() => {
-        const btnYes = document.getElementById('bj-ins-yes');
-        const btnNo = document.getElementById('bj-ins-no');
-        if (btnYes) btnYes.onclick = () => handleChoice(true);
-        if (btnNo) btnNo.onclick = () => handleChoice(false);
-      }, 50);
-    });
+      }
+    } catch (e) {
+      console.error("Reconnection failed:", e);
+    }
+    setStatusText("");
   }
 
-  async function revealDealerTurnAnimated() {
-    const dealerCardsEl = document.getElementById('bj-dealer-cards');
-    const dealerScoreEl = document.getElementById('bj-dealer-score');
-    const delay = (ms) => new Promise(res => setTimeout(res, ms));
+  async function loadHistoryAndStats() {
+    const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
 
-    setButtonsDisabled(true);
+    try {
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    // 1. Reveal Dealer Hole Card (Card 2)
-    if (dealerCardsEl && activeHand.dealerCards[1]) {
-      dealerCardsEl.innerHTML = activeHand.dealerCards.slice(0, 2).map(c => renderCard(c)).join('');
-      if (dealerScoreEl) {
-        dealerScoreEl.textContent = calcHandScore(activeHand.dealerCards.slice(0, 2)).score;
-      }
-      playSound('chip');
-      await delay(550);
-    }
+      const res = await fetch('/api/casino/blackjack/history', {
+        headers
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.ok) return;
 
-    // 2. Draw remaining Dealer cards sequentially
-    if (activeHand.dealerCards.length > 2) {
-      for (let i = 2; i < activeHand.dealerCards.length; i++) {
-        dealerCardsEl.innerHTML += renderCard(activeHand.dealerCards[i]);
-        const currentSubScore = calcHandScore(activeHand.dealerCards.slice(0, i + 1)).score;
-        if (dealerScoreEl) dealerScoreEl.textContent = currentSubScore;
-        playSound('deal');
-        await delay(500);
-      }
-    }
-
-    if (dealerScoreEl) {
-      dealerScoreEl.textContent = activeHand.dealerScore;
-      dealerScoreEl.className = 'bj-score-badge' + (activeHand.dealerScore > 21 ? ' bust' : '');
-    }
-
-    if (activeHand.outcome === 'win' || activeHand.outcome === 'blackjack') {
-      playSound('win');
-    } else if (activeHand.outcome === 'loss' || activeHand.outcome === 'bust') {
-      playSound('loss');
-    }
-
-    showResultBanner(activeHand.outcome, activeHand.payout);
-
-    const btnMain = document.getElementById('bj-btn-main');
-    if (btnMain) {
-      btnMain.textContent = 'Deal Again';
-      btnMain.disabled = false;
-    }
-  }
-
-  function calcHandScore(cards) {
-    let score = 0;
-    let aces = 0;
-    for (const c of cards) {
-      score += c.value;
-      if (c.rank === 'A') aces++;
-    }
-    while (score > 21 && aces > 0) {
-      score -= 10;
-      aces--;
-    }
-    return { score };
-  }
-
-  function renderHandState() {
-    if (!activeHand) return;
-
-    const overlay = document.getElementById('bj-result-overlay');
-    if (overlay) overlay.classList.remove('show');
-
-    // Render Dealer Cards
-    const dealerCardsEl = document.getElementById('bj-dealer-cards');
-    const dealerScoreEl = document.getElementById('bj-dealer-score');
-    if (dealerCardsEl) {
-      if (activeHand.isEnded) {
-        dealerCardsEl.innerHTML = activeHand.dealerCards.map(c => renderCard(c)).join('');
-      } else {
-        const upcardHtml = activeHand.dealerCards[0] ? renderCard(activeHand.dealerCards[0]) : '';
-        const holeCardHtml = `<div class="bj-card bj-card-back" id="bj-dealer-hole-card"></div>`;
-        dealerCardsEl.innerHTML = upcardHtml + holeCardHtml;
-      }
-    }
-    if (dealerScoreEl) {
-      dealerScoreEl.textContent = activeHand.isEnded ? activeHand.dealerScore : activeHand.dealerVisibleScore;
-      dealerScoreEl.className = 'bj-score-badge' + (activeHand.isEnded && activeHand.dealerScore > 21 ? ' bust' : '');
-    }
-
-    // Render Player Cards (supporting single or split hands)
-    const playerCardsEl = document.getElementById('bj-player-cards');
-    const playerScoreEl = document.getElementById('bj-player-score');
-
-    const hands = activeHand.playerHands || [{ playerCards: activeHand.playerCards, playerScore: activeHand.playerScore }];
-    const activeIdx = activeHand.activeHandIndex || 0;
-
-    if (hands.length > 1) {
-      if (playerCardsEl) {
-        playerCardsEl.innerHTML = `
-          <div style="display:flex; gap:20px; justify-content:center; align-items:flex-start; margin:10px 0;">
-            ${hands.map((h, i) => `
-              <div style="display:flex; flex-direction:column; align-items:center; border:${activeIdx === i && !activeHand.isEnded ? '2px solid #53fa5d' : '1px solid rgba(255,255,255,0.15)'}; padding:10px 14px; border-radius:10px; background:rgba(0,0,0,0.35); box-shadow:${activeIdx === i && !activeHand.isEnded ? '0 0 15px rgba(83,250,93,0.3)' : 'none'};">
-                <div style="font-size:0.75rem; font-weight:800; color:${activeIdx === i && !activeHand.isEnded ? '#53fa5d' : '#a09bbd'}; margin-bottom:6px;">HAND ${i + 1} ${activeIdx === i && !activeHand.isEnded ? '● PLAYING' : ''}</div>
-                <div style="display:flex; gap:8px;">${(h.cards || h.playerCards || []).map(c => renderCard(c)).join('')}</div>
-                <div class="bj-score-badge ${h.score > 21 || h.playerScore > 21 ? 'bust' : ''}" style="margin-top:6px;">${h.score !== undefined ? h.score : h.playerScore}</div>
-              </div>
-            `).join('')}
+      const { stats, history } = data;
+      
+      const statsGrid = document.getElementById('bj-stats-grid');
+      if (statsGrid) {
+        statsGrid.innerHTML = `
+          <div style="background:rgba(255,255,255,0.05); padding:16px; border-radius:12px; text-align:center;">
+            <div style="font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase;">Games Played</div>
+            <div style="font-size:1.5rem; font-weight:bold; color:#fff;">${stats.gamesPlayed}</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.05); padding:16px; border-radius:12px; text-align:center;">
+            <div style="font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase;">Win / Loss / Push</div>
+            <div style="font-size:1.2rem; font-weight:bold; color:#fff;">
+              <span style="color:#00e676">${stats.wins}</span> / 
+              <span style="color:#ff3b30">${stats.losses}</span> / 
+              <span style="color:#a09bbd">${stats.pushes}</span>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.05); padding:16px; border-radius:12px; text-align:center;">
+            <div style="font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase;">Total Wagered</div>
+            <div style="font-size:1.5rem; font-weight:bold; color:#ffd700;">${stats.totalWagered}</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.05); padding:16px; border-radius:12px; text-align:center;">
+            <div style="font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase;">Net Profit</div>
+            <div style="font-size:1.5rem; font-weight:bold; color:${stats.netPoints >= 0 ? '#00e676' : '#ff3b30'};">
+              ${stats.netPoints > 0 ? '+' : ''}${stats.netPoints}
+            </div>
           </div>
         `;
       }
-      if (playerScoreEl) playerScoreEl.style.display = 'none';
-    } else {
-      const curHand = hands[0];
-      const cardsList = curHand.cards || curHand.playerCards || activeHand.playerCards || [];
-      const currentScore = curHand.score !== undefined ? curHand.score : (curHand.playerScore !== undefined ? curHand.playerScore : activeHand.playerScore);
 
-      if (playerCardsEl) {
-        playerCardsEl.innerHTML = cardsList.map(c => renderCard(c)).join('');
+      const rowsEl = document.getElementById('bj-history-rows');
+      if (rowsEl) {
+        rowsEl.innerHTML = history.map(g => {
+          const isWin = g.net > 0;
+          const isLoss = g.net < 0;
+          const color = isWin ? '#00e676' : isLoss ? '#ff3b30' : '#a09bbd';
+          const outcomeText = isWin ? 'WIN' : isLoss ? 'LOSS' : 'PUSH';
+          const sign = isWin ? '+' : '';
+          const dateStr = new Date(g.date).toLocaleString();
+          
+          return `
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.2s;">
+              <td style="padding:12px 8px; color:var(--text-secondary);">${dateStr}</td>
+              <td style="padding:12px 8px;">${g.bet}</td>
+              <td style="padding:12px 8px;">${g.payout}</td>
+              <td style="padding:12px 8px; font-weight:bold; color:${color};">${sign}${g.net}</td>
+              <td style="padding:12px 8px; font-weight:bold; color:${color};">${outcomeText}</td>
+            </tr>
+          `;
+        }).join('');
       }
-      if (playerScoreEl) {
-        playerScoreEl.style.display = 'block';
-        playerScoreEl.textContent = currentScore;
-        playerScoreEl.className = 'bj-score-badge' + (currentScore > 21 ? ' bust' : activeHand.outcome === 'win' || activeHand.outcome === 'blackjack' ? ' win' : '');
-      }
-    }
-
-    // Toggle Action Buttons
-    const btnHit = document.getElementById('bj-btn-hit');
-    const btnStand = document.getElementById('bj-btn-stand');
-    const btnDoubleDown = document.getElementById('bj-btn-double-down');
-    const btnSplit = document.getElementById('bj-btn-split');
-    const btnMain = document.getElementById('bj-btn-main');
-
-    const canAction = !activeHand.isEnded;
-    const curHand = hands[activeIdx] || hands[0];
-    const curCards = curHand ? (curHand.cards || curHand.playerCards || activeHand.playerCards || []) : [];
-
-    const canHit = activeHand.canHit !== undefined ? activeHand.canHit : canAction;
-    const canStand = activeHand.canStand !== undefined ? activeHand.canStand : canAction;
-    const canDouble = activeHand.canDouble !== undefined ? activeHand.canDouble : (canAction && curCards.length === 2);
-    const canSplit = activeHand.canSplit !== undefined ? activeHand.canSplit : (!activeHand.isSplit && curCards.length === 2 && (curCards[0].rank === curCards[1].rank || curCards[0].value === curCards[1].value));
-
-    if (btnHit) btnHit.disabled = !canHit;
-    if (btnStand) btnStand.disabled = !canStand;
-    if (btnDoubleDown) btnDoubleDown.disabled = !canDouble;
-    if (btnSplit) btnSplit.disabled = !canSplit;
-
-    if (btnMain) {
-      btnMain.textContent = activeHand.isEnded ? 'Deal Again' : 'Game in Progress';
-      btnMain.disabled = !activeHand.isEnded;
-    }
-
-    if (activeHand.isEnded) {
-      showResultBanner(activeHand.outcome, activeHand.totalPayout !== undefined ? activeHand.totalPayout : activeHand.payout);
+    } catch (e) {
+      console.error("Failed to load history:", e);
     }
   }
 
-  async function performAction(actionName) {
-    if (!activeHand || activeHand.isEnded) return;
-
-    // Strict client-side action validation guards: Prevent invalid action execution
-    if (actionName === 'split' && activeHand.canSplit === false) return;
-    if (actionName === 'double' && activeHand.canDouble === false) return;
-    if (actionName === 'hit' && activeHand.canHit === false) return;
-    if (actionName === 'stand' && activeHand.canStand === false) return;
-
-    const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
-    if (!token) return;
-
-    setButtonsDisabled(true);
-
-    try {
-      const res = await fetch('/api/casino/blackjack/action', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ action: actionName, handId: activeHand.handId })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.error || "Action failed.");
-        setButtonsDisabled(false);
-        return;
-      }
-
-      activeHand = data.handState;
-      if (data.new_balance !== undefined) {
-        const balanceEl = document.getElementById('bj-balance-display');
-        const centerBalanceEl = document.getElementById('bj-center-balance-val');
-        if (balanceEl) balanceEl.textContent = (data.new_balance || 0).toLocaleString();
-        if (centerBalanceEl) centerBalanceEl.textContent = (data.new_balance || 0).toLocaleString();
-        if (window.authUser) window.authUser.points = data.new_balance;
-      }
-
-      if (actionName === 'split') {
-        playSound('chip');
-        renderHandState();
-        setButtonsDisabled(false);
-        const btnDoubleDown = document.getElementById('bj-btn-double-down');
-        const btnSplit = document.getElementById('bj-btn-split');
-        if (btnDoubleDown) btnDoubleDown.disabled = true;
-        if (btnSplit) btnSplit.disabled = true; // Single split only
-      } else if (actionName === 'hit') {
-        if (activeHand.isSplit) {
-          renderHandState();
-        } else {
-          const playerCardsEl = document.getElementById('bj-player-cards');
-          const playerScoreEl = document.getElementById('bj-player-score');
-          if (playerCardsEl) playerCardsEl.innerHTML = activeHand.playerCards.map(c => renderCard(c)).join('');
-          if (playerScoreEl) {
-            playerScoreEl.textContent = activeHand.playerScore;
-            playerScoreEl.className = 'bj-score-badge' + (activeHand.playerScore > 21 ? ' bust' : '');
-          }
-        }
-        playSound('deal');
-
-        if (activeHand.isEnded) {
-          await revealDealerTurnAnimated();
-        } else {
-          setButtonsDisabled(false);
-          const btnDoubleDown = document.getElementById('bj-btn-double-down');
-          const btnSplit = document.getElementById('bj-btn-split');
-          if (btnDoubleDown) btnDoubleDown.disabled = true;
-          if (btnSplit) btnSplit.disabled = true;
-        }
-      } else if (actionName === 'stand' || actionName === 'double') {
-        if (activeHand.isSplit && !activeHand.isEnded) {
-          renderHandState();
-          playSound('deal');
-          setButtonsDisabled(false);
-          const btnDoubleDown = document.getElementById('bj-btn-double-down');
-          const btnSplit = document.getElementById('bj-btn-split');
-          if (btnDoubleDown) btnDoubleDown.disabled = true;
-          if (btnSplit) btnSplit.disabled = true;
-        } else {
-          if (actionName === 'double') {
-            const playerCardsEl = document.getElementById('bj-player-cards');
-            const playerScoreEl = document.getElementById('bj-player-score');
-            if (playerCardsEl) playerCardsEl.innerHTML = activeHand.playerCards.map(c => renderCard(c)).join('');
-            if (playerScoreEl) playerScoreEl.textContent = activeHand.playerScore;
-            playSound('deal');
-            const delay = (ms) => new Promise(res => setTimeout(res, ms));
-            await delay(400);
-          }
-          await revealDealerTurnAnimated();
-        }
-      }
-    } catch (err) {
-      console.error("Action error:", err);
-      setButtonsDisabled(false);
-    }
-  }
-
-  function doHit() { performAction('hit'); }
-  function doStand() { performAction('stand'); }
-  function doDoubleDown() { performAction('double'); }
-  function doSplit() { performAction('split'); }
-
-  function showResultBanner(outcome, payout) {
-    const overlay = document.getElementById('bj-result-overlay');
-    const titleEl = document.getElementById('bj-result-title');
-    const payoutEl = document.getElementById('bj-result-payout');
-    if (!overlay || !titleEl || !payoutEl) return;
-
-    let finalOutcome = outcome;
-
-    // Defensive score enforcement to guarantee strict rule compliance
-    if (activeHand && !activeHand.isSplit) {
-      if (activeHand.playerScore > 21) {
-        finalOutcome = 'bust';
-      } else if (activeHand.dealerScore > 21) {
-        finalOutcome = 'win';
-      } else if (activeHand.playerScore > activeHand.dealerScore) {
-        finalOutcome = 'win';
-      } else if (activeHand.playerScore < activeHand.dealerScore) {
-        finalOutcome = 'loss';
-      } else if (activeHand.playerScore === activeHand.dealerScore) {
-        finalOutcome = 'push';
-      }
-    }
-
-    if (finalOutcome === 'win' || finalOutcome === 'blackjack') {
-      titleEl.textContent = finalOutcome === 'blackjack' ? 'BLACKJACK!' : 'YOU WIN!';
-      titleEl.className = 'bj-result-title win';
-      payoutEl.textContent = `+${(payout || 0).toLocaleString()} BigD Coins`;
-    } else if (finalOutcome === 'loss' || finalOutcome === 'bust') {
-      titleEl.textContent = finalOutcome === 'bust' ? 'PLAYER BUST' : 'DEALER WINS';
-      titleEl.className = 'bj-result-title loss';
-      payoutEl.textContent = `-${currentBet.toLocaleString()} BigD Coins`;
-    } else {
-      titleEl.textContent = 'PUSH (TIE)';
-      titleEl.className = 'bj-result-title push';
-      payoutEl.textContent = `Bet Returned`;
-    }
-
-    overlay.classList.add('show');
-  }
 
   // Auto-init on DOM load if element exists
   if (document.readyState === 'loading') {

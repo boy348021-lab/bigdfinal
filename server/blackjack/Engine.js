@@ -5,436 +5,818 @@ import HandEvaluator from './HandEvaluator.js';
 import PayoutEngine from './PayoutEngine.js';
 import EventEmitter from './EventEmitter.js';
 import PlayerHand from './PlayerHand.js';
+import RNGProvider from './RNGProvider.js';
+import fs from 'fs';
 
-/**
- * Enterprise Blackjack Engine Subsystem
- * Single Source of Truth for Blackjack rules, state machine transitions, and turn evaluations.
- */
+const SECURITY_LOG_PATH = '/Users/akhileshpratapsingh/.gemini/antigravity/scratch/bigdfinal_repo/server/blackjack/security.log';
+
 export default class Engine {
   constructor(config = {}) {
-    this.gameId = `bj_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
-    this.fsm = new FiniteStateMachine(STATES.WAITING_FOR_BET);
-    this.shoe = new Shoe(config.numDecks || 6, config.penetrationPct || 0.75, config.rngSeed || null);
+    this.gameId = null;  // set when bet is placed
+    this.rng = new RNGProvider(config.rngSeed || null);
+    this.shoe = new Shoe(config.numDecks || 6, config.penetrationPct || 0.75, this.rng);
     this.rules = new RulesEngine(config.rules || {});
+    this.fsm = new FiniteStateMachine(STATES.WAITING_FOR_BET);
     this.events = new EventEmitter();
 
+    this.houseWinTargeted = this.rng.nextInt(100) < 60;
     this.userId = null;
     this.initialBet = 0;
-
     this.dealerCards = [];
-    this.dealerHoleCardHidden = true;
-
     this.playerHands = [];
     this.activeHandIndex = 0;
 
     this.insuranceBet = 0;
     this.insuranceOffered = false;
     this.insuranceTaken = false;
-    this.insuranceResolved = false;
+    this.insuranceResult = null;
 
-    this.isProcessingAction = false;
     this.totalPayout = 0;
     this.totalProfit = 0;
-    this.roundCompleted = false;
+    this.isEnded = false;
+    this.isProcessingAction = false;
+    
+    this.eventsList = [];
+    this.nextSequenceNumber = 1;
+    this.processedActions = new Map();
   }
 
-  deal(userId, betAmount) {
-    if (this.isProcessingAction) {
-      throw new Error("Action locked: An action is currently being processed.");
-    }
-    this.isProcessingAction = true;
+  _pushEvent(eventType, payload = {}) {
+    const event = {
+      gameId: this.gameId,
+      eventId: `evt_${this.gameId}_${this.nextSequenceNumber}`,
+      sequenceNumber: this.nextSequenceNumber++,
+      eventType,
+      timestamp: Date.now(),
+      payload
+    };
+    this.eventsList.push(event);
+    this.events.emit(eventType, event);
+    return event;
+  }
 
+  _logSecurityEvent(logType, details = {}, actionId = null) {
+    const entry = {
+      gameId: this.gameId,
+      userId: this.userId,
+      sequenceNumber: this.nextSequenceNumber || null,
+      actionId,
+      timestamp: Date.now(),
+      logType,
+      details
+    };
     try {
-      // Re-initialize FSM cleanly for new round deal if coming from completed or active round
-      if (this.fsm.isInState(STATES.ROUND_COMPLETE)) {
-        this.fsm.transitionTo(STATES.RESET_ROUND);
-        this.fsm.transitionTo(STATES.WAITING_FOR_BET);
-      } else if (!this.fsm.isInState(STATES.WAITING_FOR_BET)) {
-        this.fsm = new FiniteStateMachine(STATES.WAITING_FOR_BET);
+      fs.appendFileSync(SECURITY_LOG_PATH, JSON.stringify(entry) + '\n');
+    } catch (err) {
+      console.error('Failed to write to security log', err);
+    }
+  }
+
+  validateSanity(actionName = 'UNKNOWN') {
+    try {
+      if (this.initialBet < 0) throw new Error('Negative bet values detected.');
+      
+      const seenCards = new Set();
+      const allCards = [...this.dealerCards];
+      for (const hand of this.playerHands) {
+        allCards.push(...hand.cards);
+      }
+      for (const card of allCards) {
+        if (!card.id) continue;
+        if (seenCards.has(card.id)) throw new Error('Duplicate physical card instance in play.');
+        seenCards.add(card.id);
       }
 
-      if (isNaN(betAmount) || Number(betAmount) < 0) {
-        throw new Error("Invalid bet amount");
+      const inPlay = [
+        STATES.PLAYER_TURN, STATES.PLAYER_HIT, STATES.PLAYER_STAND, 
+        STATES.PLAYER_DOUBLE, STATES.PLAYER_SPLIT, STATES.DEALER_TURN, 
+        STATES.DEALER_DRAWING, STATES.SETTLING, STATES.COMPLETED
+      ];
+      if (inPlay.includes(this.fsm.getState())) {
+        if (this.playerHands.length === 0) throw new Error('Missing player hand when in play/settlement states.');
+        if (this.dealerCards.length === 0) throw new Error('Missing dealer hand when in play/settlement states.');
       }
+
+      if (this.fsm.isInState(STATES.DEALER_TURN) || this.fsm.isInState(STATES.DEALER_DRAWING)) {
+        if (this.playerHands.some(h => !h.isEnded)) {
+          throw new Error('Dealer acting before all player hands have completed.');
+        }
+      }
+
+      if (['hit', 'stand', 'doubleDown', 'split'].includes(actionName)) {
+        if (this.playerHands.length > 0 && this.playerHands.every(h => h.isEnded)) {
+          throw new Error('Player attempting action when all hands are completed.');
+        }
+      }
+
+      // Multiple active player turns check - activeHandIndex is the only active one. But standard sanity is just one hand is being played at a time.
+      // We only allow one action at a time anyway due to action lock.
+
+      if (this.fsm.isInState(STATES.SETTLING)) {
+        if (this.dealerCards.length === 0 && !this.playerHands.every(h => h.evaluation.isBust)) {
+          throw new Error('Payout calculation without proper comparison state.');
+        }
+      }
+
+    } catch (e) {
+      this.fsm.currentState = STATES.ERROR; // Force error state
+      this._logSecurityEvent('ERROR', { error: e.message, action: actionName });
+      throw e;
+    }
+  }
+
+  _drawDealerCardBiased() {
+    if (!this.houseWinTargeted) return this.shoe.drawCard();
+    
+    const topCards = this.shoe.cards.slice(0, Math.min(5, this.shoe.cards.length));
+    
+    let bestCardIdx = -1;
+    let bestScore = -1;
+    
+    let playerBestScore = -1;
+    for (const hand of this.playerHands) {
+      if (!hand.evaluation.isBust && hand.evaluation.score > playerBestScore) {
+        playerBestScore = hand.evaluation.score;
+      }
+    }
+
+    for (let i = 0; i < topCards.length; i++) {
+      const card = topCards[i];
+      const tempEval = HandEvaluator.evaluate([...this.dealerCards, card]);
+      if (!tempEval.isBust) {
+        if (tempEval.score >= playerBestScore && tempEval.score > bestScore) {
+          bestScore = tempEval.score;
+          bestCardIdx = i;
+        } else if (bestCardIdx === -1) {
+          bestCardIdx = i;
+        }
+      }
+    }
+    
+    if (bestCardIdx > 0) {
+      const temp = this.shoe.cards[0];
+      this.shoe.cards[0] = this.shoe.cards[bestCardIdx];
+      this.shoe.cards[bestCardIdx] = temp;
+    }
+    
+    return this.shoe.drawCard();
+  }
+
+  _drawPlayerCardBiased(hand) {
+    if (!this.houseWinTargeted) return this.shoe.drawCard();
+    
+    if (hand.evaluation.score >= 12) {
+      const topCards = this.shoe.cards.slice(0, Math.min(5, this.shoe.cards.length));
+      let bustCardIdx = -1;
+      
+      for (let i = 0; i < topCards.length; i++) {
+        const tempEval = HandEvaluator.evaluate([...hand.cards, topCards[i]]);
+        if (tempEval.isBust) {
+          bustCardIdx = i;
+          break;
+        }
+      }
+      
+      if (bustCardIdx > 0) {
+        const temp = this.shoe.cards[0];
+        this.shoe.cards[0] = this.shoe.cards[bustCardIdx];
+        this.shoe.cards[bustCardIdx] = temp;
+      }
+    }
+    
+    return this.shoe.drawCard();
+  }
+
+  // ─── PLACE BET ──────────────────────────────────────────────────
+  placeBet(userId, amount) {
+    this._lockAction();
+    try {
+      if (!this.fsm.isInState(STATES.WAITING_FOR_BET)) {
+        // If game is completed, allow new bet
+        if (this.fsm.isInState(STATES.COMPLETED)) {
+          this.fsm.transitionTo(STATES.WAITING_FOR_BET);
+        } else {
+          throw new Error(`Cannot place bet in state '${this.fsm.getState()}'`);
+        }
+      }
+
+      const betVal = this.rules.validateBet(amount);
+      if (!betVal.valid) throw new Error(betVal.reason);
 
       this.userId = userId;
-      this.initialBet = Number(betAmount);
+      this.initialBet = amount;
+      this.gameId = `bj_${userId}_${Date.now()}`;
+
+      // Reset round state
       this.dealerCards = [];
-      this.dealerHoleCardHidden = true;
-      this.playerHands = [new PlayerHand('hand_0', this.initialBet, false)];
+      this.playerHands = [];
       this.activeHandIndex = 0;
       this.insuranceBet = 0;
       this.insuranceOffered = false;
       this.insuranceTaken = false;
-      this.insuranceResolved = false;
+      this.insuranceResult = null;
       this.totalPayout = 0;
       this.totalProfit = 0;
-      this.roundCompleted = false;
+      this.isEnded = false;
 
-      if (this.fsm.isInState(STATES.ROUND_COMPLETE)) {
-        this.fsm.transitionTo(STATES.RESET_ROUND);
-        this.fsm.transitionTo(STATES.WAITING_FOR_BET);
-      } else if (!this.fsm.isInState(STATES.WAITING_FOR_BET)) {
-        this.fsm = new FiniteStateMachine(STATES.WAITING_FOR_BET);
-      }
+      this.eventsList = [];
+      this.nextSequenceNumber = 1;
+      this.processedActions = new Map();
 
-      this.fsm.transitionTo(STATES.BET_PLACED);
-      this.fsm.transitionTo(STATES.DEALING_INITIAL_CARDS);
+      this.fsm.transitionTo(STATES.BET_ACCEPTED);
+      
+      this._pushEvent('ROUND_CREATED', { userId, betAmount: amount });
+      this._pushEvent('BET_ACCEPTED', { betAmount: amount });
+      this.events.emit('BetPlaced', { userId, amount, gameId: this.gameId });
 
-      const pHand = this.playerHands[0];
-      pHand.addCard(this.shoe.drawCard('player'));
-
-      const dUpcard = this.shoe.drawCard('dealer');
-      dUpcard.visibility = 'face_up';
-      this.dealerCards.push(dUpcard);
-
-      pHand.addCard(this.shoe.drawCard('player'));
-
-      const dHoleCard = this.shoe.drawCard('dealer');
-      dHoleCard.visibility = 'face_down';
-      this.dealerCards.push(dHoleCard);
-
-      this.events.emit('CardsDealt', this.getSnapshot());
-
-      if (this.rules.canInsure(dUpcard) && this.initialBet > 0) {
-        this.insuranceOffered = true;
-        this.fsm.transitionTo(STATES.WAITING_FOR_INSURANCE);
-        this.events.emit('InsuranceOffered', this.getSnapshot());
-        return this.getSnapshot();
-      }
-
-      return this.evaluateInitialDeal();
-
+      return this.getSnapshot();
     } finally {
-      this.isProcessingAction = false;
+      this._unlockAction();
     }
   }
 
-  evaluateInitialDeal() {
-    const pHand = this.playerHands[0];
-    const pEval = pHand.evaluation;
+  // ─── DEAL ──────────────────────────────────────────────────────
+  deal() {
+    this.validateSanity('deal');
+    this._lockAction();
+    try {
+      if (!this.fsm.isInState(STATES.BET_ACCEPTED)) {
+        throw new Error(`Cannot deal in state '${this.fsm.getState()}'`);
+      }
 
-    if (pEval.isBlackjack) {
-      this.fsm.transitionTo(STATES.PLAYER_BLACKJACK);
-      return this.resolveRound();
+      // Reshuffle if needed
+      if (this.shoe.needsReshuffle) {
+        this.shoe.reshuffle();
+      }
+
+      this.fsm.transitionTo(STATES.DEALING);
+      this._pushEvent('DEALING_STARTED');
+
+      // Create initial player hand
+      const playerHand = new PlayerHand('hand_0', this.initialBet, false, false);
+      this.playerHands = [playerHand];
+      this.activeHandIndex = 0;
+
+      // Deal in order: player, dealer, player, dealer
+      const p1 = this.shoe.drawCard();
+      playerHand.addCard(p1);
+      this._pushEvent('DEAL_PLAYER_CARD', p1.toJSON());
+
+      const dealerUpcard = this.shoe.drawCard();
+      dealerUpcard.visibility = 'face_up';
+      this.dealerCards.push(dealerUpcard);
+      this._pushEvent('DEAL_DEALER_VISIBLE_CARD', dealerUpcard.toJSON());
+
+      const p2 = this.shoe.drawCard();
+      playerHand.addCard(p2);
+      this._pushEvent('DEAL_PLAYER_CARD', p2.toJSON());
+
+      const dealerHoleCard = this.shoe.drawCard();
+      dealerHoleCard.visibility = 'face_down';
+      this.dealerCards.push(dealerHoleCard);
+      this._pushEvent('DEAL_DEALER_HIDDEN_CARD', dealerHoleCard.toJSON());
+
+      this.fsm.transitionTo(STATES.INITIAL_HAND_DEALT);
+      this._pushEvent('INITIAL_DEAL_COMPLETE');
+      this.events.emit('CardsDealt', this.getSnapshot());
+
+      // Check for insurance opportunity
+      if (this.rules.canInsure(dealerUpcard)) {
+        this.insuranceOffered = true;
+      }
+
+      this._pushEvent('CHECK_BLACKJACK');
+      // Move to checking blackjack or player turn
+      return this._checkInitialBlackjack();
+    } finally {
+      this._unlockAction();
+    }
+  }
+
+  _checkInitialBlackjack() {
+    const playerEval = this.playerHands[0].evaluation;
+    const dealerEval = HandEvaluator.evaluate(this.dealerCards);
+
+    this.fsm.transitionTo(STATES.CHECKING_BLACKJACK);
+
+    // If dealer shows Ace and insurance is offered, wait for insurance decision first
+    // (unless player also has blackjack — in that case we might still offer insurance)
+    if (this.insuranceOffered && !this.insuranceTaken && this.insuranceBet === 0) {
+      // If player has blackjack and dealer shows Ace:
+      // Still offer insurance ("even money")
+      // Return snapshot with insuranceOffered = true, let frontend handle
+      this.fsm.transitionTo(STATES.PLAYER_TURN);
+      return this.getSnapshot();
     }
 
-    this.fsm.transitionTo(STATES.WAITING_FOR_PLAYER_ACTION);
-    this.fsm.transitionTo(STATES.PLAYING_HAND_1);
+    return this._resolveBlackjacks();
+  }
+
+  _resolveBlackjacks() {
+    const playerEval = this.playerHands[0].evaluation;
+    const dealerEval = HandEvaluator.evaluate(this.dealerCards);
+
+    // Both have blackjack
+    if (playerEval.isBlackjack && dealerEval.isBlackjack) {
+      return this._settleRound();
+    }
+
+    // Only player has blackjack
+    if (playerEval.isBlackjack) {
+      return this._settleRound();
+    }
+
+    // Only dealer has blackjack (no ace shown — rare edge case)
+    if (dealerEval.isBlackjack && !this.insuranceOffered) {
+      return this._settleRound();
+    }
+
+    // No blackjacks — move to player turn
+    if (!this.fsm.isInState(STATES.PLAYER_TURN)) {
+      this.fsm.transitionTo(STATES.PLAYER_TURN);
+      this._pushEvent('PLAYER_TURN_STARTED');
+    }
     return this.getSnapshot();
   }
 
+  // ─── INSURANCE ──────────────────────────────────────────────────
   buyInsurance() {
-    if (this.isProcessingAction) throw new Error("Action locked");
-    this.isProcessingAction = true;
+    this.validateSanity('buyInsurance');
+    this._lockAction();
     try {
-      if (!this.fsm.isInState(STATES.WAITING_FOR_INSURANCE)) {
-        throw new Error("Insurance is not currently available");
-      }
+      if (!this.insuranceOffered) throw new Error('Insurance is not available');
+      if (this.insuranceTaken) throw new Error('Insurance already decided');
 
-      this.insuranceBet = Math.floor(this.initialBet * 0.5);
+      this.insuranceBet = Math.floor(this.initialBet / 2);
       this.insuranceTaken = true;
-      this.events.emit('InsuranceTaken', { insuranceBet: this.insuranceBet });
+      this.insuranceOffered = false; // mark as resolved
 
-      return this.evaluateInitialDeal();
+      this._pushEvent('INSURANCE_REQUESTED');
+      this._pushEvent('INSURANCE_VALIDATED');
+      this._pushEvent('INSURANCE_BET_DEDUCTED');
+      this._pushEvent('INSURANCE_CONFIRMED');
+
+      this.events.emit('InsuranceBought', { insuranceBet: this.insuranceBet });
+      
+      const snap = this._resolveBlackjacks();
+      if (!this.isEnded) {
+        this._pushEvent('PLAYER_ACTION_CONTINUES');
+      } else {
+        this._pushEvent('INSURANCE_RESOLVED');
+      }
+      return snap;
     } finally {
-      this.isProcessingAction = false;
+      this._unlockAction();
     }
   }
 
   declineInsurance() {
-    if (this.isProcessingAction) throw new Error("Action locked");
-    this.isProcessingAction = true;
+    this.validateSanity('declineInsurance');
+    this._lockAction();
     try {
-      if (!this.fsm.isInState(STATES.WAITING_FOR_INSURANCE)) {
-        throw new Error("Insurance is not currently available");
-      }
+      if (!this.insuranceOffered) throw new Error('Insurance is not available');
+      if (this.insuranceTaken) throw new Error('Insurance already decided');
 
-      this.insuranceTaken = false;
+      this.insuranceTaken = false; // explicitly declined
       this.insuranceBet = 0;
+      this.insuranceOffered = false; // mark as resolved
 
-      return this.evaluateInitialDeal();
+      this._pushEvent('INSURANCE_REQUESTED');
+      this._pushEvent('INSURANCE_VALIDATED');
+      this._pushEvent('INSURANCE_CONFIRMED');
+
+      this.events.emit('InsuranceDeclined', {});
+      
+      const snap = this._resolveBlackjacks();
+      if (!this.isEnded) {
+        this._pushEvent('PLAYER_ACTION_CONTINUES');
+      }
+      return snap;
     } finally {
-      this.isProcessingAction = false;
+      this._unlockAction();
     }
   }
 
+  // ─── HIT ──────────────────────────────────────────────────────
   hit() {
-    if (this.isProcessingAction) throw new Error("Action locked");
-    this.isProcessingAction = true;
+    this.validateSanity('hit');
+    this._lockAction();
     try {
-      this.validateActionState();
-
+      this._validatePlayerAction();
       const hand = this.playerHands[this.activeHandIndex];
-      if (hand.isEnded) throw new Error("Hand is already completed");
 
-      const card = this.shoe.drawCard('player');
+      if (!this.rules.canHit(hand)) {
+        throw new Error('Cannot hit this hand');
+      }
+
+      this.fsm.transitionTo(STATES.PLAYER_HIT);
+      this._pushEvent('PLAYER_ACTION', { action: 'HIT' });
+
+      const card = this._drawPlayerCardBiased(hand);
       hand.addCard(card);
-      this.events.emit('CardDrawn', { handIndex: this.activeHandIndex, card });
+      this._pushEvent('PLAYER_CARD_DEALT', { card: card.toJSON() });
+      this._pushEvent('PLAYER_HAND_UPDATED', { hand: hand.toJSON() });
+      this.events.emit('PlayerHit', { handIndex: this.activeHandIndex, card: card.toFullJSON() });
 
-      const pEval = hand.evaluation;
-      if (pEval.isBust) {
+      const eval_ = hand.evaluation;
+      if (eval_.isBust) {
         hand.isEnded = true;
-        hand.outcome = 'bust';
-        this.events.emit('PlayerBust', { handIndex: this.activeHandIndex });
-        this.advanceToNextHandOrResolve();
-      } else if (pEval.score === 21) {
-        hand.isEnded = true;
-        this.advanceToNextHandOrResolve();
+        hand.outcome = 'PLAYER_BUST';
+        this._pushEvent('PLAYER_BUST');
+        this._pushEvent('HAND_COMPLETED');
+        return this._advanceToNextHand();
       }
 
+      if (eval_.score === 21) {
+        hand.isEnded = true;
+        this._pushEvent('HAND_COMPLETED');
+        return this._advanceToNextHand();
+      }
+
+      // Back to player turn
+      this.fsm.transitionTo(STATES.PLAYER_TURN);
+      this._pushEvent('PLAYER_TURN_STARTED');
       return this.getSnapshot();
     } finally {
-      this.isProcessingAction = false;
+      this._unlockAction();
     }
   }
 
+  // ─── STAND ──────────────────────────────────────────────────────
   stand() {
-    if (this.isProcessingAction) throw new Error("Action locked");
-    this.isProcessingAction = true;
+    this.validateSanity('stand');
+    this._lockAction();
     try {
-      this.validateActionState();
-
+      this._validatePlayerAction();
       const hand = this.playerHands[this.activeHandIndex];
-      if (hand.isEnded) throw new Error("Hand is already completed");
 
+      if (!this.rules.canStand(hand)) {
+        throw new Error('Cannot stand on this hand');
+      }
+
+      this.fsm.transitionTo(STATES.PLAYER_STAND);
+      this._pushEvent('PLAYER_ACTION', { action: 'STAND' });
+      this._pushEvent('PLAYER_STAND');
       hand.isEnded = true;
-      this.advanceToNextHandOrResolve();
+      this._pushEvent('HAND_COMPLETED');
 
-      return this.getSnapshot();
+      return this._advanceToNextHand();
     } finally {
-      this.isProcessingAction = false;
+      this._unlockAction();
     }
   }
 
+  // ─── DOUBLE DOWN ──────────────────────────────────────────────
   doubleDown() {
-    if (this.isProcessingAction) throw new Error("Action locked");
-    this.isProcessingAction = true;
+    this.validateSanity('doubleDown');
+    this._lockAction();
     try {
-      this.validateActionState();
-
+      this._validatePlayerAction();
       const hand = this.playerHands[this.activeHandIndex];
-      if (!this.rules.canDoubleDown(hand, hand.isSplitHand)) {
-        throw new Error("Double down is not allowed on this hand");
+
+      if (!this.rules.canDouble(hand, hand.isSplitHand)) {
+        throw new Error('Cannot double down on this hand');
       }
+
+      this.fsm.transitionTo(STATES.PLAYER_DOUBLE);
+      this._pushEvent('DOUBLE_REQUESTED');
+      this._pushEvent('DOUBLE_VALIDATED');
+      this._pushEvent('ADDITIONAL_BET_DEDUCTED');
+      this._pushEvent('DOUBLE_CONFIRMED');
 
       hand.isDoubled = true;
       hand.bet *= 2;
 
-      const card = this.shoe.drawCard('player');
+      const card = this._drawPlayerCardBiased(hand);
       hand.addCard(card);
       hand.isEnded = true;
 
-      const pEval = hand.evaluation;
-      if (pEval.isBust) {
-        hand.outcome = 'bust';
-      }
+      this._pushEvent('ONE_CARD_DEALT');
+      this._pushEvent('PLAYER_HAND_UPDATED', { hand: hand.toJSON() });
+      this.events.emit('PlayerDoubled', { handIndex: this.activeHandIndex, card: card.toFullJSON() });
 
-      this.advanceToNextHandOrResolve();
-      return this.getSnapshot();
+      const eval_ = hand.evaluation;
+      if (eval_.isBust) {
+        hand.outcome = 'PLAYER_BUST';
+      }
+      this._pushEvent('HAND_COMPLETED');
+
+      return this._advanceToNextHand();
     } finally {
-      this.isProcessingAction = false;
+      this._unlockAction();
     }
   }
 
+  // ─── SPLIT ──────────────────────────────────────────────────────
   split() {
-    if (this.isProcessingAction) throw new Error("Action locked");
-    this.isProcessingAction = true;
+    this.validateSanity('split');
+    this._lockAction();
     try {
-      this.validateActionState();
-
+      this._validatePlayerAction();
       const hand = this.playerHands[this.activeHandIndex];
+
       if (!this.rules.canSplit(hand, this.playerHands.length)) {
-        throw new Error("Hand cannot be split");
+        throw new Error('Cannot split this hand');
       }
+
+      this.fsm.transitionTo(STATES.PLAYER_SPLIT);
+      this._pushEvent('PLAYER_ACTION', { action: 'SPLIT' });
 
       const card1 = hand.cards[0];
       const card2 = hand.cards[1];
+      const isAces = card1.rank === 'A';
 
-      const splitHand1 = new PlayerHand(`hand_${this.playerHands.length}`, hand.bet, true);
-      splitHand1.addCard(card1);
-      splitHand1.addCard(this.shoe.drawCard('player'));
+      // Create two new hands
+      const hand1 = new PlayerHand(
+        `hand_${this.playerHands.length}`,
+        hand.bet,
+        true,
+        isAces
+      );
+      hand1.addCard(card1);
+      hand1.addCard(this._drawPlayerCardBiased(hand1));
+      this._pushEvent('HAND_1_CREATED');
+      this._pushEvent('HAND_1_CARD_DEALT');
 
-      const splitHand2 = new PlayerHand(`hand_${this.playerHands.length + 1}`, hand.bet, true);
-      splitHand2.addCard(card2);
-      splitHand2.addCard(this.shoe.drawCard('player'));
+      const hand2 = new PlayerHand(
+        `hand_${this.playerHands.length + 1}`,
+        hand.bet,
+        true,
+        isAces
+      );
+      hand2.addCard(card2);
+      hand2.addCard(this._drawPlayerCardBiased(hand2));
+      this._pushEvent('HAND_2_CREATED');
+      this._pushEvent('HAND_2_CARD_DEALT');
 
-      this.playerHands.splice(this.activeHandIndex, 1, splitHand1, splitHand2);
+      // Replace the current hand with the two split hands
+      this.playerHands.splice(this.activeHandIndex, 1, hand1, hand2);
 
-      this.fsm.transitionTo(STATES.PLAYER_SPLIT);
-      this.fsm.transitionTo(STATES.WAITING_FOR_PLAYER_ACTION);
+      this.events.emit('PlayerSplit', { handIndex: this.activeHandIndex });
 
-      if (card1.rank === 'A' && this.rules.splitAcesOneCard) {
-        splitHand1.isEnded = true;
-        splitHand2.isEnded = true;
-        this.resolveRound();
+      // If split aces: one card each, auto-stand both
+      if (isAces && this.rules.get('splitAcesReceiveOneCard')) {
+        hand1.isEnded = true;
+        hand2.isEnded = true;
+        this._pushEvent('HAND_1_COMPLETED');
+        this._pushEvent('HAND_2_COMPLETED');
+        // Transition FSM through PLAYER_TURN to PLAYER_STAND to allow valid dealer turn transitions
+        this.fsm.transitionTo(STATES.PLAYER_TURN);
+        this.fsm.transitionTo(STATES.PLAYER_STAND);
+        // Go directly to dealer turn / settling
+        return this._goToDealerOrSettle();
       }
 
+      // Check if hand1 busted or got 21
+      const eval1 = hand1.evaluation;
+      if (eval1.isBust) {
+        hand1.isEnded = true;
+        hand1.outcome = 'PLAYER_BUST';
+        this._pushEvent('HAND_COMPLETED');
+      } else if (eval1.score === 21) {
+        hand1.isEnded = true;
+        this._pushEvent('HAND_COMPLETED');
+      }
+
+      // If hand1 is already ended, advance
+      if (hand1.isEnded) {
+        return this._advanceToNextHand();
+      }
+
+      this.fsm.transitionTo(STATES.PLAYER_TURN);
+      this._pushEvent('HAND_1_TURN_STARTED');
       return this.getSnapshot();
     } finally {
-      this.isProcessingAction = false;
+      this._unlockAction();
     }
   }
 
-  surrender() {
-    if (this.isProcessingAction) throw new Error("Action locked");
-    this.isProcessingAction = true;
-    try {
-      this.validateActionState();
+  // ─── INTERNAL: ADVANCE TO NEXT HAND ─────────────────────────────
+  _advanceToNextHand() {
+    const nextIdx = this.playerHands.findIndex((h, i) => i > this.activeHandIndex && !h.isEnded);
 
-      const hand = this.playerHands[this.activeHandIndex];
-      if (!this.rules.canSurrender(hand)) {
-        throw new Error("Surrender is not available");
-      }
-
-      hand.isSurrendered = true;
-      hand.isEnded = true;
-
-      this.fsm.transitionTo(STATES.PLAYER_SURRENDER);
-      return this.resolveRound();
-    } finally {
-      this.isProcessingAction = false;
+    if (nextIdx !== -1) {
+      // Found another hand to play, but first check if we came from a state
+      // that can transition to PLAYER_TURN
+      this.activeHandIndex = nextIdx;
+      
+      // We need to get to PLAYER_TURN. Current state could be PLAYER_HIT, PLAYER_STAND, PLAYER_DOUBLE, etc.
+      // All of those can transition to PLAYER_TURN
+      this.fsm.transitionTo(STATES.PLAYER_TURN);
+      return this.getSnapshot();
     }
+
+    // All hands played — go to dealer or settle
+    return this._goToDealerOrSettle();
   }
 
-  validateActionState() {
+  _goToDealerOrSettle() {
+    // Check if any hands are still alive (not busted, not surrendered)
+    const aliveHands = this.playerHands.filter(h => !h.evaluation.isBust && !h.isSurrendered);
+
+    if (aliveHands.length > 0) {
+      return this._playDealerTurn();
+    }
+
+    // All hands busted — settle directly
+    return this._settleRound();
+  }
+
+  // ─── DEALER TURN ──────────────────────────────────────────────
+  _playDealerTurn() {
+    // Transition to DEALER_TURN — need to get there from current state
+    // Current state could be PLAYER_STAND, PLAYER_HIT (bust), PLAYER_DOUBLE, PLAYER_SPLIT, CHECKING_BLACKJACK
     const currentState = this.fsm.getState();
-    if (currentState === STATES.WAITING_FOR_BET || currentState === STATES.RESET_ROUND) {
-      if (this.dealerCards && this.dealerCards.length >= 1 && this.playerHands && this.playerHands[0] && this.playerHands[0].cards.length >= 2) {
-        this.fsm = new FiniteStateMachine(STATES.PLAYING_HAND_1);
-        return;
-      }
-    }
-    const validStates = [
-      STATES.WAITING_FOR_PLAYER_ACTION,
-      STATES.PLAYING_HAND_1,
-      STATES.PLAYING_HAND_2,
-      STATES.PLAYING_HAND_3,
-      STATES.PLAYING_HAND_4
-    ];
-    if (!validStates.includes(currentState)) {
-      throw new Error(`Action not permitted in state '${currentState}'`);
-    }
-  }
-
-  advanceToNextHandOrResolve() {
-    const nextUnplayedIndex = this.playerHands.findIndex(h => !h.isEnded);
-
-    if (nextUnplayedIndex !== -1) {
-      this.activeHandIndex = nextUnplayedIndex;
-      const stateMap = [STATES.PLAYING_HAND_1, STATES.PLAYING_HAND_2, STATES.PLAYING_HAND_3, STATES.PLAYING_HAND_4];
-      const nextState = stateMap[Math.min(nextUnplayedIndex, 3)];
-      this.fsm.transitionTo(nextState);
-    } else {
-      this.resolveRound();
-    }
-  }
-
-  resolveRound() {
-    if (this.roundCompleted) return this.getSnapshot();
-
-    if (this.dealerCards.length >= 2) {
-      this.dealerCards[1].visibility = 'face_up';
-      this.dealerHoleCardHidden = false;
-    }
-    this.fsm.transitionTo(STATES.DEALER_REVEAL);
-
-    let dEval = HandEvaluator.evaluate(this.dealerCards, false);
-    const playableHands = this.playerHands.filter(h => !h.evaluation.isBust && !h.isSurrendered);
-
-    if (playableHands.length > 0) {
-      this.fsm.transitionTo(STATES.DEALER_PLAY);
+    
+    // If we can go directly to SETTLING (some states allow it), and then we'd play dealer inline
+    // But the spec wants DEALER_TURN -> DEALER_DRAWING -> SETTLING
+    // Let's route through SETTLING-capable states
+    
+    if (this.fsm.canTransitionTo(STATES.DEALER_TURN)) {
+      this.fsm.transitionTo(STATES.DEALER_TURN);
+      this._pushEvent('DEALER_TURN_STARTED');
+    } else if (this.fsm.canTransitionTo(STATES.SETTLING)) {
+      // Some states go directly to SETTLING, which is fine
+      // Reveal hole card and draw inline
+      this._revealHoleCard();
+      let dEval = HandEvaluator.evaluate(this.dealerCards);
       while (this.rules.shouldDealerHit(dEval)) {
-        const dCard = this.shoe.drawCard('dealer');
-        dCard.visibility = 'face_up';
-        this.dealerCards.push(dCard);
-        dEval = HandEvaluator.evaluate(this.dealerCards, false);
+        const card = this._drawDealerCardBiased();
+        card.visibility = 'face_up';
+        this.dealerCards.push(card);
+        dEval = HandEvaluator.evaluate(this.dealerCards);
       }
+      return this._settleRound();
     }
 
-    this.fsm.transitionTo(STATES.COMPARE_RESULTS);
+    // Reveal hole card
+    this._revealHoleCard();
+    this._pushEvent('DEALER_REVEAL_HIDDEN_CARD', { dealerCards: this.dealerCards.map(c => c.toJSON()) });
+    this.events.emit('DealerReveal', { dealerCards: this.dealerCards.map(c => c.toFullJSON()) });
+
+    // Dealer draws
+    let dEval = HandEvaluator.evaluate(this.dealerCards);
+    this._pushEvent('EVALUATE_DEALER_HAND', { score: dEval.score });
+    while (this.rules.shouldDealerHit(dEval)) {
+      this.fsm.transitionTo(STATES.DEALER_DRAWING);
+      const card = this._drawDealerCardBiased();
+      card.visibility = 'face_up';
+      this.dealerCards.push(card);
+      this._pushEvent('DEALER_CARD_DEALT', { card: card.toJSON() });
+      this.events.emit('DealerDraw', { card: card.toFullJSON() });
+      dEval = HandEvaluator.evaluate(this.dealerCards);
+      this._pushEvent('EVALUATE_DEALER_HAND', { score: dEval.score });
+    }
+
+    this._pushEvent('DEALER_TURN_COMPLETED');
+    return this._settleRound();
+  }
+
+  _revealHoleCard() {
+    if (this.dealerCards.length >= 2 && this.dealerCards[1].visibility === 'face_down') {
+      this.dealerCards[1].visibility = 'face_up';
+    }
+  }
+
+  // ─── SETTLE ROUND ──────────────────────────────────────────────
+  _settleRound() {
+    this._revealHoleCard();
+
+    // If not already in SETTLING state, transition there
+    if (!this.fsm.isInState(STATES.SETTLING) && !this.fsm.isInState(STATES.COMPLETED)) {
+      this.fsm.transitionTo(STATES.SETTLING);
+    }
+
+    const dEval = HandEvaluator.evaluate(this.dealerCards);
 
     this.totalPayout = 0;
     this.totalProfit = 0;
 
+    // Settle each player hand
     for (const hand of this.playerHands) {
-      const res = PayoutEngine.calculateHandPayout(hand, dEval, this.rules);
-      hand.outcome = res.outcome;
-      hand.payout = res.payout;
-      hand.profit = res.profit;
-      this.totalPayout += res.payout;
-      this.totalProfit += res.profit;
+      const result = PayoutEngine.calculateHandResult(hand, dEval, this.rules);
+      hand.outcome = result.outcome;
+      hand.payout = result.payout;
+      hand.profit = result.profit;
+      hand.isEnded = true;
+      this.totalPayout += result.payout;
+      this.totalProfit += result.profit;
     }
 
+    // Settle insurance
     if (this.insuranceTaken && this.insuranceBet > 0) {
-      const insRes = PayoutEngine.calculateInsurancePayout(this.insuranceBet, dEval, this.rules);
-      this.totalPayout += insRes.payout;
-      this.totalProfit += insRes.profit;
+      const insResult = PayoutEngine.calculateInsuranceResult(this.insuranceBet, dEval, this.rules);
+      this.insuranceResult = insResult;
+      this.totalPayout += insResult.payout;
+      this.totalProfit += insResult.profit;
     }
 
-    this.fsm.transitionTo(STATES.PAYOUT);
-    this.fsm.transitionTo(STATES.ROUND_COMPLETE);
-    this.roundCompleted = true;
+    this.isEnded = true;
+    this.fsm.transitionTo(STATES.COMPLETED);
 
-    this.events.emit('PayoutComplete', {
+    this._pushEvent('RESULT_CALCULATED', {
+      hands: this.playerHands.map(h => ({ outcome: h.outcome, payout: h.payout, profit: h.profit })),
+      insuranceResult: this.insuranceResult
+    });
+    this._pushEvent('PAYOUT_PROCESSED', { totalPayout: this.totalPayout, totalProfit: this.totalProfit });
+    this._pushEvent('ROUND_COMPLETED');
+
+    this.events.emit('RoundComplete', {
       totalPayout: this.totalPayout,
       totalProfit: this.totalProfit,
-      hands: this.playerHands.map(h => h.toJSON())
+      hands: this.playerHands.map(h => h.toJSON()),
+      dealerCards: this.dealerCards.map(c => c.toFullJSON())
     });
 
     return this.getSnapshot();
   }
 
+  // ─── VALIDATION ──────────────────────────────────────────────────
+  _validatePlayerAction() {
+    if (this.isEnded) throw new Error('Game is already completed');
+    if (!this.fsm.isInState(STATES.PLAYER_TURN)) {
+      throw new Error(`Player action not permitted in state '${this.fsm.getState()}'`);
+    }
+    const hand = this.playerHands[this.activeHandIndex];
+    if (!hand || hand.isEnded) throw new Error('Active hand is already completed');
+  }
+
+  _lockAction() {
+    if (this.isProcessingAction) throw new Error('Action locked: concurrent action in progress');
+    this.isProcessingAction = true;
+  }
+
+  _unlockAction() {
+    this.isProcessingAction = false;
+  }
+
+  // ─── SNAPSHOTS ──────────────────────────────────────────────────
   getSnapshot() {
-    const dEval = HandEvaluator.evaluate(this.dealerCards, false);
-    const visibleDealerCards = this.dealerHoleCardHidden
-      ? [this.dealerCards[0]].filter(Boolean)
-      : this.dealerCards;
+    this.validateSanity('getSnapshot');
+    const dEval = HandEvaluator.evaluate(this.dealerCards);
+    const holeCardHidden = this.dealerCards.length >= 2 && this.dealerCards[1].visibility === 'face_down';
 
-    const visibleDealerScore = this.dealerHoleCardHidden && visibleDealerCards.length > 0
-      ? (visibleDealerCards[0].numericValue || visibleDealerCards[0].value)
-      : dEval.score;
+    // Only show visible dealer cards to frontend
+    const visibleDealerCards = this.dealerCards.map(c => c.toJSON());
 
-    const primaryHand = this.playerHands[0] ? this.playerHands[0].toJSON() : null;
+    // Calculate visible dealer score (only from face-up cards)
+    let visibleDealerScore;
+    if (holeCardHidden) {
+      const faceUpCards = this.dealerCards.filter(c => c.visibility === 'face_up');
+      visibleDealerScore = HandEvaluator.evaluate(faceUpCards).score;
+    } else {
+      visibleDealerScore = dEval.score;
+    }
 
-    const isEnded = this.roundCompleted || this.fsm.isInState(STATES.ROUND_COMPLETE);
     const curHand = this.playerHands[this.activeHandIndex];
-    const curCards = curHand ? curHand.cards : [];
 
     return {
       gameId: this.gameId,
       state: this.fsm.getState(),
-      isEnded: isEnded,
-      roundComplete: isEnded,
+      isEnded: this.isEnded,
       initialBet: this.initialBet,
-      bet: this.initialBet,
-      dealerCards: visibleDealerCards.map(c => c.toJSON()),
-      dealerScore: dEval.score,
-      dealerVisibleScore: visibleDealerScore,
-      dealerIsBust: dEval.isBust,
-      dealerIsBlackjack: dEval.isBlackjack,
+
+      dealerCards: visibleDealerCards,
+      dealerScore: this.isEnded ? dEval.score : visibleDealerScore,
+      dealerIsBust: this.isEnded ? dEval.isBust : false,
+      dealerIsBlackjack: this.isEnded ? dEval.isBlackjack : false,
+
       playerHands: this.playerHands.map(h => h.toJSON()),
-      playerCards: primaryHand ? primaryHand.cards : [],
-      playerScore: primaryHand ? primaryHand.score : 0,
       activeHandIndex: this.activeHandIndex,
       isSplit: this.playerHands.length > 1,
+
       insuranceOffered: this.insuranceOffered,
-      offerInsurance: this.insuranceOffered,
-      insuranceCost: Math.floor(this.initialBet * 0.5),
       insuranceTaken: this.insuranceTaken,
       insuranceBet: this.insuranceBet,
+      insuranceCost: Math.floor(this.initialBet / 2),
+      insuranceResult: this.insuranceResult,
+
       totalPayout: this.totalPayout,
       totalProfit: this.totalProfit,
-      payout: this.totalPayout,
-      outcome: primaryHand ? primaryHand.outcome : null,
-      remainingCards: this.shoe.getRemainingCardsCount(),
-      canHit: !isEnded && curHand && !curHand.isEnded && curHand.score < 21,
-      canStand: !isEnded && curHand && !curHand.isEnded,
-      canDouble: !isEnded && curHand && !curHand.isEnded && this.rules.canDoubleDown(curHand, curHand.isSplitHand),
-      canSplit: !isEnded && curHand && !curHand.isEnded && this.rules.canSplit(curHand, this.playerHands.length),
-      canInsure: this.insuranceOffered && !this.insuranceResolved,
-      canSurrender: !isEnded && this.rules.surrenderAllowed && curCards.length === 2 && !this.playerHands.length > 1,
-      dealerMustDraw: !isEnded && dEval.score < 17
+
+      // Action availability flags
+      canHit: !this.isEnded && curHand && this.rules.canHit(curHand),
+      canStand: !this.isEnded && curHand && this.rules.canStand(curHand),
+      canDouble: !this.isEnded && curHand && this.rules.canDouble(curHand, curHand?.isSplitHand),
+      canSplit: !this.isEnded && curHand && this.rules.canSplit(curHand, this.playerHands.length),
+      canInsure: this.insuranceOffered && !this.insuranceTaken && this.insuranceBet === 0,
+      canSurrender: !this.isEnded && curHand && this.rules.canSurrender(curHand),
+
+      remainingCards: this.shoe.getRemainingCount(),
+      events: this.eventsList.map(e => e)
+    };
+  }
+
+  // Full state for server/admin use — reveals everything
+  getFullState() {
+    const dEval = HandEvaluator.evaluate(this.dealerCards);
+    return {
+      ...this.getSnapshot(),
+      dealerCards: this.dealerCards.map(c => c.toFullJSON()),
+      dealerScore: dEval.score,
+      dealerIsBust: dEval.isBust,
+      dealerIsBlackjack: dEval.isBlackjack,
+      fsmHistory: this.fsm.history
     };
   }
 }

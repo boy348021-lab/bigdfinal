@@ -1,93 +1,75 @@
-import Card from './Card.js';
-import RNGProvider from './RNGProvider.js';
+import Card, { SUITS, RANKS } from './Card.js';
 
-const SUITS = ['♥', '♦', '♣', '♠'];
-const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
-
-/**
- * Shoe Implementation
- * Multi-deck shoe supporting 1, 2, 4, 6, 8 decks.
- * Enforces penetration cut card, burn card, discard pile, automatic reshuffle.
- * Validates zero card duplication.
- */
 export default class Shoe {
-  constructor(numDecks = 6, penetrationPct = 0.75, rngSeed = null) {
-    if (![1, 2, 4, 6, 8].includes(numDecks)) {
-      throw new Error(`Invalid shoe size: ${numDecks}. Must be 1, 2, 4, 6, or 8 decks.`);
-    }
-
+  constructor(numDecks = 6, penetrationPct = 0.75, rng) {
     this.numDecks = numDecks;
     this.penetrationPct = penetrationPct;
-    this.rng = new RNGProvider(rngSeed);
-
+    this.rng = rng;
     this.cards = [];
-    this.discardPile = [];
-    this.cutCardIndex = 0;
-    this.burnCard = null;
+    this.dealtCardIds = new Set();  // track uniqueness
+    this.burnCards = [];
     this.needsReshuffle = false;
-
-    this.resetAndShuffle();
+    this._buildAndShuffle();
   }
 
-  resetAndShuffle() {
-    const rawCards = [];
-    let globalIndex = 0;
-
+  _buildAndShuffle() {
+    const allCards = [];
     for (let d = 0; d < this.numDecks; d++) {
       for (const suit of SUITS) {
         for (const rank of RANKS) {
-          globalIndex++;
-          const card = new Card(suit, rank, d, globalIndex);
-          card.owner = 'shoe';
-          rawCards.push(card);
+          allCards.push(new Card(suit, rank, d));
         }
       }
     }
 
-    const expectedCount = 52 * this.numDecks;
-    if (rawCards.length !== expectedCount) {
-      throw new Error(`Shoe initialization anomaly: ${rawCards.length} cards generated instead of ${expectedCount}`);
+    const expected = this.numDecks * 52;
+    if (allCards.length !== expected) {
+      throw new Error(`Shoe build error: expected ${expected} cards, got ${allCards.length}`);
     }
 
-    this.cards = this.rng.shuffle(rawCards);
-    this.discardPile = [];
-    this.cutCardIndex = Math.floor(expectedCount * (1 - this.penetrationPct));
-
-    if (this.cards.length > 0) {
-      this.burnCard = this.cards.pop();
-      this.burnCard.owner = 'discard';
-      this.discardPile.push(this.burnCard);
+    // Verify all IDs are unique
+    const idSet = new Set(allCards.map(c => c.id));
+    if (idSet.size !== allCards.length) {
+      throw new Error('Shoe build error: duplicate card IDs detected');
     }
 
+    this.cards = this.rng.shuffle(allCards);
+    this.dealtCardIds.clear();
     this.needsReshuffle = false;
+
+    // Burn first card
+    if (this.cards.length > 0) {
+      this.burnCards.push(this.cards.pop());
+    }
   }
 
-  drawCard(owner = 'player') {
-    if (this.cards.length <= this.cutCardIndex) {
-      this.needsReshuffle = true;
-    }
-
+  drawCard() {
     if (this.cards.length === 0) {
-      this.resetAndShuffle();
+      this._buildAndShuffle();
     }
 
     const card = this.cards.pop();
-    card.owner = owner;
+
+    // Safety: ensure no card is dealt twice from the same shoe
+    if (this.dealtCardIds.has(card.id)) {
+      throw new Error(`CRITICAL: Duplicate card dealt: ${card.id}`);
+    }
+    this.dealtCardIds.add(card.id);
+
+    // Check if we've passed the cut card
+    const cutPoint = Math.floor(this.numDecks * 52 * (1 - this.penetrationPct));
+    if (this.cards.length <= cutPoint) {
+      this.needsReshuffle = true;
+    }
+
     return card;
   }
 
-  discard(cards) {
-    for (const card of cards) {
-      card.owner = 'discard';
-      this.discardPile.push(card);
-    }
-  }
-
-  getRemainingCardsCount() {
+  getRemainingCount() {
     return this.cards.length;
   }
 
-  getTotalCardsCount() {
-    return 52 * this.numDecks;
+  reshuffle() {
+    this._buildAndShuffle();
   }
 }
