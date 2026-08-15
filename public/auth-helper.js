@@ -100,20 +100,27 @@ style.textContent = `
   }
 
   /* Mobile Responsive Fixes: Zero Overlap on Phone Screens */
+  #hamburger {
+    flex-shrink: 0 !important;
+  }
   @media (max-width: 768px) {
     #nav {
-      padding: 0 14px !important;
+      padding: 0 10px !important;
     }
-    .nav-logo {
-      font-size: 1.25rem !important;
+    .nav-logo-text {
+      font-size: 1.15rem !important;
     }
-    .nav-user-pill, .kick-live-badge-nav {
+    .nav-user-pill, .kick-live-badge, .kick-live-badge-nav {
       display: none !important;
     }
     .nav-points-pill {
-      padding: 0 9px;
-      font-size: 0.8rem;
-      height: 30px;
+      padding: 0 8px !important;
+      font-size: 0.8rem !important;
+      height: 30px !important;
+    }
+    #hamburger {
+      display: flex !important;
+      flex-shrink: 0 !important;
     }
   }
 

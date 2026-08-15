@@ -178,8 +178,8 @@ async function optionalAuth(req, res, next) {
     token = authHeader.split(' ')[1];
   }
 
-  // Fallback to cookie (except for blackjack API endpoints)
-  if (!token && !req.path.startsWith('/api/casino/blackjack') && req.cookies && req.cookies.bigdtv_token) {
+  // Fallback to cookie
+  if (!token && req.cookies && req.cookies.bigdtv_token) {
     token = req.cookies.bigdtv_token;
   }
 
