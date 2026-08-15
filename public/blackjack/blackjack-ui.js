@@ -180,29 +180,39 @@
     return headers;
   }
 
+  function isUserLoggedIn() {
+    return !!(window.authUser && window.authUser.loggedIn) || !!(typeof getAuthToken === 'function' && getAuthToken());
+  }
+
   async function syncBalance() {
     const balanceEl = document.getElementById('bj-balance-display');
     const navPill = document.querySelector('.nav-points-pill span');
     const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
-    if (token) {
-      try {
-        const res = await fetch('/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (res.ok) {
-          const data = await res.json();
+
+    try {
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch('/auth/me', { headers });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.loggedIn) {
           window.authUser = data;
           const pts = (data.points || 0).toLocaleString();
           if (balanceEl) balanceEl.textContent = pts;
           if (navPill) navPill.textContent = pts;
+          return;
         }
-      } catch {}
-    } else {
-      let guestBalance = Number(localStorage.getItem('bj_guest_balance'));
-      if (isNaN(guestBalance) || guestBalance === null || localStorage.getItem('bj_guest_balance') === null) {
-        guestBalance = 10000;
-        localStorage.setItem('bj_guest_balance', guestBalance);
       }
-      if (balanceEl) balanceEl.textContent = `${Number(guestBalance).toLocaleString()} (Guest)`;
+    } catch (e) {
+      console.warn("syncBalance auth check error:", e);
     }
+
+    let guestBalance = Number(localStorage.getItem('bj_guest_balance'));
+    if (isNaN(guestBalance) || guestBalance === null || localStorage.getItem('bj_guest_balance') === null) {
+      guestBalance = 10000;
+      localStorage.setItem('bj_guest_balance', guestBalance);
+    }
+    if (balanceEl) balanceEl.textContent = `${Number(guestBalance).toLocaleString()} (Guest)`;
   }
 
   function playSound(type) {
@@ -617,8 +627,7 @@
 
     // 4. Handle End of Round overlay
     if (activeHand.isEnded) {
-      const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
-      if (!token && (!window.guestPayoutHandledForGame || window.guestPayoutHandledForGame !== activeHand.gameId)) {
+      if (!isUserLoggedIn() && (!window.guestPayoutHandledForGame || window.guestPayoutHandledForGame !== activeHand.gameId)) {
         let guestBalance = Number(localStorage.getItem('bj_guest_balance'));
         if (isNaN(guestBalance) || guestBalance === null || localStorage.getItem('bj_guest_balance') === null) {
           guestBalance = 10000;
@@ -684,8 +693,7 @@
       return;
     }
 
-    const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
-    if (!token) {
+    if (!isUserLoggedIn()) {
       let guestBalance = Number(localStorage.getItem('bj_guest_balance'));
       if (isNaN(guestBalance) || guestBalance === null || localStorage.getItem('bj_guest_balance') === null) {
         guestBalance = 10000;
@@ -747,9 +755,7 @@
   async function performAction(actionName) {
     if (!activeHand || activeHand.isEnded) return;
 
-    const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
-
-    if (!token) {
+    if (!isUserLoggedIn()) {
       let guestBalance = Number(localStorage.getItem('bj_guest_balance'));
       if (isNaN(guestBalance) || guestBalance === null || localStorage.getItem('bj_guest_balance') === null) {
         guestBalance = 10000;
@@ -805,9 +811,7 @@
   async function buyOrDeclineInsurance(buyInsurance) {
     if (!activeHand || activeHand.isEnded) return;
 
-    const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
-
-    if (buyInsurance && !token) {
+    if (buyInsurance && !isUserLoggedIn()) {
       let guestBalance = Number(localStorage.getItem('bj_guest_balance'));
       if (isNaN(guestBalance) || guestBalance === null || localStorage.getItem('bj_guest_balance') === null) {
         guestBalance = 10000;
