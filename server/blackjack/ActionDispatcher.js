@@ -202,7 +202,18 @@ export default class ActionDispatcher {
   }
 
   _getActiveEngine(userId) {
-    const engine = this.activeGames.get(userId);
+    let engine = this.activeGames.get(userId);
+    if (!engine && userId.startsWith('guest_')) {
+      for (const [key, activeEng] of this.activeGames.entries()) {
+        if (!activeEng.isEnded && key.startsWith('guest_')) {
+          console.log(`[Guest Game Fallback] Re-keying active game from ${key} to ${userId}`);
+          this.activeGames.delete(key);
+          this.activeGames.set(userId, activeEng);
+          engine = activeEng;
+          break;
+        }
+      }
+    }
     if (!engine) throw new Error('No active game found');
     if (engine.isEnded) {
       this._cleanupGame(userId);

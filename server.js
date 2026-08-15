@@ -748,9 +748,15 @@ app.post("/api/store/redeem", requireAuth, async (req, res) => {
 const activeBlackjackGames = new Map(); // Map<userId, Engine>
 const actionDispatcher = new ActionDispatcher(activeBlackjackGames, supabase);
 
+function getBlackjackUserId(req) {
+  if (req.user && req.user.id) return req.user.id;
+  const guestHeader = req.headers['x-guest-id'] || req.cookies?.bj_guest_id || req.sessionID || 'session';
+  return `guest_${guestHeader}`;
+}
+
 // GET /api/casino/blackjack/state (Fetch active round snapshot)
 app.get("/api/casino/blackjack/state", optionalAuth, (req, res) => {
-  const userId = req.user ? req.user.id : `guest_${req.sessionID || 'session'}`;
+  const userId = getBlackjackUserId(req);
   const engine = activeBlackjackGames.get(userId);
   if (!engine) return res.json({ active: false });
   res.json({ active: true, snapshot: engine.getSnapshot() });
@@ -758,7 +764,7 @@ app.get("/api/casino/blackjack/state", optionalAuth, (req, res) => {
 
 // POST /api/casino/blackjack/deal (Place bet & deal initial round)
 app.post("/api/casino/blackjack/deal", optionalAuth, async (req, res) => {
-  const userId = req.user ? req.user.id : `guest_${req.sessionID || 'session'}`;
+  const userId = getBlackjackUserId(req);
   const isGuest = userId.startsWith('guest');
   if (!supabase && !isGuest) {
     return res.status(503).json({ error: "Database not configured" });
@@ -790,7 +796,7 @@ app.post("/api/casino/blackjack/deal", optionalAuth, async (req, res) => {
 
 // POST /api/casino/blackjack/insurance (Buy or Decline Insurance)
 app.post("/api/casino/blackjack/insurance", optionalAuth, async (req, res) => {
-  const userId = req.user ? req.user.id : `guest_${req.sessionID || 'session'}`;
+  const userId = getBlackjackUserId(req);
   const isGuest = userId.startsWith('guest');
   if (!supabase && !isGuest) {
     return res.status(503).json({ error: "Database not configured" });
@@ -810,7 +816,7 @@ app.post("/api/casino/blackjack/insurance", optionalAuth, async (req, res) => {
 
 // POST /api/casino/blackjack/action (Dispatch HIT, STAND, DOUBLE, SPLIT, SURRENDER)
 app.post("/api/casino/blackjack/action", optionalAuth, async (req, res) => {
-  const userId = req.user ? req.user.id : `guest_${req.sessionID || 'session'}`;
+  const userId = getBlackjackUserId(req);
   const isGuest = userId.startsWith('guest');
   if (!supabase && !isGuest) {
     return res.status(503).json({ error: "Database not configured" });
@@ -840,7 +846,7 @@ app.post("/api/casino/blackjack/action", optionalAuth, async (req, res) => {
 
 // GET /api/casino/blackjack/history (Get completed game logs and stats)
 app.get("/api/casino/blackjack/history", optionalAuth, async (req, res) => {
-  const userId = req.user ? req.user.id : `guest_${req.sessionID || 'session'}`;
+  const userId = getBlackjackUserId(req);
   const isGuest = userId.startsWith('guest');
   if (!supabase && !isGuest) {
     return res.status(503).json({ error: "Database not configured" });

@@ -161,6 +161,25 @@
     return 'act_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   }
 
+  function getGuestId() {
+    let id = localStorage.getItem('bj_guest_id');
+    if (!id) {
+      id = 'g_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('bj_guest_id', id);
+    }
+    return id;
+  }
+
+  function getFetchHeaders() {
+    const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Guest-ID': getGuestId()
+    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return headers;
+  }
+
   async function syncBalance() {
     const balanceEl = document.getElementById('bj-balance-display');
     const navPill = document.querySelector('.nav-points-pill span');
@@ -686,8 +705,7 @@
 
     try {
       const actionId = generateActionId();
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const headers = getFetchHeaders();
 
       const res = await fetch('/api/casino/blackjack/deal', {
         method: 'POST',
@@ -751,8 +769,7 @@
 
     try {
       const actionId = generateActionId();
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const headers = getFetchHeaders();
 
       const res = await fetch('/api/casino/blackjack/action', {
         method: 'POST',
@@ -763,6 +780,7 @@
       if (!res.ok) {
         alert(data.error || "Action failed.");
         setStatusText("ERROR");
+        setButtonsDisabled(false);
         renderCurrentUIState();
         return;
       }
@@ -779,6 +797,7 @@
     } catch (err) {
       console.error("Action error:", err);
       setStatusText("ERROR");
+      setButtonsDisabled(false);
       renderCurrentUIState();
     }
   }
@@ -808,8 +827,7 @@
 
     try {
       const actionId = generateActionId();
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const headers = getFetchHeaders();
 
       const res = await fetch('/api/casino/blackjack/insurance', {
         method: 'POST',
@@ -820,6 +838,7 @@
       if (!res.ok) {
         alert(data.error || "Insurance action failed.");
         setStatusText("ERROR");
+        setButtonsDisabled(false);
         renderCurrentUIState();
         return;
       }
@@ -836,6 +855,7 @@
     } catch (err) {
       console.error("Insurance error:", err);
       setStatusText("ERROR");
+      setButtonsDisabled(false);
       renderCurrentUIState();
     }
   }
@@ -861,8 +881,7 @@
 
     setStatusText("RECONNECTING...");
     try {
-      const headers = {};
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const headers = getFetchHeaders();
 
       const res = await fetch('/api/casino/blackjack/state', {
         headers
