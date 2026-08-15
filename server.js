@@ -557,8 +557,24 @@ async function syncWagerPointsForUser(userId) {
       }
     } catch (rErr) {}
 
+    // Calculate net blackjack gain/loss from audit_logs (bets are negative deltas, payouts are positive)
     const userMeta = user.metadata || {};
-    const targetBalance = Math.max(0, augustWagerPoints - redeemedPoints);
+    let blackjackNet = 0;
+    try {
+      const { data: bjLogs } = await supabase
+        .from("audit_logs")
+        .select("points_before, points_after")
+        .eq("user_id", userId)
+        .eq("source", "blackjack");
+
+      if (bjLogs && bjLogs.length > 0) {
+        blackjackNet = bjLogs.reduce((sum, log) => sum + ((log.points_after || 0) - (log.points_before || 0)), 0);
+      }
+    } catch (bjErr) {
+      console.error("Error fetching blackjack audit logs:", bjErr.message);
+    }
+
+    const targetBalance = Math.max(0, augustWagerPoints - redeemedPoints + blackjackNet);
 
     // Update user point wallet balance if it differs from targetBalance
     if (user.points !== targetBalance || userMeta.august_wager_points !== augustWagerPoints) {
@@ -567,6 +583,7 @@ async function syncWagerPointsForUser(userId) {
         august_wager_usd: augustWagerUsd,
         august_wager_points: augustWagerPoints,
         redeemed_points: redeemedPoints,
+        blackjack_net: blackjackNet,
         last_synced_at: new Date().toISOString()
       };
 
@@ -575,7 +592,7 @@ async function syncWagerPointsForUser(userId) {
         .update({ points: targetBalance, metadata: updatedMeta, updated_at: new Date().toISOString() })
         .eq("id", user.id);
 
-      console.log(`💸 Wager-Only Points Sync (August 1st EST Cutoff): User ${user.id} (${degenUsername}) -> $${augustWagerUsd.toFixed(2)} August wagered = ${augustWagerPoints} pts earned - ${redeemedPoints} redeemed = ${targetBalance} wallet balance.`);
+      console.log(`💸 Wager+Blackjack Points Sync: User ${user.id} (${degenUsername}) -> $${augustWagerUsd.toFixed(2)} August wagered = ${augustWagerPoints} pts earned - ${redeemedPoints} redeemed + ${blackjackNet} blackjack net = ${targetBalance} wallet balance.`);
       return targetBalance;
     }
 

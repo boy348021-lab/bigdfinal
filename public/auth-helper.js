@@ -99,18 +99,18 @@ style.textContent = `
     object-fit: cover;
   }
 
-  /* Mobile Responsive Fixes: Zero Overlap on Phone Screens */
+  /* Mobile Responsive Fixes: Match hamburger show breakpoint (900px) */
   #hamburger {
     flex-shrink: 0 !important;
   }
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
     #nav {
       padding: 0 10px !important;
     }
     .nav-logo-text {
       font-size: 1.15rem !important;
     }
-    .nav-user-pill, .kick-live-badge, .kick-live-badge-nav {
+    .nav-user-pill, .kick-live-badge, .kick-live-badge-nav, .nav-btn-auth {
       display: none !important;
     }
     .nav-points-pill {

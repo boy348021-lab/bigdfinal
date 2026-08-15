@@ -122,6 +122,7 @@ body::before {
   display: none; flex-direction: column; justify-content: center; gap: 5px;
   width: 36px; height: 36px; padding: 4px; background: rgba(136,0,255,0.1);
   border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); cursor: pointer; z-index: 200;
+  flex-shrink: 0;
 }
 #hamburger span { display: block; height: 2px; background: var(--purple-300); border-radius: 1px; transition: all 0.25s; }
 #hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }

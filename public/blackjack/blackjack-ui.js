@@ -163,6 +163,7 @@
 
   async function syncBalance() {
     const balanceEl = document.getElementById('bj-balance-display');
+    const navPill = document.querySelector('.nav-points-pill span');
     const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
     if (token) {
       try {
@@ -170,7 +171,9 @@
         if (res.ok) {
           const data = await res.json();
           window.authUser = data;
-          if (balanceEl) balanceEl.textContent = (data.points || 0).toLocaleString();
+          const pts = (data.points || 0).toLocaleString();
+          if (balanceEl) balanceEl.textContent = pts;
+          if (navPill) navPill.textContent = pts;
         }
       } catch {}
     } else {
@@ -707,6 +710,12 @@
       processedEventIds.clear();
       isAnimating = false;
 
+      // Update balance immediately from server response
+      if (data.new_balance !== undefined && data.new_balance !== null) {
+        const balanceEl = document.getElementById('bj-balance-display');
+        if (balanceEl) balanceEl.textContent = Number(data.new_balance).toLocaleString();
+      }
+
       // Queue the deal event stream
       queueEvents(activeHand.events || []);
     } catch (err) {
@@ -759,6 +768,13 @@
       }
 
       activeHand = data.handState;
+
+      // Update balance immediately from server response
+      if (data.new_balance !== undefined && data.new_balance !== null) {
+        const balanceEl = document.getElementById('bj-balance-display');
+        if (balanceEl) balanceEl.textContent = Number(data.new_balance).toLocaleString();
+      }
+
       queueEvents(activeHand.events || []);
     } catch (err) {
       console.error("Action error:", err);
@@ -809,6 +825,13 @@
       }
 
       activeHand = data.handState;
+
+      // Update balance immediately from server response
+      if (data.new_balance !== undefined && data.new_balance !== null) {
+        const balanceEl = document.getElementById('bj-balance-display');
+        if (balanceEl) balanceEl.textContent = Number(data.new_balance).toLocaleString();
+      }
+
       queueEvents(activeHand.events || []);
     } catch (err) {
       console.error("Insurance error:", err);
