@@ -218,23 +218,33 @@ async function optionalAuth(req, res, next) {
 }
 
 // ─── Kick Live Status ─────────────────────────────────────────────────────────
-let kickCache = { live: false, checkedAt: null };
-const KICK_CACHE_TTL = 45_000;
+let kickCache = { live: false, checkedAt: null, ok: true };
+const KICK_CACHE_TTL = 30_000;
 
 function fetchKickViaPython() {
   return new Promise((resolve) => {
     const script = path.join(__dirname, "kick_status.py");
-    execFile("/usr/bin/python3", [script], { timeout: 12_000 }, (err, stdout) => {
+    let pythonBin = "python3";
+    if (fs.existsSync("/opt/anaconda3/bin/python3")) {
+      pythonBin = "/opt/anaconda3/bin/python3";
+    } else if (fs.existsSync("/usr/local/bin/python3")) {
+      pythonBin = "/usr/local/bin/python3";
+    } else if (fs.existsSync("/usr/bin/python3")) {
+      pythonBin = "/usr/bin/python3";
+    }
+    execFile(pythonBin, [script], { timeout: 12_000, env: process.env }, (err, stdout) => {
       if (err) {
-        console.error("Kick Python helper error:", err.message);
         return resolve({ live: false, ok: false });
       }
-      try { resolve(JSON.parse(stdout)); }
-      catch (e) { resolve({ live: false, ok: false }); }
+      try {
+        const parsed = JSON.parse(stdout);
+        resolve(parsed);
+      } catch (e) {
+        resolve({ live: false, ok: false });
+      }
     });
   });
 }
-
 
 async function getKickLiveStatus() {
   const now = Date.now();
@@ -242,12 +252,21 @@ async function getKickLiveStatus() {
     return kickCache;
   }
   
-  let result = await fetchKickViaPython();
-  
-  // Fallback: Node fetch if Python helper had an issue
-  if (!result || !result.ok) {
+  let isLive = false;
+  let success = false;
+  const channel = process.env.KICK_CHANNEL || "bigdgamestv";
+
+  // Primary Method: Python scraper helper (bypasses Cloudflare using impersonated TLS)
+  const pyResult = await fetchKickViaPython();
+  console.log("pyResult in getKickLiveStatus:", pyResult);
+  if (pyResult && pyResult.ok) {
+    isLive = Boolean(pyResult.live);
+    success = true;
+  }
+
+  // Fallback Method: Direct fetch if Python helper had an issue
+  if (!success) {
     try {
-      const channel = process.env.KICK_CHANNEL || "bigdgamestv";
       const res = await fetch(`https://kick.com/api/v2/channels/${channel}`, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -256,19 +275,26 @@ async function getKickLiveStatus() {
       });
       if (res.ok) {
         const data = await res.json();
-        const livestream = data.livestream;
-        result = { live: Boolean(livestream && livestream.is_live !== false), ok: true };
+        success = true;
+        if (data.livestream && data.livestream.is_live !== false) {
+          isLive = true;
+        } else if (data.playback_url) {
+          try {
+            const hlsRes = await fetch(data.playback_url, { method: 'HEAD' });
+            if (hlsRes.ok && hlsRes.status === 200) {
+              isLive = true;
+            }
+          } catch (hlsErr) {}
+        }
       }
-    } catch (e) {
-      // Keep previous live state or offline on network error
-    }
+    } catch (e) {}
   }
 
   kickCache = {
-    live: Boolean(result && result.live),
-    channel: process.env.KICK_CHANNEL || "bigdgamestv",
+    live: isLive,
+    channel: channel,
     checkedAt: now,
-    ok: Boolean(result && result.ok)
+    ok: success
   };
   return kickCache;
 }

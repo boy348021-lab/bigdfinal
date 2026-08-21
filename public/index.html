@@ -15,55 +15,62 @@
    Inspired by Riot Games, Arcane, Cyberpunk 2077, Alienware, Apple & Linear
    ============================================================ */
 :root {
-  /* Ultra Void Canvas */
-  --bg-void:        #030208;
-  --bg-deep:        #060412;
-  --bg-surface:     #0d0820;
-  --bg-card:        rgba(14, 10, 32, 0.72);
-  --bg-card-hover:  rgba(24, 16, 52, 0.88);
+  /* Ultra Void & Elevated Surfaces Canvas */
+  --bg-void:        #07060d;
+  --bg-deep:        #100d1b;
+  --bg-surface:     #171225;
+  --bg-surface-elevated: #1f1833;
+  --bg-card:        rgba(23, 18, 37, 0.85);
+  --bg-card-hover:  rgba(31, 24, 51, 0.95);
 
-  /* Electric Violet Palette */
-  --purple-900:     #120026;
-  --purple-800:     #24004d;
-  --purple-700:     #420085;
-  --purple-600:     #6a00d5;
-  --purple-500:     #9d00ff;
-  --purple-400:     #be4dff;
-  --purple-300:     #d980ff;
-  --purple-200:     #edb3ff;
-  --purple-100:     #f8e6ff;
+  /* Electric Violet & Magenta Palette */
+  --purple-900:     #120924;
+  --purple-800:     #221142;
+  --purple-700:     #3e186e;
+  --purple-600:     #6322ad;
+  --purple-500:     #8b5cf6;
+  --purple-400:     #a855f7;
+  --purple-300:     #c084fc;
+  --purple-200:     #e9d5ff;
+  --purple-100:     #faf5ff;
 
-  /* Strict Accents */
-  --gold-500:       #cca010;
-  --gold-400:       #ffd700;
-  --gold-300:       #ffe45c;
-  --gold-glow:      0 0 25px rgba(255, 215, 0, 0.45);
+  /* Magenta / Nebula Accent */
+  --magenta-500:    #d946ef;
+  --magenta-400:    #e879f9;
+  --magenta-glow:   0 0 25px rgba(217, 70, 239, 0.45);
 
-  --green-live:     #00ff66;
-  --green-glow:     0 0 20px rgba(0, 255, 102, 0.5);
+  /* Premium Gold Hierarchy */
+  --gold-500:       #d97706;
+  --gold-400:       #f5c451;
+  --gold-300:       #fde68a;
+  --gold-glow:      0 0 25px rgba(245, 196, 81, 0.45);
 
-  --cyan-500:       #00ffe5;
-  --cyan-400:       #33fff0;
-  --cyan-glow:      0 0 25px rgba(0, 255, 229, 0.45);
+  --green-live:     #00e701;
+  --green-glow:     0 0 20px rgba(0, 231, 1, 0.5);
+
+  --cyan-500:       #06b6d4;
+  --cyan-400:       #22d3ee;
+  --cyan-glow:      0 0 25px rgba(34, 211, 238, 0.45);
 
   /* Text & Typography Hierarchy */
   --font-display:   'Orbitron', sans-serif;
   --font-ui:        'Rajdhani', sans-serif;
   --font-body:      'Space Grotesk', sans-serif;
 
-  --text-primary:   #f4efff;
-  --text-secondary: #a49bc2;
-  --text-muted:     #625884;
+  --text-primary:   #f5f3ff;
+  --text-secondary: #a7a2bc;
+  --text-muted:     #787291;
 
-  /* Borders & Cyber Glows */
-  --border-subtle:  rgba(157, 0, 255, 0.2);
-  --border-cyan:    rgba(0, 255, 229, 0.3);
-  --border-gold:    rgba(255, 215, 0, 0.35);
+  /* Luminous Borders & Cyber Glows */
+  --border-subtle:  rgba(139, 92, 246, 0.18);
+  --border-luminous: rgba(168, 85, 247, 0.45);
+  --border-gold:    rgba(245, 196, 81, 0.4);
+  --border-cyan:    rgba(34, 211, 238, 0.35);
 
-  --glow-purple:    0 0 25px rgba(157,0,255,0.45), 0 0 70px rgba(157,0,255,0.2);
-  --glow-cyan:      0 0 25px rgba(0,255,229,0.45), 0 0 60px rgba(0,255,229,0.18);
-  --glow-gold:      0 0 25px rgba(255,215,0,0.45), 0 0 60px rgba(255,215,0,0.18);
-  --glow-intense:   0 0 45px rgba(157,0,255,0.7), 0 0 110px rgba(0,255,229,0.3);
+  --glow-purple:    0 0 25px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.15);
+  --glow-magenta:   0 0 25px rgba(217, 70, 239, 0.4), 0 0 60px rgba(217, 70, 239, 0.15);
+  --glow-gold:      0 0 25px rgba(245, 196, 81, 0.4), 0 0 60px rgba(245, 196, 81, 0.15);
+  --glow-intense:   0 0 40px rgba(168, 85, 247, 0.65), 0 0 90px rgba(217, 70, 239, 0.25);
 
   --radius-sm:      6px;
   --radius-md:      12px;
@@ -398,7 +405,7 @@ body::after {
 }
 
 /* ============================================================
-   HERO SECTION
+   HERO SECTION & COSMIC ATMOSPHERE
    ============================================================ */
 #hero {
   position: relative;
@@ -410,15 +417,405 @@ body::after {
   text-align: center;
   padding: 120px 40px 80px;
   overflow: hidden;
+  background: radial-gradient(circle at 50% 30%, rgba(139, 92, 246, 0.12) 0%, rgba(217, 70, 239, 0.04) 40%, transparent 75%);
 }
-.hero-grid-bg {
+
+.hero-cosmos-canvas {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(136,0,255,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(136,0,255,0.06) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 80%);
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Faint Futuristic HUD Orbital Rings */
+.hero-orbital-ring {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotateX(72deg);
+  border: 1px dashed rgba(139, 92, 246, 0.14);
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+.hero-orbital-ring.ring-1 {
+  width: 680px;
+  height: 680px;
+  box-shadow: 0 0 50px rgba(139, 92, 246, 0.08), inset 0 0 40px rgba(217, 70, 239, 0.04);
+  animation: orbital-spin 90s linear infinite;
+}
+.hero-orbital-ring.ring-2 {
+  width: 980px;
+  height: 980px;
+  border-color: rgba(245, 196, 81, 0.08);
+  animation: orbital-spin-rev 120s linear infinite;
+}
+@keyframes orbital-spin {
+  from { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(0deg); }
+  to   { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(360deg); }
+}
+@keyframes orbital-spin-rev {
+  from { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(360deg); }
+  to   { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(0deg); }
+}
+
+/* Soft Ambient Mouse Light Follower */
+.mouse-glow-follower {
+  position: fixed;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.09) 0%, rgba(217, 70, 239, 0.03) 45%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  transition: transform 0.08s linear, opacity 0.3s ease;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+/* ============================================================
+   3D FLOATING CASINO POKER CHIPS & COSMIC FLOOR PORTAL
+   ============================================================ */
+.hero-poker-chip {
+  position: absolute;
+  z-index: 2;
+  pointer-events: auto;
+  cursor: pointer;
+  filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 25px rgba(139, 92, 246, 0.45));
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
+  will-change: transform, filter;
+}
+.hero-poker-chip img {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.hero-poker-chip:hover {
+  filter: drop-shadow(0 20px 45px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 45px rgba(168, 85, 247, 0.85)) drop-shadow(0 0 20px rgba(217, 70, 239, 0.5));
+}
+
+.hero-poker-chip.chip-left-top {
+  left: 6%;
+  top: 14%;
+  width: 125px;
+  opacity: 0.85;
+  animation: float-chip-1 7s ease-in-out infinite alternate;
+}
+.hero-poker-chip.chip-left-bottom {
+  left: 4%;
+  bottom: 22%;
+  width: 150px;
+  opacity: 0.82;
+  animation: float-chip-2 8.5s ease-in-out infinite alternate;
+}
+
+/* 2 New Background Visuals on Right Side (Subtle, Atmospheric Opacity) */
+.hero-poker-chip.chip-right-top {
+  right: 7%;
+  top: 16%;
+  width: 115px;
+  opacity: 0.78;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 20px rgba(245, 196, 81, 0.35));
+  animation: float-chip-3 9s ease-in-out infinite alternate;
+}
+.hero-poker-chip.chip-right-top:hover {
+  opacity: 1;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 35px rgba(245, 196, 81, 0.7));
+}
+
+.hero-poker-chip.chip-right-mid {
+  right: 5%;
+  bottom: 26%;
+  width: 135px;
+  opacity: 0.75;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 20px rgba(0, 255, 229, 0.3));
+  animation: float-chip-4 8s ease-in-out infinite alternate;
+}
+.hero-poker-chip.chip-right-mid:hover {
+  opacity: 1;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 35px rgba(0, 255, 229, 0.65));
+}
+
+@keyframes float-chip-1 {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  50%  { transform: translate(-8px, -18px) rotate(-6deg) scale(1.03); }
+  100% { transform: translate(6px, -8px) rotate(4deg); }
+}
+@keyframes float-chip-2 {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  50%  { transform: translate(10px, -20px) rotate(8deg) scale(1.04); }
+  100% { transform: translate(-6px, -12px) rotate(-4deg); }
+}
+@keyframes float-chip-3 {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  50%  { transform: translate(8px, -16px) rotate(6deg) scale(1.03); }
+  100% { transform: translate(-6px, -10px) rotate(-3deg); }
+}
+@keyframes float-chip-4 {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  50%  { transform: translate(-10px, -18px) rotate(-8deg) scale(1.03); }
+  100% { transform: translate(8px, -10px) rotate(5deg); }
+}
+
+@media (max-width: 1024px) {
+  .hero-poker-chip.chip-left-top { width: 85px; left: 2%; top: 10%; }
+  .hero-poker-chip.chip-left-bottom { width: 105px; left: 1%; bottom: 15%; }
+  .hero-poker-chip.chip-right-top { width: 80px; right: 2%; top: 12%; }
+  .hero-poker-chip.chip-right-mid { width: 95px; right: 1%; bottom: 18%; }
+}
+@media (max-width: 768px) {
+  .hero-poker-chip { opacity: 0.55; pointer-events: none; }
+  .hero-poker-chip.chip-left-top { width: 60px; left: 1%; top: 8%; }
+  .hero-poker-chip.chip-left-bottom { width: 75px; left: 1%; bottom: 8%; }
+  .hero-poker-chip.chip-right-top { width: 55px; right: 1%; top: 10%; }
+  .hero-poker-chip.chip-right-mid { width: 65px; right: 1%; bottom: 10%; }
+}
+
+/* Cosmic Floor Energy Portal / Radiant Disc */
+.hero-floor-portal {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%) rotateX(76deg);
+  width: 900px;
+  height: 900px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.portal-disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+}
+.portal-disc-outer {
+  box-shadow: 0 0 90px rgba(139, 92, 246, 0.4), inset 0 0 70px rgba(217, 70, 239, 0.25);
+  animation: portal-spin 40s linear infinite;
+}
+.portal-disc-inner {
+  inset: 18%;
+  border: 2px dashed rgba(245, 196, 81, 0.25);
+  box-shadow: 0 0 60px rgba(217, 70, 239, 0.35);
+  animation: portal-spin-rev 28s linear infinite;
+}
+.portal-core-glow {
+  position: absolute;
+  inset: 32%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.6) 0%, rgba(217, 70, 239, 0.3) 40%, transparent 75%);
+  filter: blur(25px);
+  animation: portal-pulse 4s ease-in-out infinite alternate;
+}
+@keyframes portal-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes portal-spin-rev {
+  from { transform: rotate(360deg); }
+  to   { transform: rotate(0deg); }
+}
+@keyframes portal-pulse {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  100% { transform: scale(1.15); opacity: 1; }
+}
+
+/* ============================================================
+   FUTURISTIC 4-CARD HERO STATS HUD & PARTNER DOCK
+   ============================================================ */
+.hero-hud-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 960px;
+  margin: 36px auto 28px;
+  position: relative;
+  z-index: 2;
+}
+.hero-hud-stat-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+.hero-hud-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.45), transparent);
+}
+.hero-hud-stat-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--purple-400);
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.25), 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+.hud-stat-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hud-stat-info {
+  display: flex;
+  flex-direction: column;
+}
+.hud-stat-value {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+.hud-stat-value .val-sup {
+  color: var(--gold-400);
+  font-size: 0.9em;
+}
+.hud-stat-label {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Partnered Sites Capsule Dock */
+.hero-partner-dock {
+  width: 100%;
+  max-width: 960px;
+  margin: 12px auto 44px;
+  position: relative;
+  z-index: 2;
+}
+.partner-dock-label {
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.partner-dock-label::before, .partner-dock-label::after {
+  content: '';
+  height: 1px;
+  width: 40px;
+  background: var(--border-subtle);
+}
+.partner-capsules-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.partner-capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(23, 18, 37, 0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 30px;
+  padding: 10px 24px;
+  text-decoration: none;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+}
+.partner-capsule-degencity {
+  border-color: rgba(168, 85, 247, 0.35);
+  background: linear-gradient(135deg, rgba(31, 24, 51, 0.9) 0%, rgba(23, 18, 37, 0.95) 100%);
+}
+.partner-capsule:hover {
+  transform: translateY(-3px) scale(1.03);
+  border-color: var(--purple-400);
+  background: rgba(38, 28, 64, 0.95);
+  box-shadow: 0 0 28px rgba(168, 85, 247, 0.45);
+}
+.partner-capsule-icon {
+  font-size: 1.2rem;
+}
+.partner-capsule-name {
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+.partner-capsule-code {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(245, 196, 81, 0.15);
+  border: 1px solid rgba(245, 196, 81, 0.4);
+  color: var(--gold-400);
+}
+.partner-capsule-perk {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(0, 231, 1, 0.12);
+  border: 1px solid rgba(0, 231, 1, 0.35);
+  color: #00e701;
+}
+
+@media (max-width: 900px) {
+  .hero-hud-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+@media (max-width: 520px) {
+  .hero-hud-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .partner-capsule {
+    padding: 8px 16px;
+    gap: 8px;
+    font-size: 0.8rem;
+  }
+  .partner-capsule-perk {
+    display: none;
+  }
 }
 .hero-eyebrow {
   font-family: var(--font-ui);
@@ -535,17 +932,17 @@ body::after {
   cursor: pointer;
 }
 
-/* Button 1: Join Discord (Purple Gradient Primary) */
+/* Button 1: Join Discord (Electric Violet & Magenta Gradient Primary) */
 .hero-btn-discord {
-  background: linear-gradient(135deg, var(--purple-600) 0%, var(--purple-500) 100%);
+  background: linear-gradient(135deg, var(--purple-600) 0%, var(--purple-500) 60%, var(--magenta-500) 100%);
   border: 1px solid var(--purple-400);
   color: #ffffff;
-  box-shadow: 0 8px 24px rgba(157, 0, 255, 0.4);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 .hero-btn-discord:hover {
-  background: linear-gradient(135deg, var(--purple-500) 0%, var(--purple-400) 100%);
-  border-color: var(--cyan-400);
-  box-shadow: 0 0 30px rgba(0, 255, 229, 0.5), 0 0 20px rgba(157, 0, 255, 0.5);
+  background: linear-gradient(135deg, var(--purple-500) 0%, var(--purple-400) 60%, var(--magenta-400) 100%);
+  border-color: #ffffff;
+  box-shadow: 0 0 35px rgba(168, 85, 247, 0.6), 0 0 50px rgba(217, 70, 239, 0.35);
   transform: translateY(-3px);
 }
 
@@ -1177,10 +1574,10 @@ body::after {
   width: 100%;
 }
 .top5-card {
-  background: rgba(13, 8, 32, 0.78);
+  background: var(--bg-card);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(157, 0, 255, 0.22);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 24px 20px;
   position: relative;
@@ -1190,17 +1587,35 @@ body::after {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
 .top5-card:hover {
   transform: translateY(-6px);
-  border-color: var(--cyan-400);
-  box-shadow: var(--glow-cyan), 0 16px 40px rgba(0,0,0,0.6);
+  border-color: var(--purple-400);
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.35), 0 16px 40px rgba(0,0,0,0.6);
 }
+
+/* Rank #1: Prestigious Gold Treatment */
 .top5-card.rank-1-card {
-  border-color: var(--gold-400);
-  background: linear-gradient(180deg, rgba(255, 215, 0, 0.1) 0%, rgba(13, 8, 32, 0.88) 100%);
-  box-shadow: var(--gold-glow);
+  border: 1px solid var(--border-gold);
+  background: linear-gradient(180deg, rgba(245, 196, 81, 0.12) 0%, rgba(23, 18, 37, 0.92) 100%);
+  box-shadow: 0 0 35px rgba(245, 196, 81, 0.25), 0 12px 35px rgba(0, 0, 0, 0.5);
+}
+.top5-card.rank-1-card:hover {
+  border-color: var(--gold-300);
+  box-shadow: 0 0 45px rgba(245, 196, 81, 0.45), 0 18px 45px rgba(0,0,0,0.7);
+}
+
+/* Rank #2: Silver Finish */
+.top5-card:nth-child(2) {
+  border-color: rgba(203, 213, 225, 0.3);
+  background: linear-gradient(180deg, rgba(203, 213, 225, 0.08) 0%, rgba(23, 18, 37, 0.9) 100%);
+}
+
+/* Rank #3: Bronze Finish */
+.top5-card:nth-child(3) {
+  border-color: rgba(205, 127, 50, 0.3);
+  background: linear-gradient(180deg, rgba(205, 127, 50, 0.08) 0%, rgba(23, 18, 37, 0.9) 100%);
 }
 .top5-rank-badge {
   font-family: var(--font-display);
@@ -1589,6 +2004,8 @@ body::after {
   overflow-x: auto;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 .lb-table {
   width: 100%;
@@ -1596,7 +2013,7 @@ body::after {
   font-family: var(--font-ui);
 }
 .lb-table thead tr {
-  background: rgba(136,0,255,0.08);
+  background: rgba(139, 92, 246, 0.08);
   border-bottom: 1px solid var(--border-subtle);
 }
 .lb-table th {
@@ -1609,37 +2026,57 @@ body::after {
   color: var(--text-muted);
 }
 .lb-table tbody tr {
-  border-bottom: 1px solid rgba(136,0,255,0.07);
-  transition: background 0.15s;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.06);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.lb-table tbody tr.lb-main-row:hover { background: rgba(136,0,255,0.05); }
+.lb-table tbody tr.lb-main-row:hover {
+  background: rgba(139, 92, 246, 0.08);
+  transform: translateX(4px);
+}
 .lb-table tbody tr.lb-expand-row:hover { background: transparent; }
 .lb-table tbody tr:last-child { border-bottom: none; }
 .lb-table td {
   padding: 14px 20px;
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
 }
 .rank-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px; height: 28px;
+  width: 30px; height: 30px;
   border-radius: 50%;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 0.85rem;
+  font-family: var(--font-display);
 }
-.rank-1 { background: linear-gradient(135deg, #c9a227, #f5d87a); color: #0a0a00; }
-.rank-2 { background: linear-gradient(135deg, #9aa5b4, #d0d8e0); color: #0a0a14; }
-.rank-3 { background: linear-gradient(135deg, #a0522d, #cd8256); color: #1a0800; }
-.rank-n { background: rgba(136,0,255,0.15); border: 1px solid var(--border-subtle); color: var(--text-secondary); }
+.rank-1 {
+  background: linear-gradient(135deg, #f5c451 0%, #d97706 100%);
+  color: #07060d;
+  box-shadow: 0 0 14px rgba(245, 196, 81, 0.5);
+}
+.rank-2 {
+  background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
+  color: #07060d;
+  box-shadow: 0 0 12px rgba(203, 213, 225, 0.4);
+}
+.rank-3 {
+  background: linear-gradient(135deg, #fb923c 0%, #c2410c 100%);
+  color: #07060d;
+  box-shadow: 0 0 12px rgba(251, 146, 60, 0.4);
+}
+.rank-n {
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
 .hidden-user { color: var(--text-muted); font-style: italic; }
 .wager-amount {
   color: var(--purple-300);
   font-weight: 700;
 }
-.wager-amount.gold { color: var(--gold-400); }
+.wager-amount.gold { color: var(--gold-400); text-shadow: 0 0 12px rgba(245, 196, 81, 0.35); }
 .lb-loading, .lb-error, .lb-empty {
   text-align: center;
   padding: 60px 20px;
@@ -2135,36 +2572,95 @@ footer a { color: var(--purple-400); transition: color 0.2s; }
 footer a:hover { color: var(--purple-300); }
 
 /* ============================================================
-   EDGE BOT — Futuristic Skull
+   BIG D FLOATING PIXEL MASCOT — DISCORD EDGE BOT
    ============================================================ */
-#edge-bot{
-
-position:fixed;
-left:0;
-top:0;
-
-width:96px;
-height:52px;
-
-display:flex;
-justify-content:center;
-align-items:center;
-
-z-index:99999;
-
-cursor:pointer;
-
-user-select:none;
-
-transition:transform .1s linear;
-
-}
-#racecar-canvas {
-  display: block;
-  width: 96px;
-  height: 52px;
+#edge-bot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 72px;
+  height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
   touch-action: manipulation;
-  filter: drop-shadow(0 0 10px rgba(255, 30, 30, 0.55)) drop-shadow(0 0 18px rgba(255, 186, 0, 0.25));
+  transition: transform 0.15s ease-out;
+  filter: drop-shadow(0 0 14px rgba(157, 0, 255, 0.45)) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.7));
+}
+
+#edge-bot:hover {
+  filter: drop-shadow(0 0 22px rgba(190, 77, 255, 0.8)) drop-shadow(0 0 35px rgba(0, 231, 1, 0.4)) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.85));
+}
+
+#bigd-mascot-img {
+  width: 68px;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  display: block;
+  pointer-events: none;
+  animation: bigd-idle-float 2.6s ease-in-out infinite alternate;
+}
+
+@keyframes bigd-idle-float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(-1.5deg); }
+  100% { transform: translateY(-2px) rotate(1.5deg); }
+}
+
+/* Playful Hover Speech Bubble */
+.bigd-speech-bubble {
+  position: absolute;
+  top: -26px;
+  white-space: nowrap;
+  background: linear-gradient(90deg, #5865f2, #7983f5);
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  font-family: var(--font-display, 'Orbitron', sans-serif);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  box-shadow: 0 4px 15px rgba(88, 101, 242, 0.6);
+  opacity: 0;
+  transform: translateY(6px) scale(0.9);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.bigd-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px 4px 0;
+  border-style: solid;
+  border-color: #5865f2 transparent;
+  display: block;
+  width: 0;
+}
+
+#edge-bot:hover .bigd-speech-bubble {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@media (max-width: 600px) {
+  #edge-bot {
+    width: 58px;
+    height: 90px;
+  }
+  #bigd-mascot-img {
+    width: 54px;
+  }
 }
 
 
@@ -2779,9 +3275,10 @@ transition:transform .1s linear;
 }
 
 .challenge-card {
-  background: rgba(17, 17, 42, 0.75);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(136, 0, 255, 0.25);
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 24px;
   display: flex;
@@ -2790,7 +3287,12 @@ transition:transform .1s linear;
   position: relative;
   overflow: hidden;
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), 0 0 20px rgba(136, 0, 255, 0.1);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+}
+.challenge-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--purple-400);
+  box-shadow: 0 0 35px rgba(168, 85, 247, 0.3), 0 20px 45px rgba(0, 0, 0, 0.65);
 }
 .challenge-card::before {
   content: '';
@@ -3005,12 +3507,36 @@ transition:transform .1s linear;
      HERO SECTION — CINEMATIC FULL VIEWPORT EXPERIENCE
      ================================================================ -->
 <section id="hero">
+  <!-- Layer 1 & 2: Cosmic Starfield & Ambient Nebula Canvas -->
+  <canvas id="hero-cosmos-canvas" class="hero-cosmos-canvas"></canvas>
   <div class="hero-grid-3d"></div>
+  <div class="hero-floor-portal">
+    <div class="portal-disc portal-disc-outer"></div>
+    <div class="portal-disc portal-disc-inner"></div>
+    <div class="portal-core-glow"></div>
+  </div>
+  <div class="hero-orbital-ring ring-1"></div>
+  <div class="hero-orbital-ring ring-2"></div>
   <div class="hero-light-beams"></div>
   <div class="hero-particles" id="hero-particles"></div>
 
+  <!-- 3D Floating Interactive Casino Elements (Calibrated Opacity & Depth) -->
+  <div class="hero-poker-chip chip-left-top" id="poker-chip-1" title="Degen City High Roller Token">
+    <img src="/poker-chip-1.png" alt="Futuristic 3D Poker Chip" draggable="false" />
+  </div>
+  <div class="hero-poker-chip chip-left-bottom" id="poker-chip-2" title="Big D VIP Casino Chip">
+    <img src="/poker-chip-2.png" alt="Futuristic 3D Poker Chip" draggable="false" />
+  </div>
+  <!-- 2 New Subtle Background Visuals (Right Side Balanced) -->
+  <div class="hero-poker-chip chip-right-top" id="poker-chip-gold" title="Big D High Roller Gold Token">
+    <img src="/poker-chip-gold.png" alt="Futuristic 3D Gold Casino Coin" draggable="false" />
+  </div>
+  <div class="hero-poker-chip chip-right-mid" id="cyber-dice" title="Degen City Quantum Dice">
+    <img src="/cyber-dice.png" alt="Futuristic 3D Cyber Dice" draggable="false" />
+  </div>
+
   <!-- Animated Glowing Aura Logo -->
-  <div class="hero-logo-container">
+  <div class="hero-logo-container" id="hero-parallax-logo">
     <div class="logo-aura-ring ring-outer"></div>
     <div class="logo-aura-ring ring-inner"></div>
     <div class="logo-halo-glow"></div>
@@ -3029,12 +3555,7 @@ transition:transform .1s linear;
     <span class="word-repeat">DOMINATE.</span>
   </h1>
 
-  <p class="hero-sub">Enter the ultimate competitive arena — rack up wagers, claim cash prizes, and rule the monthly leaderboards.</p>
-
-  <div class="hero-badge">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold-400)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <span>Tipped out <strong class="text-gold">$2,500+</strong> in live community rewards</span>
-  </div>
+  <p class="hero-sub">The #1 Community for Gamblers. Compete on live wager leaderboards, earn cash rewards, and unlock exclusive perks.</p>
 
   <!-- Hero Action Buttons (Join Discord | Watch Live Dynamic) -->
   <div class="hero-2btn-grid">
@@ -3050,6 +3571,65 @@ transition:transform .1s linear;
       <span>Watch Live</span>
       <span class="btn-status-tag" id="watch-live-status-tag">OFFLINE</span>
     </a>
+  </div>
+
+  <!-- FUTURISTIC 4-CARD HERO STATS HUD -->
+  <div class="hero-hud-stats-grid">
+    <!-- Stat 1: Community Wager -->
+    <div class="hero-hud-stat-card">
+      <div class="hud-stat-icon-wrap" style="color:var(--purple-400);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div class="hud-stat-info">
+        <div class="hud-stat-value">$<span id="stat-total-live">2,500</span><span class="val-sup">+</span></div>
+        <div class="hud-stat-label">Community Wager</div>
+      </div>
+    </div>
+
+    <!-- Stat 2: Active Period -->
+    <div class="hero-hud-stat-card">
+      <div class="hud-stat-icon-wrap" style="color:var(--purple-300);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="hud-stat-info">
+        <div class="hud-stat-value">August 2026</div>
+        <div class="hud-stat-label">Monthly Leaderboard</div>
+      </div>
+    </div>
+
+    <!-- Stat 3: Referred Members -->
+    <div class="hero-hud-stat-card">
+      <div class="hud-stat-icon-wrap" style="color:var(--gold-400);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="hud-stat-info">
+        <div class="hud-stat-value" id="stat-players"><span>24</span></div>
+        <div class="hud-stat-label">Active Members</div>
+      </div>
+    </div>
+
+    <!-- Stat 4: Rewards Given -->
+    <div class="hero-hud-stat-card">
+      <div class="hud-stat-icon-wrap" style="color:var(--magenta-400);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+      </div>
+      <div class="hud-stat-info">
+        <div class="hud-stat-value">$<span>2,500</span><span class="val-sup">+</span></div>
+        <div class="hud-stat-label">Rewards Given</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFICIAL PARTNERED SITE DOCK (DegenCity Only) -->
+  <div class="hero-partner-dock">
+    <div class="partner-dock-label">OFFICIAL PARTNERED SITE</div>
+    <div class="partner-capsules-wrap">
+      <a href="https://degencity.com" target="_blank" rel="noopener" class="partner-capsule partner-capsule-degencity" title="DegenCity — Use Code BIGD">
+        <span class="partner-capsule-icon">🎲</span>
+        <span class="partner-capsule-name">DegenCity</span>
+        <span class="partner-capsule-code">CODE: BIGD</span>
+      </a>
+    </div>
   </div>
 
   <!-- STAY CONNECTED SOCIALS (6 CARDS: YouTube, X, Instagram, Telegram, TikTok, Hall of Fame) -->
@@ -3735,11 +4315,11 @@ transition:transform .1s linear;
 </footer>
 
 <!-- ================================================================
-     EDGE BOT — Futuristic Skull
+     BIG D PIXEL ART FLOATING MASCOT (Discord Redirect)
      ================================================================ -->
-<!-- RACECAR BOT -->
-<div id="edge-bot">
-    <canvas id="racecar-canvas" width="192" height="104" aria-label="Ferrari edge bot" tabindex="0">Ferrari</canvas>
+<div id="edge-bot" title="Join Big D on Discord!" aria-label="Big D Mascot — Join Discord">
+    <img id="bigd-mascot-img" src="/bigd_pixel_mascot.png" alt="Big D Pixel Mascot" draggable="false" />
+    <div class="bigd-speech-bubble"><span>JOIN DISCORD!</span></div>
 </div>
 
 <!-- ================================================================
@@ -4705,449 +5285,114 @@ document.addEventListener('click', (e) => {
   }
 });
 
-
-
 /* ══════════════════════════════════════════════════════════
-   FERRARI EDGE BOT — perimeter orbit
+   BIG D 7-DAY PIXEL MASCOT ROTATION — Perimeter Orbit & Discord CTA
+   ══════════════════════════════════════════════════════════
+   Weekly Schedule:
+   0 = Sunday    -> Hustler         (/bigd-hustler.png)
+   1 = Monday    -> Gamer           (/bigd-gamer.png)
+   2 = Tuesday   -> Office          (/bigd-office.png)
+   3 = Wednesday -> Gambler         (/bigd-gambler.png)
+   4 = Thursday  -> Funky Casual    (/bigd-funky.png)
+   5 = Friday    -> Westside        (/bigd-westside.png)
+   6 = Saturday  -> Native American (/bigd-native.png)
    ══════════════════════════════════════════════════════════ */
-   (() => {
-
-const bot = document.getElementById("edge-bot");
-if (!bot) return;
-
-const canvas = document.getElementById("racecar-canvas");
-const ctx = canvas ? canvas.getContext("2d") : null;
-let t = 0;
-let mouseX = -9999;
-let mouseY = -9999;
-let soundPlaying = false;
-
-window.addEventListener("mousemove", e => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-});
-const speed = 0.00022;
-const engineSound = new Audio("assets/sounds/ferrari.mp3");
-engineSound.loop = true;
-engineSound.volume = 0.45;
-
-
-
-function getExhaustNoiseBuffer(){
-    if(carNoiseBuffer) return carNoiseBuffer;
-
-    const length = Math.floor(carAudioCtx.sampleRate * 0.6);
-    carNoiseBuffer = carAudioCtx.createBuffer(1, length, carAudioCtx.sampleRate);
-
-    const data = carNoiseBuffer.getChannelData(0);
-    let last = 0, last2 = 0;
-
-    for(let i = 0; i < length; i++){
-        const white = Math.random()*2 - 1;
-        last = 0.84*last + 0.16*white;
-        last2 = white - last;
-        data[i] = (last2 + white*0.18) * 0.72;
-    }
-
-    return carNoiseBuffer;
-}
-
-function makeExhaustCurve(){
-    const curve = new Float32Array(512);
-    const amount = 2.6;
-
-    for(let i = 0; i < curve.length; i++){
-        const x = i*2/curve.length - 1;
-        curve[i] = Math.tanh(x*amount);
-    }
-
-    return curve;
-}
-// Sound plays continuously once user first interacts with page
-let soundStarted = false;
-function startCarSound() {
-    if (soundStarted) return;
-    soundStarted = true;
-    soundPlaying = true;
-    engineSound.currentTime = 0;
-    engineSound.play().catch(() => { soundStarted = false; soundPlaying = false; });
-}
-function stopCarSound() {
-    // No-op: keep sound running continuously once started
-}
-// Auto-start on first user gesture (click/keydown/touchstart)
-['click','keydown','touchstart','scroll'].forEach(ev =>
-    document.addEventListener(ev, () => startCarSound(), { once: true })
-);
-
-/*function startCarSound(){
-    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
-    if(!AudioContextCtor) return;
-
-    if(!carAudioCtx) carAudioCtx = new AudioContextCtor();
-    if(carAudioCtx.state === "suspended") carAudioCtx.resume().catch(() => {});
-    if(carSoundNodes) return;
-
-    const now = carAudioCtx.currentTime;
-    const exhaust = carAudioCtx.createBufferSource();
-    const fundamental = carAudioCtx.createOscillator();
-    const overtone = carAudioCtx.createOscillator();
-    const scream = carAudioCtx.createOscillator();
-    const crackle = carAudioCtx.createOscillator();
-    const exhaustFilter = carAudioCtx.createBiquadFilter();
-    const screamFilter = carAudioCtx.createBiquadFilter();
-    const pulseFilter = carAudioCtx.createBiquadFilter();
-    const exhaustGain = carAudioCtx.createGain();
-    const fundamentalGain = carAudioCtx.createGain();
-    const overtoneGain = carAudioCtx.createGain();
-    const screamGain = carAudioCtx.createGain();
-    const crackleGain = carAudioCtx.createGain();
-    const drive = carAudioCtx.createWaveShaper();
-    const masterGain = carAudioCtx.createGain();
-
-    exhaust.buffer = getExhaustNoiseBuffer();
-    exhaust.loop = true;
-
-    fundamental.type = "sawtooth";
-    overtone.type = "triangle";
-    scream.type = "sawtooth";
-    crackle.type = "square";
-
-    exhaustFilter.type = "bandpass";
-    screamFilter.type = "bandpass";
-    pulseFilter.type = "lowpass";
-    drive.curve = makeExhaustCurve();
-
-    fundamental.frequency.setValueAtTime(155, now);
-    overtone.frequency.setValueAtTime(310, now);
-    scream.frequency.setValueAtTime(620, now);
-    crackle.frequency.setValueAtTime(58, now);
-    exhaustFilter.frequency.setValueAtTime(1450, now);
-    exhaustFilter.Q.setValueAtTime(5.2, now);
-    screamFilter.frequency.setValueAtTime(2100, now);
-    screamFilter.Q.setValueAtTime(7.5, now);
-    pulseFilter.frequency.setValueAtTime(280, now);
-
-    exhaustGain.gain.setValueAtTime(0.0001, now);
-    fundamentalGain.gain.setValueAtTime(0.0001, now);
-    overtoneGain.gain.setValueAtTime(0.0001, now);
-    screamGain.gain.setValueAtTime(0.0001, now);
-    crackleGain.gain.setValueAtTime(0.0001, now);
-    masterGain.gain.setValueAtTime(0.0001, now);
-
-exhaustGain.gain.exponentialRampToValueAtTime(0.035, now + 0.01);
-fundamentalGain.gain.exponentialRampToValueAtTime(0.042, now + 0.01);
-overtoneGain.gain.exponentialRampToValueAtTime(0.032, now + 0.01);
-screamGain.gain.exponentialRampToValueAtTime(0.02, now + 0.01);
-crackleGain.gain.exponentialRampToValueAtTime(0.006, now + 0.01);
-masterGain.gain.exponentialRampToValueAtTime(0.62, now + 0.01);
-
-    exhaust.connect(exhaustFilter);
-    exhaustFilter.connect(exhaustGain);
-    exhaustGain.connect(drive);
-
-    fundamental.connect(fundamentalGain);
-    fundamentalGain.connect(drive);
-
-    overtone.connect(overtoneGain);
-    overtoneGain.connect(drive);
-
-    scream.connect(screamFilter);
-    screamFilter.connect(screamGain);
-    screamGain.connect(drive);
-
-    crackle.connect(pulseFilter);
-    pulseFilter.connect(crackleGain);
-    crackleGain.connect(drive);
-
-    drive.connect(masterGain);
-    masterGain.connect(carAudioCtx.destination);
-
-    exhaust.start(now);
-    fundamental.start(now);
-    overtone.start(now);
-    scream.start(now);
-    crackle.start(now);
-    carSoundNodes = { exhaust, fundamental, overtone, scream, crackle, exhaustFilter, screamFilter, exhaustGain, fundamentalGain, overtoneGain, screamGain, crackleGain, masterGain };
-
-    function updateExhaust(){
-        if(!carSoundNodes) return;
-        const tick = carAudioCtx.currentTime;
-        const rev = 0.5 + Math.sin(tick*5.4)*0.5;
-        const tremble = 0.5 + Math.sin(tick*43)*0.5;
-        const rough = Math.random();
-        const base = 150 + rev*84 + rough*8;
-
-        fundamental.frequency.setTargetAtTime(base, tick, 0.035);
-        overtone.frequency.setTargetAtTime(base*2.01, tick, 0.035);
-        scream.frequency.setTargetAtTime(base*4.03, tick, 0.035);
-        crackle.frequency.setTargetAtTime(48 + tremble*34 + rough*45, tick, 0.025);
-        exhaustFilter.frequency.setTargetAtTime(1150 + rev*1900 + rough*320, tick, 0.04);
-        screamFilter.frequency.setTargetAtTime(1900 + rev*1700, tick, 0.04);
-
-        exhaustGain.gain.setTargetAtTime(0.024 + rev*0.025 + rough*0.01, tick, 0.035);
-        fundamentalGain.gain.setTargetAtTime(0.034 + rev*0.022, tick, 0.035);
-        overtoneGain.gain.setTargetAtTime(0.021 + rev*0.02, tick, 0.035);
-        screamGain.gain.setTargetAtTime(0.014 + rev*0.028, tick, 0.035);
-        crackleGain.gain.setTargetAtTime(rough > 0.7 ? 0.018 : 0.003, tick, 0.02);
-
-        carSoundTimer = setTimeout(updateExhaust, 55);
-    }
-
-    updateExhaust();
-}*/
-
-/*function stopCarSound(){
-    if(!carSoundNodes || !carAudioCtx) return;
-
-    clearTimeout(carSoundTimer);
-    carSoundTimer = null;
-
-    const { exhaust, fundamental, overtone, scream, crackle, exhaustGain, fundamentalGain, overtoneGain, screamGain, crackleGain, masterGain } = carSoundNodes;
-    const now = carAudioCtx.currentTime;
-
-    exhaustGain.gain.cancelScheduledValues(now);
-    fundamentalGain.gain.cancelScheduledValues(now);
-    overtoneGain.gain.cancelScheduledValues(now);
-    screamGain.gain.cancelScheduledValues(now);
-    crackleGain.gain.cancelScheduledValues(now);
-    masterGain.gain.cancelScheduledValues(now);
-
-   exhaustGain.gain.setTargetAtTime(0.0001, now, 0.01);
-fundamentalGain.gain.setTargetAtTime(0.0001, now, 0.01);
-overtoneGain.gain.setTargetAtTime(0.0001, now, 0.01);
-screamGain.gain.setTargetAtTime(0.0001, now, 0.01);
-crackleGain.gain.setTargetAtTime(0.0001, now, 0.01);
-masterGain.gain.setTargetAtTime(0.0001, now, 0.01);
-
-   /* exhaust.stop(now + 0.2);
-  fundamental.stop(now + 0.2);
-    overtone.stop(now + 0.2);
-    scream.stop(now + 0.2);
-    crackle.stop(now + 0.2);
-    carSoundNodes = null;*/
-//} 
-
-
-function drawFerrari(frame){
-    if(!ctx) return;
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const cssW = 96; const cssH = 52;
-    if(canvas.width !== cssW*dpr || canvas.height !== cssH*dpr){
-        canvas.width = cssW*dpr; canvas.height = cssH*dpr;
-    }
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    ctx.clearRect(0,0,cssW,cssH);
-    const spin = frame*28;
-    const flame = 5 + Math.sin(frame*88)*3;
-    const pulse = 0.7 + Math.sin(frame*60)*0.3;
-    ctx.save();
-    ctx.translate(2,4);
-
-    // Exhaust flame
-    ctx.globalAlpha = 0.55*pulse;
-    const flameGrad = ctx.createLinearGradient(0,24,flame+8,24);
-    flameGrad.addColorStop(0,'#fff4a0'); flameGrad.addColorStop(0.4,'#ff8c00'); flameGrad.addColorStop(1,'rgba(255,30,0,0)');
-    ctx.fillStyle = flameGrad;
-    ctx.beginPath(); ctx.moveTo(6,26); ctx.lineTo(0,23); ctx.lineTo(0,29); ctx.lineTo(6,30); ctx.closePath(); ctx.fill();
-    ctx.globalAlpha = 0.35*pulse;
-    ctx.fillStyle='#ffff00';
-    ctx.beginPath(); ctx.ellipse(3,26,flame*0.5,2,0,0,Math.PI*2); ctx.fill();
-    ctx.globalAlpha = 1;
-
-    // Floor/diffuser (carbon black)
-    ctx.fillStyle='#1a1a1a';
-    ctx.beginPath(); ctx.moveTo(10,38); ctx.lineTo(82,38); ctx.lineTo(88,36); ctx.lineTo(6,36); ctx.closePath(); ctx.fill();
-
-    // Side pods
-    ctx.fillStyle='#cc0000';
-    ctx.beginPath(); ctx.moveTo(16,33); ctx.lineTo(30,26); ctx.lineTo(60,26); ctx.lineTo(70,33); ctx.lineTo(16,33); ctx.closePath(); ctx.fill();
-
-    // Main body — Ferrari Rosso Corsa gradient
-    const body = ctx.createLinearGradient(8,12,88,36);
-    body.addColorStop(0,'#9b0000'); body.addColorStop(0.3,'#e00000'); body.addColorStop(0.55,'#ff2020'); body.addColorStop(1,'#8b0000');
-    ctx.fillStyle = body;
-    ctx.beginPath();
-    ctx.moveTo(8,35); ctx.bezierCurveTo(14,22,26,14,44,13); ctx.lineTo(62,13);
-    ctx.bezierCurveTo(76,14,85,22,88,34); ctx.lineTo(80,36); ctx.lineTo(14,36); ctx.closePath(); ctx.fill();
-
-    // Body highlight stripe
-    ctx.globalAlpha=0.18;
-    ctx.fillStyle='#ffffff';
-    ctx.beginPath(); ctx.moveTo(20,22); ctx.bezierCurveTo(35,16,55,15,70,20); ctx.lineTo(70,23); ctx.bezierCurveTo(55,18,35,19,20,25); ctx.closePath(); ctx.fill();
-    ctx.globalAlpha=1;
-
-    // Nose cone (pointed)
-    const nose = ctx.createLinearGradient(76,20,92,34);
-    nose.addColorStop(0,'#cc0000'); nose.addColorStop(1,'#500000');
-    ctx.fillStyle=nose;
-    ctx.beginPath(); ctx.moveTo(80,34); ctx.bezierCurveTo(85,30,90,28,92,30); ctx.lineTo(90,34); ctx.closePath(); ctx.fill();
-
-    // Cockpit / chassis opening
-    ctx.fillStyle='#0a0a14';
-    ctx.beginPath(); ctx.ellipse(48,20,14,5,0,0,Math.PI*2); ctx.fill();
-    // cockpit glass tint
-    ctx.fillStyle='rgba(100,150,255,0.15)';
-    ctx.beginPath(); ctx.ellipse(48,20,12,4,0,0,Math.PI*2); ctx.fill();
-
-    // Halo bar
-    ctx.strokeStyle='#888'; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.moveTo(38,17); ctx.bezierCurveTo(43,14,53,14,58,17); ctx.stroke();
-
-    // Front wing
-    ctx.fillStyle='#111';
-    ctx.beginPath(); ctx.moveTo(72,35); ctx.lineTo(90,35); ctx.lineTo(91,38); ctx.lineTo(71,38); ctx.closePath(); ctx.fill();
-    ctx.fillStyle='#cc0000';
-    ctx.fillRect(74,33,14,2);
-
-    // Rear wing
-    ctx.fillStyle='#cc0000';
-    ctx.fillRect(8,15,16,2.5);
-    ctx.fillStyle='#111';
-    ctx.fillRect(8,18,16,1.5);
-
-    // Ferrari prancing horse badge (small yellow rect)
-    ctx.fillStyle='#ffd700';
-    ctx.fillRect(44,24,8,4);
-    ctx.fillStyle='#111';
-    ctx.font='bold 3.5px Orbitron,sans-serif';
-    ctx.textAlign='center'; ctx.fillText('SF',48,27.5);
-
-    // Wheels (larger, realistic)
-    const wheelPositions = [{x:22,y:37,r:8},{x:70,y:37,r:8}];
-    wheelPositions.forEach(w=>{
-        // tyre
-        ctx.fillStyle='#111';
-        ctx.beginPath(); ctx.arc(w.x,w.y,w.r,0,Math.PI*2); ctx.fill();
-        // rim
-        const rimGrad = ctx.createRadialGradient(w.x,w.y,1,w.x,w.y,w.r-2);
-        rimGrad.addColorStop(0,'#cccccc'); rimGrad.addColorStop(1,'#444');
-        ctx.fillStyle=rimGrad;
-        ctx.beginPath(); ctx.arc(w.x,w.y,w.r-2,0,Math.PI*2); ctx.fill();
-        // spokes
-        ctx.strokeStyle='#999'; ctx.lineWidth=1.5;
-        for(let s=0;s<5;s++){
-            const a=spin+s*(Math.PI*2/5);
-            ctx.save(); ctx.translate(w.x,w.y); ctx.rotate(a);
-            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-(w.r-2)); ctx.stroke();
-            ctx.restore();
-        }
-        // center cap
-        ctx.fillStyle='#ffd700';
-        ctx.beginPath(); ctx.arc(w.x,w.y,2,0,Math.PI*2); ctx.fill();
-    });
-
-    // Brake glow (blue inside front wheel)
-    ctx.globalAlpha=0.35*pulse;
-    ctx.fillStyle='#4488ff';
-    ctx.beginPath(); ctx.arc(22,37,4,0,Math.PI*2); ctx.fill();
-    ctx.globalAlpha=1;
-
-    ctx.restore();
-}
-
-function point(t){
-
-    const margin = 12;
-    const botW = bot.offsetWidth || 96;
-    const botH = bot.offsetHeight || 52;
-
-    const minX = margin + botW/2;
-    const maxX = Math.max(minX, window.innerWidth - margin - botW/2);
-    const minY = margin + botH/2;
-    const maxY = Math.max(minY, window.innerHeight - margin - botH/2);
-
-    const w = maxX-minX;
-    const h = maxY-minY;
-
-    const total = 2*(w+h);
-
-    let d = (t%1)*total;
-
-    if(d < w)
-        return {x:minX+d,y:minY};
-
+(() => {
+  const bot = document.getElementById("edge-bot");
+  const mascotImg = document.getElementById("bigd-mascot-img");
+  if (!bot || !mascotImg) return;
+
+  const DAILY_MASCOTS = {
+    1: { name: 'Gamer', src: '/bigd-gamer.png', alt: 'Big D — Gamer' },
+    2: { name: 'Office', src: '/bigd-office.png', alt: 'Big D — Office' },
+    3: { name: 'Gambler', src: '/bigd-gambler.png', alt: 'Big D — Gambler' },
+    4: { name: 'Funky Casual', src: '/bigd-funky.png', alt: 'Big D — Funky Casual' },
+    5: { name: 'Westside', src: '/bigd-westside.png', alt: 'Big D — Westside' },
+    6: { name: 'Native American', src: '/bigd-native.png', alt: 'Big D — Native American' },
+    0: { name: 'Hustler', src: '/bigd-hustler.png', alt: 'Big D — Hustler' }
+  };
+
+  // Support URL testing override e.g. ?mascot=gamer or ?day=1
+  const urlParams = new URLSearchParams(window.location.search);
+  const mascotOverride = urlParams.get('mascot') ? urlParams.get('mascot').toLowerCase() : null;
+  const dayOverride = urlParams.get('day') !== null ? parseInt(urlParams.get('day'), 10) : null;
+
+  let currentMascot;
+  if (mascotOverride) {
+    const map = {
+      gamer: DAILY_MASCOTS[1],
+      office: DAILY_MASCOTS[2],
+      gambler: DAILY_MASCOTS[3],
+      funky: DAILY_MASCOTS[4],
+      westside: DAILY_MASCOTS[5],
+      native: DAILY_MASCOTS[6],
+      hustler: DAILY_MASCOTS[0]
+    };
+    currentMascot = map[mascotOverride] || DAILY_MASCOTS[1];
+  } else if (dayOverride !== null && DAILY_MASCOTS[dayOverride]) {
+    currentMascot = DAILY_MASCOTS[dayOverride];
+  } else {
+    const today = new Date().getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+    currentMascot = DAILY_MASCOTS[today] || DAILY_MASCOTS[1];
+  }
+
+  mascotImg.src = currentMascot.src;
+  mascotImg.alt = currentMascot.alt;
+  bot.setAttribute('title', `Big D (${currentMascot.name}) — Join Discord!`);
+
+  let t = 0;
+  const speed = 0.00018; // smooth, steady orbit pace
+
+  function point(t) {
+    const margin = 16;
+    const botW = bot.offsetWidth || 72;
+    const botH = bot.offsetHeight || 110;
+
+    const minX = margin + botW / 2;
+    const maxX = Math.max(minX, window.innerWidth - margin - botW / 2);
+    const minY = margin + botH / 2 + 50; // keep below navbar
+    const maxY = Math.max(minY, window.innerHeight - margin - botH / 2 - 40);
+
+    const w = maxX - minX;
+    const h = maxY - minY;
+    const total = 2 * (w + h);
+
+    let d = (t % 1) * total;
+
+    if (d < w) return { x: minX + d, y: minY, edge: 'top' };
     d -= w;
-
-    if(d < h)
-        return {x:maxX,y:minY+d};
-
+    if (d < h) return { x: maxX, y: minY + d, edge: 'right' };
     d -= h;
-
-    if(d < w)
-        return {x:maxX-d,y:maxY};
-
+    if (d < w) return { x: maxX - d, y: maxY, edge: 'bottom' };
     d -= w;
+    return { x: minX, y: maxY - d, edge: 'left' };
+  }
 
-    return {x:minX,y:maxY-d};
-}
-
-function animate(){
-
+  function animate() {
     requestAnimationFrame(animate);
-
     t += speed;
-    drawFerrari(t);
 
-    const p1 = point(t);
-    const p2 = point(t+0.0005);
+    const pos = point(t);
+    bot.style.left = pos.x + "px";
+    bot.style.top = pos.y + "px";
 
-    const angle = Math.atan2(
-        p2.y-p1.y,
-        p2.x-p1.x
-    );
+    // Keep character upright while facing left/right based on perimeter direction
+    const facingLeft = pos.edge === 'bottom' || pos.edge === 'left';
+    bot.style.transform = `translate(-50%, -50%) scaleX(${facingLeft ? -1 : 1})`;
 
-    bot.style.left = p1.x+"px";
-    bot.style.top = p1.y+"px";
+    // Keep speech bubble text un-mirrored
+    const bubble = bot.querySelector('.bigd-speech-bubble');
+    if (bubble) {
+      bubble.style.transform = facingLeft ? 'scaleX(-1)' : 'none';
+    }
+  }
 
-    // Fix upside-down car: when traveling left (bottom/left edges), flip vertically
-    const goingLeft = Math.abs(angle) > Math.PI / 2;
-    bot.style.transform =
-        `translate(-50%,-50%) rotate(${angle}rad) scaleY(${goingLeft ? -1 : 1})`;
-const rect = bot.getBoundingClientRect();
+  animate();
 
-const hovering =
-    mouseX >= rect.left &&
-    mouseX <= rect.right &&
-    mouseY >= rect.top &&
-    mouseY <= rect.bottom;
-
-if (hovering && !soundPlaying) {
-    soundPlaying = true;
-    startCarSound();
-}
-
-if (!hovering && soundPlaying) {
-    soundPlaying = false;
-    stopCarSound();
-}
-}
-
-animate();
-
-let hovering = false;
-
-bot.addEventListener("mouseenter", () => {
-    hovering = true;
-    startCarSound();
-});
-
-bot.addEventListener("mouseleave", () => {
-    hovering = false;
-    stopCarSound();
-});
-
-// Accessibility for keyboard users
-bot.addEventListener("focus", startCarSound);
-bot.addEventListener("blur", stopCarSound);
-
-bot.onclick = () => {
-    window.open(
-        "https://discord.gg/aHSVMX4DCr",
-        "_blank"
-    );
-};
-
+  // Click redirects directly to official Discord
+  bot.onclick = () => {
+    window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
+  };
 })();
 </script>
 <div id="hud-ticker">
@@ -5196,6 +5441,183 @@ bot.onclick = () => {
           loginBtn.onclick = () => loginWithDiscord();
         }
       });
+    </script>
+    <!-- ============================================================
+         COSMIC STARFIELD & INTERACTIVE MOUSE PARALLAX ENGINE
+         ============================================================ -->
+    <script>
+    (() => {
+      // 1. Interactive Starfield Canvas in Hero
+      const canvas = document.getElementById('hero-cosmos-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      let width = 0;
+      let height = 0;
+      let stars = [];
+      const STAR_COUNT = 120;
+
+      function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = canvas.parentElement.offsetWidth;
+        height = canvas.parentElement.offsetHeight;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function initStars() {
+        stars = [];
+        for (let i = 0; i < STAR_COUNT; i++) {
+          stars.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: Math.random() < 0.2 ? 1.5 + Math.random() * 1.2 : 0.6 + Math.random() * 0.8,
+            type: Math.random() < 0.15 ? 'glow' : 'tiny', // tiny, glow
+            alpha: 0.2 + Math.random() * 0.7,
+            speed: 0.003 + Math.random() * 0.008,
+            color: Math.random() < 0.35 ? '#d946ef' : (Math.random() < 0.5 ? '#f5c451' : '#a855f7'),
+            twinkleOffset: Math.random() * Math.PI * 2,
+            layer: Math.random() < 0.5 ? 1 : 2 // layer 1 = far, layer 2 = medium
+          });
+        }
+      }
+
+      let mouseTargetX = 0;
+      let mouseTargetY = 0;
+      let mouseCurrentX = 0;
+      let mouseCurrentY = 0;
+      const mouseFollower = document.getElementById('mouse-glow-follower');
+
+      window.addEventListener('mousemove', (e) => {
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        mouseTargetX = (e.clientX - centerX) / centerX; // -1 to 1
+        mouseTargetY = (e.clientY - centerY) / centerY;
+
+        if (mouseFollower) {
+          mouseFollower.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
+        }
+      });
+
+      let shootingStar = null;
+      let nextShootingStar = Date.now() + 15000;
+
+      function drawStar(star, time, parallaxX, parallaxY) {
+        const shiftX = parallaxX * (star.layer === 1 ? 4 : 10);
+        const shiftY = parallaxY * (star.layer === 1 ? 3 : 8);
+        const px = (star.x + shiftX + width) % width;
+        const py = (star.y + shiftY + height) % height;
+
+        const twinkle = 0.5 + 0.5 * Math.sin(time * star.speed * 60 + star.twinkleOffset);
+        const a = star.alpha * twinkle;
+
+        ctx.fillStyle = star.color;
+        ctx.globalAlpha = a;
+
+        if (star.type === 'glow') {
+          // Luminous 4-point star cross
+          ctx.beginPath();
+          ctx.arc(px, py, star.radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = star.color;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(px - star.radius * 3, py);
+          ctx.lineTo(px + star.radius * 3, py);
+          ctx.moveTo(px, py - star.radius * 3);
+          ctx.lineTo(px, py + star.radius * 3);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.arc(px, py, star.radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      function render(time) {
+        requestAnimationFrame(render);
+        if (!width || !height) return;
+
+        // Smooth parallax interpolation
+        mouseCurrentX += (mouseTargetX - mouseCurrentX) * 0.05;
+        mouseCurrentY += (mouseTargetY - mouseCurrentY) * 0.05;
+
+        ctx.clearRect(0, 0, width, height);
+
+        // Render layered starfield
+        for (let s of stars) {
+          drawStar(s, time, mouseCurrentX, mouseCurrentY);
+        }
+
+        // Occasional shooting star
+        if (Date.now() > nextShootingStar && !shootingStar) {
+          shootingStar = {
+            x: Math.random() * width * 0.7,
+            y: Math.random() * height * 0.4,
+            len: 120 + Math.random() * 80,
+            speed: 14 + Math.random() * 8,
+            progress: 0,
+            angle: Math.PI / 5
+          };
+          nextShootingStar = Date.now() + 20000 + Math.random() * 15000;
+        }
+
+        if (shootingStar) {
+          const sx = shootingStar.x + Math.cos(shootingStar.angle) * shootingStar.progress;
+          const sy = shootingStar.y + Math.sin(shootingStar.angle) * shootingStar.progress;
+          const tailX = sx - Math.cos(shootingStar.angle) * shootingStar.len;
+          const tailY = sy - Math.sin(shootingStar.angle) * shootingStar.len;
+
+          const grad = ctx.createLinearGradient(tailX, tailY, sx, sy);
+          grad.addColorStop(0, 'rgba(217, 70, 239, 0)');
+          grad.addColorStop(0.7, 'rgba(168, 85, 247, 0.6)');
+          grad.addColorStop(1, '#ffffff');
+
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(tailX, tailY);
+          ctx.lineTo(sx, sy);
+          ctx.stroke();
+
+          shootingStar.progress += shootingStar.speed;
+          if (shootingStar.progress > width * 0.8) {
+            shootingStar = null;
+          }
+        }
+
+        // Hero Logo Subtle Parallax
+        const logo = document.getElementById('hero-parallax-logo');
+        if (logo) {
+          logo.style.transform = `translate3d(${mouseCurrentX * 8}px, ${mouseCurrentY * 6}px, 0)`;
+        }
+
+        // 3D Floating Casino Elements Parallax (Multi-Depth Physics)
+        const chip1 = document.getElementById('poker-chip-1');
+        if (chip1) {
+          chip1.style.transform = `translate3d(${mouseCurrentX * -18}px, ${mouseCurrentY * -14}px, 0)`;
+        }
+        const chip2 = document.getElementById('poker-chip-2');
+        if (chip2) {
+          chip2.style.transform = `translate3d(${mouseCurrentX * 14}px, ${mouseCurrentY * 16}px, 0)`;
+        }
+        const goldChip = document.getElementById('poker-chip-gold');
+        if (goldChip) {
+          goldChip.style.transform = `translate3d(${mouseCurrentX * 16}px, ${mouseCurrentY * -12}px, 0)`;
+        }
+        const cyberDice = document.getElementById('cyber-dice');
+        if (cyberDice) {
+          cyberDice.style.transform = `translate3d(${mouseCurrentX * -12}px, ${mouseCurrentY * 18}px, 0)`;
+        }
+      }
+
+      window.addEventListener('resize', () => { resize(); initStars(); });
+      resize();
+      initStars();
+      requestAnimationFrame(render);
+    })();
     </script>
     <!-- <script src="/blackjack/blackjack-engine.js"></script> -->
     <!-- <script src="/blackjack/blackjack-ui.js"></script> -->

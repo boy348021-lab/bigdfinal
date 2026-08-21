@@ -379,3 +379,14 @@ onAuthReady((user) => {
 // Start auth boot
 bootAuth();
 
+// Initialize Big D Floating Kick Widget
+(function loadKickWidget() {
+  if (document.getElementById('bigd-kick-widget-script')) return;
+  const s = document.createElement('script');
+  s.id = 'bigd-kick-widget-script';
+  s.src = '/kick-widget.js';
+  s.defer = true;
+  document.body ? document.body.appendChild(s) : document.addEventListener('DOMContentLoaded', () => document.body.appendChild(s));
+})();
+
+
