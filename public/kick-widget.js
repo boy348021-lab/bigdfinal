@@ -139,34 +139,38 @@
       color: #00e701;
     }
 
-    /* Header Minimize Button */
+    /* Header Minimize / Toggle Button */
     .bkw-btn-min {
-      width: 22px;
-      height: 22px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 6px;
-      color: #a49bc2;
+      width: 28px;
+      height: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: bold;
+      font-size: 1rem;
+      font-weight: 900;
       line-height: 1;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
       padding: 0;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0;
     }
 
-    .bkw-btn-min:hover {
-      background: rgba(190, 77, 255, 0.25);
-      border-color: rgba(190, 77, 255, 0.5);
+    .bkw-btn-min:hover, .bkw-btn-min:active {
+      background: rgba(168, 85, 247, 0.35);
+      border-color: rgba(168, 85, 247, 0.8);
       color: #ffffff;
+      transform: scale(1.08);
     }
 
     /* Widget Body */
     .bkw-body {
-      padding: 16px 18px 18px 18px;
+      padding: 14px 16px 16px 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -175,16 +179,16 @@
 
     /* TV Avatar Container */
     .bkw-avatar-wrap {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(157, 0, 255, 0.3);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.85rem;
-      margin-bottom: 12px;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(157, 0, 255, 0.15);
       position: relative;
     }
@@ -196,37 +200,37 @@
 
     /* Text Block */
     .bkw-text-box {
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       width: 100%;
     }
 
     .bkw-text-main {
       font-family: var(--font-display, 'Orbitron', sans-serif);
-      font-size: 0.84rem;
+      font-size: 0.82rem;
       font-weight: 700;
       color: #ffffff;
       letter-spacing: 0.02em;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
       white-space: nowrap;
     }
 
     .bkw-text-sub {
       font-family: var(--font-ui, 'Rajdhani', sans-serif);
-      font-size: 0.76rem;
+      font-size: 0.74rem;
       font-weight: 600;
       color: #8c84a8;
       letter-spacing: 0.02em;
-      line-height: 1.3;
+      line-height: 1.25;
     }
 
     /* Action CTA Button */
     .bkw-cta-btn {
       width: 100%;
-      height: 38px;
+      height: 36px;
       box-sizing: border-box;
       border-radius: 8px;
       font-family: var(--font-ui, 'Rajdhani', sans-serif);
-      font-size: 0.88rem;
+      font-size: 0.84rem;
       font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -241,28 +245,22 @@
 
     /* Offline Button Style: Kick Green Glass Outline */
     .bkw-cta-btn.btn-offline {
-      background: rgba(0, 231, 1, 0.05);
+      background: rgba(0, 231, 1, 0.06);
       border: 1px solid rgba(0, 231, 1, 0.45);
       color: #00e701;
       box-shadow: 0 0 14px rgba(0, 231, 1, 0.12);
     }
 
-    .bkw-cta-btn.btn-offline:hover {
-      background: rgba(0, 231, 1, 0.16);
+    .bkw-cta-btn.btn-offline:hover, .bkw-cta-btn.btn-offline:active {
+      background: rgba(0, 231, 1, 0.18);
       border-color: #00e701;
       box-shadow: 0 0 20px rgba(0, 231, 1, 0.35);
-      transform: translateY(-1px);
       color: #ffffff;
     }
 
     .bkw-cta-btn.btn-offline svg {
       color: #00e701;
       transition: transform 0.2s ease;
-    }
-
-    .bkw-cta-btn.btn-offline:hover svg {
-      transform: scale(1.15);
-      color: #ffffff;
     }
 
     /* Live Button Style: Solid Glowing Kick Green */
@@ -275,10 +273,9 @@
       animation: bkw-live-glow 2s infinite ease-in-out;
     }
 
-    .bkw-cta-btn.btn-live:hover {
+    .bkw-cta-btn.btn-live:hover, .bkw-cta-btn.btn-live:active {
       background: linear-gradient(90deg, #1aff1a, #00d901);
       box-shadow: 0 0 30px rgba(0, 231, 1, 0.8);
-      transform: scale(1.02);
       color: #000000;
     }
 
@@ -289,33 +286,63 @@
 
     /* Minimized Compact Mode */
     #bigd-kick-floating-widget.is-minimized {
-      width: auto;
+      width: auto !important;
       border-radius: 20px;
     }
 
     #bigd-kick-floating-widget.is-minimized .bkw-body {
-      display: none;
+      display: none !important;
     }
 
     #bigd-kick-floating-widget.is-minimized .bkw-header {
-      padding: 6px 12px;
+      padding: 6px 10px;
       border-bottom: none;
-      gap: 10px;
+      gap: 8px;
     }
 
+    /* Mobile Phones (Compact & Perfectly Scaled) */
     @media (max-width: 600px) {
       #bigd-kick-floating-widget {
-        width: 250px;
+        width: 210px;
+        border-radius: 12px;
+      }
+      .bkw-header {
+        padding: 8px 10px;
+      }
+      .bkw-channel-link {
+        font-size: 0.68rem;
+      }
+      .bkw-status-pill {
+        padding: 3px 6px;
+        font-size: 0.62rem;
+      }
+      .bkw-btn-min {
+        width: 26px;
+        height: 26px;
+        font-size: 0.95rem;
+      }
+      .bkw-body {
+        padding: 10px 12px 12px 12px;
+      }
+      .bkw-avatar-wrap {
+        width: 36px;
+        height: 36px;
+        font-size: 1.25rem;
+        margin-bottom: 6px;
+      }
+      .bkw-text-box {
+        margin-bottom: 8px;
       }
       .bkw-text-main {
-        font-size: 0.78rem;
-      }
-      .bkw-text-sub {
         font-size: 0.72rem;
       }
+      .bkw-text-sub {
+        font-size: 0.66rem;
+      }
       .bkw-cta-btn {
-        height: 35px;
-        font-size: 0.82rem;
+        height: 30px;
+        font-size: 0.74rem;
+        border-radius: 6px;
       }
     }
   `;
@@ -419,8 +446,11 @@
   const header = document.getElementById('bigd-kick-widget-header');
   const minBtn = document.getElementById('bkw-btn-min');
 
-  minBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
+  function toggleMinimize(e) {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     isMinimized = !isMinimized;
     widget.classList.toggle('is-minimized', isMinimized);
     minBtn.textContent = isMinimized ? '+' : '−';
@@ -429,10 +459,13 @@
     } catch (err) {}
     const rect = widget.getBoundingClientRect();
     applyPosition(rect.left, rect.top);
-  });
+  }
+
+  minBtn.addEventListener('click', toggleMinimize);
+  minBtn.addEventListener('touchend', toggleMinimize);
 
   function onPointerDown(e) {
-    if (e.target.closest('button') || e.target.closest('a')) return;
+    if (e.target.closest('#bkw-btn-min') || e.target.closest('button') || e.target.closest('a')) return;
 
     isDragging = true;
     hasMoved = false;
