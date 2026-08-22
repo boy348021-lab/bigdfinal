@@ -601,18 +601,94 @@ footer a:hover { color: var(--purple-200); }
 .ticker-sep { color: rgba(136,0,255,0.5); padding: 0 4px; }
 @keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-/* ─── FERRARI EDGE BOT ───────────────────────────────────── */
+/* ─── BIG D FLOATING PIXEL MASCOT ────────────────────────── */
 #edge-bot {
-  position: fixed; width: 96px; height: 52px;
-  z-index: 9999; cursor: pointer; pointer-events: auto;
-  transform-origin: center center;
-}
-#racecar-canvas {
-  display: block;
-  width: 96px;
-  height: 52px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 72px;
+  height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
   touch-action: manipulation;
-  filter: drop-shadow(0 0 10px rgba(255, 30, 30, 0.55)) drop-shadow(0 0 18px rgba(255, 186, 0, 0.25));
+  transition: transform 0.15s ease-out;
+  filter: drop-shadow(0 0 14px rgba(157, 0, 255, 0.45)) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.7));
+}
+
+#edge-bot:hover {
+  filter: drop-shadow(0 0 22px rgba(190, 77, 255, 0.8)) drop-shadow(0 0 35px rgba(0, 231, 1, 0.4)) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.85));
+}
+
+#bigd-mascot-img {
+  width: 68px;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  display: block;
+  pointer-events: none;
+  animation: bigd-idle-float 2.6s ease-in-out infinite alternate;
+}
+
+@keyframes bigd-idle-float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(-1.5deg); }
+  100% { transform: translateY(-2px) rotate(1.5deg); }
+}
+
+/* Playful Hover Speech Bubble */
+.bigd-speech-bubble {
+  position: absolute;
+  top: -26px;
+  white-space: nowrap;
+  background: linear-gradient(90deg, #5865f2, #7983f5);
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  font-family: var(--font-display, 'Orbitron', sans-serif);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  box-shadow: 0 4px 15px rgba(88, 101, 242, 0.6);
+  opacity: 0;
+  transform: translateY(6px) scale(0.9);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.bigd-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px 4px 0;
+  border-style: solid;
+  border-color: #5865f2 transparent;
+  display: block;
+  width: 0;
+}
+
+#edge-bot:hover .bigd-speech-bubble {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@media (max-width: 600px) {
+  #edge-bot {
+    width: 58px;
+    height: 90px;
+  }
+  #bigd-mascot-img {
+    width: 54px;
+  }
 }
 
 @media (max-width: 900px) {
@@ -933,8 +1009,9 @@ footer a:hover { color: var(--purple-200); }
   </div>
 </div>
 
-<div id="edge-bot">
-  <canvas id="racecar-canvas" width="192" height="104" aria-label="Ferrari edge bot" tabindex="0">Ferrari</canvas>
+<div id="edge-bot" title="Join Big D on Discord!" aria-label="Big D Mascot — Join Discord">
+  <img id="bigd-mascot-img" src="/bigd_pixel_mascot.png" alt="Big D Pixel Mascot" draggable="false" />
+  <div class="bigd-speech-bubble"><span>JOIN DISCORD!</span></div>
 </div>
 
 <script src="/auth-helper.js"></script>
@@ -1175,224 +1252,100 @@ hamburger.addEventListener('click', () => {
   }
 })();
 
-/* ── Ferrari Edge Bot ────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   BIG D 7-DAY PIXEL MASCOT ROTATION — Perimeter Orbit & Discord CTA
+   ══════════════════════════════════════════════════════════ */
 (() => {
-  const bot    = document.getElementById('edge-bot');
-  const canvas = document.getElementById('racecar-canvas');
-  const ctx    = canvas?.getContext('2d');
-  if (!bot || !ctx) return;
+  const bot = document.getElementById("edge-bot");
+  const mascotImg = document.getElementById("bigd-mascot-img");
+  if (!bot || !mascotImg) return;
+
+  const DAILY_MASCOTS = {
+    1: { name: 'Gamer', src: '/bigd-gamer.png', alt: 'Big D — Gamer' },
+    2: { name: 'Office', src: '/bigd-office.png', alt: 'Big D — Office' },
+    3: { name: 'Gambler', src: '/bigd-gambler.png', alt: 'Big D — Gambler' },
+    4: { name: 'Funky Casual', src: '/bigd-funky.png', alt: 'Big D — Funky Casual' },
+    5: { name: 'Westside', src: '/bigd-westside.png', alt: 'Big D — Westside' },
+    6: { name: 'Native American', src: '/bigd-native.png', alt: 'Big D — Native American' },
+    0: { name: 'Hustler', src: '/bigd-hustler.png', alt: 'Big D — Hustler' }
+  };
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const mascotOverride = urlParams.get('mascot') ? urlParams.get('mascot').toLowerCase() : null;
+  const dayOverride = urlParams.get('day') !== null ? parseInt(urlParams.get('day'), 10) : null;
+
+  let currentMascot;
+  if (mascotOverride) {
+    const map = {
+      gamer: DAILY_MASCOTS[1],
+      office: DAILY_MASCOTS[2],
+      gambler: DAILY_MASCOTS[3],
+      funky: DAILY_MASCOTS[4],
+      westside: DAILY_MASCOTS[5],
+      native: DAILY_MASCOTS[6],
+      hustler: DAILY_MASCOTS[0]
+    };
+    currentMascot = map[mascotOverride] || DAILY_MASCOTS[1];
+  } else if (dayOverride !== null && DAILY_MASCOTS[dayOverride]) {
+    currentMascot = DAILY_MASCOTS[dayOverride];
+  } else {
+    const today = new Date().getDay();
+    currentMascot = DAILY_MASCOTS[today] || DAILY_MASCOTS[1];
+  }
+
+  mascotImg.src = currentMascot.src;
+  mascotImg.alt = currentMascot.alt;
+  bot.setAttribute('title', `Big D (${currentMascot.name}) — Join Discord!`);
+
   let t = 0;
-  let mouseX = -9999;
-  let mouseY = -9999;
-  let soundPlaying = false;
+  const speed = 0.00018;
 
-  window.addEventListener('mousemove', e => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-  });
-  const speed = 0.00022;
-  const engineSound = new Audio('assets/sounds/ferrari.mp3');
-  engineSound.loop = true; engineSound.volume = 0.45;
+  function point(t) {
+    const margin = 16;
+    const botW = bot.offsetWidth || 72;
+    const botH = bot.offsetHeight || 110;
 
-  let soundStarted = false;
-  function startCarSound() {
-      if (soundStarted) return;
-      soundStarted = true;
-      soundPlaying = true;
-      engineSound.currentTime = 0;
-      engineSound.play().catch(() => { soundStarted = false; soundPlaying = false; });
-  }
-  function stopCarSound() {}
-  
-  ['click','keydown','touchstart','scroll'].forEach(ev =>
-      document.addEventListener(ev, () => startCarSound(), { once: true })
-  );
+    const minX = margin + botW / 2;
+    const maxX = Math.max(minX, window.innerWidth - margin - botW / 2);
+    const minY = margin + botH / 2 + 50;
+    const maxY = Math.max(minY, window.innerHeight - margin - botH / 2 - 40);
 
-  function drawFerrari(frame){
-      if(!ctx) return;
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
-      const cssW = 96; const cssH = 52;
-      if(canvas.width !== cssW*dpr || canvas.height !== cssH*dpr){
-          canvas.width = cssW*dpr; canvas.height = cssH*dpr;
-      }
-      ctx.setTransform(dpr,0,0,dpr,0,0);
-      ctx.clearRect(0,0,cssW,cssH);
-      const spin = frame*28;
-      const flame = 5 + Math.sin(frame*88)*3;
-      const pulse = 0.7 + Math.sin(frame*60)*0.3;
-      ctx.save();
-      ctx.translate(2,4);
+    const w = maxX - minX;
+    const h = maxY - minY;
+    const total = 2 * (w + h);
 
-      // Exhaust flame
-      ctx.globalAlpha = 0.55*pulse;
-      const flameGrad = ctx.createLinearGradient(0,24,flame+8,24);
-      flameGrad.addColorStop(0,'#fff4a0'); flameGrad.addColorStop(0.4,'#ff8c00'); flameGrad.addColorStop(1,'rgba(255,30,0,0)');
-      ctx.fillStyle = flameGrad;
-      ctx.beginPath(); ctx.moveTo(6,26); ctx.lineTo(0,23); ctx.lineTo(0,29); ctx.lineTo(6,30); ctx.closePath(); ctx.fill();
-      ctx.globalAlpha = 0.35*pulse;
-      ctx.fillStyle='#ffff00';
-      ctx.beginPath(); ctx.ellipse(3,26,flame*0.5,2,0,0,Math.PI*2); ctx.fill();
-      ctx.globalAlpha = 1;
+    let d = (t % 1) * total;
 
-      // Floor/diffuser
-      ctx.fillStyle='#1a1a1a';
-      ctx.beginPath(); ctx.moveTo(10,38); ctx.lineTo(82,38); ctx.lineTo(88,36); ctx.lineTo(6,36); ctx.closePath(); ctx.fill();
-
-      // Side pods
-      ctx.fillStyle='#cc0000';
-      ctx.beginPath(); ctx.moveTo(16,33); ctx.lineTo(30,26); ctx.lineTo(60,26); ctx.lineTo(70,33); ctx.lineTo(16,33); ctx.closePath(); ctx.fill();
-
-      // Main body
-      const body = ctx.createLinearGradient(8,12,88,36);
-      body.addColorStop(0,'#9b0000'); body.addColorStop(0.3,'#e00000'); body.addColorStop(0.55,'#ff2020'); body.addColorStop(1,'#8b0000');
-      ctx.fillStyle = body;
-      ctx.beginPath();
-      ctx.moveTo(8,35); ctx.bezierCurveTo(14,22,26,14,44,13); ctx.lineTo(62,13);
-      ctx.bezierCurveTo(76,14,85,22,88,34); ctx.lineTo(80,36); ctx.lineTo(14,36); ctx.closePath(); ctx.fill();
-
-      // Body highlight stripe
-      ctx.globalAlpha=0.18;
-      ctx.fillStyle='#ffffff';
-      ctx.beginPath(); ctx.moveTo(20,22); ctx.bezierCurveTo(35,16,55,15,70,20); ctx.lineTo(70,23); ctx.bezierCurveTo(55,18,35,19,20,25); ctx.closePath(); ctx.fill();
-      ctx.globalAlpha=1;
-
-      // Nose cone
-      const nose = ctx.createLinearGradient(76,20,92,34);
-      nose.addColorStop(0,'#cc0000'); nose.addColorStop(1,'#500000');
-      ctx.fillStyle=nose;
-      ctx.beginPath(); ctx.moveTo(80,34); ctx.bezierCurveTo(85,30,90,28,92,30); ctx.lineTo(90,34); ctx.closePath(); ctx.fill();
-
-      // Cockpit
-      ctx.fillStyle='#0a0a14';
-      ctx.beginPath(); ctx.ellipse(48,20,14,5,0,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='rgba(100,150,255,0.15)';
-      ctx.beginPath(); ctx.ellipse(48,20,12,4,0,0,Math.PI*2); ctx.fill();
-
-      // Halo bar
-      ctx.strokeStyle='#888'; ctx.lineWidth=1.5;
-      ctx.beginPath(); ctx.moveTo(38,17); ctx.bezierCurveTo(43,14,53,14,58,17); ctx.stroke();
-
-      // Front wing
-      ctx.fillStyle='#111';
-      ctx.beginPath(); ctx.moveTo(72,35); ctx.lineTo(90,35); ctx.lineTo(91,38); ctx.lineTo(71,38); ctx.closePath(); ctx.fill();
-      ctx.fillStyle='#cc0000';
-      ctx.fillRect(74,33,14,2);
-
-      // Rear wing
-      ctx.fillStyle='#cc0000';
-      ctx.fillRect(8,15,16,2.5);
-      ctx.fillStyle='#111';
-      ctx.fillRect(8,18,16,1.5);
-
-      // Ferrari prancing horse badge
-      ctx.fillStyle='#ffd700';
-      ctx.fillRect(44,24,8,4);
-      ctx.fillStyle='#111';
-      ctx.font='bold 3.5px Orbitron,sans-serif';
-      ctx.textAlign='center'; ctx.fillText('SF',48,27.5);
-
-      // Wheels
-      const wheelPositions = [{x:22,y:37,r:8},{x:70,y:37,r:8}];
-      wheelPositions.forEach(w=>{
-          ctx.fillStyle='#111';
-          ctx.beginPath(); ctx.arc(w.x,w.y,w.r,0,Math.PI*2); ctx.fill();
-          const rimGrad = ctx.createRadialGradient(w.x,w.y,1,w.x,w.y,w.r-2);
-          rimGrad.addColorStop(0,'#cccccc'); rimGrad.addColorStop(1,'#444');
-          ctx.fillStyle=rimGrad;
-          ctx.beginPath(); ctx.arc(w.x,w.y,w.r-2,0,Math.PI*2); ctx.fill();
-          ctx.strokeStyle='#999'; ctx.lineWidth=1.5;
-          for(let s=0;s<5;s++){
-              const a=spin+s*(Math.PI*2/5);
-              ctx.save(); ctx.translate(w.x,w.y); ctx.rotate(a);
-              ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-(w.r-2)); ctx.stroke();
-              ctx.restore();
-          }
-          ctx.fillStyle='#ffd700';
-          ctx.beginPath(); ctx.arc(w.x,w.y,2,0,Math.PI*2); ctx.fill();
-      });
-
-      // Brake glow
-      ctx.globalAlpha=0.35*pulse;
-      ctx.fillStyle='#4488ff';
-      ctx.beginPath(); ctx.arc(22,37,4,0,Math.PI*2); ctx.fill();
-      ctx.globalAlpha=1;
-
-      ctx.restore();
+    if (d < w) return { x: minX + d, y: minY, edge: 'top' };
+    d -= w;
+    if (d < h) return { x: maxX, y: minY + d, edge: 'right' };
+    d -= h;
+    if (d < w) return { x: maxX - d, y: maxY, edge: 'bottom' };
+    d -= w;
+    return { x: minX, y: maxY - d, edge: 'left' };
   }
 
-  function point(t){
-      const margin = 12;
-      const botW = bot.offsetWidth || 96;
-      const botH = bot.offsetHeight || 52;
+  function animate() {
+    requestAnimationFrame(animate);
+    t += speed;
 
-      const minX = margin + botW/2;
-      const maxX = Math.max(minX, window.innerWidth - margin - botW/2);
-      const minY = margin + botH/2;
-      const maxY = Math.max(minY, window.innerHeight - margin - botH/2);
+    const pos = point(t);
+    bot.style.left = pos.x + "px";
+    bot.style.top = pos.y + "px";
 
-      const w = maxX-minX;
-      const h = maxY-minY;
-      const total = 2*(w+h);
-      let d = (t%1)*total;
+    const facingLeft = pos.edge === 'bottom' || pos.edge === 'left';
+    bot.style.transform = `translate(-50%, -50%) scaleX(${facingLeft ? -1 : 1})`;
 
-      if(d < w) return {x:minX+d,y:minY};
-      d -= w;
-      if(d < h) return {x:maxX,y:minY+d};
-      d -= h;
-      if(d < w) return {x:maxX-d,y:maxY};
-      d -= w;
-      return {x:minX,y:maxY-d};
-  }
-
-  function animate(){
-      requestAnimationFrame(animate);
-      t += speed;
-      drawFerrari(t);
-
-      const p1 = point(t);
-      const p2 = point(t+0.0005);
-      const angle = Math.atan2(p2.y-p1.y, p2.x-p1.x);
-
-      bot.style.left = p1.x+"px";
-      bot.style.top = p1.y+"px";
-
-      const goingLeft = Math.abs(angle) > Math.PI / 2;
-      bot.style.transform = `translate(-50%,-50%) rotate(${angle}rad) scaleY(${goingLeft ? -1 : 1})`;
-
-      const rect = bot.getBoundingClientRect();
-      const hovering =
-          mouseX >= rect.left &&
-          mouseX <= rect.right &&
-          mouseY >= rect.top &&
-          mouseY <= rect.bottom;
-
-      if (hovering && !soundPlaying) {
-          soundPlaying = true;
-          startCarSound();
-      }
-      if (!hovering && soundPlaying) {
-          soundPlaying = false;
-          stopCarSound();
-      }
+    const bubble = bot.querySelector('.bigd-speech-bubble');
+    if (bubble) {
+      bubble.style.transform = facingLeft ? 'scaleX(-1)' : 'none';
+    }
   }
 
   animate();
 
-  let hovering = false;
-  bot.addEventListener("mouseenter", () => {
-      hovering = true;
-      startCarSound();
-  });
-  bot.addEventListener("mouseleave", () => {
-      hovering = false;
-      stopCarSound();
-  });
-
   bot.onclick = () => {
-      window.open(
-          "https://discord.gg/B2K2U5sF37",
-          "_blank"
-      );
+    window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
   };
 })();
 

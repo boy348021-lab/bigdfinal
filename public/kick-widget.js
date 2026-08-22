@@ -7,6 +7,11 @@
 (function () {
   'use strict';
 
+  // Only render on landing / home page (first screen)
+  const path = window.location.pathname.toLowerCase();
+  const isLandingPage = path === '/' || path === '/index.html' || path.endsWith('/index.html') || path === '';
+  if (!isLandingPage) return;
+
   if (document.getElementById('bigd-kick-floating-widget')) return;
 
   const KICK_CHANNEL = 'bigdgamestv';
@@ -41,10 +46,18 @@
       user-select: none;
       -webkit-user-select: none;
       touch-action: none;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
+      transition: opacity 0.35s ease, transform 0.35s ease, border-color 0.3s ease, box-shadow 0.3s ease;
       cursor: default;
       overflow: hidden;
       box-sizing: border-box;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #bigd-kick-floating-widget.is-scrolled-out {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translateY(20px) scale(0.92) !important;
     }
 
     #bigd-kick-floating-widget.is-dragging {
@@ -538,6 +551,23 @@
 
     updateWidgetUI(false);
   }
+
+  // ─── 7. First-Screen-Only Visibility (Hide on Scroll) ──────────────────────
+  function handleScrollVisibility() {
+    // Determine the first screen boundary (Hero section height or 1 viewport height)
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    const heroEl = document.querySelector('.hero') || document.querySelector('#hero') || document.getElementById('tabs-section');
+    const threshold = heroEl ? Math.max(250, heroEl.offsetTop + (heroEl.offsetHeight * 0.45)) : (window.innerHeight * 0.6);
+
+    if (scrollY > threshold) {
+      widget.classList.add('is-scrolled-out');
+    } else {
+      widget.classList.remove('is-scrolled-out');
+    }
+  }
+
+  window.addEventListener('scroll', handleScrollVisibility, { passive: true });
+  handleScrollVisibility();
 
   checkKickLive();
   setInterval(checkKickLive, STATUS_POLL_INTERVAL);
