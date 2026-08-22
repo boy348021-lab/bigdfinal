@@ -170,118 +170,84 @@
 
     /* Widget Body */
     .bkw-body {
-      padding: 14px 16px 16px 16px;
+      width: 100%;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      text-align: center;
     }
 
-    /* TV Avatar Container */
-    .bkw-avatar-wrap {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(157, 0, 255, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      margin-bottom: 10px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(157, 0, 255, 0.15);
+    /* Live Player Iframe Container (Exact 16:9 Aspect Ratio) */
+    .bkw-iframe-wrap {
+      background: #000000;
+      width: 100%;
+      padding-top: 56.25%;
       position: relative;
+      overflow: hidden;
     }
 
-    #bigd-kick-floating-widget.is-live-mode .bkw-avatar-wrap {
-      border-color: rgba(0, 231, 1, 0.45);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(0, 231, 1, 0.2);
-    }
-
-    /* Text Block */
-    .bkw-text-box {
-      margin-bottom: 12px;
+    .bkw-iframe-wrap iframe {
       width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      border: none;
     }
 
-    .bkw-text-main {
-      font-family: var(--font-display, 'Orbitron', sans-serif);
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #ffffff;
-      letter-spacing: 0.02em;
-      margin-bottom: 2px;
-      white-space: nowrap;
-    }
-
-    .bkw-text-sub {
-      font-family: var(--font-ui, 'Rajdhani', sans-serif);
-      font-size: 0.74rem;
-      font-weight: 600;
-      color: #8c84a8;
-      letter-spacing: 0.02em;
-      line-height: 1.25;
-    }
-
-    /* Action CTA Button */
-    .bkw-cta-btn {
-      width: 100%;
-      height: 36px;
-      box-sizing: border-box;
-      border-radius: 8px;
-      font-family: var(--font-ui, 'Rajdhani', sans-serif);
-      font-size: 0.84rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
+    /* Offline Card Container */
+    .bkw-offline-card {
+      text-align: center;
+      background: #0f121d;
       justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      align-items: center;
+      padding: 22px 16px;
+      display: flex;
+      box-sizing: border-box;
+      width: 100%;
     }
 
-    /* Offline Button Style: Kick Green Glass Outline */
-    .bkw-cta-btn.btn-offline {
-      background: rgba(0, 231, 1, 0.06);
-      border: 1px solid rgba(0, 231, 1, 0.45);
-      color: #00e701;
-      box-shadow: 0 0 14px rgba(0, 231, 1, 0.12);
+    .bkw-offline-content {
+      align-items: center;
+      flex-direction: column;
+      gap: 10px;
+      display: flex;
+      width: 100%;
     }
 
-    .bkw-cta-btn.btn-offline:hover, .bkw-cta-btn.btn-offline:active {
-      background: rgba(0, 231, 1, 0.18);
-      border-color: #00e701;
-      box-shadow: 0 0 20px rgba(0, 231, 1, 0.35);
-      color: #ffffff;
+    .bkw-offline-icon {
+      font-size: 1.8rem;
+      line-height: 1;
     }
 
-    .bkw-cta-btn.btn-offline svg {
-      color: #00e701;
-      transition: transform 0.2s ease;
+    .bkw-offline-title {
+      color: #94a3b8;
+      margin: 0;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
     }
 
-    /* Live Button Style: Solid Glowing Kick Green */
-    .bkw-cta-btn.btn-live {
-      background: linear-gradient(90deg, #00e701, #00b801);
-      color: #051405;
-      font-weight: 900;
-      border: 1px solid #77ff77;
-      box-shadow: 0 0 22px rgba(0, 231, 1, 0.5);
-      animation: bkw-live-glow 2s infinite ease-in-out;
+    /* Visit Channel Button */
+    .bkw-visit-btn {
+      color: #53fc18;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(83, 252, 24, 0.12);
+      border: 1px solid rgba(83, 252, 24, 0.4);
+      border-radius: 6px;
+      margin-top: 6px;
+      padding: 6px 14px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-block;
     }
 
-    .bkw-cta-btn.btn-live:hover, .bkw-cta-btn.btn-live:active {
-      background: linear-gradient(90deg, #1aff1a, #00d901);
-      box-shadow: 0 0 30px rgba(0, 231, 1, 0.8);
+    .bkw-visit-btn:hover, .bkw-visit-btn:active {
       color: #000000;
-    }
-
-    @keyframes bkw-live-glow {
-      0%, 100% { box-shadow: 0 0 16px rgba(0, 231, 1, 0.4); }
-      50% { box-shadow: 0 0 26px rgba(0, 231, 1, 0.75); }
+      background: #53fc18;
+      box-shadow: 0 0 16px rgba(83, 252, 24, 0.6);
+      transform: translateY(-1px);
     }
 
     /* Minimized Compact Mode */
@@ -303,7 +269,7 @@
     /* Mobile Phones (Compact & Perfectly Scaled) */
     @media (max-width: 600px) {
       #bigd-kick-floating-widget {
-        width: 210px;
+        width: 220px;
         border-radius: 12px;
       }
       .bkw-header {
@@ -321,28 +287,18 @@
         height: 26px;
         font-size: 0.95rem;
       }
-      .bkw-body {
-        padding: 10px 12px 12px 12px;
+      .bkw-offline-card {
+        padding: 14px 10px;
       }
-      .bkw-avatar-wrap {
-        width: 36px;
-        height: 36px;
-        font-size: 1.25rem;
-        margin-bottom: 6px;
+      .bkw-offline-icon {
+        font-size: 1.4rem;
       }
-      .bkw-text-box {
-        margin-bottom: 8px;
-      }
-      .bkw-text-main {
+      .bkw-offline-title {
         font-size: 0.72rem;
       }
-      .bkw-text-sub {
-        font-size: 0.66rem;
-      }
-      .bkw-cta-btn {
-        height: 30px;
-        font-size: 0.74rem;
-        border-radius: 6px;
+      .bkw-visit-btn {
+        padding: 5px 12px;
+        font-size: 0.68rem;
       }
     }
   `;
@@ -369,19 +325,7 @@
       </div>
     </div>
     <div class="bkw-body" id="bkw-body">
-      <div class="bkw-avatar-wrap">
-        <span id="bkw-icon-box">📺</span>
-      </div>
-      <div class="bkw-text-box">
-        <div class="bkw-text-main" id="bkw-text-main">Big D is currently offline</div>
-        <div class="bkw-text-sub" id="bkw-text-sub">Catch latest streams & replays on Kick</div>
-      </div>
-      <a href="${KICK_URL}" target="_blank" rel="noopener" class="bkw-cta-btn btn-offline" id="bkw-cta-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
-        </svg>
-        <span id="bkw-cta-text">VISIT CHANNEL</span>
-      </a>
+      <!-- Injected dynamically based on live status -->
     </div>
   `;
 
@@ -519,54 +463,80 @@
   header.addEventListener('pointerdown', onPointerDown);
   header.addEventListener('touchstart', onPointerDown, { passive: true });
 
-  // ─── 5. Update UI for Live vs Offline ───────────────────────────────────────
+  // ─── 5. Update UI for Live vs Offline (Matching Fraez.co Logic) ─────────────
   function updateWidgetUI(liveState) {
     isLive = Boolean(liveState);
 
     const pill = document.getElementById('bkw-status-pill');
     const statusText = document.getElementById('bkw-status-text');
-    const iconBox = document.getElementById('bkw-icon-box');
-    const textMain = document.getElementById('bkw-text-main');
-    const textSub = document.getElementById('bkw-text-sub');
-    const ctaBtn = document.getElementById('bkw-cta-btn');
-    const ctaText = document.getElementById('bkw-cta-text');
+    const body = document.getElementById('bkw-body');
 
-    if (!pill || !ctaBtn) return;
+    if (!pill || !body) return;
 
     if (isLive) {
       widget.classList.add('is-live-mode');
       pill.className = 'bkw-status-pill live';
       statusText.textContent = 'LIVE';
-      iconBox.textContent = '🔥';
-      textMain.textContent = 'Big D is LIVE Now!';
-      textSub.textContent = 'Streaming live on Kick — Tune in!';
-      ctaBtn.className = 'bkw-cta-btn btn-live';
-      ctaText.textContent = 'WATCH BIG D LIVE';
+
+      // Inject 16:9 Kick live stream iframe
+      body.innerHTML = `
+        <div class="bkw-iframe-wrap">
+          <iframe 
+            src="https://player.kick.com/${KICK_CHANNEL}?autoplay=1&muted=true" 
+            frameborder="0" 
+            scrolling="no" 
+            allowfullscreen 
+            allow="autoplay; fullscreen"
+          ></iframe>
+        </div>
+      `;
     } else {
       widget.classList.remove('is-live-mode');
       pill.className = 'bkw-status-pill offline';
       statusText.textContent = 'OFFLINE';
-      iconBox.textContent = '📺';
-      textMain.textContent = 'Big D is currently offline';
-      textSub.textContent = 'Catch latest streams & replays on Kick';
-      ctaBtn.className = 'bkw-cta-btn btn-offline';
-      ctaText.textContent = 'VISIT CHANNEL';
+
+      // Inject offline card matching fraez.co layout
+      body.innerHTML = `
+        <div class="bkw-offline-card">
+          <div class="bkw-offline-content">
+            <span class="bkw-offline-icon">📺</span>
+            <p class="bkw-offline-title">Big D is currently offline</p>
+            <a href="${KICK_URL}" target="_blank" rel="noopener" class="bkw-visit-btn">Visit Channel</a>
+          </div>
+        </div>
+      `;
     }
   }
 
-  // ─── 6. Fetch & Poll Live Status ───────────────────────────────────────────
+  // ─── 6. Fetch & Poll Live Status (Multiple Fallbacks) ──────────────────────
   async function checkKickLive() {
     try {
+      // 1. Check our primary server endpoint
       const res = await fetch('/api/kick-live', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
-        updateWidgetUI(Boolean(data && data.live));
-      } else {
-        updateWidgetUI(false);
+        if (typeof data.live === 'boolean') {
+          updateWidgetUI(data.live);
+          return;
+        }
       }
-    } catch (e) {
-      updateWidgetUI(false);
-    }
+    } catch (e) {}
+
+    try {
+      // 2. Direct client fallback to Kick public channel endpoint if server is unreachable
+      const res = await fetch(`https://kick.com/api/v2/channels/${KICK_CHANNEL}`, {
+        headers: { 'Accept': 'application/json' },
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const live = Boolean(data && data.livestream && data.livestream.is_live !== false);
+        updateWidgetUI(live);
+        return;
+      }
+    } catch (e) {}
+
+    updateWidgetUI(false);
   }
 
   checkKickLive();
