@@ -106,18 +106,20 @@ style.textContent = `
     justify-content: space-between !important;
     height: 64px !important;
     box-sizing: border-box !important;
+    position: fixed !important;
   }
   .nav-logo {
     display: flex !important;
     align-items: center !important;
-    gap: 10px !important;
+    gap: 12px !important;
     flex-shrink: 0 !important;
     text-decoration: none !important;
+    margin-right: 36px !important;
   }
   .nav-links {
     display: flex !important;
     align-items: center !important;
-    gap: 10px !important;
+    gap: 12px !important;
     margin: 0 !important;
     padding: 0 !important;
     list-style: none !important;
@@ -131,11 +133,28 @@ style.textContent = `
     margin-left: auto !important;
   }
 
+  /* Futuristic Active Tab Indicator / Completion Bar */
+  #nav-active-tracker {
+    position: absolute;
+    bottom: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #be4dff 0%, #00ffe5 100%);
+    box-shadow: 0 0 12px rgba(190, 77, 255, 0.8), 0 0 20px rgba(0, 255, 229, 0.5);
+    border-radius: 3px 3px 0 0;
+    transition: left 0.35s cubic-bezier(0.16, 1, 0.3, 1), width 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+    pointer-events: none;
+    z-index: 101;
+    opacity: 0;
+  }
+
   /* Responsive Fixes: 1100px threshold for desktop links fitting cleanly */
   #hamburger {
     flex-shrink: 0 !important;
   }
   @media (max-width: 1100px) {
+    .nav-logo {
+      margin-right: 20px !important;
+    }
     .nav-links a {
       padding: 6px 12px !important;
       font-size: 0.78rem !important;
@@ -148,7 +167,13 @@ style.textContent = `
     #nav {
       padding: 0 16px !important;
     }
+    .nav-logo {
+      margin-right: 0 !important;
+    }
     .nav-links {
+      display: none !important;
+    }
+    #nav-active-tracker {
       display: none !important;
     }
     .nav-user-pill, .kick-live-badge, .kick-live-badge-nav, .nav-btn-auth {
@@ -428,6 +453,72 @@ bootAuth();
   s.src = '/kick-widget.js';
   s.defer = true;
   document.body ? document.body.appendChild(s) : document.addEventListener('DOMContentLoaded', () => document.body.appendChild(s));
+})();
+
+// ─── Active Nav Tab Indicator / Completion Bar Controller ───────────────────
+(function initNavActiveTracker() {
+  function setupTracker() {
+    const nav = document.getElementById('nav');
+    const navLinks = document.querySelector('#nav .nav-links');
+    if (!nav || !navLinks) return;
+
+    let tracker = document.getElementById('nav-active-tracker');
+    if (!tracker) {
+      tracker = document.createElement('div');
+      tracker.id = 'nav-active-tracker';
+      nav.appendChild(tracker);
+    }
+
+    function updateTrackerPosition() {
+      // Find active link
+      const path = window.location.pathname.toLowerCase();
+      let activeLink = navLinks.querySelector('a.active');
+
+      if (!activeLink) {
+        const allLinks = Array.from(navLinks.querySelectorAll('a'));
+        activeLink = allLinks.find(a => {
+          const href = (a.getAttribute('href') || '').toLowerCase();
+          if (path.includes('blackjack') && href.includes('blackjack')) return true;
+          if (path.includes('verify') && href.includes('verify')) return true;
+          if (path.includes('store') && href.includes('store')) return true;
+          if (path.includes('account') && href.includes('account')) return true;
+          if ((path === '/' || path === '/index.html' || path === '') && (href === '#tabs-section' || href.includes('index.html'))) return true;
+          return false;
+        });
+      }
+
+      if (activeLink && window.innerWidth > 960) {
+        const linkRect = activeLink.getBoundingClientRect();
+        const navRect = nav.getBoundingClientRect();
+        const left = linkRect.left - navRect.left;
+        const width = linkRect.width;
+
+        tracker.style.left = `${left}px`;
+        tracker.style.width = `${width}px`;
+        tracker.style.opacity = '1';
+      } else {
+        tracker.style.opacity = '0';
+      }
+    }
+
+    // Attach click listeners to update indicator position when clicking tabs
+    navLinks.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        setTimeout(updateTrackerPosition, 50);
+      });
+    });
+
+    window.addEventListener('resize', updateTrackerPosition);
+    window.addEventListener('hashchange', updateTrackerPosition);
+    setTimeout(updateTrackerPosition, 80);
+    setTimeout(updateTrackerPosition, 400); // Secondary check after font/styles load
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupTracker);
+  } else {
+    setupTracker();
+  }
 })();
 
 
