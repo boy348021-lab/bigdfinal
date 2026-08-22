@@ -35,25 +35,9 @@ style.textContent = `
     transform: translateY(-1px) !important;
   }
 
-  /* Unified Header Badges (Offline & Live) */
-  .kick-live-badge {
-    height: 36px !important;
-    padding: 0 16px !important;
-    border-radius: 10px !important;
-    font-family: var(--font-ui, 'Rajdhani', sans-serif) !important;
-    font-size: 0.82rem !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.1em !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 8px !important;
-    box-sizing: border-box !important;
-    margin-left: 0 !important;
-  }
-  .kick-live-badge .status-dot {
-    width: 8px !important;
-    height: 8px !important;
+  /* Hide redundant Kick Offline/Live button from header */
+  .kick-live-badge, .kick-live-badge-nav {
+    display: none !important;
   }
   .mobile-auth-btn {
     display: block !important;
