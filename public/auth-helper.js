@@ -10,34 +10,75 @@ style.textContent = `
     border: 1px solid rgba(168, 85, 247, 0.45) !important;
     color: #ffffff !important;
     font-family: var(--font-ui, 'Rajdhani', sans-serif);
-    font-size: 0.82rem !important;
+    font-size: 0.78rem !important;
     font-weight: 800 !important;
-    letter-spacing: 0.1em !important;
+    letter-spacing: 0.08em !important;
     text-transform: uppercase !important;
-    padding: 0 18px !important;
-    border-radius: 10px !important;
+    padding: 0 14px !important;
+    border-radius: 8px !important;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    height: 36px !important;
+    height: 32px !important;
     box-sizing: border-box !important;
     outline: none !important;
     text-decoration: none !important;
     white-space: nowrap !important;
     box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35) !important;
-    margin-left: 14px !important;
+    margin-left: 6px !important;
   }
   .nav-btn-auth:hover {
     background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
     border-color: rgba(192, 132, 252, 0.7) !important;
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.55), 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 0 16px rgba(168, 85, 247, 0.55), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
     transform: translateY(-1px) !important;
   }
 
-  /* Hide redundant Kick Offline/Live button from header */
-  .kick-live-badge, .kick-live-badge-nav {
-    display: none !important;
+  /* Compact Uniform Kick Live/Offline Badge */
+  .kick-live-badge {
+    height: 32px !important;
+    padding: 0 12px !important;
+    border-radius: 8px !important;
+    font-family: var(--font-ui, 'Rajdhani', sans-serif) !important;
+    font-size: 0.76rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    box-sizing: border-box !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    border: 1px solid rgba(239, 68, 68, 0.45) !important;
+    background: linear-gradient(135deg, rgba(153, 27, 27, 0.35) 0%, rgba(185, 28, 28, 0.55) 100%) !important;
+    color: #fecaca !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  }
+  .kick-live-badge:hover {
+    transform: translateY(-1px) !important;
+    border-color: rgba(239, 68, 68, 0.7) !important;
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.4) !important;
+  }
+  .kick-live-badge.is-live {
+    color: #6ee7b7 !important;
+    border-color: rgba(52, 211, 153, 0.6) !important;
+    background: linear-gradient(135deg, rgba(5, 150, 105, 0.4) 0%, rgba(16, 185, 129, 0.6) 100%) !important;
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.4) !important;
+  }
+  .kick-live-badge .status-dot {
+    width: 7px !important;
+    height: 7px !important;
+    border-radius: 50% !important;
+    background: #ef4444 !important;
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.8) !important;
+    display: inline-block !important;
+  }
+  .kick-live-badge.is-live .status-dot {
+    background: #00ff66 !important;
+    box-shadow: 0 0 6px rgba(0, 255, 102, 0.9) !important;
   }
   .mobile-auth-btn {
     display: block !important;
