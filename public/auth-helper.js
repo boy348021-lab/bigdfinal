@@ -6,27 +6,54 @@ style.textContent = `
     cursor: pointer !important;
   }
   .nav-btn-auth {
-    background: linear-gradient(90deg, #8800ff, #5500aa) !important;
-    border: 1px solid rgba(136, 0, 255, 0.4) !important;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+    border: 1px solid rgba(168, 85, 247, 0.45) !important;
     color: #ffffff !important;
     font-family: var(--font-ui, 'Rajdhani', sans-serif);
     font-size: 0.82rem !important;
     font-weight: 800 !important;
-    letter-spacing: 0.08em !important;
+    letter-spacing: 0.1em !important;
     text-transform: uppercase !important;
-    padding: 6px 14px !important;
-    border-radius: 6px !important;
-    transition: all 0.25s !important;
+    padding: 0 18px !important;
+    border-radius: 10px !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     display: inline-flex !important;
     align-items: center !important;
-    height: 34px !important;
+    justify-content: center !important;
+    height: 36px !important;
+    box-sizing: border-box !important;
     outline: none !important;
     text-decoration: none !important;
     white-space: nowrap !important;
+    box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35) !important;
+    margin-left: 14px !important;
   }
   .nav-btn-auth:hover {
-    background: linear-gradient(90deg, #9933ff, #7700cc) !important;
-    box-shadow: 0 0 15px rgba(136, 0, 255, 0.45) !important;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+    border-color: rgba(192, 132, 252, 0.7) !important;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.55), 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  /* Unified Header Badges (Offline & Live) */
+  .kick-live-badge {
+    height: 36px !important;
+    padding: 0 16px !important;
+    border-radius: 10px !important;
+    font-family: var(--font-ui, 'Rajdhani', sans-serif) !important;
+    font-size: 0.82rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.1em !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+  }
+  .kick-live-badge .status-dot {
+    width: 8px !important;
+    height: 8px !important;
   }
   .mobile-auth-btn {
     display: block !important;
@@ -128,7 +155,7 @@ style.textContent = `
   .nav-right {
     display: flex !important;
     align-items: center !important;
-    gap: 10px !important;
+    gap: 14px !important;
     flex-shrink: 0 !important;
     margin-left: auto !important;
   }
