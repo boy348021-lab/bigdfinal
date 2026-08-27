@@ -990,6 +990,18 @@ footer a:hover { color: var(--purple-200); }
     </div>
   </div>
 
+  <!-- Store Maintenance / Unavailable Banner -->
+  <div id="store-unavailable-banner" style="width:100%; max-width:820px; background:rgba(255,180,0,0.06); border:1px solid rgba(255,180,0,0.35); border-radius:var(--radius-md); padding:24px 28px; text-align:center; margin-bottom:32px; box-shadow:0 0 25px rgba(255,180,0,0.1); backdrop-filter:blur(10px);">
+    <div style="font-size:2.2rem; margin-bottom:8px;">⚠️</div>
+    <div style="font-family:var(--font-display); font-size:1.35rem; font-weight:800; color:#ffd700; letter-spacing:0.06em; margin-bottom:8px; text-transform:uppercase;">Redemptions Currently Unavailable</div>
+    <p style="font-family:var(--font-body); font-size:0.92rem; color:var(--text-secondary); line-height:1.6; max-width:620px; margin:0 auto 14px;">
+      Store redemptions are temporarily paused for maintenance and stock restocking. You can still earn and accumulate BigD Coins by wagering on DegenCity with code <strong>BIGD</strong>!
+    </p>
+    <a href="https://discord.gg/aHSVMX4DCr" target="_blank" rel="noopener" class="history-claim-btn" style="display:inline-flex; font-size:0.82rem; padding:8px 18px;">
+      Join Discord for Updates 📢
+    </a>
+  </div>
+
   <!-- Rewards Grid -->
   <div class="rewards-grid" id="rewards-grid"><!-- JS renders cards --></div>
 
@@ -1111,39 +1123,8 @@ async function loadRedemptions(token) {
 }
 
 async function redeemReward(rewardId) {
-  if (!currentAuthToken) {
-    showToast("Please verify/login first");
-    return;
-  }
-  const btn = document.querySelector(`button[data-reward-id="${rewardId}"]`);
-  if (btn) btn.disabled = true;
-
-  try {
-    const res = await fetch("/api/store/redeem", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${currentAuthToken}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ reward_id: rewardId })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      showToast("Redemption successful!");
-      const val = document.getElementById("coin-value");
-      const storePointsVal = document.getElementById("store-points-val");
-      if (val) val.textContent = data.new_balance.toLocaleString();
-      if (storePointsVal) storePointsVal.textContent = data.new_balance.toLocaleString();
-      await loadRedemptions(currentAuthToken);
-    } else {
-      showToast(data.error || "Redemption failed");
-    }
-  } catch (err) {
-    console.error("Redemption error:", err);
-    showToast("Server error during redemption");
-  } finally {
-    if (btn) btn.disabled = false;
-  }
+  showToast("Store redemptions are currently unavailable.");
+  return;
 }
 
 function showToast(msg) {
@@ -1170,12 +1151,13 @@ async function initStore() {
     data.rewards.forEach(r => {
       const card = document.createElement("div");
       card.className = "reward-card";
+      card.style.opacity = "0.75";
       card.innerHTML = `
         <div class="reward-card-emoji">${r.emoji || "🏆"}</div>
         <div class="reward-card-title">${escHtml(r.label)}</div>
         <div class="reward-card-desc">${escHtml(r.description)}</div>
         <div class="reward-card-cost">${r.points_cost.toLocaleString()} Coins</div>
-        <button class="reward-card-btn" data-reward-id="${r.id}" onclick="redeemReward('${r.id}')">Redeem</button>
+        <button class="reward-card-btn" disabled style="background:rgba(255,255,255,0.08); color:var(--text-muted); border:1px solid rgba(255,255,255,0.12); cursor:not-allowed; box-shadow:none;">Currently Unavailable</button>
       `;
       grid.appendChild(card);
     });
