@@ -1,6 +1,17 @@
 {
   "data": [
     {
+      "user_id": 34349,
+      "username": "allinbluntz",
+      "status": "visible",
+      "wager_data": [
+        {
+          "month": "2026-08",
+          "total_wager_usd": 495.8781
+        }
+      ]
+    },
+    {
       "user_id": 34361,
       "username": "fanumbigd",
       "status": "visible",
@@ -66,7 +77,7 @@
       "wager_data": [
         {
           "month": "2026-08",
-          "total_wager_usd": 225.28362663
+          "total_wager_usd": 624.93560275
         },
         {
           "month": "2026-07",
@@ -232,7 +243,7 @@
       "wager_data": [
         {
           "month": "2026-08",
-          "total_wager_usd": 10513.8732
+          "total_wager_usd": 10906.2137
         },
         {
           "month": "2026-07",
@@ -251,7 +262,7 @@
       "wager_data": [
         {
           "month": "2026-08",
-          "total_wager_usd": 122.4119
+          "total_wager_usd": 835.9328
         },
         {
           "month": "2026-07",
@@ -270,7 +281,7 @@
       "wager_data": [
         {
           "month": "2026-08",
-          "total_wager_usd": 1458.26
+          "total_wager_usd": 9225.6213524
         },
         {
           "month": "2026-07",
@@ -283,6 +294,10 @@
       "username": "luaclass",
       "status": "visible",
       "wager_data": [
+        {
+          "month": "2026-08",
+          "total_wager_usd": 155.8966
+        },
         {
           "month": "2026-07",
           "total_wager_usd": 52.15
@@ -323,6 +338,17 @@
       ]
     },
     {
+      "user_id": 38288,
+      "username": "ahaoahh",
+      "status": "visible",
+      "wager_data": [
+        {
+          "month": "2026-08",
+          "total_wager_usd": 105.6905
+        }
+      ]
+    },
+    {
       "user_id": 39010,
       "username": "ninjazod",
       "status": "visible",
@@ -330,6 +356,17 @@
         {
           "month": "2026-07",
           "total_wager_usd": 435.11385969
+        }
+      ]
+    },
+    {
+      "user_id": 39109,
+      "username": "faded666",
+      "status": "visible",
+      "wager_data": [
+        {
+          "month": "2026-08",
+          "total_wager_usd": 31.6693
         }
       ]
     },
@@ -361,6 +398,10 @@
       "status": "visible",
       "wager_data": [
         {
+          "month": "2026-08",
+          "total_wager_usd": 498.98
+        },
+        {
           "month": "2026-07",
           "total_wager_usd": 1014.19
         }
@@ -382,6 +423,10 @@
       "username": "bellybutton",
       "status": "visible",
       "wager_data": [
+        {
+          "month": "2026-08",
+          "total_wager_usd": 30
+        },
         {
           "month": "2026-07",
           "total_wager_usd": 22
@@ -406,7 +451,7 @@
       "wager_data": [
         {
           "month": "2026-08",
-          "total_wager_usd": 2585.8
+          "total_wager_usd": 10253.6
         },
         {
           "month": "2026-07",
@@ -421,7 +466,7 @@
       "wager_data": [
         {
           "month": "2026-08",
-          "total_wager_usd": 922.7616
+          "total_wager_usd": 1751.9033
         },
         {
           "month": "2026-07",
@@ -436,7 +481,40 @@
       "wager_data": [
         {
           "month": "2026-08",
-          "total_wager_usd": 879.7301
+          "total_wager_usd": 11116.4217
+        }
+      ]
+    },
+    {
+      "user_id": 45489,
+      "username": "maaars",
+      "status": "visible",
+      "wager_data": [
+        {
+          "month": "2026-08",
+          "total_wager_usd": 7466.7
+        }
+      ]
+    },
+    {
+      "user_id": 45564,
+      "username": "jovicaa2",
+      "status": "visible",
+      "wager_data": [
+        {
+          "month": "2026-08",
+          "total_wager_usd": 46.67
+        }
+      ]
+    },
+    {
+      "user_id": 45733,
+      "username": "rishabh0989",
+      "status": "visible",
+      "wager_data": [
+        {
+          "month": "2026-08",
+          "total_wager_usd": 362.44
         }
       ]
     }
