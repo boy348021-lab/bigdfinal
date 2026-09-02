@@ -30,7 +30,7 @@
   50%      { transform: translateX(100%); }
 }
 .bw-period-label {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-ui, 'Neue Haas Grotesk Display Pro', 'Neue Haas Display', sans-serif);
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.28em;
@@ -39,7 +39,7 @@
   text-transform: uppercase;
 }
 .bw-period-dates {
-  font-family: 'Orbitron', sans-serif;
+  font-family: var(--font-display, 'Bring Bold Nineties', 'Nineties Bold', 'Syne', sans-serif);
   font-size: clamp(0.85rem, 2vw, 1.1rem);
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -47,7 +47,7 @@
 }
 .bw-period-countdown { text-align: right; }
 .bw-days-left {
-  font-family: 'Orbitron', sans-serif;
+  font-family: var(--font-display, 'Bring Bold Nineties', 'Nineties Bold', 'Syne', sans-serif);
   font-size: 2.4rem;
   font-weight: 900;
   color: #00ffe5;
@@ -56,7 +56,7 @@
   line-height: 1;
 }
 .bw-days-label {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-ui, 'Neue Haas Grotesk Display Pro', 'Neue Haas Display', sans-serif);
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.16em;
@@ -171,7 +171,7 @@
   gap: 10px;
 }
 .bw-countdown-label {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-ui, 'Neue Haas Grotesk Display Pro', 'Neue Haas Display', sans-serif);
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.16em;
@@ -179,7 +179,7 @@
   color: #5a5480;
 }
 .bw-countdown-timer {
-  font-family: 'Orbitron', sans-serif;
+  font-family: var(--font-display, 'Bring Bold Nineties', 'Nineties Bold', 'Syne', sans-serif);
   font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.08em;

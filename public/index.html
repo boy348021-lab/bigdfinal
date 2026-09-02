@@ -6,7 +6,7 @@
 <title>BigDGamesTV — Play. Earn. Dominate.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/style.css"/>
 <link rel="stylesheet" href="/blackjack/blackjack.css"/>
 <style>
@@ -52,10 +52,10 @@
   --cyan-400:       #22d3ee;
   --cyan-glow:      0 0 25px rgba(34, 211, 238, 0.45);
 
-  /* Text & Typography Hierarchy */
-  --font-display:   'Orbitron', sans-serif;
-  --font-ui:        'Rajdhani', sans-serif;
-  --font-body:      'Space Grotesk', sans-serif;
+  /* Text & Typography Hierarchy (Neue Haas & Bring Bold Nineties) */
+  --font-display:   'Neue Haas Grotesk Display Pro', 'Neue Haas Display', 'Neue Haas Grotesk', 'Bring Bold Nineties', 'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-ui:        'Neue Haas Grotesk Display Pro', 'Neue Haas Display', 'Neue Haas Grotesk', 'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-body:      'Neue Haas Grotesk Text Pro', 'Neue Haas Display', 'Neue Haas Grotesk', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
   --text-primary:   #f5f3ff;
   --text-secondary: #a7a2bc;
@@ -934,12 +934,13 @@ body::after {
 }
 .hero-headline {
   font-family: var(--font-display);
-  font-size: clamp(3rem, 8vw, 7rem);
+  font-size: clamp(2.4rem, 5.5vw, 4.4rem);
   font-weight: 900;
-  line-height: 0.95;
-  letter-spacing: -0.02em;
+  line-height: 1.08;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
-  margin-bottom: 32px;
+  max-width: 840px;
+  margin: 0 auto 24px;
 }
 .hero-headline .word-play  { color: var(--text-primary); }
 .hero-headline .word-earn  {
@@ -3156,22 +3157,415 @@ footer a:hover { color: var(--purple-300); }
 }
 
 /* ============================================================
-   HERO LOGO IMAGE
+   BIGD WATCH — INTERACTIVE DAILY FIT SELECTOR (DEVICE STYLES)
    ============================================================ */
-.hero-logo-wrap {
-  margin-bottom: 28px;
+.bigd-watch-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 5;
 }
-.hero-logo-img {
-  width: clamp(120px, 22vw, 200px);
-  height: clamp(120px, 22vw, 200px);
+
+.bigd-watch-device {
+  position: relative;
+  width: clamp(310px, 86vw, 440px);
+  height: clamp(310px, 86vw, 440px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(30, 16, 55, 0.95) 0%, rgba(12, 8, 24, 0.98) 70%, rgba(5, 3, 10, 1) 100%);
+  border: 2px solid rgba(168, 85, 247, 0.45);
+  box-shadow: 
+    0 0 50px rgba(136, 0, 255, 0.35),
+    inset 0 0 45px rgba(0, 255, 229, 0.15),
+    inset 0 0 80px rgba(0, 0, 0, 0.9),
+    0 20px 60px rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  touch-action: pan-y;
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+  overflow: visible;
+}
+
+.bigd-watch-device:active {
+  cursor: grabbing;
+}
+
+.bigd-watch-device.is-locked {
+  cursor: default;
+  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow: 
+    0 0 60px rgba(255, 215, 0, 0.3),
+    inset 0 0 50px rgba(255, 215, 0, 0.15),
+    inset 0 0 80px rgba(0, 0, 0, 0.9),
+    0 20px 60px rgba(0, 0, 0, 0.85);
+}
+
+/* Outer Chassis Ring with Engravings & Notches */
+.watch-outer-chassis {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1px dashed rgba(168, 85, 247, 0.3);
+  pointer-events: none;
+  animation: watch-chassis-spin 60s linear infinite;
+}
+
+@keyframes watch-chassis-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.watch-insignia-top {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  color: #ffffff;
+  text-shadow: 0 0 12px var(--purple-400);
+  background: rgba(18, 10, 34, 0.9);
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  z-index: 10;
+  pointer-events: none;
+}
+.watch-insignia-top .insignia-crown {
+  color: var(--gold-400);
+  font-size: 0.8rem;
+}
+
+/* Rotating Wheel Track */
+.watch-dial-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* 7 Orbiting Look Pods */
+.fit-orbit-pod {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 52px;
+  height: 52px;
+  margin-top: -26px;
+  margin-left: -26px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(28, 18, 48, 0.95) 0%, rgba(10, 6, 20, 0.98) 100%);
+  border: 1.5px solid rgba(168, 85, 247, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7), 0 0 12px rgba(136, 0, 255, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 6;
+}
+
+.fit-orbit-pod img {
+  width: 32px;
+  height: 32px;
   object-fit: contain;
-  border-radius: var(--radius-lg);
-  filter: drop-shadow(0 0 40px rgba(136,0,255,0.5));
-  animation: hero-logo-float 4s ease-in-out infinite;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.8));
+  transition: transform 0.25s ease;
 }
-@keyframes hero-logo-float {
-  0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 40px rgba(136,0,255,0.5)); }
-  50% { transform: translateY(-10px) scale(1.02); filter: drop-shadow(0 0 60px rgba(136,0,255,0.8)); }
+
+.fit-orbit-pod .pod-day-label {
+  position: absolute;
+  bottom: -14px;
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  background: rgba(8, 4, 16, 0.9);
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+
+.fit-orbit-pod:hover {
+  transform: scale(1.18) !important;
+  border-color: var(--cyan-400);
+  box-shadow: 0 0 20px rgba(0, 255, 229, 0.6);
+  z-index: 8;
+}
+.fit-orbit-pod:hover img {
+  transform: scale(1.1);
+}
+
+.fit-orbit-pod.is-today-day {
+  border-color: var(--gold-400);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.5);
+}
+.fit-orbit-pod.is-today-day .pod-day-label {
+  color: var(--gold-400);
+  border-color: rgba(255, 215, 0, 0.4);
+  font-weight: 900;
+}
+
+.fit-orbit-pod.is-active-focused {
+  border-color: var(--cyan-400);
+  background: radial-gradient(circle, rgba(45, 24, 78, 1) 0%, rgba(14, 8, 28, 1) 100%);
+  box-shadow: 0 0 24px rgba(0, 255, 229, 0.7), inset 0 0 10px rgba(0, 255, 229, 0.4);
+  transform: scale(1.22) !important;
+  z-index: 9;
+}
+.fit-orbit-pod.is-active-focused .pod-day-label {
+  color: var(--cyan-400);
+  border-color: rgba(0, 255, 229, 0.6);
+}
+
+/* Center Hologram Core Chamber */
+.watch-hologram-core {
+  position: absolute;
+  inset: 72px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 45%, rgba(60, 25, 105, 0.65) 0%, rgba(20, 10, 40, 0.85) 60%, rgba(8, 4, 16, 0.95) 100%);
+  border: 1px solid rgba(0, 255, 229, 0.3);
+  box-shadow: 
+    inset 0 0 35px rgba(168, 85, 247, 0.5),
+    0 0 30px rgba(136, 0, 255, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Hologram Background Energy Disc */
+.core-energy-disc {
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 255, 229, 0.25);
+  animation: core-disc-spin 25s linear infinite reverse;
+}
+@keyframes core-disc-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Floating Center Character */
+.core-character-wrap {
+  position: relative;
+  width: 145px;
+  height: 145px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -12px;
+  filter: drop-shadow(0 0 28px rgba(168, 85, 247, 0.75)) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.8));
+}
+
+.core-character-img {
+  max-width: 125px;
+  max-height: 125px;
+  object-fit: contain;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
+  animation: core-char-float 4.5s ease-in-out infinite alternate;
+}
+
+@keyframes core-char-float {
+  0%   { transform: translateY(0) scale(1); }
+  50%  { transform: translateY(-7px) scale(1.03); }
+  100% { transform: translateY(3px) scale(0.98); }
+}
+
+/* Center Holographic Nameplate */
+.core-look-nameplate {
+  position: absolute;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.core-day-tag {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--cyan-400);
+  margin-bottom: 2px;
+}
+
+.core-look-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px var(--purple-400);
+}
+
+/* Step Chevrons (Prev / Next) */
+.watch-step-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(18, 10, 32, 0.85);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 8;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.watch-step-btn:hover {
+  background: rgba(136, 0, 255, 0.4);
+  border-color: var(--cyan-400);
+  color: var(--cyan-400);
+  box-shadow: 0 0 15px rgba(0, 255, 229, 0.4);
+  transform: translateY(-50%) scale(1.1);
+}
+.watch-step-btn.btn-prev { left: -16px; }
+.watch-step-btn.btn-next { right: -16px; }
+
+/* Control & Action Deck (Below Watch) */
+.watch-action-deck {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.watch-hint-text {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+.watch-lock-btn {
+  background: linear-gradient(135deg, #8800ff 0%, #b800ff 50%, #00ffe5 100%);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 11px 28px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 0 25px rgba(136, 0, 255, 0.5), 0 4px 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.watch-lock-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 0 35px rgba(0, 255, 229, 0.7), 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+
+.watch-locked-status-badge {
+  display: none;
+  background: rgba(255, 215, 0, 0.12);
+  border: 1px solid rgba(255, 215, 0, 0.45);
+  color: #ffd700;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 8px 22px;
+  border-radius: 20px;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
+}
+
+/* Locking Animation Pulse */
+@keyframes fit-lock-pulse {
+  0%   { transform: scale(1); filter: brightness(1); }
+  50%  { transform: scale(1.08); filter: brightness(1.7) drop-shadow(0 0 50px #ffd700); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+.bigd-watch-device.animating-lock {
+  animation: fit-lock-pulse 0.8s ease-in-out forwards;
+}
+
+/* Confirmation Modal */
+.fit-modal-card {
+  max-width: 440px;
+  text-align: center;
+  background: linear-gradient(145deg, rgba(24, 14, 42, 0.95) 0%, rgba(10, 6, 20, 0.98) 100%);
+  border: 1.5px solid var(--purple-400);
+  box-shadow: 0 0 50px rgba(136, 0, 255, 0.45), 0 20px 60px rgba(0, 0, 0, 0.8);
+  padding: 32px 24px;
+}
+
+.fit-modal-char-preview {
+  width: 120px;
+  height: 120px;
+  margin: 12px auto;
+  filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.8));
+}
+.fit-modal-char-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Responsive Scales for Mobile / Tablets */
+@media (max-width: 768px) {
+  .bigd-watch-wrapper { max-width: 360px; margin-bottom: 22px; }
+  .watch-hologram-core { inset: 58px; }
+  .core-character-wrap { width: 115px; height: 115px; }
+  .core-character-img { max-width: 100px; max-height: 100px; }
+  .fit-orbit-pod { width: 44px; height: 44px; margin-top: -22px; margin-left: -22px; }
+  .fit-orbit-pod img { width: 26px; height: 26px; }
+  .watch-step-btn { width: 32px; height: 32px; }
+  .watch-step-btn.btn-prev { left: -8px; }
+  .watch-step-btn.btn-next { right: -8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .watch-outer-chassis, .core-energy-disc, .core-character-img { animation: none !important; }
+  .watch-dial-track { transition: none !important; }
 }
 
 /* ============================================================
@@ -3636,12 +4030,88 @@ footer a:hover { color: var(--purple-300); }
     <img src="/cyber-dice.png" alt="Futuristic 3D Cyber Dice" draggable="false" />
   </div>
 
-  <!-- Animated Glowing Aura Logo -->
-  <div class="hero-logo-container" id="hero-parallax-logo">
-    <div class="logo-aura-ring ring-outer"></div>
-    <div class="logo-aura-ring ring-inner"></div>
-    <div class="logo-halo-glow"></div>
-    <img src="/logo.png" alt="BigDGamesTV" class="hero-logo-img"/>
+  <!-- ============================================================
+       BIGD WATCH — INTERACTIVE DAILY FIT SELECTOR CENTERPIECE
+       ============================================================ -->
+  <div class="bigd-watch-wrapper" id="bigd-watch-wrapper">
+    <div class="bigd-watch-device" id="bigd-watch-device" title="BigD Daily Fit Selector — Drag or Scroll to Rotate">
+      <!-- Outer Chassis Ring & Markings -->
+      <div class="watch-outer-chassis"></div>
+
+      <!-- Top Engraved Insignia Badge -->
+      <div class="watch-insignia-top">
+        <span class="insignia-crown">👑</span>
+        <span>BIGD TV</span>
+        <span style="color:var(--cyan-400); font-size:0.6rem;">• FIT MATRIX</span>
+      </div>
+
+      <!-- Left & Right Step Chevrons -->
+      <button class="watch-step-btn btn-prev" id="fit-prev-btn" title="Previous BigD Fit" aria-label="Previous Look">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="watch-step-btn btn-next" id="fit-next-btn" title="Next BigD Fit" aria-label="Next Look">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+
+      <!-- Rotating Dial Track (Populated dynamically with the 7 Orbiting Fit Pods) -->
+      <div class="watch-dial-track" id="watch-dial-track"></div>
+
+      <!-- Inner Holographic Crystal Chamber -->
+      <div class="watch-hologram-core" id="watch-hologram-core">
+        <div class="core-energy-disc"></div>
+        <div class="core-character-wrap" id="core-character-wrap">
+          <img src="/bigd-gamer.png" alt="BigD Fit Preview" class="core-character-img" id="core-character-img" draggable="false" />
+        </div>
+        <div class="core-look-nameplate">
+          <span class="core-day-tag" id="core-day-tag">MONDAY FIT</span>
+          <span class="core-look-title" id="core-look-title">GAMER BIGD</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Watch Action & Selection Deck -->
+    <div class="watch-action-deck" id="watch-action-deck">
+      <div class="watch-hint-text" id="watch-hint-text">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M2 12h20"/></svg>
+        <span>DRAG DIAL • SCROLL TO ROTATE</span>
+      </div>
+      <button class="watch-lock-btn" id="watch-lock-btn" onclick="openFitLockModal()">
+        <span>⚡ LOCK TODAY'S FIT</span>
+      </button>
+      <div class="watch-locked-status-badge" id="watch-locked-status-badge">
+        <span>🔒 TODAY'S FIT LOCKED</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BigD Fit Selection Confirmation Modal -->
+  <div id="fit-lock-modal" class="modal-overlay">
+    <div class="modal-card fit-modal-card">
+      <button class="modal-close" onclick="closeFitLockModal()">×</button>
+      <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:0.06em;">
+        LOCK YOUR <span style="color:var(--cyan-400);">BIGD FIT</span>
+      </div>
+      <div class="fit-modal-char-preview">
+        <img src="/bigd-gamer.png" id="modal-char-preview-img" alt="Selected BigD Look" />
+      </div>
+      <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#ffd700; margin-bottom:4px;" id="modal-fit-title">
+        GAMER BIGD
+      </div>
+      <div style="font-family:var(--font-ui); font-size:0.8rem; font-weight:800; color:var(--cyan-400); text-transform:uppercase; margin-bottom:12px;" id="modal-fit-day">
+        MONDAY FIT
+      </div>
+      <p style="font-family:var(--font-ui); font-size:0.88rem; color:var(--text-secondary); line-height:1.5; margin-bottom:22px;">
+        Lock this as your official BigD look for today? Once confirmed, this choice cannot be changed until tomorrow.
+      </p>
+      <div style="display:flex; justify-content:center; gap:12px;">
+        <button onclick="closeFitLockModal()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-family:var(--font-ui); font-size:0.85rem; font-weight:800; padding:10px 22px; border-radius:20px; cursor:pointer;">
+          CANCEL
+        </button>
+        <button onclick="confirmAndLockFit()" style="background:linear-gradient(135deg, #8800ff, #00ffe5); border:none; color:#fff; font-family:var(--font-display); font-size:0.88rem; font-weight:900; padding:10px 26px; border-radius:20px; cursor:pointer; box-shadow:0 0 20px rgba(0,255,229,0.5);">
+          ⚡ CONFIRM & LOCK
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="hero-eyebrow">
@@ -6217,6 +6687,485 @@ document.addEventListener('click', (e) => {
       resize();
       initStars();
       requestAnimationFrame(render);
+    })();
+    </script>
+    <!-- ============================================================
+         BIGD WATCH — DAILY FIT SELECTOR JAVASCRIPT ENGINE
+         ============================================================ -->
+    <script>
+    (function() {
+      const BIGD_FIT_LOOKS = [
+        {
+          id: 'hustler',
+          dayIndex: 0, // Sunday
+          dayName: 'Sunday',
+          dayAbbr: 'SUN',
+          name: 'Hustler BigD',
+          tag: 'SUNDAY FIT',
+          src: '/bigd-hustler.png',
+          desc: 'Green jacket, stacks of cash & ultimate hustle energy'
+        },
+        {
+          id: 'gamer',
+          dayIndex: 1, // Monday
+          dayName: 'Monday',
+          dayAbbr: 'MON',
+          name: 'Gamer BigD',
+          tag: 'MONDAY FIT',
+          src: '/bigd-gamer.png',
+          desc: 'Headphones on, pixel grinder locked in on stream'
+        },
+        {
+          id: 'office',
+          dayIndex: 2, // Tuesday
+          dayName: 'Tuesday',
+          dayAbbr: 'TUE',
+          name: 'Office BigD',
+          tag: 'TUESDAY FIT',
+          src: '/bigd-office.png',
+          desc: 'Sharp executive suit, high stakes dealmaker style'
+        },
+        {
+          id: 'gambler',
+          dayIndex: 3, // Wednesday
+          dayName: 'Wednesday',
+          dayAbbr: 'WED',
+          name: 'Gambler BigD',
+          tag: 'WEDNESDAY FIT',
+          src: '/bigd-gambler.png',
+          desc: 'High roller casino chips & signature gold chain'
+        },
+        {
+          id: 'funky',
+          dayIndex: 4, // Thursday
+          dayName: 'Thursday',
+          dayAbbr: 'THU',
+          name: 'Funky Casual BigD',
+          tag: 'THURSDAY FIT',
+          src: '/bigd-funky.png',
+          desc: 'Retro neon shades, streetwear swagger & cool vibes'
+        },
+        {
+          id: 'westside',
+          dayIndex: 5, // Friday
+          dayName: 'Friday',
+          dayAbbr: 'FRI',
+          name: 'Westside BigD',
+          tag: 'FRIDAY FIT',
+          src: '/bigd-westside.png',
+          desc: 'Street king crown, golden era hip-hop energy'
+        },
+        {
+          id: 'native',
+          dayIndex: 6, // Saturday
+          dayName: 'Saturday',
+          dayAbbr: 'SAT',
+          name: 'Native American BigD',
+          tag: 'SATURDAY FIT',
+          src: '/bigd-native.png',
+          desc: 'Feathered war bonnet, warrior pride & tribal power'
+        }
+      ];
+
+      let currentFocusedIndex = 1; // 0-6
+      let isFitLockedToday = false;
+      let lockedFitData = null;
+      let currentDialRotation = 0; // in degrees
+
+      function getWatchRadius() {
+        return window.innerWidth <= 768 ? 116 : 152;
+      }
+
+      function getLocalDateString() {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+
+      function initBigDWatch() {
+        const track = document.getElementById('watch-dial-track');
+        const device = document.getElementById('bigd-watch-device');
+        if (!track || !device) return;
+
+        const today = new Date().getDay(); // 0-6
+        const todayDateStr = getLocalDateString();
+
+        // 1. Check client-side daily persistence (localStorage)
+        try {
+          const rawSaved = localStorage.getItem('bigd_daily_fit_selection');
+          if (rawSaved) {
+            const saved = JSON.parse(rawSaved);
+            if (saved && saved.date === todayDateStr && saved.fitId) {
+              const matchIdx = BIGD_FIT_LOOKS.findIndex(l => l.id === saved.fitId);
+              if (matchIdx !== -1) {
+                currentFocusedIndex = matchIdx;
+                isFitLockedToday = true;
+                lockedFitData = saved;
+              }
+            } else {
+              // New calendar day -> unlock for fresh choice
+              localStorage.removeItem('bigd_daily_fit_selection');
+            }
+          }
+        } catch (e) {
+          console.error('LocalStorage error:', e);
+        }
+
+        // If not locked yet, default initial focus to today's weekday fit
+        if (!isFitLockedToday) {
+          const todayLookIdx = BIGD_FIT_LOOKS.findIndex(l => l.dayIndex === today);
+          if (todayLookIdx !== -1) {
+            currentFocusedIndex = todayLookIdx;
+          }
+        }
+
+        renderOrbitPods();
+        updateWatchVisuals(false);
+        setupWatchEvents();
+      }
+
+      function renderOrbitPods() {
+        const track = document.getElementById('watch-dial-track');
+        if (!track) return;
+        track.innerHTML = '';
+
+        const today = new Date().getDay();
+        const total = BIGD_FIT_LOOKS.length;
+        const radius = getWatchRadius();
+
+        BIGD_FIT_LOOKS.forEach((look, idx) => {
+          const angleDeg = (idx * 360) / total;
+          const rad = (angleDeg - 90) * (Math.PI / 180);
+          const x = Math.round(radius * Math.cos(rad));
+          const y = Math.round(radius * Math.sin(rad));
+
+          const pod = document.createElement('div');
+          pod.className = `fit-orbit-pod ${look.dayIndex === today ? 'is-today-day' : ''}`;
+          pod.id = `fit-pod-${idx}`;
+          pod.style.transform = `translate(${x}px, ${y}px)`;
+          pod.setAttribute('data-index', idx);
+          pod.setAttribute('title', `${look.name} (${look.dayName})`);
+
+          pod.innerHTML = `
+            <img src="${look.src}" alt="${look.name}" />
+            <span class="pod-day-label">${look.dayAbbr}</span>
+          `;
+
+          pod.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (isFitLockedToday) return;
+            focusLookByIndex(idx);
+          });
+
+          track.appendChild(pod);
+        });
+      }
+
+      function updateWatchVisuals(animate = true) {
+        const look = BIGD_FIT_LOOKS[currentFocusedIndex];
+        if (!look) return;
+
+        const charImg = document.getElementById('core-character-img');
+        const dayTag = document.getElementById('core-day-tag');
+        const lookTitle = document.getElementById('core-look-title');
+        const track = document.getElementById('watch-dial-track');
+        const device = document.getElementById('bigd-watch-device');
+        const lockBtn = document.getElementById('watch-lock-btn');
+        const lockedBadge = document.getElementById('watch-locked-status-badge');
+        const hintText = document.getElementById('watch-hint-text');
+
+        // Update Center Character & Nameplate
+        if (charImg) {
+          charImg.src = look.src;
+          charImg.alt = look.name;
+        }
+        if (dayTag) dayTag.textContent = isFitLockedToday ? '★ TODAY’S CHOSEN FIT' : look.tag;
+        if (lookTitle) lookTitle.textContent = look.name.toUpperCase();
+
+        // Rotate Dial to bring focused index to top (0°)
+        const total = BIGD_FIT_LOOKS.length;
+        currentDialRotation = -(currentFocusedIndex * 360) / total;
+        if (track) {
+          track.style.transform = `rotate(${currentDialRotation}deg)`;
+        }
+
+        // Counter-rotate each pod so icons remain upright
+        BIGD_FIT_LOOKS.forEach((_, idx) => {
+          const pod = document.getElementById(`fit-pod-${idx}`);
+          if (pod) {
+            const isFocused = idx === currentFocusedIndex;
+            pod.classList.toggle('is-active-focused', isFocused);
+
+            const radius = getWatchRadius();
+            const angleDeg = (idx * 360) / total;
+            const rad = (angleDeg - 90) * (Math.PI / 180);
+            const x = Math.round(radius * Math.cos(rad));
+            const y = Math.round(radius * Math.sin(rad));
+
+            pod.style.transform = `translate(${x}px, ${y}px) rotate(${-currentDialRotation}deg)`;
+          }
+        });
+
+        // Update Locked State UI
+        if (isFitLockedToday) {
+          if (device) device.classList.add('is-locked');
+          if (lockBtn) lockBtn.style.display = 'none';
+          if (lockedBadge) lockedBadge.style.display = 'inline-flex';
+          if (hintText) hintText.style.display = 'none';
+        } else {
+          if (device) device.classList.remove('is-locked');
+          if (lockBtn) lockBtn.style.display = 'inline-flex';
+          if (lockedBadge) lockedBadge.style.display = 'none';
+          if (hintText) hintText.style.display = 'flex';
+        }
+      }
+
+      // ─── TACTILE ROTATION & LOCK SOUND SYNTHESIZER ───
+      let audioCtx = null;
+      function getAudioContext() {
+        if (!audioCtx) {
+          const AudioConstructor = window.AudioContext || window.webkitAudioContext;
+          if (AudioConstructor) {
+            audioCtx = new AudioConstructor();
+          }
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return audioCtx;
+      }
+
+      function playWatchTickSound() {
+        try {
+          const ctx = getAudioContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+
+          // 1. High-frequency crisp cyber ratchet tick
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(950, now);
+          osc.frequency.exponentialRampToValueAtTime(320, now + 0.045);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.05);
+
+          // 2. Subtle metallic resonance ping
+          const pingOsc = ctx.createOscillator();
+          const pingGain = ctx.createGain();
+          pingOsc.type = 'sine';
+          pingOsc.frequency.setValueAtTime(1600, now);
+          pingGain.gain.setValueAtTime(0.08, now);
+          pingGain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+          pingOsc.connect(pingGain);
+          pingGain.connect(ctx.destination);
+          pingOsc.start(now);
+          pingOsc.stop(now + 0.04);
+        } catch (e) {}
+      }
+
+      function playWatchLockSound() {
+        try {
+          const ctx = getAudioContext();
+          if (!ctx) return;
+          const now = ctx.currentTime;
+
+          // 1. Heavy metallic bass latch
+          const bassOsc = ctx.createOscillator();
+          const bassGain = ctx.createGain();
+          bassOsc.type = 'sawtooth';
+          bassOsc.frequency.setValueAtTime(240, now);
+          bassOsc.frequency.exponentialRampToValueAtTime(65, now + 0.28);
+          bassGain.gain.setValueAtTime(0.32, now);
+          bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          bassOsc.connect(bassGain);
+          bassGain.connect(ctx.destination);
+          bassOsc.start(now);
+          bassOsc.stop(now + 0.29);
+
+          // 2. Cyber energetic lock chord
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+            const chordOsc = ctx.createOscillator();
+            const chordGain = ctx.createGain();
+            chordOsc.type = 'sine';
+            chordOsc.frequency.setValueAtTime(freq, now + i * 0.04);
+            chordGain.gain.setValueAtTime(0.14, now + i * 0.04);
+            chordGain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.38);
+            chordOsc.connect(chordGain);
+            chordGain.connect(ctx.destination);
+            chordOsc.start(now + i * 0.04);
+            chordOsc.stop(now + i * 0.04 + 0.39);
+          });
+        } catch (e) {}
+      }
+
+      function focusLookByIndex(idx, playSound = true) {
+        if (isFitLockedToday) return;
+        const total = BIGD_FIT_LOOKS.length;
+        const newIndex = ((idx % total) + total) % total;
+        if (newIndex !== currentFocusedIndex) {
+          currentFocusedIndex = newIndex;
+          if (playSound) playWatchTickSound();
+          updateWatchVisuals(true);
+        }
+      }
+
+      function stepLook(dir) {
+        if (isFitLockedToday) return;
+        focusLookByIndex(currentFocusedIndex + dir, true);
+      }
+
+      function setupWatchEvents() {
+        const device = document.getElementById('bigd-watch-device');
+        const prevBtn = document.getElementById('fit-prev-btn');
+        const nextBtn = document.getElementById('fit-next-btn');
+
+        if (prevBtn) prevBtn.onclick = (e) => { e.stopPropagation(); stepLook(-1); };
+        if (nextBtn) nextBtn.onclick = (e) => { e.stopPropagation(); stepLook(1); };
+
+        if (!device) return;
+
+        // 1. Mouse Wheel on Device (with rotation click sound)
+        let wheelTimeout = null;
+        device.addEventListener('wheel', (e) => {
+          if (isFitLockedToday) return;
+          e.preventDefault();
+          if (wheelTimeout) return;
+          wheelTimeout = setTimeout(() => { wheelTimeout = null; }, 160);
+          const dir = e.deltaY > 0 ? 1 : -1;
+          stepLook(dir);
+        }, { passive: false });
+
+        // 2. Click & Drag / Touch Swipe on Dial
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let startAngle = 0;
+
+        function getAngleFromCenter(clientX, clientY) {
+          const rect = device.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          return Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
+        }
+
+        device.addEventListener('pointerdown', (e) => {
+          if (isFitLockedToday || e.target.closest('.watch-step-btn')) return;
+          isDragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          startAngle = getAngleFromCenter(e.clientX, e.clientY);
+          device.setPointerCapture(e.pointerId);
+          getAudioContext(); // Initialize audio context on first user touch
+        });
+
+        device.addEventListener('pointermove', (e) => {
+          if (!isDragging || isFitLockedToday) return;
+          const currentAngle = getAngleFromCenter(e.clientX, e.clientY);
+          let deltaAngle = currentAngle - startAngle;
+          if (deltaAngle > 180) deltaAngle -= 360;
+          if (deltaAngle < -180) deltaAngle += 360;
+
+          const stepThreshold = 360 / 7 / 2; // ~25.7 deg
+          if (Math.abs(deltaAngle) >= stepThreshold) {
+            const dir = deltaAngle > 0 ? 1 : -1;
+            stepLook(dir);
+            startAngle = currentAngle;
+          }
+        });
+
+        const endDrag = (e) => {
+          if (isDragging) {
+            isDragging = false;
+            try { device.releasePointerCapture(e.pointerId); } catch(err) {}
+          }
+        };
+
+        device.addEventListener('pointerup', endDrag);
+        device.addEventListener('pointercancel', endDrag);
+
+        // 3. Keyboard Arrow Navigation
+        window.addEventListener('keydown', (e) => {
+          if (isFitLockedToday) return;
+          if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+          if (e.key === 'ArrowLeft') stepLook(-1);
+          if (e.key === 'ArrowRight') stepLook(1);
+        });
+
+        // 4. Window Resize adjustment
+        window.addEventListener('resize', () => {
+          renderOrbitPods();
+          updateWatchVisuals(false);
+        });
+      }
+
+      // Modal & Locking Actions
+      window.openFitLockModal = function() {
+        if (isFitLockedToday) return;
+        const look = BIGD_FIT_LOOKS[currentFocusedIndex];
+        if (!look) return;
+
+        const modal = document.getElementById('fit-lock-modal');
+        const modalImg = document.getElementById('modal-char-preview-img');
+        const modalTitle = document.getElementById('modal-fit-title');
+        const modalDay = document.getElementById('modal-fit-day');
+
+        if (modalImg) modalImg.src = look.src;
+        if (modalTitle) modalTitle.textContent = look.name.toUpperCase();
+        if (modalDay) modalDay.textContent = look.tag;
+
+        if (modal) modal.classList.add('active');
+      };
+
+      window.closeFitLockModal = function() {
+        const modal = document.getElementById('fit-lock-modal');
+        if (modal) modal.classList.remove('active');
+      };
+
+      window.confirmAndLockFit = function() {
+        const look = BIGD_FIT_LOOKS[currentFocusedIndex];
+        if (!look) return;
+
+        closeFitLockModal();
+        playWatchLockSound();
+
+        const todayDateStr = getLocalDateString();
+        const lockPayload = {
+          fitId: look.id,
+          name: look.name,
+          dayIndex: look.dayIndex,
+          date: todayDateStr,
+          lockedAt: new Date().toISOString()
+        };
+
+        try {
+          localStorage.setItem('bigd_daily_fit_selection', JSON.stringify(lockPayload));
+        } catch (e) {
+          console.error('LocalStorage write error:', e);
+        }
+
+        isFitLockedToday = true;
+        lockedFitData = lockPayload;
+
+        const device = document.getElementById('bigd-watch-device');
+        if (device) {
+          device.classList.add('animating-lock');
+          setTimeout(() => {
+            device.classList.remove('animating-lock');
+            updateWatchVisuals(true);
+          }, 800);
+        } else {
+          updateWatchVisuals(true);
+        }
+      };
+
+      document.addEventListener('DOMContentLoaded', initBigDWatch);
     })();
     </script>
     <!-- <script src="/blackjack/blackjack-engine.js"></script> -->
