@@ -802,6 +802,97 @@ body::after {
   color: #00e701;
 }
 
+.partner-capsule-archive {
+  border-color: rgba(255, 215, 0, 0.3);
+  background: linear-gradient(135deg, rgba(35, 28, 15, 0.9) 0%, rgba(20, 16, 10, 0.95) 100%);
+  cursor: pointer;
+}
+.partner-capsule-archive:hover {
+  border-color: #ffd700;
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.4);
+}
+
+/* Campaign Archive Switcher Bar */
+.partner-campaign-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto 28px;
+  padding: 12px 20px;
+  background: rgba(18, 12, 36, 0.85);
+  border: 1px solid rgba(136, 0, 255, 0.3);
+  border-radius: 40px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+}
+.campaign-bar-label {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.campaign-toggle-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.campaign-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+.campaign-toggle-btn:hover {
+  color: #fff;
+  border-color: rgba(136, 0, 255, 0.5);
+  background: rgba(136, 0, 255, 0.15);
+}
+.campaign-toggle-btn.active {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(136, 0, 255, 0.4) 0%, rgba(0, 255, 229, 0.25) 100%);
+  border-color: var(--cyan-400);
+  box-shadow: 0 0 18px rgba(0, 255, 229, 0.35);
+}
+.archive-notice-banner {
+  max-width: 1050px;
+  margin: 0 auto 24px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+}
+.archive-notice-text {
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ffe45c;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 @media (max-width: 900px) {
   .hero-hud-stats-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -3486,7 +3577,7 @@ footer a:hover { color: var(--purple-300); }
     <li><a href="#tabs-section" data-tab="milestones">Milestones</a></li>
     <li><a href="blackjack.html">Blackjack ♠️</a></li>
     <li><a href="verify.html">Code Check</a></li>
-    <li><a href="store.html">Store</a></li>
+    <li><a href="store.html">Weekly Rewards 🪙</a></li>
     <li style="display:flex;align-items:center;margin-left:8px;"><button id="nav-auth-btn" class="nav-btn-auth">Login</button></li>
   </ul>
   <div class="nav-right">
@@ -3509,7 +3600,7 @@ footer a:hover { color: var(--purple-300); }
   <a href="#tabs-section" data-tab="milestones">Milestones</a>
   <a href="blackjack.html">Blackjack ♠️</a>
   <a href="verify.html">Code Check</a>
-  <a href="store.html">Store</a>
+  <a href="store.html">Weekly Rewards 🪙</a>
   <a href="#" id="mobile-nav-auth-btn" class="mobile-auth-btn">Login</a>
 </div>
 
@@ -3531,7 +3622,7 @@ footer a:hover { color: var(--purple-300); }
   <div class="hero-particles" id="hero-particles"></div>
 
   <!-- 3D Floating Interactive Casino Elements (Calibrated Opacity & Depth) -->
-  <div class="hero-poker-chip chip-left-top" id="poker-chip-1" title="Degen City High Roller Token">
+  <div class="hero-poker-chip chip-left-top" id="poker-chip-1" title="Yeet High Roller Token">
     <img src="/poker-chip-1.png" alt="Futuristic 3D Poker Chip" draggable="false" />
   </div>
   <div class="hero-poker-chip chip-left-bottom" id="poker-chip-2" title="Big D VIP Casino Chip">
@@ -3541,7 +3632,7 @@ footer a:hover { color: var(--purple-300); }
   <div class="hero-poker-chip chip-right-top" id="poker-chip-gold" title="Big D High Roller Gold Token">
     <img src="/poker-chip-gold.png" alt="Futuristic 3D Gold Casino Coin" draggable="false" />
   </div>
-  <div class="hero-poker-chip chip-right-mid" id="cyber-dice" title="Degen City Quantum Dice">
+  <div class="hero-poker-chip chip-right-mid" id="cyber-dice" title="Quantum Dice">
     <img src="/cyber-dice.png" alt="Futuristic 3D Cyber Dice" draggable="false" />
   </div>
 
@@ -3602,7 +3693,7 @@ footer a:hover { color: var(--purple-300); }
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
       <div class="hud-stat-info">
-        <div class="hud-stat-value">August 2026</div>
+        <div class="hud-stat-value" id="hud-season-period-val">September 2026</div>
         <div class="hud-stat-label">Monthly Leaderboard</div>
       </div>
     </div>
@@ -3624,21 +3715,27 @@ footer a:hover { color: var(--purple-300); }
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
       </div>
       <div class="hud-stat-info">
-        <div class="hud-stat-value">$<span>2,500</span><span class="val-sup">+</span></div>
+        <div class="hud-stat-value">$<span id="hud-rewards-given-val">5,000</span><span class="val-sup">+</span></div>
         <div class="hud-stat-label">Rewards Given</div>
       </div>
     </div>
   </div>
 
-  <!-- OFFICIAL PARTNERED SITE DOCK (DegenCity Only) -->
+  <!-- OFFICIAL PARTNERED SITE DOCK (Yeet Primary + Previous Partner Archive) -->
   <div class="hero-partner-dock">
-    <div class="partner-dock-label">OFFICIAL PARTNERED SITE</div>
+    <div class="partner-dock-label">PARTNER CASINOS & ARCHIVES</div>
     <div class="partner-capsules-wrap">
-      <a href="https://degencity.com" target="_blank" rel="noopener" class="partner-capsule partner-capsule-degencity" title="DegenCity — Use Code BIGD">
-        <span class="partner-capsule-icon">🎲</span>
-        <span class="partner-capsule-name">DegenCity</span>
+      <a href="https://yeet.com" target="_blank" rel="noopener" class="partner-capsule partner-capsule-degencity" title="Active Casino Partner: Yeet">
+        <span class="partner-capsule-icon">⚡</span>
+        <span class="partner-capsule-name">Yeet</span>
         <span class="partner-capsule-code">CODE: BIGD</span>
+        <span class="partner-capsule-perk">ACTIVE CASINO</span>
       </a>
+      <button type="button" onclick="switchCampaign('degencity')" class="partner-capsule partner-capsule-archive" title="View DegenCity Historical Records">
+        <span class="partner-capsule-icon">📁</span>
+        <span class="partner-capsule-name">DegenCity</span>
+        <span class="partner-capsule-code" style="background:rgba(255,215,0,0.15); border-color:rgba(255,215,0,0.4); color:#ffd700;">PREVIOUS PARTNER</span>
+      </button>
     </div>
   </div>
 
@@ -3723,10 +3820,10 @@ footer a:hover { color: var(--purple-300); }
   <!-- Standalone Premium Active Season Glass Card -->
   <div class="active-season-card">
     <div class="season-card-inner">
-      <span class="live-pulse-dot"></span>
+      <span class="live-pulse-dot" id="season-pulse-dot"></span>
       <span class="season-card-label">ACTIVE SEASON:</span>
-      <span class="season-card-value">AUGUST 2026</span>
-      <span class="season-card-badge">COMPETING</span>
+      <span class="season-card-value" id="season-card-value">SEPTEMBER 2026</span>
+      <span class="season-card-badge" id="season-card-badge">YEET CASINO</span>
     </div>
   </div>
 </section>
@@ -3736,18 +3833,18 @@ footer a:hover { color: var(--purple-300); }
      ================================================================ -->
 <div class="ticker-bar-wrap">
   <div class="ticker-track">
-    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>reversed</strong> holds 1st place with $11,116.42 wagered!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #2</span> ⚡ <strong>armedupmused</strong> close 2nd with $10,906.21 wagered!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-reward">PRIZE POOL</span> 💰 <strong>$3,000 Combined Leaderboard</strong> (BIGD + BigBallz) Active!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>reversed</strong> holds all-time record with $11,116.42 wagered!</div>
     <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>thatonet</strong> linked Kick account under code <strong>BIGD</strong>!</div>
     <div class="ticker-item"><span class="ticker-tag tag-live">LIVE NOW</span> 🟢 <strong>BigDgamesTV</strong> is streaming live on Kick!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #3</span> 🎲 <strong>wisthechad</strong> climbing fast with $10,253.60!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-reward">REWARD</span> 🎯 <strong>bigballszs34</strong> unlocked $60 Le Prechaun Cash Bonus!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-reward">WEEKLY REWARDS</span> ⚡ <strong>10 Coins / $1</strong> on Slots & <strong>0.25 Coins / $1</strong> on House/Live!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #2</span> ⚡ <strong>armedupmused</strong> holding 2nd with $10,906.21!</div>
     <!-- Loop repeat for smooth marquee -->
-    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>reversed</strong> holds 1st place with $11,116.42 wagered!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #2</span> ⚡ <strong>armedupmused</strong> close 2nd with $10,906.21 wagered!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-reward">PRIZE POOL</span> 💰 <strong>$3,000 Combined Leaderboard</strong> (BIGD + BigBallz) Active!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>reversed</strong> holds all-time record with $11,116.42 wagered!</div>
     <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>thatonet</strong> linked Kick account under code <strong>BIGD</strong>!</div>
     <div class="ticker-item"><span class="ticker-tag tag-live">LIVE NOW</span> 🟢 <strong>BigDgamesTV</strong> is streaming live on Kick!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #3</span> 🎲 <strong>wisthechad</strong> climbing fast with $10,253.60!</div>
+    <div class="ticker-item"><span class="ticker-tag tag-reward">WEEKLY REWARDS</span> ⚡ <strong>10 Coins / $1</strong> on Slots & <strong>0.25 Coins / $1</strong> on House/Live!</div>
   </div>
 </div>
 
@@ -3765,7 +3862,7 @@ footer a:hover { color: var(--purple-300); }
       <div class="stat-label">Referred Players</div>
     </div>
     <div class="stat-item">
-      <div class="stat-value">$<span>1,500</span></div>
+      <div class="stat-value">$<span id="stat-pool-val">3,000</span></div>
       <div class="stat-label">Monthly Pool</div>
     </div>
     <div class="stat-item">
@@ -3781,69 +3878,150 @@ footer a:hover { color: var(--purple-300); }
 <section id="leaderboard-spotlight" class="story-section">
   <div class="story-section-header">
     <span class="story-eyebrow">HALL OF CHAMPIONS</span>
-    <h2 class="story-title">Leaderboard <span>Top 5 Spotlight</span></h2>
-    <p class="story-sub">Real-time ranking of top players dominating the August 2026 wager leaderboard.</p>
+    <h2 class="story-title">Leaderboard <span>Hall of Fame</span></h2>
+    <p class="story-sub">Active campaign status and historical monthly champions across partner casinos.</p>
   </div>
 
-  <div class="top5-spotlight-grid">
-    <!-- Rank 1 -->
-    <div class="top5-card rank-1-card">
-      <div class="top5-rank-badge">🥇 #1</div>
-      <div class="top5-avatar-wrap">
-        <img src="/logo.png" alt="reversed" class="top5-avatar"/>
-        <span class="top5-flag">🇨🇦</span>
-      </div>
-      <div class="top5-username">reversed</div>
-      <div class="top5-wager">$11,116.42</div>
-      <div class="top5-prog-track"><div class="top5-prog-fill" style="width:100%"></div></div>
+  <!-- Active September 2026 Yeet Spotlight (Coming Soon) -->
+  <div style="background:linear-gradient(145deg, rgba(20,14,36,0.8) 0%, rgba(10,8,20,0.95) 100%); border:1px solid rgba(0,255,229,0.35); border-radius:var(--radius-lg); padding:32px 24px; text-align:center; max-width:980px; margin:0 auto 40px; box-shadow:0 0 35px rgba(0,255,229,0.08);">
+    <div style="font-size:2.8rem; margin-bottom:10px;">⚡</div>
+    <div style="font-family:var(--font-display); font-size:1.45rem; font-weight:900; color:#fff; text-transform:uppercase; margin-bottom:8px; letter-spacing:0.06em;">
+      September 2026 Yeet Hall of Fame: <span style="color:var(--cyan-400);">COMING SOON</span>
+    </div>
+    <p style="font-family:var(--font-ui); font-size:0.92rem; color:var(--text-secondary); max-width:600px; margin:0 auto 18px; line-height:1.6;">
+      The active September 2026 leaderboard race is preparing for launch! Once the Yeet API key is connected, live top rankings and player podiums will update here automatically.
+    </p>
+    <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 18px; border-radius:20px; background:rgba(0,255,229,0.1); border:1px solid rgba(0,255,229,0.35); color:var(--cyan-400); font-family:var(--font-ui); font-size:0.8rem; font-weight:800; letter-spacing:0.1em; text-transform:uppercase;">
+      <span>●</span> Active Partner: Yeet Casino (Code: BIGD) — Awaiting API Key
+    </div>
+  </div>
+
+  <!-- PREVIOUS MONTHS HALL OF FAME (WITH SITE DETAILS) -->
+  <div style="max-width:1150px; margin:0 auto;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+      <span style="font-size:1.4rem;">📁</span>
+      <h3 style="font-family:var(--font-display); font-size:1.2rem; font-weight:900; color:#ffd700; text-transform:uppercase; letter-spacing:0.06em; margin:0;">
+        Previous Months Hall of Fame & Site Records
+      </h3>
     </div>
 
-    <!-- Rank 2 -->
-    <div class="top5-card">
-      <div class="top5-rank-badge">🥈 #2</div>
-      <div class="top5-avatar-wrap">
-        <img src="/logo.png" alt="armedupmused" class="top5-avatar"/>
-        <span class="top5-flag">🇺🇸</span>
-      </div>
-      <div class="top5-username">armedupmused</div>
-      <div class="top5-wager">$10,906.21</div>
-      <div class="top5-prog-track"><div class="top5-prog-fill" style="width:98%"></div></div>
-    </div>
+    <!-- 3-Column Grid for Previous Months & Site Details -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:22px;">
 
-    <!-- Rank 3 -->
-    <div class="top5-card">
-      <div class="top5-rank-badge">🥉 #3</div>
-      <div class="top5-avatar-wrap">
-        <img src="/logo.png" alt="wisthechad" class="top5-avatar"/>
-        <span class="top5-flag">🇬🇧</span>
-      </div>
-      <div class="top5-username">wisthechad</div>
-      <div class="top5-wager">$10,253.60</div>
-      <div class="top5-prog-track"><div class="top5-prog-fill" style="width:92%"></div></div>
-    </div>
+      <!-- Column 1: August 2026 Season (Site: DegenCity) -->
+      <div style="background:rgba(14,10,26,0.75); border:1px solid rgba(255,215,0,0.25); border-radius:var(--radius-md); padding:22px; display:flex; flex-direction:column; gap:14px;">
+        <div style="border-bottom:1px solid rgba(255,215,0,0.2); padding-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#fff;">August 2026</div>
+            <span style="background:rgba(255,215,0,0.15); color:#ffd700; font-family:var(--font-ui); font-size:0.72rem; font-weight:800; padding:3px 8px; border-radius:4px; border:1px solid rgba(255,215,0,0.3);">
+              SITE: DEGENCITY
+            </span>
+          </div>
+          <div style="font-family:var(--font-ui); font-size:0.78rem; color:var(--text-secondary); margin-top:4px;">
+            Partner: DegenCity Casino &nbsp;|&nbsp; Community Total: $102.9k
+          </div>
+        </div>
 
-    <!-- Rank 4 -->
-    <div class="top5-card">
-      <div class="top5-rank-badge">#4</div>
-      <div class="top5-avatar-wrap">
-        <img src="/logo.png" alt="bigballszs34" class="top5-avatar"/>
-        <span class="top5-flag">🇩🇪</span>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px; background:rgba(255,215,0,0.08); border-radius:4px;">
+            <div>🥇 <strong style="color:#fff;">reversed</strong> <span style="font-size:0.72rem; color:#ffd700;">(CHAMPION)</span></div>
+            <strong style="color:#ffd700;">$11,116.42</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px; background:rgba(255,255,255,0.02); border-radius:4px;">
+            <div>🥈 <strong style="color:#fff;">armedupmused</strong></div>
+            <strong style="color:var(--text-primary);">$9,314.12</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px; background:rgba(255,255,255,0.02); border-radius:4px;">
+            <div>🥉 <strong style="color:#fff;">thatonet</strong></div>
+            <strong style="color:var(--text-primary);">$922.76</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px;">
+            <div>4. <span style="color:var(--text-secondary);">soysolos</span></div>
+            <span style="color:var(--text-secondary);">$225.28</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px;">
+            <div>5. <span style="color:var(--text-secondary);">supermustang</span></div>
+            <span style="color:var(--text-secondary);">$122.41</span>
+          </div>
+        </div>
       </div>
-      <div class="top5-username">bigballszs34</div>
-      <div class="top5-wager">$9,225.62</div>
-      <div class="top5-prog-track"><div class="top5-prog-fill" style="width:83%"></div></div>
-    </div>
 
-    <!-- Rank 5 -->
-    <div class="top5-card">
-      <div class="top5-rank-badge">#5</div>
-      <div class="top5-avatar-wrap">
-        <img src="/logo.png" alt="maaars" class="top5-avatar"/>
-        <span class="top5-flag">🇦🇺</span>
+      <!-- Column 2: July 2026 Season (Site: DegenCity) -->
+      <div style="background:rgba(14,10,26,0.75); border:1px solid rgba(136,0,255,0.25); border-radius:var(--radius-md); padding:22px; display:flex; flex-direction:column; gap:14px;">
+        <div style="border-bottom:1px solid rgba(136,0,255,0.2); padding-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#fff;">July 2026</div>
+            <span style="background:rgba(136,0,255,0.2); color:var(--purple-300); font-family:var(--font-ui); font-size:0.72rem; font-weight:800; padding:3px 8px; border-radius:4px; border:1px solid rgba(136,0,255,0.35);">
+              SITE: DEGENCITY
+            </span>
+          </div>
+          <div style="font-family:var(--font-ui); font-size:0.78rem; color:var(--text-secondary); margin-top:4px;">
+            Partner: DegenCity Casino &nbsp;|&nbsp; Summer Wager Race
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px; background:rgba(136,0,255,0.1); border-radius:4px;">
+            <div>🥇 <strong style="color:#fff;">wisthechad</strong> <span style="font-size:0.72rem; color:var(--purple-300);">(CHAMPION)</span></div>
+            <strong style="color:var(--purple-300);">$10,253.60</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px; background:rgba(255,255,255,0.02); border-radius:4px;">
+            <div>🥈 <strong style="color:#fff;">bigballszs34</strong></div>
+            <strong style="color:var(--text-primary);">$8,093.47</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px; background:rgba(255,255,255,0.02); border-radius:4px;">
+            <div>🥉 <strong style="color:#fff;">maaars</strong></div>
+            <strong style="color:var(--text-primary);">$7,466.70</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px;">
+            <div>4. <span style="color:var(--text-secondary);">m1ndset_</span></div>
+            <span style="color:var(--text-secondary);">$2,572.77</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px;">
+            <div>5. <span style="color:var(--text-secondary);">armedupmused</span></div>
+            <span style="color:var(--text-secondary);">$1,592.09</span>
+          </div>
+        </div>
       </div>
-      <div class="top5-username">maaars</div>
-      <div class="top5-wager">$7,466.70</div>
-      <div class="top5-prog-track"><div class="top5-prog-fill" style="width:67%"></div></div>
+
+      <!-- Column 3: All-Time Champions Hall of Fame -->
+      <div style="background:rgba(14,10,26,0.75); border:1px solid rgba(0,255,229,0.25); border-radius:var(--radius-md); padding:22px; display:flex; flex-direction:column; gap:14px;">
+        <div style="border-bottom:1px solid rgba(0,255,229,0.2); padding-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#fff;">All-Time Legends</div>
+            <span style="background:rgba(0,255,229,0.15); color:var(--cyan-400); font-family:var(--font-ui); font-size:0.72rem; font-weight:800; padding:3px 8px; border-radius:4px; border:1px solid rgba(0,255,229,0.3);">
+              HISTORICAL RECORDS
+            </span>
+          </div>
+          <div style="font-family:var(--font-ui); font-size:0.78rem; color:var(--text-secondary); margin-top:4px;">
+            All-Time Cumulative Wager Champions
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px; background:rgba(0,255,229,0.08); border-radius:4px;">
+            <div>🥇 <strong style="color:#fff;">reversed</strong> <span style="font-size:0.7rem; color:var(--text-muted);">(DegenCity)</span></div>
+            <strong style="color:var(--cyan-400);">$11,116.42</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px; background:rgba(255,255,255,0.02); border-radius:4px;">
+            <div>🥈 <strong style="color:#fff;">armedupmused</strong> <span style="font-size:0.7rem; color:var(--text-muted);">(DegenCity)</span></div>
+            <strong style="color:var(--text-primary);">$10,906.21</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px; background:rgba(255,255,255,0.02); border-radius:4px;">
+            <div>🥉 <strong style="color:#fff;">wisthechad</strong> <span style="font-size:0.7rem; color:var(--text-muted);">(DegenCity)</span></div>
+            <strong style="color:var(--text-primary);">$10,253.60</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px;">
+            <div>4. <span style="color:var(--text-secondary);">bigballszs34</span> <span style="font-size:0.7rem; color:var(--text-muted);">(DegenCity)</span></div>
+            <span style="color:var(--text-secondary);">$9,225.62</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:6px 10px;">
+            <div>5. <span style="color:var(--text-secondary);">maaars</span> <span style="font-size:0.7rem; color:var(--text-muted);">(DegenCity)</span></div>
+            <span style="color:var(--text-secondary);">$7,466.70</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -3862,7 +4040,7 @@ footer a:hover { color: var(--purple-300); }
   <div class="story-section-header">
     <span class="story-eyebrow">RECENT PAYOUTS</span>
     <h2 class="story-title">Last Month's <span>Winners</span></h2>
-    <p class="story-sub">Live cash rewards transferred to players across DegenCity & Kick challenges.</p>
+    <p class="story-sub">Live cash rewards transferred to players across Yeet & Kick challenges.</p>
   </div>
 
   <div class="winners-carousel-grid">
@@ -3915,7 +4093,7 @@ footer a:hover { color: var(--purple-300); }
     <div class="how-card">
       <div class="how-step-num">01</div>
       <h3 class="how-title">Link Account</h3>
-      <p class="how-desc">Sign up on DegenCity or Stake using code <strong class="text-cyan">BIGD</strong> and verify your account in seconds.</p>
+      <p class="how-desc">Sign up on Yeet using code <strong class="text-cyan">BIGD</strong> and verify your account in seconds.</p>
     </div>
     <div class="how-card">
       <div class="how-step-num">02</div>
@@ -3934,6 +4112,49 @@ footer a:hover { color: var(--purple-300); }
      TABS
      ================================================================ -->
 <section id="tabs-section">
+
+  <!-- PARTNER CAMPAIGN SELECTOR BAR -->
+  <div class="partner-campaign-bar">
+    <span class="campaign-bar-label">SELECT CAMPAIGN:</span>
+    <div class="campaign-toggle-group">
+      <button class="campaign-toggle-btn active" id="btn-campaign-yeet" onclick="switchCampaign('yeet')">
+        <span style="color:#00ff66;">●</span> ⚡ Yeet Casino (Current — September 2026)
+      </button>
+      <button class="campaign-toggle-btn" id="btn-campaign-degencity" onclick="switchCampaign('degencity')">
+        📁 DegenCity (Previous Partner Archive)
+      </button>
+    </div>
+  </div>
+
+  <!-- ARCHIVE NOTICE BANNER (Active when DegenCity is selected) -->
+  <div class="archive-notice-banner" id="campaign-archive-banner" style="display:none; flex-direction:column; align-items:flex-start; gap:12px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:10px;">
+      <div class="archive-notice-text">
+        <span>📁</span>
+        <span><strong>Historical Archive Mode:</strong> Viewing previous partner records from DegenCity. All-Time progress, monthly rankings, and milestone history preserved.</span>
+      </div>
+      <button onclick="switchCampaign('yeet')" style="font-family:var(--font-ui); font-size:0.75rem; font-weight:800; color:#fff; background:rgba(136,0,255,0.4); border:1px solid var(--purple-400); padding:5px 14px; border-radius:12px; cursor:pointer;">
+        ⚡ Switch to Active Yeet Campaign →
+      </button>
+    </div>
+    
+    <!-- DegenCity Community Total Summary Strip -->
+    <div style="display:flex; flex-wrap:wrap; gap:12px; width:100%; border-top:1px solid rgba(255,215,0,0.2); padding-top:10px;">
+      <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,215,0,0.3); border-radius:8px; padding:6px 14px; display:flex; align-items:center; gap:8px;">
+        <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-ui); text-transform:uppercase; font-weight:700;">Total Community Wagered:</span>
+        <strong style="color:#ffd700; font-family:var(--font-display); font-size:1.15rem; letter-spacing:0.04em;">$102,968.05</strong>
+      </div>
+      <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,215,0,0.3); border-radius:8px; padding:6px 14px; display:flex; align-items:center; gap:8px;">
+        <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-ui); text-transform:uppercase; font-weight:700;">Referred Members:</span>
+        <strong style="color:#fff; font-family:var(--font-display); font-size:1.15rem;">42 Active</strong>
+      </div>
+      <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(0,255,128,0.3); border-radius:8px; padding:6px 14px; display:flex; align-items:center; gap:8px;">
+        <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-ui); text-transform:uppercase; font-weight:700;">Milestone Reached:</span>
+        <strong style="color:#00ff80; font-family:var(--font-ui); font-size:0.88rem; font-weight:800;">✓ $50,000 Smashed (10 Bonus Buys Awarded)</strong>
+      </div>
+    </div>
+  </div>
+
   <div class="tabs-nav">
     <button class="tab-btn active" data-panel="leaderboard">Lifetime Wager</button>
     <button class="tab-btn" data-panel="biweekly">Monthly Leaderboard</button>
@@ -3962,17 +4183,35 @@ footer a:hover { color: var(--purple-300); }
       </div>
     </div>
 
-    <!-- CHALLENGES PANEL -->
+    <!-- CHALLENGES PANEL (PHASES 13, 14, 15) -->
     <div class="tab-panel" id="panel-challenges">
-      <div class="challenges-header">
+      <div class="challenges-header" style="text-align:center; max-width:800px; margin:0 auto 24px;">
         <div class="section-title">Community <span>Challenges</span></div>
-        <p class="challenges-sub">Complete live game challenges to claim cash prizes! Join our Discord community to submit your entry.</p>
+        <p class="challenges-sub">
+          Complete live game challenges to claim cash prizes! Incomplete challenges are reused for the active Yeet campaign, while completed challenges remain in our hall of records.
+        </p>
+
+        <!-- Challenge Status Filter Tabs (Phase 15) -->
+        <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:16px;">
+          <button class="campaign-toggle-btn active" id="ch-filter-all" onclick="filterChallenges('all')" style="font-size:0.75rem; padding:6px 14px;">
+            🌐 All Challenges
+          </button>
+          <button class="campaign-toggle-btn" id="ch-filter-active" onclick="filterChallenges('active')" style="font-size:0.75rem; padding:6px 14px;">
+            🔥 Active & Reused (Yeet)
+          </button>
+          <button class="campaign-toggle-btn" id="ch-filter-completed" onclick="filterChallenges('completed')" style="font-size:0.75rem; padding:6px 14px;">
+            🏆 Completed History
+          </button>
+          <button class="campaign-toggle-btn" id="ch-filter-archived" onclick="filterChallenges('archived')" style="font-size:0.75rem; padding:6px 14px;">
+            📁 Archived
+          </button>
+        </div>
       </div>
 
-      <div class="challenges-grid">
-        <!-- Challenge Card 1: Sweet Bonanza 2500 -->
-        <div class="challenge-card">
-          <div class="challenge-card-badge">🔥 LIVE CHALLENGE</div>
+      <div class="challenges-grid" id="challenges-grid">
+        <!-- Challenge Card 1: Sweet Bonanza 2500 (ACTIVE / REUSED) -->
+        <div class="challenge-card" data-challenge-status="active">
+          <div class="challenge-card-badge" style="background:rgba(0,255,229,0.15); border-color:rgba(0,255,229,0.4); color:var(--cyan-400);">🔥 LIVE (REUSED FOR YEET)</div>
           <div class="challenge-img-wrap">
             <img src="/challenges/sweet-bonanza-challenge.jpg" alt="Sweet Bonanza 2500 - 1000x Bomb Challenge" class="challenge-img" loading="lazy" />
           </div>
@@ -3981,36 +4220,17 @@ footer a:hover { color: var(--purple-300); }
               <span class="challenge-title">Sweet Bonanza 2500</span>
               <span class="challenge-prize-tag">$20 CASH</span>
             </div>
-            <p class="challenge-desc">First person to hit the 1000x Bomb wins $20 Cash! Min bet $0.20. No bonus buys. Ends 08/31.</p>
+            <p class="challenge-desc">First person to hit the 1000x Bomb on Yeet using code BIGD wins $20 Cash! Min bet $0.20. No bonus buys.</p>
             <a href="https://discord.gg/aHSVMX4DCr" target="_blank" rel="noopener" class="btn-claim-challenge">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/></svg>
-              <span>Claim</span>
+              <span>Claim on Discord</span>
             </a>
           </div>
         </div>
 
-        <!-- Challenge Card 2: Le Prechaun -->
-        <div class="challenge-card">
-          <div class="challenge-card-badge">🔥 LIVE CHALLENGE</div>
-          <div class="challenge-img-wrap">
-            <img src="/challenges/le-prechaun-challenge.jpg" alt="Le Prechaun - Community Challenge" class="challenge-img" loading="lazy" />
-          </div>
-          <div class="challenge-card-body">
-            <div class="challenge-card-meta">
-              <span class="challenge-title">Le Prechaun Challenge</span>
-              <span class="challenge-prize-tag">$60 CASH</span>
-            </div>
-            <p class="challenge-desc">First person to hit 5 Scatter wins $60 Cash! Min bet $0.20. Challenge ends 08/31.</p>
-            <a href="https://discord.gg/aHSVMX4DCr" target="_blank" rel="noopener" class="btn-claim-challenge">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/></svg>
-              <span>Claim</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- Challenge Card 3: Out of the Woods -->
-        <div class="challenge-card">
-          <div class="challenge-card-badge">🔥 LIVE CHALLENGE</div>
+        <!-- Challenge Card 2: Out of the Woods (ACTIVE / REUSED) -->
+        <div class="challenge-card" data-challenge-status="active">
+          <div class="challenge-card-badge" style="background:rgba(0,255,229,0.15); border-color:rgba(0,255,229,0.4); color:var(--cyan-400);">🔥 LIVE (REUSED FOR YEET)</div>
           <div class="challenge-img-wrap">
             <img src="/challenges/out-of-the-woods-challenge.jpg" alt="Out of the Woods - 1000x Challenge" class="challenge-img" loading="lazy" />
           </div>
@@ -4019,35 +4239,17 @@ footer a:hover { color: var(--purple-300); }
               <span class="challenge-title">Out of the Woods</span>
               <span class="challenge-prize-tag">$20 CASH</span>
             </div>
-            <p class="challenge-desc">First person to hit 1000x wins $20 Cash! Min bet $0.25. No bonus buys. Ends 08/31.</p>
+            <p class="challenge-desc">First person to hit 1000x on Yeet using code BIGD wins $20 Cash! Min bet $0.25. No bonus buys.</p>
             <a href="https://discord.gg/aHSVMX4DCr" target="_blank" rel="noopener" class="btn-claim-challenge">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/></svg>
-              <span>Claim</span>
+              <span>Claim on Discord</span>
             </a>
           </div>
         </div>
 
-        <!-- Challenge Card 4: Fruit Party -->
-        <div class="challenge-card">
-          <div class="challenge-card-badge">🔥 LIVE CHALLENGE</div>
-          <div class="challenge-img-wrap">
-            <img src="/challenges/fruit-party-completed.png" alt="Fruit Party - 300x Challenge (Completed)" class="challenge-img" loading="lazy" />
-          </div>
-          <div class="challenge-card-body">
-            <div class="challenge-card-meta">
-              <span class="challenge-title">Fruit Party</span>
-              <span class="challenge-prize-tag">$25 CASH</span>
-            </div>
-            <p class="challenge-desc">First person to hit 300x wins $25 Cash! Min bet $0.20 USD. Ends 08/31.</p>
-            <button class="btn-claim-challenge disabled" disabled aria-disabled="true">
-              <span>Claimed</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Challenge Card 5: Big Bass Reel Repeat -->
-        <div class="challenge-card">
-          <div class="challenge-card-badge">🔥 LIVE CHALLENGE</div>
+        <!-- Challenge Card 3: Big Bass Reel Repeat (ACTIVE / REUSED) -->
+        <div class="challenge-card" data-challenge-status="active">
+          <div class="challenge-card-badge" style="background:rgba(0,255,229,0.15); border-color:rgba(0,255,229,0.4); color:var(--cyan-400);">🔥 LIVE (REUSED FOR YEET)</div>
           <div class="challenge-img-wrap">
             <img src="/challenges/bigbass.png" alt="Big Bass Reel Repeat - 300x Challenge" class="challenge-img" loading="lazy" />
           </div>
@@ -4056,32 +4258,66 @@ footer a:hover { color: var(--purple-300); }
               <span class="challenge-title">Big Bass Reel Repeat</span>
               <span class="challenge-prize-tag">$10 CASH</span>
             </div>
-            <p class="challenge-desc">First person to hit 300x wins $10 Cash! Spin in, Reel Repeat & cash out big. Ends 08/31.</p>
+            <p class="challenge-desc">First person to hit 300x on Yeet with code BIGD wins $10 Cash! Spin in, Reel Repeat & cash out big.</p>
             <a href="https://discord.gg/aHSVMX4DCr" target="_blank" rel="noopener" class="btn-claim-challenge">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/></svg>
-              <span>Claim</span>
+              <span>Claim on Discord</span>
             </a>
           </div>
         </div>
 
-        <!-- Challenge Card 6: SixSixSix -->
-        <div class="challenge-card">
-          <div class="challenge-card-badge">🔥 LIVE CHALLENGE</div>
+        <!-- Challenge Card 4: SixSixSix (ACTIVE / REUSED) -->
+        <div class="challenge-card" data-challenge-status="active">
+          <div class="challenge-card-badge" style="background:rgba(0,255,229,0.15); border-color:rgba(0,255,229,0.4); color:var(--cyan-400);">🔥 LIVE (REUSED FOR YEET)</div>
           <div class="challenge-img-wrap">
             <img src="/challenges/sixsixsix.png" alt="SixSixSix - 500x Challenge" class="challenge-img" loading="lazy" />
           </div>
           <div class="challenge-card-body">
-
-
             <div class="challenge-card-meta">
               <span class="challenge-title">SixSixSix</span>
               <span class="challenge-prize-tag">$25 CASH</span>
             </div>
-            <p class="challenge-desc">First person to hit 500x wins $25 Cash! Min bet $0.10 USD. Spin into darkness. Ends 08/31.</p>
+            <p class="challenge-desc">First person to hit 500x on Yeet using code BIGD wins $25 Cash! Min bet $0.10 USD. Spin into darkness.</p>
             <a href="https://discord.gg/aHSVMX4DCr" target="_blank" rel="noopener" class="btn-claim-challenge">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/></svg>
-              <span>Claim</span>
+              <span>Claim on Discord</span>
             </a>
+          </div>
+        </div>
+
+        <!-- Challenge Card 5: Fruit Party (COMPLETED HISTORY - Phase 13) -->
+        <div class="challenge-card" data-challenge-status="completed" style="opacity:0.85; border-color:rgba(0,255,128,0.3);">
+          <div class="challenge-card-badge" style="background:rgba(0,255,128,0.15); border-color:rgba(0,255,128,0.4); color:#00ff80;">✓ COMPLETED & CLAIMED</div>
+          <div class="challenge-img-wrap">
+            <img src="/challenges/fruit-party-completed.png" alt="Fruit Party - 300x Challenge (Completed)" class="challenge-img" loading="lazy" />
+          </div>
+          <div class="challenge-card-body">
+            <div class="challenge-card-meta">
+              <span class="challenge-title">Fruit Party</span>
+              <span class="challenge-prize-tag" style="background:rgba(0,255,128,0.15); color:#00ff80; border-color:rgba(0,255,128,0.3);">$25 CASH AWARDED</span>
+            </div>
+            <p class="challenge-desc">First person to hit 300x won $25 Cash! Completed during Summer Campaign. Claimed on Discord.</p>
+            <button class="btn-claim-challenge disabled" disabled aria-disabled="true" style="background:rgba(0,255,128,0.08); border-color:rgba(0,255,128,0.25); color:#00ff80; cursor:default;">
+              <span>✓ Claimed in Discord</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Challenge Card 6: Le Prechaun (ARCHIVED - Phase 14) -->
+        <div class="challenge-card" data-challenge-status="archived" style="opacity:0.65; border-color:rgba(255,255,255,0.1);">
+          <div class="challenge-card-badge" style="background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.15); color:var(--text-muted);">📁 ARCHIVED ROTATION</div>
+          <div class="challenge-img-wrap" style="filter:grayscale(0.6);">
+            <img src="/challenges/le-prechaun-challenge.jpg" alt="Le Prechaun - Community Challenge (Archived)" class="challenge-img" loading="lazy" />
+          </div>
+          <div class="challenge-card-body">
+            <div class="challenge-card-meta">
+              <span class="challenge-title">Le Prechaun Challenge</span>
+              <span class="challenge-prize-tag" style="color:var(--text-muted); border-color:rgba(255,255,255,0.15);">$60 CASH</span>
+            </div>
+            <p class="challenge-desc">First person to hit 5 Scatter wins $60 Cash. Archived from active rotation.</p>
+            <button class="btn-claim-challenge disabled" disabled aria-disabled="true" style="background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1); color:var(--text-muted); cursor:not-allowed;">
+              <span>Archived</span>
+            </button>
           </div>
         </div>
       </div>
@@ -4089,50 +4325,166 @@ footer a:hover { color: var(--purple-300); }
 
     <!-- MILESTONES PANEL -->
     <div class="tab-panel" id="panel-milestones">
-      <div style="max-width:1050px; margin:32px auto; display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:24px;">
 
-        <!-- $50K Milestone Card (Achieved) -->
-        <div style="background: linear-gradient(145deg, rgba(20,25,18,0.85) 0%, rgba(10,14,10,0.95) 100%); border: 1px solid rgba(0, 255, 128, 0.4); border-radius: var(--radius-lg); padding: 32px 28px; text-align: left; position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(0, 255, 128, 0.12); transition: transform 0.3s ease;">
-          <div style="position: absolute; top: 16px; right: 16px; background: rgba(0, 255, 128, 0.15); border: 1px solid rgba(0, 255, 128, 0.5); color: #00ff80; padding: 4px 14px; border-radius: 20px; font-family: var(--font-ui); font-size: 0.72rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase;">
-            ✓ UNLOCKED & ACHIEVED
-          </div>
-          <div style="font-size: 2.8rem; margin-bottom: 14px;">🎉</div>
-          <div style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; color: #ffffff; margin-bottom: 8px;">
-            $50,000 <span style="color: #00ff80;">MILESTONE</span>
-          </div>
-          <div style="display: inline-block; background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.3); color: #ffd700; padding: 4px 10px; border-radius: 4px; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 800; margin-bottom: 16px;">
-            🎁 REWARD: 10 BONUS BUYS (2x $40 + 8x $20)
-          </div>
-          <p style="font-family: var(--font-ui); font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;">
-            The community has <strong style="color: #00ff80;">OFFICIALLY SMASHED</strong> the $50,000 wager milestone! 10 lucky participants from the wagering pool were selected live on stream and awarded Bonus Buys (<strong>2 at $40 and 8 at $20</strong>)!
+      <!-- YEET MILESTONES (ACTIVE SEPTEMBER 2026 CAMPAIGN) -->
+      <div id="ms-container-yeet">
+        <div class="challenges-header" style="text-align:center; max-width:720px; margin:0 auto 28px;">
+          <div class="section-title">Yeet <span>Wager Milestones</span></div>
+          <p class="challenges-sub">
+            Wager on Yeet with code <strong class="text-cyan">BIGD</strong> to push community goals forward. When milestones unlock, random draws take place live on Kick stream for all active participants!
           </p>
-
-          <div style="font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; color: #00ff80; display: flex; align-items: center; gap: 6px;">
-            <span>★</span> Status: Completed Live on Stream
-          </div>
         </div>
 
-        <!-- $100K Milestone Card (Active Goal) -->
-        <div style="background: linear-gradient(145deg, rgba(25,18,35,0.85) 0%, rgba(12,8,20,0.95) 100%); border: 1px solid var(--border-glow); border-radius: var(--radius-lg); padding: 32px 28px; text-align: left; position: relative; overflow: hidden; box-shadow: var(--glow-purple); transition: transform 0.3s ease;">
-          <div style="position: absolute; top: 16px; right: 16px; background: rgba(0, 255, 229, 0.15); border: 1px solid rgba(0, 255, 229, 0.4); color: var(--cyan-400); padding: 4px 14px; border-radius: 20px; font-family: var(--font-ui); font-size: 0.72rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase;">
-            ⚡ ACTIVE GOAL
-          </div>
-          <div style="font-size: 2.8rem; margin-bottom: 14px;">💎</div>
-          <div style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; color: #ffffff; margin-bottom: 8px;">
-            $100,000 <span style="color: var(--cyan-400);">MILESTONE</span>
-          </div>
-          <div style="display: inline-block; background: rgba(136, 0, 255, 0.2); border: 1px solid rgba(136, 0, 255, 0.4); color: var(--purple-300); padding: 4px 10px; border-radius: 4px; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 800; margin-bottom: 16px;">
-            🎁 REWARD: 3x $100 BONUS BUYS
-          </div>
-          <p style="font-family: var(--font-ui); font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;">
-            When the community reaches a total wager of <strong style="color: #fff;">$100,000</strong> on DegenCity using code <strong style="color: var(--cyan-400);">BIGD</strong>, 3 participants from the wagering pool will be selected live on stream to receive a <strong>$100 Bonus Buy</strong> each!
-          </p>
-          <div style="font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; color: var(--cyan-400); display: flex; align-items: center; gap: 6px;">
-            <span>●</span> Status: Active Community Progress
-          </div>
-        </div>
+        <div style="max-width:1150px; margin:0 auto; display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:24px;">
 
+          <!-- Milestone 1: $50K Target -->
+          <div id="milestone-card-1" style="background: linear-gradient(145deg, rgba(25,18,35,0.85) 0%, rgba(12,8,20,0.95) 100%); border: 1px solid var(--border-glow); border-radius: var(--radius-lg); padding: 30px 24px; text-align: left; position: relative; overflow: hidden; box-shadow: var(--glow-purple); transition: transform 0.3s ease;">
+            <div id="milestone-badge-1" style="position: absolute; top: 16px; right: 16px; background: rgba(0, 255, 229, 0.15); border: 1px solid rgba(0, 255, 229, 0.4); color: var(--cyan-400); padding: 4px 14px; border-radius: 20px; font-family: var(--font-ui); font-size: 0.72rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase;">
+              ⚡ ACTIVE GOAL #1
+            </div>
+            <div style="font-size: 2.5rem; margin-bottom: 12px;">🎉</div>
+            <div style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; color: #ffffff; margin-bottom: 6px;">
+              $50,000 <span style="color: var(--cyan-400);">MILESTONE</span>
+            </div>
+            <div style="display: inline-block; background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.3); color: #ffd700; padding: 4px 10px; border-radius: 4px; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 800; margin-bottom: 14px;">
+              🎁 REWARD: 3 × $20 ($60 TOTAL)
+            </div>
+            <p style="font-family: var(--font-ui); font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 16px;">
+              When the community reaches <strong style="color: #fff;">$50,000</strong> total wager on Yeet using code <strong style="color: var(--cyan-400);">BIGD</strong>, 3 participants from the wagering pool will be drawn live on stream to receive <strong>$20 Cash</strong> each!
+            </p>
+            
+            <div style="margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-family:var(--font-ui); color:var(--text-secondary); margin-bottom:5px;">
+                <span id="ms-prog-label-1">Progress</span>
+                <span id="ms-prog-pct-1" style="color:var(--cyan-400); font-weight:700;">0%</span>
+              </div>
+              <div style="background:rgba(255,255,255,0.06); border-radius:10px; height:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
+                <div id="ms-prog-bar-1" style="width:0%; height:100%; background:linear-gradient(90deg, var(--purple-500), var(--cyan-400)); border-radius:10px; transition:width 0.8s ease;"></div>
+              </div>
+            </div>
+
+            <div id="ms-status-1" style="font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; color: var(--cyan-400); display: flex; align-items: center; gap: 6px;">
+              <span>●</span> Status: Active Target Progress
+            </div>
+          </div>
+
+          <!-- Milestone 2: $100K Target -->
+          <div id="milestone-card-2" style="background: linear-gradient(145deg, rgba(20,15,30,0.85) 0%, rgba(10,8,16,0.95) 100%); border: 1px solid rgba(136,0,255,0.25); border-radius: var(--radius-lg); padding: 30px 24px; text-align: left; position: relative; overflow: hidden; transition: transform 0.3s ease;">
+            <div id="milestone-badge-2" style="position: absolute; top: 16px; right: 16px; background: rgba(136, 0, 255, 0.15); border: 1px solid rgba(136, 0, 255, 0.4); color: var(--purple-300); padding: 4px 14px; border-radius: 20px; font-family: var(--font-ui); font-size: 0.72rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase;">
+              🔒 NEXT TARGET #2
+            </div>
+            <div style="font-size: 2.5rem; margin-bottom: 12px;">💎</div>
+            <div style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; color: #ffffff; margin-bottom: 6px;">
+              $100,000 <span style="color: var(--purple-300);">MILESTONE</span>
+            </div>
+            <div style="display: inline-block; background: rgba(136, 0, 255, 0.2); border: 1px solid rgba(136, 0, 255, 0.4); color: var(--purple-300); padding: 4px 10px; border-radius: 4px; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 800; margin-bottom: 14px;">
+              🎁 REWARD: 5 × $20 ($100 TOTAL)
+            </div>
+            <p style="font-family: var(--font-ui); font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 16px;">
+              When the community reaches <strong style="color: #fff;">$100,000</strong> total wager on Yeet using code <strong style="color: var(--cyan-400);">BIGD</strong>, 5 participants from the wagering pool will be drawn live on stream to receive <strong>$20 Cash</strong> each!
+            </p>
+            
+            <div style="margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-family:var(--font-ui); color:var(--text-secondary); margin-bottom:5px;">
+                <span id="ms-prog-label-2">Progress</span>
+                <span id="ms-prog-pct-2" style="color:var(--purple-300); font-weight:700;">0%</span>
+              </div>
+              <div style="background:rgba(255,255,255,0.06); border-radius:10px; height:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
+                <div id="ms-prog-bar-2" style="width:0%; height:100%; background:linear-gradient(90deg, var(--purple-600), var(--purple-400)); border-radius:10px; transition:width 0.8s ease;"></div>
+              </div>
+            </div>
+
+            <div id="ms-status-2" style="font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+              <span>●</span> Status: Unlocks after $50K Goal
+            </div>
+          </div>
+
+          <!-- Milestone 3: $150K Target -->
+          <div id="milestone-card-3" style="background: linear-gradient(145deg, rgba(20,15,30,0.85) 0%, rgba(10,8,16,0.95) 100%); border: 1px solid rgba(255,215,0,0.25); border-radius: var(--radius-lg); padding: 30px 24px; text-align: left; position: relative; overflow: hidden; transition: transform 0.3s ease;">
+            <div id="milestone-badge-3" style="position: absolute; top: 16px; right: 16px; background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.4); color: #ffd700; padding: 4px 14px; border-radius: 20px; font-family: var(--font-ui); font-size: 0.72rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase;">
+              👑 MEGA TARGET #3
+            </div>
+            <div style="font-size: 2.5rem; margin-bottom: 12px;">🏆</div>
+            <div style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; color: #ffffff; margin-bottom: 6px;">
+              $150,000 <span style="color: #ffd700;">MILESTONE</span>
+            </div>
+            <div style="display: inline-block; background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.3); color: #ffd700; padding: 4px 10px; border-radius: 4px; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 800; margin-bottom: 14px;">
+              🎁 REWARD: 3 × $40 ($120 TOTAL)
+            </div>
+            <p style="font-family: var(--font-ui); font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 16px;">
+              When the community reaches <strong style="color: #fff;">$150,000</strong> total wager on Yeet using code <strong style="color: var(--cyan-400);">BIGD</strong>, 3 participants from the wagering pool will be drawn live on stream to receive <strong>$40 Cash</strong> each!
+            </p>
+            
+            <div style="margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-family:var(--font-ui); color:var(--text-secondary); margin-bottom:5px;">
+                <span id="ms-prog-label-3">Progress</span>
+                <span id="ms-prog-pct-3" style="color:#ffd700; font-weight:700;">0%</span>
+              </div>
+              <div style="background:rgba(255,255,255,0.06); border-radius:10px; height:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
+                <div id="ms-prog-bar-3" style="width:0%; height:100%; background:linear-gradient(90deg, #ffd700, #ffaa00); border-radius:10px; transition:width 0.8s ease;"></div>
+              </div>
+            </div>
+
+            <div id="ms-status-3" style="font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+              <span>●</span> Status: Unlocks after $100K Goal
+            </div>
+          </div>
+
+        </div>
       </div>
+
+      <!-- DEGENCITY HISTORICAL MILESTONES (AUGUST 2026 ARCHIVE) -->
+      <div id="ms-container-degencity" style="display:none;">
+        <div class="challenges-header" style="text-align:center; max-width:720px; margin:0 auto 28px;">
+          <div class="section-title">DegenCity <span>Historical Milestones</span></div>
+          <p class="challenges-sub">
+            Historical milestone results achieved during the August 2026 DegenCity community campaign.
+          </p>
+        </div>
+
+        <div style="max-width:1050px; margin:0 auto; display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:24px;">
+          <!-- $50K Smashed -->
+          <div style="background: linear-gradient(145deg, rgba(20,25,18,0.85) 0%, rgba(10,14,10,0.95) 100%); border: 1px solid rgba(0, 255, 128, 0.4); border-radius: var(--radius-lg); padding: 32px 28px; text-align: left; position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(0, 255, 128, 0.12);">
+            <div style="position: absolute; top: 16px; right: 16px; background: rgba(0, 255, 128, 0.15); border: 1px solid rgba(0, 255, 128, 0.5); color: #00ff80; padding: 4px 14px; border-radius: 20px; font-family: var(--font-ui); font-size: 0.72rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase;">
+              ✓ UNLOCKED & ACHIEVED
+            </div>
+            <div style="font-size: 2.8rem; margin-bottom: 14px;">🎉</div>
+            <div style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; color: #ffffff; margin-bottom: 8px;">
+              $50,000 <span style="color: #00ff80;">MILESTONE</span>
+            </div>
+            <div style="display: inline-block; background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.3); color: #ffd700; padding: 4px 10px; border-radius: 4px; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 800; margin-bottom: 16px;">
+              🎁 REWARD: 10 BONUS BUYS (2x $40 + 8x $20)
+            </div>
+            <p style="font-family: var(--font-ui); font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;">
+              The community officially smashed the $50,000 milestone! 10 lucky participants were selected live on stream and awarded Bonus Buys (<strong>2 at $40 and 8 at $20</strong>)!
+            </p>
+            <div style="font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; color: #00ff80; display: flex; align-items: center; gap: 6px;">
+              <span>★</span> Status: Completed Live on Stream
+            </div>
+          </div>
+
+          <!-- $100K DegenCity Milestone -->
+          <div style="background: linear-gradient(145deg, rgba(25,18,35,0.85) 0%, rgba(12,8,20,0.95) 100%); border: 1px solid var(--border-glow); border-radius: var(--radius-lg); padding: 32px 28px; text-align: left; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 16px; right: 16px; background: rgba(0, 255, 229, 0.15); border: 1px solid rgba(0, 255, 229, 0.4); color: var(--cyan-400); padding: 4px 14px; border-radius: 20px; font-family: var(--font-ui); font-size: 0.72rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase;">
+              ✓ FINAL TOTAL: $102.9K+
+            </div>
+            <div style="font-size: 2.8rem; margin-bottom: 14px;">💎</div>
+            <div style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; color: #ffffff; margin-bottom: 8px;">
+              $100,000 <span style="color: var(--cyan-400);">MILESTONE</span>
+            </div>
+            <div style="display: inline-block; background: rgba(136, 0, 255, 0.2); border: 1px solid rgba(136, 0, 255, 0.4); color: var(--purple-300); padding: 4px 10px; border-radius: 4px; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 800; margin-bottom: 16px;">
+              🎁 REWARD: 3x $100 BONUS BUYS
+            </div>
+            <p style="font-family: var(--font-ui); font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;">
+              Community exceeded $100,000 reaching a record <strong>$102,968.05</strong> total community wager on DegenCity.
+            </p>
+            <div style="font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; color: var(--cyan-400); display: flex; align-items: center; gap: 6px;">
+              <span>●</span> Status: Archived Campaign Record
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
 
@@ -4177,150 +4529,171 @@ footer a:hover { color: var(--purple-300); }
         </div>
       </div>
 
-      <!-- Prize Pool -->
-      <div class="prize-pool-banner" style="margin-bottom:32px">
+      <!-- Prize Pool ($3,000 Combined Leaderboard with BigBallz) -->
+      <div class="prize-pool-banner" style="margin-bottom:24px">
         <div>
-          <div class="prize-pool-label">Monthly Prize Pool</div>
-          <div class="prize-pool-total">$1,500</div>
+          <div class="prize-pool-label">Combined Prize Pool (BIGD + BigBallz)</div>
+          <div class="prize-pool-total" style="color:#ffd700;">$3,000</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-          <span class="prize-badge prize-badge-1">🥇 $800</span>
-          <span class="prize-badge prize-badge-2">🥈 $250</span>
-          <span class="prize-badge prize-badge-3">🥉 $150</span>
-          <span class="prize-badge prize-badge-n">4th $90</span>
-          <span class="prize-badge prize-badge-n">5th $60</span>
-          <span class="prize-badge prize-badge-n">6th $45</span>
-          <span class="prize-badge prize-badge-n">7th $35</span>
-          <span class="prize-badge prize-badge-n">8th $30</span>
-          <span class="prize-badge prize-badge-n">9th $20</span>
-          <span class="prize-badge prize-badge-n">10th $20</span>
+          <span class="prize-badge prize-badge-1">🥇 $1,500</span>
+          <span class="prize-badge prize-badge-2">🥈 $500</span>
+          <span class="prize-badge prize-badge-3">🥉 $300</span>
+          <span class="prize-badge prize-badge-n">4th $200</span>
+          <span class="prize-badge prize-badge-n">5th $150</span>
+          <span class="prize-badge prize-badge-n">6th $100</span>
+          <span class="prize-badge prize-badge-n">7th $80</span>
+          <span class="prize-badge prize-badge-n">8th $70</span>
+          <span class="prize-badge prize-badge-n">9th $50</span>
+          <span class="prize-badge prize-badge-n">10th $50</span>
         </div>
-        <span class="prize-pool-cadence">⏱ Monthly Reset</span>
+        <span class="prize-pool-cadence" style="color:var(--cyan-400);">⚡ Combined Race</span>
       </div>
 
-      <!-- Rankings Table -->
-      <div class="leaderboard-header">
-        <div class="section-title">Monthly <span>Rankings</span></div>
+      <!-- Combined Code Filter (Phase 9) -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
+        <div class="leaderboard-header" style="margin:0;">
+          <div class="section-title">Monthly <span>Rankings</span></div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="campaign-toggle-btn active" id="code-btn-all" onclick="setCodeFilter('all')" style="font-size:0.75rem; padding:5px 12px;">
+            🌐 All Codes ($3,000 Combined)
+          </button>
+          <button class="campaign-toggle-btn" id="code-btn-bigd" onclick="setCodeFilter('bigd')" style="font-size:0.75rem; padding:5px 12px;">
+            ⚡ Code BIGD
+          </button>
+          <button class="campaign-toggle-btn" id="code-btn-bigballz" onclick="setCodeFilter('bigballz')" style="font-size:0.75rem; padding:5px 12px;">
+            💎 Code BigBallz
+          </button>
+        </div>
       </div>
+
       <div id="bw-lb-content">
         <div class="lb-loading"><div class="spinner"></div>Loading period data…</div>
       </div>
 
     </div>
 
+    <!-- PREVIOUS PARTNERED SITES SHOWCASE (PHASE 11) -->
+    <div style="max-width:1050px; margin:48px auto 0; padding:32px 28px; background:linear-gradient(145deg, rgba(24,18,36,0.85) 0%, rgba(12,8,20,0.95) 100%); border:1px solid rgba(255,215,0,0.3); border-radius:var(--radius-lg); box-shadow:0 0 30px rgba(255,215,0,0.08); text-align:left;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="font-size:2rem;">📁</div>
+          <div>
+            <div style="font-family:var(--font-display); font-size:1.4rem; font-weight:900; color:#fff; text-transform:uppercase;">
+              Previous Partnered <span style="color:#ffd700;">Sites & Archives</span>
+            </div>
+            <p style="font-family:var(--font-ui); font-size:0.85rem; color:var(--text-secondary); margin-top:2px;">
+              Historical partnership records and weighted total accrued statistics. (Kept separate from active Yeet campaign).
+            </p>
+          </div>
+        </div>
+        <button onclick="switchCampaign('degencity')" style="background:rgba(255,215,0,0.15); border:1px solid rgba(255,215,0,0.4); color:#ffd700; font-family:var(--font-ui); font-size:0.82rem; font-weight:800; padding:8px 18px; border-radius:20px; cursor:pointer; text-transform:uppercase; letter-spacing:0.08em; transition:all 0.2s;">
+          📁 View Full DegenCity Archive →
+        </button>
+      </div>
+
+      <!-- DegenCity Historical Card -->
+      <div style="background:rgba(10,8,18,0.7); border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-md); padding:20px; display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:18px;">
+        <div>
+          <div style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:800;">Previous Partner</div>
+          <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; margin:2px 0;">DegenCity Casino</div>
+          <div style="font-family:var(--font-ui); font-size:0.8rem; color:var(--text-secondary);">Campaign Period: June 2026 – August 2026</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:800;">Weighted Total Wager Accrued</div>
+          <div style="font-family:var(--font-display); font-size:1.5rem; font-weight:900; color:#ffd700;">$102,968.05</div>
+          <div style="font-family:var(--font-ui); font-size:0.8rem; color:#00ff80;">✓ 42 Active Referred Players</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:800;">Milestone Achieved</div>
+          <div style="font-family:var(--font-ui); font-size:0.92rem; font-weight:800; color:#00ff80; margin:4px 0;">✓ $50,000 Target Smashed</div>
+          <div style="font-family:var(--font-ui); font-size:0.78rem; color:var(--text-secondary);">10 Bonus Buys Awarded Live on Stream</div>
+        </div>
+      </div>
+    </div>
+
     </div>
 </section>
 
-
-
 <!-- ================================================================
-     HALL OF FAME MODAL OVERLAY
+     HALL OF FAME MODAL OVERLAY (COMING SOON & SITE DETAILS)
      ================================================================ -->
 <div id="hof-modal" class="modal-overlay">
-  <div class="modal-card hof-modal-card">
+  <div class="modal-card hof-modal-card" style="max-width:760px; max-height:88vh; overflow-y:auto;">
     <button class="modal-close" onclick="closeHallOfFameModal()">×</button>
     <div class="hof-header">
       <div class="hof-crown-icon">👑</div>
       <div class="hof-title">HALL OF <span>FAME</span></div>
-      <p class="hof-subtitle">Celebrating BigDTV's Top 5 Monthly & All-Time Wager Legends</p>
+      <p class="hof-subtitle">Community Champions & Historical Wager Records</p>
     </div>
-    <div class="hof-ranking-list">
-      <div class="hof-rank-item rank-1">
-        <div class="hof-rank-num">🥇 1</div>
-        <div class="hof-user-details">
-          <div class="hof-username">armedupmused</div>
-          <div class="hof-badge-tag">TOP LEGEND</div>
+
+    <!-- Active September 2026 Note -->
+    <div style="background:rgba(0,255,229,0.08); border:1px solid rgba(0,255,229,0.3); border-radius:var(--radius-md); padding:12px 18px; margin-bottom:18px; display:flex; align-items:center; gap:12px;">
+      <span style="font-size:1.4rem;">⚡</span>
+      <div style="text-align:left;">
+        <div style="font-family:var(--font-display); font-size:0.95rem; font-weight:900; color:var(--cyan-400); text-transform:uppercase;">
+          September 2026 Yeet Season: Coming Soon
         </div>
-        <div class="hof-wager-amount">$9,314.12</div>
+        <div style="font-family:var(--font-ui); font-size:0.8rem; color:var(--text-secondary);">
+          Leaderboard will update automatically once the Yeet API key is connected.
+        </div>
       </div>
-      <div class="hof-rank-item rank-2">
-        <div class="hof-rank-num">🥈 2</div>
-        <div class="hof-user-details">
-          <div class="hof-username">bigballszs34</div>
-          <div class="hof-badge-tag">RUNNER UP</div>
-        </div>
-        <div class="hof-wager-amount">$1,132.15</div>
+    </div>
+
+    <!-- Previous Months Historical Hall of Fame -->
+    <div style="text-align:left; margin-bottom:14px;">
+      <div style="font-family:var(--font-ui); font-size:0.82rem; font-weight:800; color:#ffd700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;">
+        📁 Previous Months & Site Records:
       </div>
-      <div class="hof-rank-item rank-3">
-        <div class="hof-rank-num">🥉 3</div>
-        <div class="hof-user-details">
-          <div class="hof-username">thatonet</div>
-          <div class="hof-badge-tag">BRONZE CHAMP</div>
+
+      <!-- August 2026 Season -->
+      <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,215,0,0.2); border-radius:var(--radius-sm); padding:12px 16px; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="font-family:var(--font-display); font-size:0.95rem; color:#fff;">August 2026 Season</strong>
+          <span style="font-family:var(--font-ui); font-size:0.72rem; color:#ffd700; background:rgba(255,215,0,0.12); padding:2px 8px; border-radius:4px; font-weight:800;">SITE: DEGENCITY</span>
         </div>
-        <div class="hof-wager-amount">$922.76</div>
+        <div style="font-family:var(--font-ui); font-size:0.84rem; display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; justify-content:space-between;"><span>🥇 <strong>reversed</strong> (Champion)</span><strong style="color:#ffd700;">$11,116.42</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>🥈 <strong>armedupmused</strong></span><span>$9,314.12</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>🥉 <strong>thatonet</strong></span><span>$922.76</span></div>
+        </div>
       </div>
-      <div class="hof-rank-item rank-4">
-        <div class="hof-rank-num">4</div>
-        <div class="hof-user-details">
-          <div class="hof-username">soysolos</div>
+
+      <!-- July 2026 Season -->
+      <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(136,0,255,0.2); border-radius:var(--radius-sm); padding:12px 16px; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="font-family:var(--font-display); font-size:0.95rem; color:#fff;">July 2026 Season</strong>
+          <span style="font-family:var(--font-ui); font-size:0.72rem; color:var(--purple-300); background:rgba(136,0,255,0.15); padding:2px 8px; border-radius:4px; font-weight:800;">SITE: DEGENCITY</span>
         </div>
-        <div class="hof-wager-amount">$225.28</div>
+        <div style="font-family:var(--font-ui); font-size:0.84rem; display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; justify-content:space-between;"><span>🥇 <strong>wisthechad</strong> (Champion)</span><strong style="color:var(--purple-300);">$10,253.60</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>🥈 <strong>bigballszs34</strong></span><span>$8,093.47</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>🥉 <strong>maaars</strong></span><span>$7,466.70</span></div>
+        </div>
       </div>
-      <div class="hof-rank-item rank-5">
-        <div class="hof-rank-num">5</div>
-        <div class="hof-user-details">
-          <div class="hof-username">supermustang</div>
+
+      <!-- All-Time Legends -->
+      <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(0,255,229,0.2); border-radius:var(--radius-sm); padding:12px 16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="font-family:var(--font-display); font-size:0.95rem; color:#fff;">All-Time Historical Champions</strong>
+          <span style="font-family:var(--font-ui); font-size:0.72rem; color:var(--cyan-400); background:rgba(0,255,229,0.12); padding:2px 8px; border-radius:4px; font-weight:800;">HISTORICAL ARCHIVE</span>
         </div>
-        <div class="hof-wager-amount">$122.41</div>
+        <div style="font-family:var(--font-ui); font-size:0.84rem; display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; justify-content:space-between;"><span>🥇 <strong>reversed</strong> (DegenCity)</span><strong style="color:var(--cyan-400);">$11,116.42</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>🥈 <strong>armedupmused</strong> (DegenCity)</span><span>$10,906.21</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>🥉 <strong>wisthechad</strong> (DegenCity)</span><span>$10,253.60</span></div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <!-- ================================================================
-     BONUSES SECTION
-     ================================================================ -->
-<section class="section-container" id="bonuses-section" style="position:relative;">
-  <div class="shard shard-tl"></div>
-  <div class="shard shard-tr"></div>
-  <div class="shard shard-bl"></div>
-  <div class="shard shard-br"></div>
-  <div class="section-header">
-    <div class="section-title">Exclusive <span>Bonuses</span></div>
-    <p>Claim amazing bonuses from our partnered sites using code BIGD</p>
-  </div>
-  <div class="bonus-grid">
-
-    <div class="bonus-card">
-      <div class="bonus-thumb">
-        <div class="bonus-thumb-icon">💵</div>
-        <div class="bonus-site-badge">DEGENCITY</div>
-      </div>
-      <div class="bonus-body">
-        <div class="bonus-name">$100,000 Wager Milestone</div>
-        <div class="bonus-desc" style="font-size: 0.85rem; line-height: 1.5; margin-bottom: 16px;">When the community reaches a total wager of <strong>$100,000</strong> on DegenCity using code <strong>BIGD</strong>, three participants from the current wagering pool will be selected at random to receive a <strong>$100 Bonus Buy</strong> each.</div>
-        <div class="bonus-code-row">
-          <span class="code-label">Status:</span>
-          <span class="code-value" style="color:var(--cyan-400);">ACTIVE</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="bonus-card">
-      <div class="bonus-thumb">
-        <div class="bonus-thumb-icon">🎰</div>
-        <div class="bonus-site-badge">BIGD DRAW</div>
-      </div>
-      <div class="bonus-body">
-        <div class="bonus-name">Community Wager Draw</div>
-        <div class="bonus-desc" style="font-size: 0.82rem; line-height: 1.5; min-height: 100px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px;">
-          <span style="color: var(--text-secondary);">Selections will be made live during the Kick stream using a random draw. Every participant on the current wagering leaderboard has an equal chance of being selected. Rankings do not increase or decrease a participant's chances of winning.</span>
-        </div>
-        <div class="bonus-code-row">
-          <span class="code-label">Selection:</span>
-          <span class="code-value">RANDOM DRAW</span>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<!-- ================================================================
      FOOTER
      ================================================================ -->
 <footer>
-  <p>&copy; 2026 BigDGamesTV. All rights reserved. &nbsp;|&nbsp; <a href="#">Terms</a> &nbsp;|&nbsp; <a href="#">Privacy</a> &nbsp;|&nbsp; Powered by <a href="https://degencity.com">DegenCity</a></p>
+  <p>&copy; 2026 BigDGamesTV. All rights reserved. &nbsp;|&nbsp; <a href="#">Terms</a> &nbsp;|&nbsp; <a href="#">Privacy</a> &nbsp;|&nbsp; Powered by <a href="https://yeet.com" target="_blank" rel="noopener">Yeet</a></p>
   <p style="margin-top:8px; font-size:0.72rem; opacity:0.5;">Gambling can be addictive. Please play responsibly. 18+ only.</p>
 </footer>
 
@@ -4730,6 +5103,8 @@ function activateTab(panelId) {
     initBiweeklyProgress();
     fetchBiweeklyLeaderboard();
     startBiweeklyCountdown();
+  } else if (panelId === 'leaderboard') {
+    fetchLeaderboard();
   }
 }
 
@@ -4754,6 +5129,9 @@ window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       document.getElementById('tabs-section')?.scrollIntoView({ behavior: 'smooth' });
     }, 150);
+  } else {
+    // Fetch initial leaderboard
+    fetchLeaderboard();
   }
 });
 
@@ -4763,19 +5141,91 @@ function scrollToTabs() {
 }
 
 /* ──────────────────────────────────────────
-   LEADERBOARD API
+   CAMPAIGN / PARTNER SWITCHER & LEADERBOARD API
    ────────────────────────────────────────── */
+let currentCampaign = "yeet"; // 'yeet' (active default) or 'degencity' (previous partner archive)
+
+function switchCampaign(campaign) {
+  currentCampaign = campaign;
+
+  const btnYeet = document.getElementById('btn-campaign-yeet');
+  const btnDegen = document.getElementById('btn-campaign-degencity');
+  const archiveBanner = document.getElementById('campaign-archive-banner');
+  const seasonVal = document.getElementById('season-card-value');
+  const seasonBadge = document.getElementById('season-card-badge');
+  const msYeet = document.getElementById('ms-container-yeet');
+  const msDegen = document.getElementById('ms-container-degencity');
+
+  // Reset date filters when switching campaigns
+  const afterInput = document.getElementById('lb-after');
+  const beforeInput = document.getElementById('lb-before');
+  if (afterInput) afterInput.value = '';
+  if (beforeInput) beforeInput.value = '';
+
+  if (campaign === 'degencity') {
+    if (btnYeet) btnYeet.classList.remove('active');
+    if (btnDegen) btnDegen.classList.add('active');
+    if (archiveBanner) archiveBanner.style.display = 'flex';
+    if (seasonVal) seasonVal.textContent = 'AUGUST 2026';
+    if (seasonBadge) {
+      seasonBadge.textContent = 'DEGENCITY (ARCHIVE)';
+      seasonBadge.style.color = '#ffd700';
+    }
+    if (msYeet) msYeet.style.display = 'none';
+    if (msDegen) msDegen.style.display = 'block';
+
+    // Set static historical community stats for DegenCity
+    document.querySelectorAll('.stat-total-live-val').forEach(el => el.textContent = '102.9k');
+    document.querySelectorAll('.stat-players-val').forEach(el => el.textContent = '42');
+    const hudPeriod = document.getElementById('hud-season-period-val');
+    const hudRewards = document.getElementById('hud-rewards-given-val');
+    const statPool = document.getElementById('stat-pool-val');
+    if (hudPeriod) hudPeriod.textContent = 'August 2026';
+    if (hudRewards) hudRewards.textContent = '2,500';
+    if (statPool) statPool.textContent = '1,500';
+  } else {
+    if (btnYeet) btnYeet.classList.add('active');
+    if (btnDegen) btnDegen.classList.remove('active');
+    if (archiveBanner) archiveBanner.style.display = 'none';
+    if (seasonVal) seasonVal.textContent = 'SEPTEMBER 2026';
+    if (seasonBadge) {
+      seasonBadge.textContent = 'YEET CASINO';
+      seasonBadge.style.color = 'var(--cyan-400)';
+    }
+    if (msYeet) msYeet.style.display = 'block';
+    if (msDegen) msDegen.style.display = 'none';
+
+    // Active September Yeet Stats
+    const hudPeriod = document.getElementById('hud-season-period-val');
+    const hudRewards = document.getElementById('hud-rewards-given-val');
+    const statPool = document.getElementById('stat-pool-val');
+    if (hudPeriod) hudPeriod.textContent = 'September 2026';
+    if (hudRewards) hudRewards.textContent = '5,000';
+    if (statPool) statPool.textContent = '3,000';
+  }
+
+  // Update monthly progress state
+  initBiweeklyProgress(false);
+  startBiweeklyCountdown();
+
+  fetchLeaderboard();
+  if (document.getElementById('panel-biweekly')?.classList.contains('active')) {
+    fetchBiweeklyLeaderboard();
+  }
+}
+
 async function fetchLeaderboard(after, before, rangeLabel) {
   const lbContent = document.getElementById('lb-content');
-  lbContent.innerHTML = `<div class="lb-loading"><div class="spinner"></div>Fetching live data from DegenCity…</div>`;
+  const partnerName = currentCampaign === 'degencity' ? 'DegenCity Archive' : 'Yeet';
+  lbContent.innerHTML = `<div class="lb-loading"><div class="spinner"></div>Fetching live data from ${partnerName}…</div>`;
 
   try {
     let url = API_BASE;
     const params = [];
+    params.push(`partner=${encodeURIComponent(currentCampaign)}`);
     if (after)  params.push(`after=${encodeURIComponent(after)}`);
     if (before) params.push(`before=${encodeURIComponent(before)}`);
-    if (params.length) url += '?' + params.join('&');
-
+    url += '?' + params.join('&');
 
     const res = await fetch(url, { cache: 'no-store' });
 
@@ -4812,21 +5262,95 @@ async function fetchLeaderboard(after, before, rangeLabel) {
         ? (totalWager / 1_000).toFixed(1) + 'k'
         : totalWager.toFixed(0);
 
-    document.querySelectorAll('.stat-players-val').forEach(el => {
-      el.textContent = uniqueUsers.toLocaleString();
-    });
-    document.querySelectorAll('.stat-total-live-val').forEach(el => {
-      el.textContent = formattedWager;
-    });
+    if (currentCampaign === 'yeet') {
+      document.querySelectorAll('.stat-players-val').forEach(el => {
+        el.textContent = uniqueUsers.toLocaleString();
+      });
+      document.querySelectorAll('.stat-total-live-val').forEach(el => {
+        el.textContent = formattedWager;
+      });
 
-    const oldPlayersEl = document.getElementById('stat-players');
-    if (oldPlayersEl) oldPlayersEl.innerHTML = `<span>${uniqueUsers.toLocaleString()}</span>`;
-    const oldTotalEl = document.getElementById('stat-total-live');
-    if (oldTotalEl) oldTotalEl.textContent = formattedWager;
+      const oldPlayersEl = document.getElementById('stat-players');
+      if (oldPlayersEl) oldPlayersEl.innerHTML = `<span>${uniqueUsers.toLocaleString()}</span>`;
+      const oldTotalEl = document.getElementById('stat-total-live');
+      if (oldTotalEl) oldTotalEl.textContent = formattedWager;
+
+      // Update fresh reset milestone goals dynamically
+      updateMilestonesProgress(totalWager);
+    }
 
   } catch (err) {
     console.error('Leaderboard fetch error:', err);
     lbContent.innerHTML = `<div class="lb-error">⚠️ Network error. Check your connection and try again.</div>`;
+  }
+}
+
+function updateMilestonesProgress(totalWager) {
+  const current = Number(totalWager) || 0;
+
+  // Milestone 1: $50K (3x $20)
+  const m1Target = 50000;
+  const m1Pct = Math.min(100, (current / m1Target) * 100);
+  const m1Bar = document.getElementById('ms-prog-bar-1');
+  const m1PctEl = document.getElementById('ms-prog-pct-1');
+  const m1Label = document.getElementById('ms-prog-label-1');
+  const m1Badge = document.getElementById('milestone-badge-1');
+  const m1Status = document.getElementById('ms-status-1');
+  if (m1Bar) m1Bar.style.width = `${m1Pct.toFixed(1)}%`;
+  if (m1PctEl) m1PctEl.textContent = `${m1Pct.toFixed(1)}%`;
+  if (m1Label) m1Label.textContent = current >= m1Target ? 'Completed ($50,000 / $50,000)' : `$${current.toLocaleString(undefined, {maximumFractionDigits:0})} / $50,000`;
+  if (current >= m1Target) {
+    if (m1Badge) { m1Badge.textContent = '✓ UNLOCKED'; m1Badge.style.color = '#00ff80'; m1Badge.style.borderColor = 'rgba(0,255,128,0.5)'; m1Badge.style.background = 'rgba(0,255,128,0.15)'; }
+    if (m1Status) { m1Status.innerHTML = `<span>★</span> Status: <strong style="color:#00ff80;">Target Achieved! Live Draw Active</strong>`; m1Status.style.color = '#00ff80'; }
+  } else {
+    const rem = m1Target - current;
+    if (m1Status) m1Status.innerHTML = `<span>●</span> Status: <strong>$${rem.toLocaleString(undefined, {maximumFractionDigits:0})}</strong> to unlock 3x $20`;
+  }
+
+  // Milestone 2: $100K (5x $20)
+  const m2Target = 100000;
+  const m2Pct = Math.min(100, (current / m2Target) * 100);
+  const m2Bar = document.getElementById('ms-prog-bar-2');
+  const m2PctEl = document.getElementById('ms-prog-pct-2');
+  const m2Label = document.getElementById('ms-prog-label-2');
+  const m2Badge = document.getElementById('milestone-badge-2');
+  const m2Status = document.getElementById('ms-status-2');
+  if (m2Bar) m2Bar.style.width = `${m2Pct.toFixed(1)}%`;
+  if (m2PctEl) m2PctEl.textContent = `${m2Pct.toFixed(1)}%`;
+  if (m2Label) m2Label.textContent = current >= m2Target ? 'Completed ($100,000 / $100,000)' : `$${current.toLocaleString(undefined, {maximumFractionDigits:0})} / $100,000`;
+  if (current >= m2Target) {
+    if (m2Badge) { m2Badge.textContent = '✓ UNLOCKED'; m2Badge.style.color = '#00ff80'; m2Badge.style.borderColor = 'rgba(0,255,128,0.5)'; m2Badge.style.background = 'rgba(0,255,128,0.15)'; }
+    if (m2Status) { m2Status.innerHTML = `<span>★</span> Status: <strong style="color:#00ff80;">Target Achieved! Live Draw Active</strong>`; m2Status.style.color = '#00ff80'; }
+  } else if (current >= m1Target) {
+    const rem = m2Target - current;
+    if (m2Badge) { m2Badge.textContent = '⚡ ACTIVE TARGET #2'; m2Badge.style.color = 'var(--cyan-400)'; }
+    if (m2Status) m2Status.innerHTML = `<span>●</span> Status: <strong>$${rem.toLocaleString(undefined, {maximumFractionDigits:0})}</strong> to unlock 5x $20`;
+  } else {
+    const rem = m2Target - current;
+    if (m2Status) m2Status.innerHTML = `<span>●</span> Status: <strong>$${rem.toLocaleString(undefined, {maximumFractionDigits:0})}</strong> to target (Unlocks after $50K)`;
+  }
+
+  // Milestone 3: $150K (3x $40)
+  const m3Target = 150000;
+  const m3Pct = Math.min(100, (current / m3Target) * 100);
+  const m3Bar = document.getElementById('ms-prog-bar-3');
+  const m3PctEl = document.getElementById('ms-prog-pct-3');
+  const m3Label = document.getElementById('ms-prog-label-3');
+  const m3Badge = document.getElementById('milestone-badge-3');
+  const m3Status = document.getElementById('ms-status-3');
+  if (m3Bar) m3Bar.style.width = `${m3Pct.toFixed(1)}%`;
+  if (m3PctEl) m3PctEl.textContent = `${m3Pct.toFixed(1)}%`;
+  if (m3Label) m3Label.textContent = current >= m3Target ? 'Completed ($150,000 / $150,000)' : `$${current.toLocaleString(undefined, {maximumFractionDigits:0})} / $150,000`;
+  if (current >= m3Target) {
+    if (m3Badge) { m3Badge.textContent = '✓ UNLOCKED'; m3Badge.style.color = '#00ff80'; m3Badge.style.borderColor = 'rgba(0,255,128,0.5)'; m3Badge.style.background = 'rgba(0,255,128,0.15)'; }
+    if (m3Status) { m3Status.innerHTML = `<span>★</span> Status: <strong style="color:#00ff80;">Target Achieved! Live Draw Active</strong>`; m3Status.style.color = '#00ff80'; }
+  } else if (current >= m2Target) {
+    const rem = m3Target - current;
+    if (m3Badge) { m3Badge.textContent = '⚡ ACTIVE TARGET #3'; m3Badge.style.color = '#ffd700'; }
+    if (m3Status) m3Status.innerHTML = `<span>●</span> Status: <strong>$${rem.toLocaleString(undefined, {maximumFractionDigits:0})}</strong> to unlock 3x $40`;
+  } else {
+    const rem = m3Target - current;
+    if (m3Status) m3Status.innerHTML = `<span>●</span> Status: <strong>$${rem.toLocaleString(undefined, {maximumFractionDigits:0})}</strong> to target (Unlocks after $100K)`;
   }
 }
 
@@ -4898,11 +5422,33 @@ function renderLeaderboard(data, rangeLabel) {
       </tr>` : ''}`;
   }).join('');
 
+  const totalSum = players.reduce((s, p) => s + p.total, 0);
+  const degenTotalBanner = currentCampaign === 'degencity'
+    ? `<div style="background:linear-gradient(135deg, rgba(35,28,15,0.7) 0%, rgba(20,16,10,0.85) 100%); border:1px solid rgba(255,215,0,0.3); border-radius:10px; padding:14px 20px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; box-shadow: 0 0 20px rgba(255,215,0,0.1);">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:1.6rem;">🏆</span>
+          <div>
+            <div style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:800; letter-spacing:0.06em;">DegenCity Total Community Wagered</div>
+            <div style="font-family:var(--font-display); font-size:1.4rem; font-weight:900; color:#ffd700; letter-spacing:0.04em;">$${totalSum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <div style="font-family:var(--font-ui); font-size:0.8rem; font-weight:700; color:var(--cyan-400); background:rgba(0,255,229,0.1); border:1px solid rgba(0,255,229,0.3); padding:4px 12px; border-radius:14px;">
+            ${players.length} Players Recorded
+          </div>
+          <div style="font-family:var(--font-ui); font-size:0.8rem; font-weight:700; color:#00ff80; background:rgba(0,255,128,0.1); border:1px solid rgba(0,255,128,0.3); padding:4px 12px; border-radius:14px;">
+            ✓ $50K Milestone Smashed
+          </div>
+        </div>
+      </div>`
+    : '';
+
   const labelBanner = rangeLabel
     ? `<div class="lb-period-banner">📅 Showing data for: <strong>${rangeLabel}</strong></div>`
     : '';
 
   lbContent.innerHTML = `
+    ${degenTotalBanner}
     ${labelBanner}
     <div class="lb-table-wrap">
       <table class="lb-table">
@@ -5099,82 +5645,95 @@ let bwCountdownInterval = null;
 
 function startBiweeklyCountdown() {
   if (bwCountdownInterval) clearInterval(bwCountdownInterval);
-  
-  function update() {
-    const { start, end, now } = getSemiMonthPeriod();
-    const diffMs = end - now;
-    
-    if (diffMs <= 0) {
-      initBiweeklyProgress();
-      fetchBiweeklyLeaderboard();
-      return;
-    }
-    
-    const timerEl = document.getElementById('bw-countdown-timer');
-    if (timerEl) {
-      timerEl.textContent = formatETCountdown(diffMs);
-    }
-    
-    initBiweeklyProgress(true);
+
+  if (currentCampaign === 'degencity') {
+    initBiweeklyProgress(false);
+    return;
   }
-  
-  update();
-  bwCountdownInterval = setInterval(update, 1000);
+
+  // For September Yeet campaign: set coming soon
+  initBiweeklyProgress(false);
 }
 
 function initBiweeklyProgress(isIntervalUpdate = false) {
-  const { start, end, displayEnd, now } = getSemiMonthPeriod();
-  const totalMs   = end - start;
-  const elapsedMs = now - start;
-  const pct       = Math.min(100, Math.max(0, Math.round((elapsedMs / totalMs) * 100)));
-  const daysLeft  = Math.max(0, Math.ceil((end - now) / 86400000));
-
   const datesEl = document.getElementById('bw-period-dates');
-  if (datesEl) datesEl.textContent = bwFmtDate(start) + ' → ' + bwFmtDate(displayEnd);
-
   const daysLeftEl = document.getElementById('bw-days-left');
-  if (daysLeftEl) daysLeftEl.textContent = daysLeft;
-
   const startEl = document.getElementById('bw-prog-start');
   const endEl   = document.getElementById('bw-prog-end');
   const pctEl   = document.getElementById('bw-prog-pct');
-  if (startEl) startEl.textContent = bwFmtDate(start);
-  if (endEl)   endEl.textContent   = bwFmtDate(displayEnd);
-  if (pctEl)   pctEl.textContent   = pct + '% complete';
-
   const fill    = document.getElementById('bw-progress-fill');
   const thunder = document.getElementById('bw-thunder-icon');
-  if (fill) {
-    if (isIntervalUpdate) {
-      fill.style.width = pct + '%';
-      if (thunder) thunder.style.left = Math.max(2, Math.min(98, pct)) + '%';
-    } else {
-      setTimeout(() => {
-        fill.style.width = pct + '%';
-        if (thunder) thunder.style.left = Math.max(2, Math.min(98, pct)) + '%';
-      }, 350);
-    }
-  }
-
+  const timerEl = document.getElementById('bw-countdown-timer');
   const midNode = document.getElementById('bw-node-mid');
   const endNode = document.getElementById('bw-node-end');
-  if (midNode && pct >= 50) midNode.classList.add('active');
-  if (endNode && pct >= 100) endNode.classList.add('active');
+
+  if (currentCampaign === 'degencity') {
+    // 📁 DEGENCITY ARCHIVE (Stopped at August 31, 2026 — Not Live)
+    if (datesEl) datesEl.textContent = 'Aug 1, 2026 → Aug 31, 2026';
+    if (daysLeftEl) daysLeftEl.textContent = '0';
+    if (startEl) startEl.textContent = 'Aug 1, 2026';
+    if (endEl)   endEl.textContent   = 'Aug 31, 2026';
+    if (pctEl)   pctEl.textContent   = '100% complete (Campaign Concluded)';
+    if (fill)    fill.style.width    = '100%';
+    if (thunder) thunder.style.left  = '96%';
+    if (timerEl) timerEl.textContent = 'CAMPAIGN CONCLUDED (AUG 31)';
+    if (midNode) midNode.classList.add('active');
+    if (endNode) endNode.classList.add('active');
+    return;
+  }
+
+  // ⚡ SEPTEMBER 2026 YEET CAMPAIGN (Coming Soon)
+  if (datesEl) datesEl.textContent = 'Sep 1, 2026 → Sep 30, 2026';
+  if (daysLeftEl) daysLeftEl.textContent = 'COMING SOON';
+  if (startEl) startEl.textContent = 'Sep 1, 2026';
+  if (endEl)   endEl.textContent   = 'Sep 30, 2026';
+  if (pctEl)   pctEl.textContent   = 'Coming Soon';
+  if (fill)    fill.style.width    = '0%';
+  if (thunder) thunder.style.left  = '0%';
+  if (timerEl) timerEl.textContent = 'COMING SOON';
+  if (midNode) midNode.classList.remove('active');
+  if (endNode) endNode.classList.remove('active');
 }
 
-const BW_PRIZE_POOL = [800, 250, 150, 90, 60, 45, 35, 30, 20, 20];
+const BW_PRIZE_POOL = [1500, 500, 300, 200, 150, 100, 80, 70, 50, 50]; // $3,000 Combined Prize Pool (Phase 9)
+let selectedCodeFilter = 'all';
+
+function setCodeFilter(code) {
+  selectedCodeFilter = code;
+  document.getElementById('code-btn-all')?.classList.toggle('active', code === 'all');
+  document.getElementById('code-btn-bigd')?.classList.toggle('active', code === 'bigd');
+  document.getElementById('code-btn-bigballz')?.classList.toggle('active', code === 'bigballz');
+  fetchBiweeklyLeaderboard();
+}
 
 async function fetchBiweeklyLeaderboard() {
   const bwContent = document.getElementById('bw-lb-content');
   if (!bwContent) return;
   bwContent.innerHTML = '<div class="lb-loading"><div class="spinner"></div>Loading monthly rankings…</div>';
 
+  if (currentCampaign === 'yeet') {
+    bwContent.innerHTML = `
+      <div class="lb-coming-soon" style="text-align:center; padding:52px 24px; background:rgba(18,12,36,0.6); border:1px solid rgba(0,255,229,0.25); border-radius:var(--radius-lg); box-shadow:0 0 30px rgba(0,255,229,0.08);">
+        <div style="font-size:3.2rem; margin-bottom:12px;">⚡</div>
+        <div style="font-family:var(--font-display); font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px;">
+          September $3,000 Combined Leaderboard <span style="color:var(--cyan-400);">Coming Soon</span>
+        </div>
+        <p style="font-family:var(--font-ui); color:var(--text-secondary); max-width:580px; margin:0 auto 20px; font-size:0.92rem; line-height:1.6;">
+          The September 2026 <strong>$3,000 Combined Wager Race (BIGD + BigBallz)</strong> is preparing for launch! Wager on Yeet using code <strong style="color:var(--cyan-400);">BIGD</strong> or <strong style="color:#ffd700;">BIGBALLZ</strong> to qualify for the $3,000 cash prize pool.
+        </p>
+        <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 18px; border-radius:20px; background:rgba(0,255,229,0.12); border:1px solid rgba(0,255,229,0.4); color:var(--cyan-400); font-family:var(--font-ui); font-size:0.8rem; font-weight:800; letter-spacing:0.1em; text-transform:uppercase;">
+          <span>●</span> $3,000 COMBINED RACE — SEPTEMBER 2026
+        </div>
+      </div>`;
+    return;
+  }
+
   const { start, end } = getMonthlyPeriod();
   const after  = bwFmtISO(start);
   const before = bwFmtISO(end);
 
   try {
-    const url = API_BASE + '?after=' + encodeURIComponent(after) + '&before=' + encodeURIComponent(before) + '&period=monthly';
+    const url = API_BASE + '?after=' + encodeURIComponent(after) + '&before=' + encodeURIComponent(before) + '&period=monthly&partner=' + encodeURIComponent(currentCampaign) + '&code=' + encodeURIComponent(selectedCodeFilter);
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) {
       bwContent.innerHTML = '<div class="lb-error">⚠️ Error loading monthly data (' + res.status + '). Try again.</div>';
@@ -5200,6 +5759,7 @@ function renderBiweeklyLeaderboard(data) {
   const players = data.map(u => ({
     user_id:  u.user_id,
     username: u.username,
+    source_code: u.source_code || 'BIGD',
     total: (u.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0)
   })).filter(p => p.total >= 0).sort((a, b) => b.total - a.total);
 
@@ -5234,13 +5794,33 @@ function renderBiweeklyLeaderboard(data) {
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
-// Lazy-load biweekly panel on first click
-document.querySelectorAll('.tab-btn[data-panel="biweekly"]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    initBiweeklyProgress();
-    fetchBiweeklyLeaderboard();
-    startBiweeklyCountdown();
+// Initialize monthly progress state on load
+initBiweeklyProgress(false);
+
+/* ──────────────────────────────────────────
+   CHALLENGES STATUS FILTER (PHASES 13, 14, 15)
+   ────────────────────────────────────────── */
+function filterChallenges(status) {
+  document.getElementById('ch-filter-all')?.classList.toggle('active', status === 'all');
+  document.getElementById('ch-filter-active')?.classList.toggle('active', status === 'active');
+  document.getElementById('ch-filter-completed')?.classList.toggle('active', status === 'completed');
+  document.getElementById('ch-filter-archived')?.classList.toggle('active', status === 'archived');
+
+  const cards = document.querySelectorAll('#challenges-grid .challenge-card');
+  cards.forEach(c => {
+    const cardStatus = c.getAttribute('data-challenge-status');
+    if (status === 'all') {
+      c.style.display = cardStatus === 'archived' ? 'none' : 'flex';
+    } else if (status === 'archived') {
+      c.style.display = cardStatus === 'archived' ? 'flex' : 'none';
+    } else {
+      c.style.display = cardStatus === status ? 'flex' : 'none';
+    }
   });
+}
+// Run default challenge filter on load (show all active + completed, hide archived by default)
+document.addEventListener('DOMContentLoaded', () => {
+  filterChallenges('all');
 });
 
 /* Login Modal javascript removed */
@@ -5419,10 +5999,15 @@ document.addEventListener('click', (e) => {
 <script>
 (function(){
   const items = [
-    'BIGDGAMESTV','DEGEN MODE: <span class="hi">ACTIVE</span>','TOP WAGER: <span class="hi">$11,979</span>',
-    'PRIZE POOL: <span class="hi">$750</span>','PLAYERS: <span class="hi">LIVE</span>','CODE: <span class="hi">BIGD</span>',
-    'PLATFORM: <span class="hi">DEGENCITY</span>','STREAM: <span class="hi">KICK.COM/BIGDGAMESTV</span>',
-    'SEASON: <span class="hi">ONGOING</span>','AFFILIATE: <span class="hi">VERIFIED</span>'
+    'BIGDGAMESTV',
+    'ACTIVE PARTNER: <span class="hi">YEET (CODE: BIGD)</span>',
+    'COMBINED LEADERBOARD: <span class="hi">$3,000 PRIZE POOL</span>',
+    'WEEKLY REWARDS: <span class="hi">LIVE NOW</span>',
+    'SLOTS MULTIPLIER: <span class="hi">10 COINS / $1</span>',
+    'HOUSE / LIVE: <span class="hi">0.25 COINS / $1</span>',
+    'COMBINED RACE: <span class="hi">BIGD + BIGBALLZ</span>',
+    'STREAM: <span class="hi">KICK.COM/BIGDGAMESTV</span>',
+    'TOP ALL-TIME: <span class="hi">$11,116.42 (reversed)</span>'
   ];
   const track = document.getElementById('ticker-track');
   if(track){
@@ -5438,7 +6023,7 @@ document.addEventListener('click', (e) => {
         if (!loginBtn) return;
         
         if (user) {
-          const isVerified = user.degencityUsername;
+          const isVerified = user.degencityUsername || user.yeetUsername;
           if (isVerified) {
             loginBtn.innerHTML = `
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
@@ -5448,7 +6033,7 @@ document.addEventListener('click', (e) => {
           } else {
             loginBtn.innerHTML = `
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              Link DegenCity
+              Link Yeet Account
             `;
             loginBtn.onclick = () => window.location.href = "/verify.html";
           }

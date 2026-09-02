@@ -711,24 +711,84 @@ footer a:hover { color: var(--purple-200); }
       </div>
     </div>
 
-    <!-- DegenCity Link -->
+    <!-- Yeet Casino Link -->
     <div class="panel" id="degen-panel">
       <div class="panel-header">
-        <div class="panel-icon" style="background:rgba(0,255,229,0.08);">🎲</div>
-        <div class="panel-title">DegenCity Username</div>
+        <div class="panel-icon" style="background:rgba(0,255,229,0.08);">⚡</div>
+        <div class="panel-title">Yeet Username</div>
         <span id="degen-pill" class="status-pill disconnected" style="margin-left:auto;">Not Linked</span>
       </div>
       <div class="panel-body">
         <div id="degen-saved-row" style="display:none;">
           <div class="status-row">
             <div class="status-info">
-              <span style="font-size:1.4rem;">🎲</span>
+              <span style="font-size:1.4rem;">⚡</span>
               <div>
                 <div class="status-name" id="degen-username-display">—</div>
-                <div class="status-sub">DegenCity Account Verified</div>
+                <div class="status-sub">Yeet Account Verified</div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    <!-- Referral Tracking Panel (Phase 10) -->
+    <div class="panel" id="referral-panel" style="display:none;">
+      <div class="panel-header">
+        <div class="panel-icon" style="background:rgba(255,215,0,0.1);">🤝</div>
+        <div class="panel-title">Friend Referrals & Attribution</div>
+        <span class="status-pill connected" style="margin-left:auto;">Code BIGD</span>
+      </div>
+      <div class="panel-body">
+        <p style="font-size:0.86rem; color:var(--text-secondary); margin-bottom:16px;">
+          Invite your friends to register and wager on Yeet using code <strong style="color:var(--cyan-400);">BIGD</strong>. Earn bonus BigD Coins as your referred friends participate!
+        </p>
+
+        <!-- Referral Link Share Box -->
+        <div style="background:rgba(8,6,18,0.8); border:1px solid rgba(136,0,255,0.3); border-radius:var(--radius-md); padding:16px; margin-bottom:20px;">
+          <div style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:800; margin-bottom:6px;">Your Personal Invite Link</div>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="ref-link-input" readonly value="Loading invite link…" style="flex:1; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:8px 12px; color:#fff; font-family:var(--font-ui); font-size:0.88rem; outline:none;" />
+            <button onclick="copyReferralLink()" style="background:linear-gradient(135deg, var(--purple-700), var(--purple-500)); color:#fff; border:none; border-radius:4px; padding:0 16px; font-family:var(--font-ui); font-size:0.85rem; font-weight:700; cursor:pointer;" id="ref-copy-btn">Copy</button>
+          </div>
+        </div>
+
+        <!-- Referral Stats Grid -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:20px;">
+          <div style="background:rgba(18,14,32,0.6); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:12px; text-align:center;">
+            <div style="font-family:var(--font-ui); font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:800;">Total Invited</div>
+            <div style="font-family:var(--font-display); font-size:1.4rem; font-weight:900; color:#fff;" id="ref-stat-total">0</div>
+          </div>
+          <div style="background:rgba(18,14,32,0.6); border:1px solid rgba(0,255,128,0.2); border-radius:6px; padding:12px; text-align:center;">
+            <div style="font-family:var(--font-ui); font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:800;">Verified Code BIGD</div>
+            <div style="font-family:var(--font-display); font-size:1.4rem; font-weight:900; color:#00ff80;" id="ref-stat-verified">0</div>
+          </div>
+          <div style="background:rgba(18,14,32,0.6); border:1px solid rgba(255,215,0,0.2); border-radius:6px; padding:12px; text-align:center;">
+            <div style="font-family:var(--font-ui); font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:800;">Bonus Coins Earned</div>
+            <div style="font-family:var(--font-display); font-size:1.4rem; font-weight:900; color:#ffd700;" id="ref-stat-coins">+0</div>
+          </div>
+        </div>
+
+        <!-- Attributed Friends List (Privacy-Masked) -->
+        <div style="font-family:var(--font-ui); font-size:0.8rem; font-weight:800; color:var(--text-secondary); text-transform:uppercase; margin-bottom:8px;">
+          Attributed Referred Friends (Privacy Masked)
+        </div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-family:var(--font-ui); font-size:0.82rem; text-align:left;">
+            <thead>
+              <tr style="background:rgba(255,255,255,0.03); color:var(--text-muted); border-bottom:1px solid rgba(255,255,255,0.06);">
+                <th style="padding:8px 10px;">Friend</th>
+                <th style="padding:8px 10px;">Date</th>
+                <th style="padding:8px 10px;">Attribution Status</th>
+              </tr>
+            </thead>
+            <tbody id="ref-friends-tbody">
+              <tr>
+                <td colspan="3" style="text-align:center; padding:16px; color:var(--text-muted);">
+                  No referrals yet. Share your invite link to start attributing friends!
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -774,7 +834,7 @@ footer a:hover { color: var(--purple-200); }
 </main>
 
 <footer>
-  <p>&copy; 2026 BigDGamesTV. All rights reserved. &nbsp;|&nbsp; <a href="#">Terms</a> &nbsp;|&nbsp; <a href="#">Privacy</a> &nbsp;|&nbsp; Powered by <a href="https://degencity.com">DegenCity</a></p>
+  <p>&copy; 2026 BigDGamesTV. All rights reserved. &nbsp;|&nbsp; <a href="#">Terms</a> &nbsp;|&nbsp; <a href="#">Privacy</a> &nbsp;|&nbsp; Powered by <a href="https://yeet.com" target="_blank" rel="noopener">Yeet</a></p>
   <p style="margin-top:8px; font-size:0.72rem; opacity:0.5;">Gambling can be addictive. Please play responsibly. 18+ only.</p>
 </footer>
 
@@ -807,9 +867,9 @@ footer a:hover { color: var(--purple-200); }
     kick_failed:     'Kick login failed. Please try again.',
     discord_already_linked: 'This Discord account is already connected to another user.',
     kick_already_linked:    'This Kick account is already connected to another user.',
-    degencity_required:     'Please verify your DegenCity username on the Code Check page first.',
+    degencity_required:     'Please verify your Yeet username on the Code Check page first.',
     discord_required:       'Please connect your Discord account before connecting Kick.',
-    degencity_not_verified: 'This DegenCity username has not been verified on the Code Check page first.',
+    degencity_not_verified: 'This Yeet username has not been verified on the Code Check page first.',
   };
   const s = p.get('success'), e = p.get('error');
   const sEl = document.getElementById('alert-success');
@@ -884,7 +944,7 @@ async function loadSession() {
 
 function renderAccountState(d) {
   const isLoggedIn = d.loggedIn;
-  const degencityUsername = d.degencityUsername || d.tempDegencityUsername || localStorage.getItem('verified_degencity_username') || null;
+  const casinoUsername = d.yeetUsername || d.degencityUsername || d.tempDegencityUsername || localStorage.getItem('verified_yeet_username') || localStorage.getItem('verified_degencity_username') || null;
 
   // Points panel
   const pointsPanel = document.getElementById('points-panel');
@@ -944,12 +1004,12 @@ function renderAccountState(d) {
     }
   }
 
-  // DegenCity panel state
+  // Yeet panel state
   const degenPanel = document.getElementById('degen-panel');
-  if (degencityUsername) {
+  if (casinoUsername) {
     degenPanel.style.display = 'block';
     document.getElementById('degen-saved-row').style.display = 'block';
-    document.getElementById('degen-username-display').textContent = degencityUsername;
+    document.getElementById('degen-username-display').textContent = casinoUsername;
     document.getElementById('degen-pill').textContent = 'Verified';
     document.getElementById('degen-pill').className   = 'status-pill connected';
   } else {
@@ -959,6 +1019,81 @@ function renderAccountState(d) {
   // Logout wrap visibility
   const logoutWrap = document.getElementById('logout-wrap');
   if (logoutWrap) logoutWrap.style.display = isLoggedIn ? 'block' : 'none';
+
+  // Referral Panel (Phase 10)
+  const referralPanel = document.getElementById('referral-panel');
+  if (referralPanel) {
+    referralPanel.style.display = isLoggedIn ? 'block' : 'none';
+    if (isLoggedIn) loadReferrals();
+  }
+}
+
+/* ── Referral Tracking Loader (Phase 10) ── */
+async function loadReferrals() {
+  const token = getAuthToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch('/api/referrals', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+
+    const linkInput = document.getElementById('ref-link-input');
+    if (linkInput && data.referral_link) {
+      linkInput.value = data.referral_link;
+    }
+
+    const statTotal = document.getElementById('ref-stat-total');
+    const statVerified = document.getElementById('ref-stat-verified');
+    const statCoins = document.getElementById('ref-stat-coins');
+    if (statTotal) statTotal.textContent = data.total_referred || 0;
+    if (statVerified) statVerified.textContent = data.verified_referred || 0;
+    if (statCoins) statCoins.textContent = `+${(data.bonus_coins_earned || 0).toLocaleString()}`;
+
+    const tbody = document.getElementById('ref-friends-tbody');
+    if (tbody) {
+      if (data.referred_friends && data.referred_friends.length > 0) {
+        tbody.innerHTML = data.referred_friends.map(f => {
+          const dt = new Date(f.joined_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+          const statusBadge = f.verified
+            ? `<span style="color:#00ff80; font-weight:700;">✓ Verified (Code BIGD)</span>`
+            : `<span style="color:var(--text-muted);">⏳ Pending Code Check</span>`;
+          return `
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+              <td style="padding:10px 10px; font-weight:700; color:#fff;">${f.username_masked}</td>
+              <td style="padding:10px 10px; color:var(--text-secondary);">${dt}</td>
+              <td style="padding:10px 10px;">${statusBadge}</td>
+            </tr>
+          `;
+        }).join('');
+      } else {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="3" style="text-align:center; padding:16px; color:var(--text-muted);">
+              No referrals yet. Share your personal invite link to start earning bonus coins!
+            </td>
+          </tr>
+        `;
+      }
+    }
+  } catch (err) {
+    console.error("Referral fetch error:", err);
+  }
+}
+
+function copyReferralLink() {
+  const input = document.getElementById('ref-link-input');
+  const btn = document.getElementById('ref-copy-btn');
+  if (!input) return;
+  navigator.clipboard.writeText(input.value).catch(() => {
+    input.select();
+    document.execCommand('copy');
+  });
+  if (btn) btn.textContent = '✓ Copied!';
+  setTimeout(() => { if (btn) btn.textContent = 'Copy'; }, 1800);
+  showToast('✓ Referral invite link copied to clipboard!', 'success');
 }
 
 function showToast(msg, type = 'success') {
@@ -1015,12 +1150,15 @@ hamburger.addEventListener('click', () => {
 /* ── HUD Ticker ──────────────────────────────────────────── */
 (function(){
   const items = [
-    'BIGDGAMESTV', 'ACCOUNT: <span class="hi">LINK YOUR ACCOUNTS</span>',
-    'EARN: <span class="hi">+10 COINS / 5 MIN</span>',
+    'BIGDGAMESTV',
+    'ACTIVE PARTNER: <span class="hi">YEET (CODE: BIGD)</span>',
+    'COMBINED LEADERBOARD: <span class="hi">$3,000 PRIZE POOL</span>',
     'CODE: <span class="hi">BIGD</span>',
-    'PLATFORM: <span class="hi">DEGENCITY</span>',
-    'STREAM: <span class="hi">KICK.COM/BIGDGAMESTV</span>',
-    'STORE: <span class="hi">COMING SOON</span>'
+    'REFERRALS: <span class="hi">ACTIVE ATTRIBUTION</span>',
+    'WEEKLY REWARDS: <span class="hi">LIVE</span>',
+    'SLOTS: <span class="hi">10 COINS / $1</span>',
+    'HOUSE & LIVE: <span class="hi">0.25 COINS / $1</span>',
+    'STREAM: <span class="hi">KICK.COM/BIGDGAMESTV</span>'
   ];
   const track = document.getElementById('ticker-track');
   if (track) {

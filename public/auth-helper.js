@@ -398,6 +398,7 @@ async function logoutUser() {
   }
   clearAuthToken();
   localStorage.removeItem('verified_degencity_username');
+  localStorage.removeItem('verified_yeet_username');
   window.authUser = null;
   window.location.reload();
 }
@@ -418,13 +419,14 @@ function updateHeaderNavUI(user) {
   if (isLoggedIn && navRight) {
     const pointsVal = (user.points || 0).toLocaleString();
     const augustWagerFormatted = (user.augustWagerUsd || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
+    const casinoUser = user.yeetUsername || user.degencityUsername;
 
     // Inject points pill into top nav bar
     const pointsPill = document.createElement('a');
     pointsPill.id = 'nav-user-points-pill';
     pointsPill.href = '/store.html';
     pointsPill.className = 'nav-points-pill';
-    pointsPill.title = `August Wagered: $${augustWagerFormatted} ($1 = 10 Coins)`;
+    pointsPill.title = `Wagered: $${augustWagerFormatted} ($1 = 10 Coins)`;
     pointsPill.innerHTML = `🪙 <span>${pointsVal}</span>`;
     
     // Inject user name pill for desktop
@@ -459,13 +461,13 @@ function updateHeaderNavUI(user) {
           <img src="${avatarSrc}" class="mobile-profile-avatar"/>
           <div class="mobile-profile-info">
             <div class="mobile-profile-name">${user.displayName || 'Player'}</div>
-            <div class="mobile-profile-sub">${user.kickUsername ? 'Kick: @' + user.kickUsername : (user.degencityUsername ? 'DegenCity: ' + user.degencityUsername : 'Account Connected')}</div>
+            <div class="mobile-profile-sub">${user.kickUsername ? 'Kick: @' + user.kickUsername : (casinoUser ? 'Yeet: ' + casinoUser : 'Account Connected')}</div>
           </div>
         </div>
         <div class="mobile-balance-box">
           <div class="mobile-balance-title">BIGD COINS WALLET</div>
           <div class="mobile-balance-amount">🪙 ${pointsVal}</div>
-          <div class="mobile-balance-sub">August Wagered: <strong>$${augustWagerFormatted}</strong> ($1 = 10 pts)</div>
+          <div class="mobile-balance-sub">Wagered: <strong>$${augustWagerFormatted}</strong> ($1 = 10 pts)</div>
         </div>
       `;
     }

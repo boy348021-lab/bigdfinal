@@ -522,6 +522,350 @@ main {
   font-size: 0.88rem;
 }
 
+/* ─── WEEKLY REWARDS SECTION STYLES (PHASE 4, 5, 6, 7) ──────────────── */
+.weekly-rewards-container {
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.weekly-hero-card {
+  background: linear-gradient(135deg, rgba(26,16,48,0.85) 0%, rgba(12,8,24,0.95) 100%);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  box-shadow: 0 0 35px rgba(136,0,255,0.18), inset 0 1px 1px rgba(255,255,255,0.1);
+  position: relative;
+  overflow: hidden;
+}
+.weekly-hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #ffd700, #ff007f, var(--cyan-400), #00ff80);
+}
+
+.weekly-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  background: rgba(255,215,0,0.12);
+  border: 1px solid rgba(255,215,0,0.4);
+  color: #ffd700;
+  font-family: var(--font-ui);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.weekly-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 12px 0 8px;
+}
+.weekly-title span { color: var(--cyan-400); text-shadow: var(--glow-cyan); }
+
+.weekly-sub {
+  font-family: var(--font-ui);
+  font-size: 0.96rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 680px;
+}
+
+.weekly-hud-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+.weekly-stat-box {
+  background: rgba(14,10,30,0.7);
+  border: 1px solid rgba(136,0,255,0.25);
+  border-radius: var(--radius-md);
+  padding: 18px 16px;
+  text-align: left;
+}
+.weekly-stat-box .ws-label {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.weekly-stat-box .ws-val {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ffffff;
+}
+.weekly-stat-box .ws-val.gold { color: #ffd700; text-shadow: 0 0 15px rgba(255,215,0,0.4); }
+.weekly-stat-box .ws-val.cyan { color: var(--cyan-400); text-shadow: 0 0 15px rgba(0,255,229,0.4); }
+.weekly-stat-box .ws-val.green { color: #00ff80; text-shadow: 0 0 15px rgba(0,255,128,0.4); }
+.weekly-stat-box .ws-note {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Progression Bar Track */
+.weekly-prog-wrap {
+  background: rgba(8,6,18,0.8);
+  border: 1px solid rgba(136,0,255,0.3);
+  border-radius: var(--radius-md);
+  padding: 22px 20px;
+  margin-top: 14px;
+}
+.weekly-prog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.weekly-prog-title {
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+.weekly-prog-track {
+  height: 14px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 7px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
+}
+.weekly-prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8800ff, #00f2fe, #00ff80);
+  border-radius: 7px;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 12px rgba(0,242,254,0.6);
+}
+.weekly-prog-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Category Multiplier Cards & Live Calculator */
+.multipliers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+.multiplier-card {
+  background: rgba(16,12,32,0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  text-align: left;
+}
+.multiplier-card.slots { border-color: rgba(0,255,229,0.35); }
+.multiplier-card.house { border-color: rgba(255,215,0,0.35); }
+.mc-tag {
+  display: inline-block;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+.mc-tag.slots { background: rgba(0,255,229,0.15); color: var(--cyan-400); border: 1px solid rgba(0,255,229,0.3); }
+.mc-tag.house { background: rgba(255,215,0,0.15); color: #ffd700; border: 1px solid rgba(255,215,0,0.3); }
+.mc-rate {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.mc-formula {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Calculator Box */
+.calculator-box {
+  background: linear-gradient(145deg, rgba(20,15,40,0.9) 0%, rgba(10,8,22,0.95) 100%);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  text-align: left;
+}
+.calc-inputs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+.calc-input-group label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.calc-input-field {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(136,0,255,0.3);
+  border-radius: 6px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.calc-input-field:focus {
+  border-color: var(--cyan-400);
+  box-shadow: 0 0 12px rgba(0,255,229,0.25);
+}
+.calc-presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.calc-preset-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text-secondary);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.calc-preset-btn:hover {
+  background: rgba(0,255,229,0.15);
+  border-color: var(--cyan-400);
+  color: #fff;
+}
+.calc-result-strip {
+  background: rgba(8,6,18,0.9);
+  border: 1px solid rgba(0,255,229,0.3);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+/* Weekly Reward Tiers Table / Cards */
+.tiers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  width: 100%;
+}
+.tier-card {
+  background: rgba(18,14,35,0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px 14px;
+  text-align: center;
+  position: relative;
+  transition: all 0.25s;
+}
+.tier-card.unlocked {
+  border-color: rgba(0,255,128,0.5);
+  background: rgba(10,25,18,0.7);
+  box-shadow: 0 0 20px rgba(0,255,128,0.12);
+}
+.tier-card .tc-badge {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.tier-card.unlocked .tc-badge { color: #00ff80; }
+.tier-card .tc-wager {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.tier-card .tc-reward {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #ffd700;
+}
+
+/* Ledger Table */
+.ledger-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  background: rgba(12,10,24,0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-family: var(--font-ui);
+  font-size: 0.84rem;
+}
+.ledger-table th {
+  background: rgba(24,18,48,0.5);
+  padding: 12px 16px;
+  color: var(--text-muted);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.ledger-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--text-primary);
+}
+.ledger-table tr:last-child td { border-bottom: none; }
+
 /* ─── TOAST ──────────────────────────────────────────────────── */
 #store-toast {
   position: fixed;
@@ -977,7 +1321,7 @@ footer a:hover { color: var(--purple-200); }
         <button id="store-kick-btn" onclick="linkWithKick()" style="background:#53fa5d; color:#000; border:none; border-radius:3px; padding:3px 10px; font-weight:700; font-size:0.75rem; cursor:pointer; margin-left:4px;">Connect</button>
       </div>
       <div id="badge-degencity" style="font-size:0.8rem; background:rgba(0,255,229,0.12); border:1px solid rgba(0,255,229,0.3); color:#fff; padding:6px 12px; border-radius:4px; display:inline-flex; align-items:center; gap:6px;">
-        <span style="color:#00ffe5;">●</span> DegenCity: <strong id="store-degen-name">Not Verified</strong>
+        <span style="color:#00ffe5;">●</span> Yeet: <strong id="store-degen-name">Not Verified</strong>
         <a id="store-degen-btn" href="verify.html" style="background:#00ffe5; color:#000; text-decoration:none; border-radius:3px; padding:3px 10px; font-weight:700; font-size:0.75rem; margin-left:4px;">Verify</a>
       </div>
     </div>
@@ -985,17 +1329,208 @@ footer a:hover { color: var(--purple-200); }
 
   <div id="store-login-prompt" class="store-user-bar" style="display:none; justify-content:center; text-align:center; padding:24px; max-width:800px; width:100%;">
     <div>
-      <p style="margin-bottom:12px; font-size:0.95rem; color:var(--text-secondary);" id="store-prompt-msg">Log in with Discord and verify your DegenCity account to use your BigD Coins!</p>
+      <p style="margin-bottom:12px; font-size:0.95rem; color:var(--text-secondary);" id="store-prompt-msg">Log in with Discord and verify your Yeet account to use your BigD Coins!</p>
       <button onclick="loginWithDiscord()" class="nav-btn-auth" style="padding:10px 20px; font-size:0.9rem;">Login with Discord</button>
     </div>
   </div>
 
+  <!-- ══════════════════════════════════════════════════════════
+       WEEKLY WAGER REWARDS SECTION (PHASES 4, 5, 6, 7)
+       ══════════════════════════════════════════════════════════ -->
+  <div class="weekly-rewards-container" id="weekly-rewards-section">
+    
+    <!-- Hero Card & Timer -->
+    <div class="weekly-hero-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div class="weekly-badge-pill">
+          <span>⚡</span> WEEKLY WAGER CHASE
+        </div>
+        <div style="font-family:var(--font-ui); font-size:0.8rem; font-weight:800; color:var(--cyan-400); background:rgba(0,255,229,0.12); border:1px solid rgba(0,255,229,0.3); padding:4px 14px; border-radius:20px;" id="weekly-countdown-pill">
+          🕒 RESETS IN: <strong id="weekly-time-left">Loading…</strong>
+        </div>
+      </div>
+
+      <div class="weekly-title">
+        Weekly <span>Wager Rewards</span>
+      </div>
+      <p class="weekly-sub">
+        Wager on Yeet using code <strong style="color:var(--cyan-400);">BIGD</strong> to accumulate weekly coins and unlock cash rewards! The more you wager each week, the more cash you can redeem.
+      </p>
+
+      <!-- User Stats HUD -->
+      <div class="weekly-hud-stats">
+        <div class="weekly-stat-box">
+          <div class="ws-label">This Week Wagered</div>
+          <div class="ws-val cyan" id="hud-weekly-wager">$0.00</div>
+          <div class="ws-note" id="hud-wager-breakdown">Slots: $0 | House: $0</div>
+        </div>
+        <div class="weekly-stat-box">
+          <div class="ws-label">Lifetime Wagered</div>
+          <div class="ws-val" id="hud-lifetime-wager">$0.00</div>
+          <div class="ws-note">Permanent All-Time Record</div>
+        </div>
+        <div class="weekly-stat-box">
+          <div class="ws-label">BigD Coins Balance</div>
+          <div class="ws-val gold" id="hud-coins-val">0</div>
+          <div class="ws-note" id="hud-weekly-coins-note">+0 coins earned this week</div>
+        </div>
+        <div class="weekly-stat-box">
+          <div class="ws-label">Current Tier Rank</div>
+          <div class="ws-val green" id="hud-tier-name" style="font-size:1.3rem;">Bronze Starter</div>
+          <div class="ws-note" id="hud-tier-badge">Tier 1 Target: $100</div>
+        </div>
+      </div>
+
+      <!-- Weekly Progression Bar (Phase 4) -->
+      <div class="weekly-prog-wrap">
+        <div class="weekly-prog-header">
+          <span class="weekly-prog-title" id="weekly-prog-bar-title">THIS WEEK PROGRESSION</span>
+          <span style="font-family:var(--font-display); font-size:0.92rem; font-weight:800; color:#ffd700;" id="weekly-prog-pct">0% toward next reward</span>
+        </div>
+        <div class="weekly-prog-track">
+          <div class="weekly-prog-fill" id="weekly-prog-fill" style="width:0%;"></div>
+        </div>
+        <div class="weekly-prog-footer">
+          <span id="weekly-prog-current">$0.00 Wagered This Week</span>
+          <strong style="color:var(--cyan-400);" id="weekly-prog-remaining">$100.00 remaining until next reward</strong>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Wager -> Coin Conversion Rules (Phase 5) -->
+    <div style="text-align:left;">
+      <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.06em;">
+        Wager to Coin <span>Conversion Rates</span>
+      </div>
+      <div class="multipliers-grid">
+        <div class="multiplier-card slots">
+          <span class="mc-tag slots">🎰 Category A — Slots</span>
+          <div class="mc-rate">$1 Wager = 10 Coins</div>
+          <p class="mc-formula">
+            For every $1 wagered on qualifying slot games, receive <strong>10 BigD Coins</strong>.<br/>
+            <em>Formula: slotCoins = slotWager × 10</em>
+          </p>
+        </div>
+        <div class="multiplier-card house">
+          <span class="mc-tag house">🎲 Category B — House / Live Games</span>
+          <div class="mc-rate">$1 Wager = 0.25 Coins</div>
+          <p class="mc-formula">
+            For every $1 spent on qualifying house or live casino games, receive <strong>0.25 BigD Coins</strong>.<br/>
+            <em>Formula: houseCoins = houseWager × 0.25</em>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Real-Time Interactive Coin Calculator (Phase 5) -->
+    <div class="calculator-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
+        <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase;">
+          🧮 Live Wager <span>Coin Calculator</span>
+        </div>
+        <span style="font-family:var(--font-ui); font-size:0.75rem; color:var(--cyan-400); font-weight:700;">⚡ Instant Conversion</span>
+      </div>
+      <p style="font-family:var(--font-ui); font-size:0.88rem; color:var(--text-secondary); margin-bottom:14px;">
+        Test and simulate exact coin conversions with our verified mathematical formula:
+      </p>
+
+      <div class="calc-presets">
+        <span style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); padding-top:4px; font-weight:800;">QUICK EXAMPLES:</span>
+        <button class="calc-preset-btn" onclick="setCalcPreset(100, 100)">$100 Slots + $100 House</button>
+        <button class="calc-preset-btn" onclick="setCalcPreset(500, 0)">$500 Slots</button>
+        <button class="calc-preset-btn" onclick="setCalcPreset(0, 500)">$500 House</button>
+        <button class="calc-preset-btn" onclick="setCalcPreset(250, 750)">$250 Slots + $750 House</button>
+      </div>
+
+      <div class="calc-inputs-grid">
+        <div class="calc-input-group">
+          <label>🎰 Slots Wager ($ USD)</label>
+          <input type="number" id="calc-slots-input" class="calc-input-field" placeholder="0" value="100" min="0" oninput="runCoinCalculation()"/>
+        </div>
+        <div class="calc-input-group">
+          <label>🎲 House / Live Games Wager ($ USD)</label>
+          <input type="number" id="calc-house-input" class="calc-input-field" placeholder="0" value="100" min="0" oninput="runCoinCalculation()"/>
+        </div>
+      </div>
+
+      <div class="calc-result-strip">
+        <div>
+          <div style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Breakdown</div>
+          <div style="font-family:var(--font-ui); font-size:0.95rem; color:#fff; margin-top:2px;">
+            Slots: <strong style="color:var(--cyan-400);" id="calc-res-slots">1,000 coins</strong> &nbsp;|&nbsp; House: <strong style="color:#ffd700;" id="calc-res-house">25 coins</strong>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Total Qualifying Reward</div>
+          <div style="font-family:var(--font-display); font-size:1.8rem; font-weight:900; color:#00ff80; text-shadow:0 0 15px rgba(0,255,128,0.4);" id="calc-res-total">
+            1,025 Coins
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly Reward Tiers Grid -->
+    <div style="text-align:left;">
+      <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.06em;">
+        Weekly <span>Reward Tiers</span>
+      </div>
+      <div class="tiers-grid" id="weekly-tiers-grid">
+        <!-- Tiers populated dynamically -->
+      </div>
+    </div>
+
+    <!-- Auditable Transaction Ledger (Phase 6) -->
+    <div style="text-align:left;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+        <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase;">
+          📋 Auditable <span>Coin & Wager Ledger</span>
+        </div>
+        <span style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); font-weight:700;">VERIFIED LOG</span>
+      </div>
+      <div class="ledger-table-wrap">
+        <table class="ledger-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Game Type</th>
+              <th>Wager (USD)</th>
+              <th>Multiplier</th>
+              <th>Coins Earned</th>
+              <th>Week ID</th>
+            </tr>
+          </thead>
+          <tbody id="ledger-table-body">
+            <tr>
+              <td colspan="6" style="text-align:center; color:var(--text-muted); padding:24px;">
+                No wager transactions logged yet this week. Start wagering on Yeet with code <strong>BIGD</strong>!
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Weekly Reset Rules Box (Phase 7) -->
+    <div style="background:rgba(12,10,22,0.7); border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-md); padding:20px; text-align:left; font-family:var(--font-ui); font-size:0.88rem; color:var(--text-secondary); line-height:1.6;">
+      <div style="font-weight:800; color:#fff; margin-bottom:4px; font-size:0.95rem;">
+        ℹ️ Weekly Reset & Persistence Architecture:
+      </div>
+      <ul style="margin-left:18px; margin-top:4px;">
+        <li><strong>Lifetime Wager:</strong> Continues indefinitely and never resets.</li>
+        <li><strong>Weekly Wager & Tier Progression:</strong> Resets every Sunday at 23:59:59 UTC to begin a fresh weekly rewards race.</li>
+        <li><strong>BigD Coins:</strong> Persist in your balance to spend on rewards anytime!</li>
+      </ul>
+    </div>
+
+  </div>
+
   <!-- Store Maintenance / Unavailable Banner -->
-  <div id="store-unavailable-banner" style="width:100%; max-width:820px; background:rgba(255,180,0,0.06); border:1px solid rgba(255,180,0,0.35); border-radius:var(--radius-md); padding:24px 28px; text-align:center; margin-bottom:32px; box-shadow:0 0 25px rgba(255,180,0,0.1); backdrop-filter:blur(10px);">
+  <div id="store-unavailable-banner" style="width:100%; max-width:900px; background:rgba(255,180,0,0.06); border:1px solid rgba(255,180,0,0.35); border-radius:var(--radius-md); padding:24px 28px; text-align:center; margin-bottom:32px; box-shadow:0 0 25px rgba(255,180,0,0.1); backdrop-filter:blur(10px);">
     <div style="font-size:2.2rem; margin-bottom:8px;">⚠️</div>
     <div style="font-family:var(--font-display); font-size:1.35rem; font-weight:800; color:#ffd700; letter-spacing:0.06em; margin-bottom:8px; text-transform:uppercase;">Redemptions Currently Unavailable</div>
     <p style="font-family:var(--font-body); font-size:0.92rem; color:var(--text-secondary); line-height:1.6; max-width:620px; margin:0 auto 14px;">
-      Store redemptions are temporarily paused for maintenance and stock restocking. You can still earn and accumulate BigD Coins by wagering on DegenCity with code <strong>BIGD</strong>!
+      Store redemptions are temporarily paused for maintenance and stock restocking. You can still earn and accumulate BigD Coins by wagering on Yeet with code <strong>BIGD</strong>!
     </p>
     <a href="https://discord.gg/aHSVMX4DCr" target="_blank" rel="noopener" class="history-claim-btn" style="display:inline-flex; font-size:0.82rem; padding:8px 18px;">
       Join Discord for Updates 📢
@@ -1003,7 +1538,7 @@ footer a:hover { color: var(--purple-200); }
   </div>
 
   <!-- Rewards Grid -->
-  <div class="rewards-grid" id="rewards-grid"><!-- JS renders cards --></div>
+  <div class="rewards-grid" id="rewards-grid" style="max-width:900px;"><!-- JS renders cards --></div>
 
   <!-- Redemption History -->
   <section class="history-section" id="history-section" style="display:none;">
@@ -1024,9 +1559,9 @@ footer a:hover { color: var(--purple-200); }
     <div class="section-label">How to Earn BigD Coins</div>
     <div class="earn-grid">
       <div class="earn-card">
-        <span class="earn-card-icon">🎲</span>
-        <div class="earn-card-title">Wager on DegenCity</div>
-        <p class="earn-card-desc">Every $1 wagered on DegenCity using code BIGD earns you 10 coins automatically.</p>
+        <span class="earn-card-icon">⚡</span>
+        <div class="earn-card-title">Wager on Yeet</div>
+        <p class="earn-card-desc">Every $1 wagered on Yeet using code BIGD earns you 10 coins automatically.</p>
         <span class="earn-card-badge">10 coins / $1</span>
       </div>
       <div class="earn-card">
@@ -1042,7 +1577,7 @@ footer a:hover { color: var(--purple-200); }
 
 
 <footer>
-  <p>&copy; 2026 BigDGamesTV. All rights reserved. &nbsp;|&nbsp; <a href="#">Terms</a> &nbsp;|&nbsp; <a href="#">Privacy</a> &nbsp;|&nbsp; Powered by <a href="https://degencity.com">DegenCity</a></p>
+  <p>&copy; 2026 BigDGamesTV. All rights reserved. &nbsp;|&nbsp; <a href="#">Terms</a> &nbsp;|&nbsp; <a href="#">Privacy</a> &nbsp;|&nbsp; Powered by <a href="https://yeet.com" target="_blank" rel="noopener">Yeet</a></p>
   <p style="margin-top:8px; font-size:0.72rem; opacity:0.5;">Gambling can be addictive. Please play responsibly. 18+ only.</p>
 </footer>
 
@@ -1207,11 +1742,12 @@ onAuthReady(async (user) => {
           if (kickBtnEl) kickBtnEl.style.display = 'inline-block';
         }
 
-        // Update DegenCity badge & action
+        // Update Yeet badge & action
         const degenNameEl = document.getElementById('store-degen-name');
         const degenBtnEl = document.getElementById('store-degen-btn');
-        if (d.degencityUsername) {
-          if (degenNameEl) degenNameEl.textContent = d.degencityUsername;
+        const casinoUser = d.yeetUsername || d.degencityUsername;
+        if (casinoUser) {
+          if (degenNameEl) degenNameEl.textContent = casinoUser;
           if (degenBtnEl) degenBtnEl.style.display = 'none';
         } else {
           if (degenNameEl) degenNameEl.textContent = 'Not Verified';
@@ -1222,7 +1758,7 @@ onAuthReady(async (user) => {
         if (coins) coins.classList.add('visible');
 
 
-        // Always show userBar for logged-in users so they see Kick & DegenCity connect options!
+        // Always show userBar for logged-in users so they see Kick & Yeet connect options!
         if (userBar) userBar.style.display = 'flex';
         if (loginPrompt) loginPrompt.style.display = 'none';
 
@@ -1232,6 +1768,7 @@ onAuthReady(async (user) => {
         }
 
         await loadRedemptions(token);
+        await loadWeeklyRewards(token);
       }
     } catch (e) {
       console.error("Failed to load user info:", e);
@@ -1244,9 +1781,157 @@ onAuthReady(async (user) => {
     if (loginPrompt) loginPrompt.style.display = 'flex';
     const histSect = document.getElementById("history-section");
     if (histSect) histSect.style.display = "none";
+    await loadWeeklyRewards(null);
   }
   
   await initStore();
+});
+
+/* ── Weekly Rewards & Coin Converter Logic (Phase 4, 5, 6, 7) ── */
+let weeklyTimerInterval = null;
+
+async function loadWeeklyRewards(token) {
+  try {
+    const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+    const res = await fetch("/api/rewards/weekly", { headers, cache: "no-store" });
+    if (!res.ok) return;
+    const data = await res.json();
+
+    // 1. Countdown timer
+    const timeLeftEl = document.getElementById("weekly-time-left");
+    if (timeLeftEl && data.week_info) {
+      timeLeftEl.textContent = data.week_info.countdown;
+    }
+
+    // 2. User progression HUD
+    const prog = data.user_progression;
+    const hudWeekly = document.getElementById("hud-weekly-wager");
+    const hudBreakdown = document.getElementById("hud-wager-breakdown");
+    const hudLifetime = document.getElementById("hud-lifetime-wager");
+    const hudCoins = document.getElementById("hud-coins-val");
+    const hudWeeklyCoins = document.getElementById("hud-weekly-coins-note");
+    const hudTierName = document.getElementById("hud-tier-name");
+    const hudTierBadge = document.getElementById("hud-tier-badge");
+
+    const progFill = document.getElementById("weekly-prog-fill");
+    const progPct = document.getElementById("weekly-prog-pct");
+    const progCurrent = document.getElementById("weekly-prog-current");
+    const progRemaining = document.getElementById("weekly-prog-remaining");
+
+    if (prog) {
+      if (hudWeekly) hudWeekly.textContent = "$" + prog.weekly_wager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (hudBreakdown) hudBreakdown.textContent = `Slots: $${prog.weekly_slots_wager} | House/Live: $${prog.weekly_house_live_wager}`;
+      if (hudLifetime) hudLifetime.textContent = "$" + prog.lifetime_wager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (hudCoins) hudCoins.textContent = prog.points_balance.toLocaleString();
+      if (hudWeeklyCoins) hudWeeklyCoins.textContent = `+${prog.weekly_coins_earned.toLocaleString()} coins earned this week`;
+      
+      const cTier = prog.current_tier;
+      const nTier = prog.next_tier;
+      if (hudTierName) hudTierName.textContent = cTier ? cTier.name : "Bronze Starter";
+      if (hudTierBadge) hudTierBadge.textContent = nTier ? `Next: ${nTier.badge} ($${nTier.wager_threshold})` : "Max VIP Level Reached!";
+
+      if (progPct) progPct.textContent = `${prog.tier_progress_pct}% toward ${nTier ? nTier.name : 'Max VIP'}`;
+      if (progFill) progFill.style.width = `${prog.tier_progress_pct}%`;
+      if (progCurrent) progCurrent.textContent = `$${prog.weekly_wager.toFixed(2)} Wagered This Week (${data.week_info.weekId})`;
+      if (progRemaining) {
+        progRemaining.textContent = nTier
+          ? `$${prog.wager_remaining_for_next_tier.toFixed(2)} remaining until next reward (${nTier.reward_coins.toLocaleString()} Coins / $${nTier.cash_value} Cash)`
+          : "🎉 Maximum VIP Tier Unlocked This Week!";
+      }
+    } else {
+      if (progCurrent) progCurrent.textContent = `$0.00 Wagered This Week (${data.week_info ? data.week_info.weekId : 'Current Week'})`;
+      if (progRemaining) progRemaining.textContent = "$100.00 remaining until Tier 1 Reward ($10 Cash)";
+      if (progFill) progFill.style.width = "0%";
+      if (progPct) progPct.textContent = "0% toward Tier 1";
+    }
+
+    // 3. Render Reward Tiers
+    const tiersGrid = document.getElementById("weekly-tiers-grid");
+    if (tiersGrid && data.reward_tiers) {
+      const userWager = prog ? prog.weekly_wager : 0;
+      tiersGrid.innerHTML = data.reward_tiers.map(t => {
+        const isUnlocked = userWager >= t.wager_threshold;
+        return `
+          <div class="tier-card ${isUnlocked ? 'unlocked' : ''}">
+            <div class="tc-badge">${t.badge} ${isUnlocked ? '✓ UNLOCKED' : ''}</div>
+            <div class="tc-wager">$${t.wager_threshold.toLocaleString()} Wager</div>
+            <div class="tc-reward">🎁 $${t.cash_value} Cash (${t.reward_coins.toLocaleString()} Coins)</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 4. Render Auditable Ledger
+    const ledgerBody = document.getElementById("ledger-table-body");
+    if (ledgerBody) {
+      if (data.recent_ledger && data.recent_ledger.length > 0) {
+        ledgerBody.innerHTML = data.recent_ledger.map(row => {
+          const dt = new Date(row.timestamp).toLocaleDateString(undefined, {
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+          });
+          const typeBadge = row.wager_type.includes('SLOTS')
+            ? `<span style="color:var(--cyan-400); font-weight:800;">🎰 SLOTS</span>`
+            : `<span style="color:#ffd700; font-weight:800;">🎲 HOUSE / LIVE</span>`;
+          return `
+            <tr>
+              <td>${dt}</td>
+              <td>${typeBadge}</td>
+              <td><strong>$${row.wager_amount_usd.toFixed(2)}</strong></td>
+              <td><span style="color:var(--purple-300); font-weight:700;">${row.multiplier}×</span></td>
+              <td><strong style="color:#00ff80;">+${row.coins_earned.toLocaleString()} Coins</strong></td>
+              <td><span style="font-size:0.75rem; color:var(--text-muted);">${row.week_id}</span></td>
+            </tr>
+          `;
+        }).join('');
+      } else {
+        ledgerBody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align:center; color:var(--text-muted); padding:24px;">
+              No wager transactions logged yet for ${data.week_info ? data.week_info.weekId : 'this week'}. Start wagering on Yeet with code <strong>BIGD</strong>!
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+  } catch (err) {
+    console.error("Failed to load weekly rewards:", err);
+  }
+}
+
+/* ── Live Coin Converter (Phase 5) ── */
+function runCoinCalculation() {
+  const slotsInput = document.getElementById("calc-slots-input");
+  const houseInput = document.getElementById("calc-house-input");
+  const slotsVal = Math.max(0, parseFloat(slotsInput?.value) || 0);
+  const houseVal = Math.max(0, parseFloat(houseInput?.value) || 0);
+
+  // Exact multipliers (Phase 5)
+  const slotCoins = slotsVal * 10;
+  const houseCoins = houseVal * 0.25;
+  const totalCoins = slotCoins + houseCoins;
+
+  const resSlots = document.getElementById("calc-res-slots");
+  const resHouse = document.getElementById("calc-res-house");
+  const resTotal = document.getElementById("calc-res-total");
+
+  if (resSlots) resSlots.textContent = slotCoins.toLocaleString(undefined, { maximumFractionDigits: 2 }) + " coins";
+  if (resHouse) resHouse.textContent = houseCoins.toLocaleString(undefined, { maximumFractionDigits: 2 }) + " coins";
+  if (resTotal) resTotal.textContent = totalCoins.toLocaleString(undefined, { maximumFractionDigits: 2 }) + " Coins";
+}
+
+function setCalcPreset(slots, house) {
+  const slotsInput = document.getElementById("calc-slots-input");
+  const houseInput = document.getElementById("calc-house-input");
+  if (slotsInput) slotsInput.value = slots;
+  if (houseInput) houseInput.value = house;
+  runCoinCalculation();
+}
+
+// Run initial calculation on page load
+document.addEventListener("DOMContentLoaded", () => {
+  runCoinCalculation();
+  loadWeeklyRewards(null);
 });
 
 /* ── Hamburger ───────────────────────────────────────────── */
@@ -1260,13 +1945,15 @@ hamburger.addEventListener('click', () => {
 /* ── HUD Ticker ──────────────────────────────────────────── */
 (function(){
   const items = [
-    'BIGDGAMESTV', 'STORE: <span class="hi">COMING SOON</span>',
-    'BIGD COINS: <span class="hi">EARN NOW</span>',
-    'CHAT ON KICK: <span class="hi">+10 COINS / 5MIN</span>',
+    'BIGDGAMESTV',
+    'WEEKLY REWARDS: <span class="hi">LIVE NOW</span>',
+    'COMBINED LEADERBOARD: <span class="hi">$3,000 PRIZE POOL</span>',
+    'SLOTS: <span class="hi">10 COINS / $1</span>',
+    'HOUSE / LIVE: <span class="hi">0.25 COINS / $1</span>',
     'CODE: <span class="hi">BIGD</span>',
-    'PLATFORM: <span class="hi">DEGENCITY</span>',
-    'STREAM: <span class="hi">KICK.COM/BIGDGAMESTV</span>',
-    'SEASON: <span class="hi">ONGOING</span>'
+    'PLATFORM: <span class="hi">YEET</span>',
+    'CHAT ON KICK: <span class="hi">+10 COINS / 5MIN</span>',
+    'STREAM: <span class="hi">KICK.COM/BIGDGAMESTV</span>'
   ];
   const track = document.getElementById('ticker-track');
   if (track) {

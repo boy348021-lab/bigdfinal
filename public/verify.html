@@ -902,11 +902,11 @@ footer a:hover { color: var(--purple-200); }
   <!-- Main Code Check Card (Always Available to Anyone) -->
   <div class="verify-card" id="main-verify-card" style="display:block;">
     <h1 class="verify-title">Code <span>Check</span></h1>
-    <p class="verify-sub">Check if any DegenCity account is active under Big D's creator code <strong>BIGD</strong></p>
+    <p class="verify-sub">Check if any Yeet account is active under Big D's creator code <strong>BIGD</strong></p>
     
     <div class="input-group">
-      <label class="input-label" for="verify-username">DegenCity Username</label>
-      <input type="text" id="verify-username" class="verify-input" placeholder="Enter any DegenCity username..." autocomplete="off"/>
+      <label class="input-label" for="verify-username">Yeet Username</label>
+      <input type="text" id="verify-username" class="verify-input" placeholder="Enter any Yeet username..." autocomplete="off"/>
     </div>
     
     <button id="verify-btn" class="verify-btn" onclick="doVerify()">
@@ -927,7 +927,7 @@ footer a:hover { color: var(--purple-200); }
      FOOTER
      ================================================================ -->
 <footer>
-  <p>&copy; 2026 BigDGamesTV. All rights reserved. &nbsp;|&nbsp; <a href="#">Terms</a> &nbsp;|&nbsp; <a href="#">Privacy</a> &nbsp;|&nbsp; Powered by <a href="https://degencity.com">DegenCity</a></p>
+  <p>&copy; 2026 BigDGamesTV. All rights reserved. &nbsp;|&nbsp; <a href="#">Terms</a> &nbsp;|&nbsp; <a href="#">Privacy</a> &nbsp;|&nbsp; Powered by <a href="https://yeet.com" target="_blank" rel="noopener">Yeet</a></p>
   <p style="margin-top:8px; font-size:0.72rem; opacity:0.5;">Gambling can be addictive. Please play responsibly. 18+ only.</p>
 </footer>
 
@@ -977,14 +977,16 @@ footer a:hover { color: var(--purple-200); }
         statusCard.style.display = "block";
         if (nameEl) nameEl.textContent = userProfile.displayName || "Player";
         if (detailsEl) {
-          detailsEl.textContent = userProfile.degencityUsername 
-            ? `Linked DegenCity: @${userProfile.degencityUsername}` 
+          const casinoUser = userProfile.yeetUsername || userProfile.degencityUsername;
+          detailsEl.textContent = casinoUser 
+            ? `Linked Yeet: @${casinoUser}` 
             : "Logged in with Discord";
         }
         if (badgesEl) {
+          const casinoUser = userProfile.yeetUsername || userProfile.degencityUsername;
           badgesEl.innerHTML = `
             ${userProfile.kickUsername ? `<span style="background:rgba(83,250,93,0.12); border:1px solid rgba(83,250,93,0.4); color:#53fa5d; padding:4px 10px; border-radius:4px; font-size:0.75rem; font-weight:700;">✓ Kick: @${escHtml(userProfile.kickUsername)}</span>` : `<a href="/store.html" style="background:rgba(136,0,255,0.15); border:1px solid rgba(136,0,255,0.4); color:#be4dff; padding:4px 10px; border-radius:4px; font-size:0.75rem; font-weight:700; text-decoration:none;">+ Connect Kick in Store</a>`}
-            ${userProfile.degencityUsername ? `<span style="background:rgba(0,255,229,0.12); border:1px solid rgba(0,255,229,0.4); color:var(--cyan-500); padding:4px 10px; border-radius:4px; font-size:0.75rem; font-weight:700;">✓ DegenCity: @${escHtml(userProfile.degencityUsername)}</span>` : `<span style="background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); color:#ffd700; padding:4px 10px; border-radius:4px; font-size:0.75rem; font-weight:700;">Code Unlinked</span>`}
+            ${casinoUser ? `<span style="background:rgba(0,255,229,0.12); border:1px solid rgba(0,255,229,0.4); color:var(--cyan-500); padding:4px 10px; border-radius:4px; font-size:0.75rem; font-weight:700;">✓ Yeet: @${escHtml(casinoUser)}</span>` : `<span style="background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); color:#ffd700; padding:4px 10px; border-radius:4px; font-size:0.75rem; font-weight:700;">Code Unlinked</span>`}
           `;
         }
       }
@@ -1164,11 +1166,12 @@ async function doVerify() {
     
     if (match) {
       localStorage.setItem('verified_degencity_username', match.username);
+      localStorage.setItem('verified_yeet_username', match.username);
       resultBox.innerHTML = `
         <div class="result-card success">
           <div class="result-badge">✓ Verified Active</div>
           <div class="result-message">
-            Great news! The account <strong>${escHtml(match.username)}</strong> is <strong>verified and active</strong> under Big D's creator code <strong>BIGD</strong> on DegenCity.
+            Great news! The account <strong>${escHtml(match.username)}</strong> is <strong>verified and active</strong> under Big D's creator code <strong>BIGD</strong> on Yeet.
           </div>
           <div style="font-size:0.8rem; color:var(--cyan-400); margin-top:4px;">
             ✓ Eligible for Big D leaderboards, wager rewards, and store claims.
@@ -1176,7 +1179,7 @@ async function doVerify() {
         </div>
       `;
 
-      // If user is logged in, link their DegenCity profile in background without redirecting
+      // If user is logged in, link their profile in background without redirecting
       const token = getAuthToken();
       if (token) {
         fetch('/profile/degencity', {
@@ -1185,7 +1188,7 @@ async function doVerify() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ degencity_username: match.username })
+          body: JSON.stringify({ degencity_username: match.username, yeet_username: match.username })
         })
         .then(res => {
           if (res.ok) {
@@ -1193,7 +1196,7 @@ async function doVerify() {
           }
         })
         .catch(err => {
-          console.error("Error linking DegenCity account:", err);
+          console.error("Error linking Yeet account:", err);
         });
       }
     } else {
@@ -1211,7 +1214,7 @@ async function doVerify() {
             <button class="btn-copy-promo" onclick="copyCode('BIGD', this)">📋 Copy Code</button>
           </div>
           <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:4px; line-height: 1.4;">
-            To qualify, make sure you registered on DegenCity using affiliate code <strong>BIGD</strong> and have active gameplay.
+            To qualify, make sure you registered on Yeet using affiliate code <strong>BIGD</strong> and have active gameplay.
           </div>
         </div>
       `;
@@ -1247,10 +1250,14 @@ document.getElementById('verify-username').addEventListener('keydown', (e) => {
    ────────────────────────────────────────── */
 (function(){
   const items = [
-    'BIGDGAMESTV','DEGEN MODE: <span class="hi">ACTIVE</span>','TOP WAGER: <span class="hi">$11,979</span>',
-    'PRIZE POOL: <span class="hi">$750</span>','PLAYERS: <span class="hi">LIVE</span>','CODE: <span class="hi">BIGD</span>',
-    'PLATFORM: <span class="hi">DEGENCITY</span>','STREAM: <span class="hi">KICK.COM/BIGDGAMESTV</span>',
-    'SEASON: <span class="hi">ONGOING</span>','AFFILIATE: <span class="hi">VERIFIED</span>'
+    'BIGDGAMESTV',
+    'ACTIVE PARTNER: <span class="hi">YEET (CODE: BIGD)</span>',
+    'COMBINED LEADERBOARD: <span class="hi">$3,000 PRIZE POOL</span>',
+    'CODE CHECK: <span class="hi">ENTER USERNAME</span>',
+    'WEEKLY REWARDS: <span class="hi">ACTIVE</span>',
+    'SLOTS: <span class="hi">10 COINS / $1</span>',
+    'HOUSE & LIVE: <span class="hi">0.25 COINS / $1</span>',
+    'STREAM: <span class="hi">KICK.COM/BIGDGAMESTV</span>'
   ];
   const track = document.getElementById('ticker-track');
   if(track){

@@ -373,9 +373,9 @@ function parseToISODate(dateStr) {
 // Treat all leaderboard code as READ-ONLY unless explicitly instructed by user.
 // ==============================================================================
 app.get("/api/leaderboard", async (req, res) => {
-
-  const { after, before, period } = req.query;
+  const { after, before, period, partner } = req.query;
   const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+  const isDegenArchive = partner === "degencity" || (after && after.startsWith("2026-08") && partner !== "yeet");
 
   // Helper to load fallback dataset from file
   function getFallbackLeaderboard() {
@@ -392,53 +392,41 @@ app.get("/api/leaderboard", async (req, res) => {
     return [];
   }
 
-  // ─── LEADERBOARD B: Monthly Leaderboard (Wagered amounts from August 1st) ───
-  if (period === "biweekly" || period === "monthly") {
+  // ─── 1. HISTORICAL DEGENCITY PARTNER ARCHIVE ───
+  if (isDegenArchive) {
+    let rawList = [];
     try {
-      let rawList = [];
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
-        // Query DegenCity API for wagers from August 1st onwards
-        const response = await fetch("https://api.degencity.com/api/v1/partner/affiliates/leaderboard?after=2026-08-01T00:00:00.000Z", {
-          method: "GET",
-          headers: { 
-            "x-api-key": API_KEY || "", 
-            "Accept": "application/json",
-            "User-Agent": USER_AGENT
-          },
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        if (response.ok) {
-          const data = await response.json();
-          rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-        }
-      } catch (e) {}
-
-      if (!rawList || rawList.length === 0) {
-        rawList = getFallbackLeaderboard();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const afterParam = after || (period === "biweekly" || period === "monthly" ? "2026-08-01T00:00:00.000Z" : "2026-06-01T00:00:00.000Z");
+      let apiUrl = `https://api.degencity.com/api/v1/partner/affiliates/leaderboard?after=${encodeURIComponent(afterParam)}`;
+      if (before) apiUrl += `&before=${encodeURIComponent(before)}`;
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: { 
+          "x-api-key": API_KEY || "", 
+          "Accept": "application/json",
+          "User-Agent": USER_AGENT
+        },
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (response.ok) {
+        const json = await response.json();
+        rawList = Array.isArray(json?.data) ? json.data : (Array.isArray(json) ? json : []);
       }
+    } catch (e) {}
 
-      let targetMonth = "2026-08";
+    if (!rawList || rawList.length === 0) {
+      rawList = getFallbackLeaderboard();
+    }
 
-      // Check if targetMonth has wagers in dataset; if not, use latest available month in rawList
-      const hasTargetWagers = rawList.some(u => (u.wager_data || []).some(m => m.month === targetMonth));
-      if (!hasTargetWagers) {
-        const allMonths = new Set();
-        rawList.forEach(u => (u.wager_data || []).forEach(m => { if (m.month) allMonths.add(m.month); }));
-        const sortedMonths = Array.from(allMonths).sort().reverse();
-        if (sortedMonths.length > 0) {
-          targetMonth = sortedMonths[0];
-        }
-      }
-
+    if (period === "biweekly" || period === "monthly") {
+      const targetMonth = "2026-08";
       const formatted = rawList.map(u => {
         const uname = u.username || "";
         const monthObj = (u.wager_data || []).find(m => m.month === targetMonth);
         const currentWager = monthObj ? (Number(monthObj.total_wager_usd) || 0) : 0;
-
         return {
           user_id: u.user_id || 1,
           username: uname,
@@ -453,45 +441,194 @@ app.get("/api/leaderboard", async (req, res) => {
       }).filter(u => u._currentWager > 0).sort((a, b) => b._currentWager - a._currentWager);
 
       res.set("Cache-Control", "no-store");
-      return res.json({ data: formatted });
-    } catch (err) {
-      console.error("Monthly leaderboard error:", err);
-      return res.status(500).json({ success: false, message: err.message });
+      return res.json({ data: formatted, partner: "degencity", period: "August 2026 (Archive)" });
     }
-  }
 
-  // ─── LEADERBOARD A: Lifetime Leaderboard (Entire dataset from the beginning - June 1st) ───
-  try {
-    let rawList = [];
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
-      const response = await fetch("https://api.degencity.com/api/v1/partner/affiliates/leaderboard?after=2026-06-01T00:00:00.000Z", {
-        method: "GET",
-        headers: { 
-          "x-api-key": API_KEY || "", 
-          "Accept": "application/json",
-          "User-Agent": USER_AGENT
-        },
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-      }
-    } catch (e) {}
-
-    if (!rawList || rawList.length === 0) {
-      rawList = getFallbackLeaderboard();
+    // Lifetime DegenCity: if after/before are specified, filter months
+    let lifetimeList = rawList;
+    if (after || before) {
+      const afterMonth = after ? after.slice(0, 7) : null;
+      const beforeMonth = before ? before.slice(0, 7) : null;
+      lifetimeList = rawList.map(u => {
+        const filteredWagers = (u.wager_data || []).filter(w => {
+          if (afterMonth && w.month < afterMonth) return false;
+          if (beforeMonth && w.month >= beforeMonth) return false;
+          return true;
+        });
+        return {
+          ...u,
+          wager_data: filteredWagers
+        };
+      }).filter(u => (u.wager_data || []).length > 0);
     }
 
     res.set("Cache-Control", "no-store");
-    return res.json({ data: rawList });
+    return res.json({ data: lifetimeList, partner: "degencity", period: "All-Time DegenCity Archive" });
+  }
+
+  // ─── 2. ACTIVE SEPTEMBER 2026 YEET CAMPAIGN ───
+  // ─── 2. ACTIVE SEPTEMBER 2026 YEET COMBINED LEADERBOARD ($3,000 POOL) ───
+  try {
+    const codeFilter = String(req.query.code || 'all').toLowerCase();
+    let yeetWagers = [];
+
+    // Prize distribution for $3,000 Combined Prize Pool (Phase 9)
+    const COMBINED_PRIZE_POOL = [1500, 500, 300, 200, 150, 100, 80, 70, 50, 50];
+
+    if (supabase) {
+      try {
+        const startOfMonth = "2026-09-01T00:00:00.000Z";
+        let query = supabase
+          .from("wager_transactions")
+          .select("transaction_id, user_id, wager_amount_usd, processed_at, provider, users(degencity_username, kick_username, discord_username)")
+          .or("provider.ilike.yeet%,provider.ilike.bigd%,provider.ilike.bigballz%");
+
+        if (period === "biweekly" || period === "monthly") {
+          query = query.gte("processed_at", startOfMonth);
+        }
+
+        const { data: txData, error: txErr } = await query;
+        if (!txErr && txData && txData.length > 0) {
+          // Deduplicate by transaction_id to prevent double-counting (Phase 9 requirement)
+          const seenTx = new Set();
+          const userMap = {};
+
+          txData.forEach(tx => {
+            if (tx.transaction_id && seenTx.has(tx.transaction_id)) return;
+            if (tx.transaction_id) seenTx.add(tx.transaction_id);
+
+            const uid = tx.user_id;
+            const uname = tx.users?.degencity_username || tx.users?.kick_username || tx.users?.discord_username || `Player_${String(uid).slice(0, 5)}`;
+            const amt = Number(tx.wager_amount_usd) || 0;
+            const prov = String(tx.provider || '').toLowerCase();
+            const sourceCode = prov.includes('bigballz') ? 'BIGBALLZ' : 'BIGD';
+
+            // Filter by code if requested
+            if (codeFilter === 'bigd' && sourceCode !== 'BIGD') return;
+            if (codeFilter === 'bigballz' && sourceCode !== 'BIGBALLZ') return;
+
+            if (!userMap[uid]) {
+              userMap[uid] = {
+                user_id: uid,
+                username: uname,
+                source_code: sourceCode,
+                total: 0
+              };
+            }
+            userMap[uid].total += amt;
+          });
+
+          yeetWagers = Object.values(userMap).map(u => ({
+            user_id: u.user_id,
+            username: u.username,
+            source_code: u.source_code,
+            wager_data: [{ month: "2026-09", total_wager_usd: Number(u.total.toFixed(2)) }]
+          })).sort((a, b) => b.wager_data[0].total_wager_usd - a.wager_data[0].total_wager_usd);
+        }
+      } catch (dbErr) {
+        console.warn("DB query for Yeet wagers skipped:", dbErr.message);
+      }
+    }
+
+    res.set("Cache-Control", "no-store");
+    return res.json({
+      data: yeetWagers,
+      partner: "yeet",
+      period: "September 2026 (Live)",
+      prize_pool: 3000,
+      prize_distribution: COMBINED_PRIZE_POOL,
+      codes_supported: ["BIGD", "BIGBALLZ"],
+      active_filter: codeFilter
+    });
   } catch (err) {
-    console.error("Lifetime leaderboard error:", err);
+    console.error("Yeet leaderboard error:", err);
     return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ─── API: Previous Partnered Sites & Weighted Accrued Totals (Phase 11) ────────
+app.get("/api/partners/history", (req, res) => {
+  res.json({
+    success: true,
+    current_partner: {
+      name: "Yeet Casino",
+      code: "BIGD",
+      status: "active",
+      season: "September 2026",
+      url: "https://yeet.com",
+      combined_with: "BigBallz",
+      prize_pool: "$3,000"
+    },
+    previous_partners: [
+      {
+        id: "degencity",
+        name: "DegenCity",
+        status: "Archived Partner",
+        period: "June 2026 – August 2026",
+        weighted_total_wager: 102968.05,
+        currency: "USD",
+        referred_players: 42,
+        milestones_smashed: [
+          { target: "$50,000", reward: "10 Bonus Buys (2x $40 + 8x $20)", status: "Unlocked & Completed on Stream" }
+        ],
+        description: "Official community wagering campaign during Summer 2026. The community smashed the $50,000 milestone live on stream and achieved a record $102,968.05 weighted community wager."
+      }
+    ]
+  });
+});
+
+// ─── API: Referral Tracking & Friend Attribution (Phase 10) ───────────────────
+app.get("/api/referrals", requireAuth, async (req, res) => {
+  if (!supabase) return res.status(503).json({ error: "Database not configured" });
+  if (!req.user) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+    const userId = req.user.id;
+    const referralCode = req.user.kick_username || req.user.degencity_username || `ref_${String(userId).slice(0, 6)}`;
+    const referralLink = `${req.protocol}://${req.get('host')}/verify.html?ref=${encodeURIComponent(referralCode)}`;
+
+    // Query referred users from database (with sensitive data masked for privacy)
+    let referredFriends = [];
+    const { data: refUsers } = await supabase
+      .from("users")
+      .select("id, created_at, degencity_username, kick_username, points_balance")
+      .eq("referred_by", userId);
+
+    if (refUsers && refUsers.length > 0) {
+      referredFriends = refUsers.map(u => {
+        const rawName = u.degencity_username || u.kick_username || "Player";
+        const maskedName = rawName.length > 3
+          ? rawName.slice(0, 2) + "*".repeat(Math.min(5, rawName.length - 3)) + rawName.slice(-1)
+          : rawName.slice(0, 1) + "**";
+        return {
+          id: u.id,
+          username_masked: maskedName,
+          joined_date: u.created_at,
+          verified: Boolean(u.degencity_username),
+          status: Boolean(u.degencity_username) ? "Verified with Code BIGD" : "Pending Code Verification",
+          commission_coins: Math.round((u.points_balance || 0) * 0.05)
+        };
+      });
+    }
+
+    const totalFriends = referredFriends.length;
+    const verifiedFriends = referredFriends.filter(f => f.verified).length;
+    const totalBonusCoins = referredFriends.reduce((s, f) => s + f.commission_coins, 0);
+
+    res.json({
+      success: true,
+      referral_code: referralCode,
+      referral_link: referralLink,
+      partner_code: "BIGD",
+      total_referred: totalFriends,
+      verified_referred: verifiedFriends,
+      bonus_coins_earned: totalBonusCoins,
+      referred_friends: referredFriends
+    });
+
+  } catch (err) {
+    console.error("Referral tracking error:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -519,6 +656,80 @@ const STORE_REWARDS = [
 app.get("/api/store-items", (req, res) => {
   res.set("Cache-Control", "no-store");
   res.json({ rewards: STORE_REWARDS });
+});
+
+// ─── Community Challenges Configuration & API (Phases 13, 14, 15, 18) ────────
+const COMMUNITY_CHALLENGES = [
+  {
+    id: "sweet_bonanza",
+    title: "Sweet Bonanza 2500",
+    prize: "$20 CASH",
+    desc: "First person to hit the 1000x Bomb on Yeet using code BIGD wins $20 Cash! Min bet $0.20. No bonus buys.",
+    img: "/challenges/sweet-bonanza-challenge.jpg",
+    status: "active",
+    reused: true,
+    campaign: "yeet"
+  },
+  {
+    id: "out_of_woods",
+    title: "Out of the Woods",
+    prize: "$20 CASH",
+    desc: "First person to hit 1000x on Yeet using code BIGD wins $20 Cash! Min bet $0.25. No bonus buys.",
+    img: "/challenges/out-of-the-woods-challenge.jpg",
+    status: "active",
+    reused: true,
+    campaign: "yeet"
+  },
+  {
+    id: "big_bass",
+    title: "Big Bass Reel Repeat",
+    prize: "$10 CASH",
+    desc: "First person to hit 300x on Yeet with code BIGD wins $10 Cash! Spin in, Reel Repeat & cash out big.",
+    img: "/challenges/bigbass.png",
+    status: "active",
+    reused: true,
+    campaign: "yeet"
+  },
+  {
+    id: "sixsixsix",
+    title: "SixSixSix",
+    prize: "$25 CASH",
+    desc: "First person to hit 500x on Yeet using code BIGD wins $25 Cash! Min bet $0.10 USD. Spin into darkness.",
+    img: "/challenges/sixsixsix.png",
+    status: "active",
+    reused: true,
+    campaign: "yeet"
+  },
+  {
+    id: "fruit_party",
+    title: "Fruit Party",
+    prize: "$25 CASH",
+    desc: "First person to hit 300x won $25 Cash! Completed during Summer Campaign. Claimed on Discord.",
+    img: "/challenges/fruit-party-completed.png",
+    status: "completed",
+    claimed_by: "Community Winner",
+    claimed_date: "August 2026",
+    campaign: "degencity_archive"
+  },
+  {
+    id: "leprechaun",
+    title: "Le Prechaun Challenge",
+    prize: "$60 CASH",
+    desc: "First person to hit 5 Scatter wins $60 Cash. Archived from active rotation.",
+    img: "/challenges/le-prechaun-challenge.jpg",
+    status: "archived",
+    archived_reason: "Removed from active rotation",
+    campaign: "archive"
+  }
+];
+
+app.get("/api/challenges", (req, res) => {
+  const statusFilter = req.query.status;
+  let list = COMMUNITY_CHALLENGES;
+  if (statusFilter && statusFilter !== "all") {
+    list = list.filter(c => c.status === statusFilter);
+  }
+  res.json({ success: true, challenges: list });
 });
 
 // ─── Wager-to-Points Synchronization Helper ────────────────────────────
@@ -645,13 +856,227 @@ app.get("/api/points/:userId", async (req, res) => {
 
 // Heartbeat endpoint removed
 
-// ─── Wager Webhook ─────────────────────────────────────────────────────────────
-// Expected payload: { transaction_id, degencity_username, wager_amount_usd, provider? }
-// 10 points per $1 wagered. Idempotent — duplicate transaction_ids are silently skipped.
+// ─── WAGER REWARDS & COIN MULTIPLIERS (PHASES 4, 5, 6, 7) ──────────────────────
+const REWARD_MULTIPLIERS = {
+  SLOTS: 10,           // $1 wagered on slots = 10 coins
+  HOUSE_LIVE: 0.25     // $1 spent on house/live games = 0.25 coins
+};
+
+// Configurable Weekly Reward Tiers
+const WEEKLY_REWARD_TIERS = [
+  { tier: 1, name: "Bronze Grinder",    wager_threshold: 100,  reward_coins: 1000,  cash_value: 10,  badge: "🥉 Tier 1" },
+  { tier: 2, name: "Silver Roller",     wager_threshold: 250,  reward_coins: 2500,  cash_value: 25,  badge: "🥈 Tier 2" },
+  { tier: 3, name: "Gold High Roller",  wager_threshold: 500,  reward_coins: 5000,  cash_value: 50,  badge: "🥇 Tier 3" },
+  { tier: 4, name: "Platinum Whale",    wager_threshold: 1000, reward_coins: 10000, cash_value: 100, badge: "💎 Tier 4" },
+  { tier: 5, name: "Diamond Legend",    wager_threshold: 2500, reward_coins: 25000, cash_value: 250, badge: "👑 VIP Legend" }
+];
+
+/**
+ * Calculate coin conversion for slots and house/live wagers (Phase 5)
+ */
+function calculateCoinConversion(slotsWager = 0, houseLiveWager = 0) {
+  const sWager = Math.max(0, Number(slotsWager) || 0);
+  const hlWager = Math.max(0, Number(houseLiveWager) || 0);
+  const slotCoins = Number((sWager * REWARD_MULTIPLIERS.SLOTS).toFixed(4));
+  const houseLiveCoins = Number((hlWager * REWARD_MULTIPLIERS.HOUSE_LIVE).toFixed(4));
+  const totalWager = Number((sWager + hlWager).toFixed(2));
+  const totalCoins = Number((slotCoins + houseLiveCoins).toFixed(4));
+
+  return {
+    slots_wager: sWager,
+    slots_multiplier: REWARD_MULTIPLIERS.SLOTS,
+    slot_coins: slotCoins,
+    house_live_wager: hlWager,
+    house_live_multiplier: REWARD_MULTIPLIERS.HOUSE_LIVE,
+    house_live_coins: houseLiveCoins,
+    total_wager: totalWager,
+    total_coins: totalCoins
+  };
+}
+
+/**
+ * Returns current week UTC bounds and week identifier (Phase 7)
+ */
+function getWeeklyTimeBounds() {
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const day = d.getUTCDay();
+  const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1); // Monday is start of week
+  const startOfWeek = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), diff, 0, 0, 0, 0));
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 6);
+  endOfWeek.setUTCHours(23, 59, 59, 999);
+
+  const msRemaining = Math.max(0, endOfWeek.getTime() - now.getTime());
+  const daysRemaining = Math.floor(msRemaining / (1000 * 60 * 60 * 24));
+  const hoursRemaining = Math.floor((msRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutesRemaining = Math.floor((msRemaining % (1000 * 60 * 60)) / (1000 * 60));
+
+  const weekNumber = Math.ceil((((startOfWeek - new Date(Date.UTC(startOfWeek.getUTCFullYear(), 0, 1))) / 86400000) + 1) / 7);
+  const weekId = `${startOfWeek.getUTCFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
+
+  return {
+    weekId,
+    startOfWeek: startOfWeek.toISOString(),
+    endOfWeek: endOfWeek.toISOString(),
+    msRemaining,
+    countdown: `${daysRemaining}d ${hoursRemaining}h ${minutesRemaining}m`,
+    daysRemaining
+  };
+}
+
+// ─── API: Weekly Rewards & User Progression (Phase 4, 6, 7) ───────────────────
+app.get("/api/rewards/weekly", async (req, res) => {
+  const weekInfo = getWeeklyTimeBounds();
+  const authHeader = req.headers.authorization;
+  let targetUser = null;
+
+  if (authHeader && authHeader.startsWith("Bearer ") && supabase) {
+    try {
+      const token = authHeader.split(" ")[1];
+      const { data: session } = await supabase
+        .from("sessions")
+        .select("user_id, users(*)")
+        .eq("token", token)
+        .gt("expires_at", new Date().toISOString())
+        .single();
+      if (session?.users) targetUser = session.users;
+    } catch (e) {}
+  }
+
+  let userProgression = null;
+  let recentLedger = [];
+
+  if (targetUser && supabase) {
+    try {
+      // 1. Fetch lifetime transactions for user
+      const { data: allTx } = await supabase
+        .from("wager_transactions")
+        .select("*")
+        .eq("user_id", targetUser.id)
+        .order("processed_at", { ascending: false });
+
+      const txList = allTx || [];
+      const lifetimeWager = txList.reduce((sum, tx) => sum + (Number(tx.wager_amount_usd) || 0), 0);
+
+      // 2. Filter for current week transactions
+      const startMs = new Date(weekInfo.startOfWeek).getTime();
+      const endMs = new Date(weekInfo.endOfWeek).getTime();
+      const weekTx = txList.filter(tx => {
+        const txMs = new Date(tx.processed_at).getTime();
+        return txMs >= startMs && txMs <= endMs;
+      });
+
+      let weeklySlotsWager = 0;
+      let weeklyHouseLiveWager = 0;
+      let weeklyCoinsEarned = 0;
+
+      weekTx.forEach(tx => {
+        const amt = Number(tx.wager_amount_usd) || 0;
+        const wType = String(tx.provider || '').toLowerCase();
+        if (wType.includes('house') || wType.includes('live')) {
+          weeklyHouseLiveWager += amt;
+          weeklyCoinsEarned += Number((amt * REWARD_MULTIPLIERS.HOUSE_LIVE).toFixed(4));
+        } else {
+          weeklySlotsWager += amt;
+          weeklyCoinsEarned += Number((amt * REWARD_MULTIPLIERS.SLOTS).toFixed(4));
+        }
+      });
+
+      const weeklyTotalWager = Number((weeklySlotsWager + weeklyHouseLiveWager).toFixed(2));
+
+      // 3. Find current and next reward tier
+      let currentTier = null;
+      let nextTier = WEEKLY_REWARD_TIERS[0];
+      for (let i = 0; i < WEEKLY_REWARD_TIERS.length; i++) {
+        const tier = WEEKLY_REWARD_TIERS[i];
+        if (weeklyTotalWager >= tier.wager_threshold) {
+          currentTier = tier;
+          nextTier = WEEKLY_REWARD_TIERS[i + 1] || null;
+        }
+      }
+
+      const prevThreshold = currentTier ? currentTier.wager_threshold : 0;
+      const nextThreshold = nextTier ? nextTier.wager_threshold : WEEKLY_REWARD_TIERS[WEEKLY_REWARD_TIERS.length - 1].wager_threshold;
+      const span = Math.max(1, nextThreshold - prevThreshold);
+      const progressInTier = Math.max(0, weeklyTotalWager - prevThreshold);
+      const tierProgressPct = nextTier
+        ? Math.min(100, Math.max(0, Math.round((progressInTier / span) * 100)))
+        : 100;
+
+      const remainingForNext = nextTier
+        ? Math.max(0, Number((nextTier.wager_threshold - weeklyTotalWager).toFixed(2)))
+        : 0;
+
+      userProgression = {
+        user_id: targetUser.id,
+        username: targetUser.degencity_username || targetUser.kick_username || targetUser.discord_username || "Verified Player",
+        discord_username: targetUser.discord_username,
+        kick_username: targetUser.kick_username,
+        yeet_username: targetUser.degencity_username,
+        points_balance: targetUser.points_balance || 0,
+        lifetime_wager: Number(lifetimeWager.toFixed(2)),
+        weekly_wager: weeklyTotalWager,
+        weekly_slots_wager: Number(weeklySlotsWager.toFixed(2)),
+        weekly_house_live_wager: Number(weeklyHouseLiveWager.toFixed(2)),
+        weekly_coins_earned: weeklyCoinsEarned,
+        current_tier: currentTier,
+        next_tier: nextTier,
+        tier_progress_pct: tierProgressPct,
+        wager_remaining_for_next_tier: remainingForNext
+      };
+
+      recentLedger = txList.slice(0, 15).map(tx => {
+        const amt = Number(tx.wager_amount_usd) || 0;
+        const wType = String(tx.provider || 'SLOTS').toUpperCase();
+        const isHouse = wType.includes('HOUSE') || wType.includes('LIVE');
+        const multiplier = isHouse ? REWARD_MULTIPLIERS.HOUSE_LIVE : REWARD_MULTIPLIERS.SLOTS;
+        const coins = tx.points_awarded || Number((amt * multiplier).toFixed(4));
+        return {
+          id: tx.id || tx.transaction_id,
+          transaction_id: tx.transaction_id,
+          timestamp: tx.processed_at,
+          wager_type: isHouse ? "HOUSE / LIVE" : "SLOTS",
+          wager_amount_usd: amt,
+          multiplier: multiplier,
+          coins_earned: coins,
+          week_id: weekInfo.weekId
+        };
+      });
+
+    } catch (dbErr) {
+      console.error("Weekly rewards DB calculation error:", dbErr);
+    }
+  }
+
+  res.json({
+    success: true,
+    week_info: weekInfo,
+    multipliers: REWARD_MULTIPLIERS,
+    reward_tiers: WEEKLY_REWARD_TIERS,
+    user_progression: userProgression,
+    recent_ledger: recentLedger
+  });
+});
+
+// ─── API: Real-Time Coin Conversion Calculator (Phase 5) ──────────────────────
+app.post("/api/rewards/calculate", (req, res) => {
+  const { slots_wager = 0, house_live_wager = 0 } = req.body;
+  const result = calculateCoinConversion(slots_wager, house_live_wager);
+  res.json({ success: true, calculation: result });
+});
+
+// ─── Wager Webhook (Auditable Multiplier Support) (Phase 6) ───────────────────
 app.post("/api/webhooks/wager", async (req, res) => {
   if (!supabase) return res.status(503).json({ error: "Database not configured" });
 
-  const { transaction_id, degencity_username, wager_amount_usd, provider = "degencity" } = req.body;
+  const {
+    transaction_id,
+    degencity_username,
+    wager_amount_usd,
+    game_type = "slots", // 'slots' | 'house' | 'live'
+    provider = "yeet"
+  } = req.body;
 
   if (!transaction_id || !degencity_username || wager_amount_usd == null) {
     return res.status(400).json({ error: "Missing required fields: transaction_id, degencity_username, wager_amount_usd" });
@@ -661,18 +1086,20 @@ app.post("/api/webhooks/wager", async (req, res) => {
   }
 
   const amount = Number(wager_amount_usd);
-  const points = Math.floor(amount * 10);
+  const isHouseLive = String(game_type).toLowerCase().includes("house") || String(game_type).toLowerCase().includes("live");
+  const multiplier = isHouseLive ? REWARD_MULTIPLIERS.HOUSE_LIVE : REWARD_MULTIPLIERS.SLOTS;
+  const points = Math.max(1, Math.round(amount * multiplier));
 
   try {
-    // 1) Look up user by degencity_username
+    // 1) Look up user by username (supports Yeet / DegenCity)
     const { data: user, error: userErr } = await supabase
       .from("users")
-      .select("id")
-      .eq("degencity_username", degencity_username.trim().toLowerCase())
+      .select("id, points_balance")
+      .or(`degencity_username.ilike.${degencity_username.trim()},kick_username.ilike.${degencity_username.trim()}`)
       .single();
 
     if (userErr || !user) {
-      return res.status(404).json({ error: `No user found for DegenCity username: ${degencity_username}` });
+      return res.status(404).json({ error: `No user found for casino username: ${degencity_username}` });
     }
 
     // 2) Check for duplicate transaction (idempotency)
@@ -691,22 +1118,22 @@ app.post("/api/webhooks/wager", async (req, res) => {
       p_user_id: user.id,
       p_delta:   points,
       p_action:  "wager_points",
-      p_source:  "degencity_wager",
+      p_source:  `${provider}_wager_${isHouseLive ? 'houselive' : 'slots'}`,
       p_ref:     transaction_id
     });
     if (rpcErr) throw new Error(rpcErr.message);
 
-    // 4) Log the wager transaction
+    // 4) Log the wager transaction with auditable ledger data
     await supabase.from("wager_transactions").insert({
       user_id:          user.id,
       transaction_id,
-      provider,
+      provider:         isHouseLive ? `${provider}_house` : `${provider}_slots`,
       wager_amount_usd: amount,
       points_awarded:   points
     });
 
-    console.log(`💸 Wager: ${degencity_username} wagered $${amount} → +${points} points (tx: ${transaction_id})`);
-    res.json({ ok: true, points_awarded: points, new_balance: newBalance });
+    console.log(`💸 Wager (${isHouseLive ? 'House/Live' : 'Slots'}): ${degencity_username} wagered $${amount} × ${multiplier} → +${points} coins (tx: ${transaction_id})`);
+    res.json({ ok: true, points_awarded: points, multiplier, game_type: isHouseLive ? "HOUSE/LIVE" : "SLOTS", new_balance: newBalance });
 
   } catch (err) {
     console.error("Wager webhook error:", err.message);
