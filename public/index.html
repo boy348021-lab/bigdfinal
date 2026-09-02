@@ -3157,18 +3157,63 @@ footer a:hover { color: var(--purple-300); }
 }
 
 /* ============================================================
-   BIGD WATCH — INTERACTIVE DAILY FIT SELECTOR (DEVICE STYLES)
+   BIGD WATCH — INTERACTIVE DAILY FIT SELECTOR (3D SHOWCASE)
    ============================================================ */
+.fit-matrix-section {
+  position: relative;
+  width: 100%;
+  padding: 56px 20px 48px;
+  background: radial-gradient(circle at 50% 30%, rgba(40, 20, 75, 0.45) 0%, rgba(14, 8, 28, 0.6) 50%, rgba(7, 6, 13, 0.95) 100%);
+  border-top: 1px solid rgba(139, 92, 246, 0.15);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  perspective: 1400px;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.fit-matrix-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.fit-matrix-header {
+  margin-bottom: 28px;
+}
+
+.fit-matrix-header .section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  color: #ffffff;
+}
+
+.fit-matrix-header .section-desc {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
 .bigd-watch-wrapper {
   position: relative;
   width: 100%;
-  max-width: 480px;
-  margin: 0 auto 28px;
+  max-width: 500px;
+  margin: 0 auto 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   user-select: none;
   -webkit-user-select: none;
+  transform-style: preserve-3d;
   z-index: 5;
 }
 
@@ -3177,20 +3222,21 @@ footer a:hover { color: var(--purple-300); }
   width: clamp(310px, 86vw, 440px);
   height: clamp(310px, 86vw, 440px);
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%, rgba(30, 16, 55, 0.95) 0%, rgba(12, 8, 24, 0.98) 70%, rgba(5, 3, 10, 1) 100%);
+  background: radial-gradient(circle at 50% 45%, rgba(35, 18, 65, 0.98) 0%, rgba(16, 10, 32, 0.98) 65%, rgba(6, 4, 12, 1) 100%);
   border: 2px solid rgba(168, 85, 247, 0.45);
   box-shadow: 
+    0 12px 30px rgba(0, 0, 0, 0.9),
     0 0 50px rgba(136, 0, 255, 0.35),
     inset 0 0 45px rgba(0, 255, 229, 0.15),
-    inset 0 0 80px rgba(0, 0, 0, 0.9),
-    0 20px 60px rgba(0, 0, 0, 0.85);
+    inset 0 0 80px rgba(0, 0, 0, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: grab;
   touch-action: pan-y;
-  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
   overflow: visible;
+  transform-style: preserve-3d;
 }
 
 .bigd-watch-device:active {
@@ -3199,12 +3245,12 @@ footer a:hover { color: var(--purple-300); }
 
 .bigd-watch-device.is-locked {
   cursor: default;
-  border-color: rgba(255, 215, 0, 0.5);
+  border-color: rgba(255, 215, 0, 0.55);
   box-shadow: 
+    0 12px 35px rgba(0, 0, 0, 0.9),
     0 0 60px rgba(255, 215, 0, 0.3),
     inset 0 0 50px rgba(255, 215, 0, 0.15),
-    inset 0 0 80px rgba(0, 0, 0, 0.9),
-    0 20px 60px rgba(0, 0, 0, 0.85);
+    inset 0 0 80px rgba(0, 0, 0, 0.9);
 }
 
 /* Outer Chassis Ring with Engravings & Notches */
@@ -3240,6 +3286,7 @@ footer a:hover { color: var(--purple-300); }
   padding: 4px 14px;
   border-radius: 20px;
   border: 1px solid rgba(168, 85, 247, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
   z-index: 10;
   pointer-events: none;
 }
@@ -3255,27 +3302,32 @@ footer a:hover { color: var(--purple-300); }
   border-radius: 50%;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
+  transform-style: preserve-3d;
 }
 
-/* 7 Orbiting Look Pods */
+/* 7 Orbiting Look Pods — Tactile 3D Buttons */
 .fit-orbit-pod {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 52px;
-  height: 52px;
-  margin-top: -26px;
-  margin-left: -26px;
+  width: 54px;
+  height: 54px;
+  margin-top: -27px;
+  margin-left: -27px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(28, 18, 48, 0.95) 0%, rgba(10, 6, 20, 0.98) 100%);
-  border: 1.5px solid rgba(168, 85, 247, 0.35);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7), 0 0 12px rgba(136, 0, 255, 0.25);
+  background: radial-gradient(circle at 40% 35%, rgba(45, 28, 75, 0.98) 0%, rgba(14, 8, 28, 1) 100%);
+  border: 2px solid rgba(168, 85, 247, 0.4);
+  box-shadow: 
+    0 8px 16px rgba(0, 0, 0, 0.85),
+    0 2px 4px rgba(0, 0, 0, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
+    0 0 14px rgba(136, 0, 255, 0.3);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
   z-index: 6;
 }
 
@@ -3284,55 +3336,71 @@ footer a:hover { color: var(--purple-300); }
   height: 32px;
   object-fit: contain;
   pointer-events: none;
-  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.8));
-  transition: transform 0.25s ease;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.85));
+  transition: transform 0.2s ease;
 }
 
 .fit-orbit-pod .pod-day-label {
   position: absolute;
-  bottom: -14px;
+  bottom: -15px;
   font-family: var(--font-ui);
   font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--text-muted);
-  background: rgba(8, 4, 16, 0.9);
-  padding: 1px 5px;
+  background: rgba(8, 4, 16, 0.92);
+  padding: 1px 6px;
   border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
   white-space: nowrap;
 }
 
 .fit-orbit-pod:hover {
-  transform: scale(1.18) !important;
   border-color: var(--cyan-400);
-  box-shadow: 0 0 20px rgba(0, 255, 229, 0.6);
+  box-shadow: 
+    0 10px 22px rgba(0, 0, 0, 0.9),
+    0 0 24px rgba(0, 255, 229, 0.7),
+    inset 0 2px 6px rgba(255, 255, 255, 0.3);
   z-index: 8;
 }
 .fit-orbit-pod:hover img {
-  transform: scale(1.1);
+  transform: scale(1.12);
+}
+
+.fit-orbit-pod:active {
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.95),
+    inset 0 4px 8px rgba(0, 0, 0, 0.9),
+    0 0 10px rgba(0, 255, 229, 0.4);
 }
 
 .fit-orbit-pod.is-today-day {
   border-color: var(--gold-400);
-  box-shadow: 0 0 16px rgba(255, 215, 0, 0.5);
+  box-shadow: 
+    0 8px 18px rgba(0, 0, 0, 0.85),
+    0 0 20px rgba(255, 215, 0, 0.55),
+    inset 0 2px 4px rgba(255, 215, 0, 0.3);
 }
 .fit-orbit-pod.is-today-day .pod-day-label {
   color: var(--gold-400);
-  border-color: rgba(255, 215, 0, 0.4);
+  border-color: rgba(255, 215, 0, 0.45);
   font-weight: 900;
 }
 
 .fit-orbit-pod.is-active-focused {
   border-color: var(--cyan-400);
-  background: radial-gradient(circle, rgba(45, 24, 78, 1) 0%, rgba(14, 8, 28, 1) 100%);
-  box-shadow: 0 0 24px rgba(0, 255, 229, 0.7), inset 0 0 10px rgba(0, 255, 229, 0.4);
-  transform: scale(1.22) !important;
+  background: radial-gradient(circle at 45% 35%, rgba(60, 30, 105, 1) 0%, rgba(16, 10, 32, 1) 100%);
+  box-shadow: 
+    0 12px 26px rgba(0, 0, 0, 0.9),
+    0 0 28px rgba(0, 255, 229, 0.75),
+    inset 0 0 12px rgba(0, 255, 229, 0.45),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
   z-index: 9;
 }
 .fit-orbit-pod.is-active-focused .pod-day-label {
   color: var(--cyan-400);
-  border-color: rgba(0, 255, 229, 0.6);
+  border-color: rgba(0, 255, 229, 0.65);
 }
 
 /* Center Hologram Core Chamber */
@@ -3340,11 +3408,11 @@ footer a:hover { color: var(--purple-300); }
   position: absolute;
   inset: 72px;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 45%, rgba(60, 25, 105, 0.65) 0%, rgba(20, 10, 40, 0.85) 60%, rgba(8, 4, 16, 0.95) 100%);
-  border: 1px solid rgba(0, 255, 229, 0.3);
+  background: radial-gradient(circle at 50% 45%, rgba(65, 28, 115, 0.7) 0%, rgba(22, 12, 45, 0.88) 60%, rgba(8, 4, 16, 0.98) 100%);
+  border: 1px solid rgba(0, 255, 229, 0.35);
   box-shadow: 
-    inset 0 0 35px rgba(168, 85, 247, 0.5),
-    0 0 30px rgba(136, 0, 255, 0.3);
+    inset 0 0 40px rgba(168, 85, 247, 0.55),
+    0 0 35px rgba(136, 0, 255, 0.35);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3376,7 +3444,7 @@ footer a:hover { color: var(--purple-300); }
   align-items: center;
   justify-content: center;
   margin-top: -12px;
-  filter: drop-shadow(0 0 28px rgba(168, 85, 247, 0.75)) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.8));
+  filter: drop-shadow(0 0 28px rgba(168, 85, 247, 0.8)) drop-shadow(0 10px 22px rgba(0, 0, 0, 0.9));
 }
 
 .core-character-img {
@@ -3424,43 +3492,45 @@ footer a:hover { color: var(--purple-300); }
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px var(--purple-400);
 }
 
-/* Step Chevrons (Prev / Next) */
+/* Step Chevrons (Prev / Next) — 3D Pushable Buttons */
 .watch-step-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: rgba(18, 10, 32, 0.85);
-  border: 1px solid rgba(168, 85, 247, 0.4);
+  background: radial-gradient(circle at 35% 30%, rgba(35, 18, 55, 0.95) 0%, rgba(12, 6, 22, 1) 100%);
+  border: 1.5px solid rgba(168, 85, 247, 0.45);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: 0 6px 0 rgba(40, 15, 75, 1), 0 8px 18px rgba(0, 0, 0, 0.7);
+  transition: all 0.12s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 8;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 }
 .watch-step-btn:hover {
-  background: rgba(136, 0, 255, 0.4);
   border-color: var(--cyan-400);
   color: var(--cyan-400);
-  box-shadow: 0 0 15px rgba(0, 255, 229, 0.4);
-  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 7px 0 rgba(40, 15, 75, 1), 0 10px 22px rgba(0, 255, 229, 0.4);
+  transform: translateY(calc(-50% - 2px));
+}
+.watch-step-btn:active {
+  transform: translateY(calc(-50% + 3px));
+  box-shadow: 0 2px 0 rgba(40, 15, 75, 1), 0 3px 8px rgba(0, 0, 0, 0.9);
 }
 .watch-step-btn.btn-prev { left: -16px; }
 .watch-step-btn.btn-next { right: -16px; }
 
 /* Control & Action Deck (Below Watch) */
 .watch-action-deck {
-  margin-top: 18px;
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
 }
 
@@ -3478,6 +3548,7 @@ footer a:hover { color: var(--purple-300); }
   transition: opacity 0.3s ease;
 }
 
+/* 3D Tactile Lock Button */
 .watch-lock-btn {
   background: linear-gradient(135deg, #8800ff 0%, #b800ff 50%, #00ffe5 100%);
   color: #ffffff;
@@ -3486,36 +3557,78 @@ footer a:hover { color: var(--purple-300); }
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 11px 28px;
+  padding: 12px 30px;
   border-radius: 30px;
   border: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 0 25px rgba(136, 0, 255, 0.5), 0 4px 15px rgba(0, 0, 0, 0.5);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 5px 0 rgba(70, 0, 140, 1), 0 10px 25px rgba(0, 0, 0, 0.65), 0 0 25px rgba(136, 0, 255, 0.4);
+  transition: all 0.12s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .watch-lock-btn:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 0 35px rgba(0, 255, 229, 0.7), 0 6px 20px rgba(0, 0, 0, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 rgba(70, 0, 140, 1), 0 14px 30px rgba(0, 0, 0, 0.75), 0 0 35px rgba(0, 255, 229, 0.6);
+}
+.watch-lock-btn:active {
+  transform: translateY(3px) !important;
+  box-shadow: 0 2px 0 rgba(70, 0, 140, 1), 0 4px 10px rgba(0, 0, 0, 0.9);
+}
+
+/* Locked State Controls & Reselect Button */
+.watch-locked-group {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
 .watch-locked-status-badge {
-  display: none;
   background: rgba(255, 215, 0, 0.12);
-  border: 1px solid rgba(255, 215, 0, 0.45);
+  border: 1px solid rgba(255, 215, 0, 0.5);
   color: #ffd700;
   font-family: var(--font-ui);
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 8px 22px;
   border-radius: 20px;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 215, 0, 0.25);
+}
+
+.watch-reselect-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #f0e8ff;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.7), 0 6px 16px rgba(0, 0, 0, 0.5);
+  transition: all 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.watch-reselect-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--cyan-400);
+  color: var(--cyan-400);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.7), 0 8px 20px rgba(0, 255, 229, 0.35);
+}
+.watch-reselect-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.9);
 }
 
 /* Locking Animation Pulse */
@@ -3552,13 +3665,14 @@ footer a:hover { color: var(--purple-300); }
 
 /* Responsive Scales for Mobile / Tablets */
 @media (max-width: 768px) {
-  .bigd-watch-wrapper { max-width: 360px; margin-bottom: 22px; }
+  .fit-matrix-section { padding: 40px 16px 36px; }
+  .bigd-watch-wrapper { max-width: 360px; margin-bottom: 10px; }
   .watch-hologram-core { inset: 58px; }
   .core-character-wrap { width: 115px; height: 115px; }
   .core-character-img { max-width: 100px; max-height: 100px; }
   .fit-orbit-pod { width: 44px; height: 44px; margin-top: -22px; margin-left: -22px; }
   .fit-orbit-pod img { width: 26px; height: 26px; }
-  .watch-step-btn { width: 32px; height: 32px; }
+  .watch-step-btn { width: 34px; height: 34px; }
   .watch-step-btn.btn-prev { left: -8px; }
   .watch-step-btn.btn-next { right: -8px; }
 }
@@ -4030,88 +4144,12 @@ footer a:hover { color: var(--purple-300); }
     <img src="/cyber-dice.png" alt="Futuristic 3D Cyber Dice" draggable="false" />
   </div>
 
-  <!-- ============================================================
-       BIGD WATCH — INTERACTIVE DAILY FIT SELECTOR CENTERPIECE
-       ============================================================ -->
-  <div class="bigd-watch-wrapper" id="bigd-watch-wrapper">
-    <div class="bigd-watch-device" id="bigd-watch-device" title="BigD Daily Fit Selector — Drag or Scroll to Rotate">
-      <!-- Outer Chassis Ring & Markings -->
-      <div class="watch-outer-chassis"></div>
-
-      <!-- Top Engraved Insignia Badge -->
-      <div class="watch-insignia-top">
-        <span class="insignia-crown">👑</span>
-        <span>BIGD TV</span>
-        <span style="color:var(--cyan-400); font-size:0.6rem;">• FIT MATRIX</span>
-      </div>
-
-      <!-- Left & Right Step Chevrons -->
-      <button class="watch-step-btn btn-prev" id="fit-prev-btn" title="Previous BigD Fit" aria-label="Previous Look">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <button class="watch-step-btn btn-next" id="fit-next-btn" title="Next BigD Fit" aria-label="Next Look">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
-
-      <!-- Rotating Dial Track (Populated dynamically with the 7 Orbiting Fit Pods) -->
-      <div class="watch-dial-track" id="watch-dial-track"></div>
-
-      <!-- Inner Holographic Crystal Chamber -->
-      <div class="watch-hologram-core" id="watch-hologram-core">
-        <div class="core-energy-disc"></div>
-        <div class="core-character-wrap" id="core-character-wrap">
-          <img src="/bigd-gamer.png" alt="BigD Fit Preview" class="core-character-img" id="core-character-img" draggable="false" />
-        </div>
-        <div class="core-look-nameplate">
-          <span class="core-day-tag" id="core-day-tag">MONDAY FIT</span>
-          <span class="core-look-title" id="core-look-title">GAMER BIGD</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Watch Action & Selection Deck -->
-    <div class="watch-action-deck" id="watch-action-deck">
-      <div class="watch-hint-text" id="watch-hint-text">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M2 12h20"/></svg>
-        <span>DRAG DIAL • SCROLL TO ROTATE</span>
-      </div>
-      <button class="watch-lock-btn" id="watch-lock-btn" onclick="openFitLockModal()">
-        <span>⚡ LOCK TODAY'S FIT</span>
-      </button>
-      <div class="watch-locked-status-badge" id="watch-locked-status-badge">
-        <span>🔒 TODAY'S FIT LOCKED</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- BigD Fit Selection Confirmation Modal -->
-  <div id="fit-lock-modal" class="modal-overlay">
-    <div class="modal-card fit-modal-card">
-      <button class="modal-close" onclick="closeFitLockModal()">×</button>
-      <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:0.06em;">
-        LOCK YOUR <span style="color:var(--cyan-400);">BIGD FIT</span>
-      </div>
-      <div class="fit-modal-char-preview">
-        <img src="/bigd-gamer.png" id="modal-char-preview-img" alt="Selected BigD Look" />
-      </div>
-      <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#ffd700; margin-bottom:4px;" id="modal-fit-title">
-        GAMER BIGD
-      </div>
-      <div style="font-family:var(--font-ui); font-size:0.8rem; font-weight:800; color:var(--cyan-400); text-transform:uppercase; margin-bottom:12px;" id="modal-fit-day">
-        MONDAY FIT
-      </div>
-      <p style="font-family:var(--font-ui); font-size:0.88rem; color:var(--text-secondary); line-height:1.5; margin-bottom:22px;">
-        Lock this as your official BigD look for today? Once confirmed, this choice cannot be changed until tomorrow.
-      </p>
-      <div style="display:flex; justify-content:center; gap:12px;">
-        <button onclick="closeFitLockModal()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-family:var(--font-ui); font-size:0.85rem; font-weight:800; padding:10px 22px; border-radius:20px; cursor:pointer;">
-          CANCEL
-        </button>
-        <button onclick="confirmAndLockFit()" style="background:linear-gradient(135deg, #8800ff, #00ffe5); border:none; color:#fff; font-family:var(--font-display); font-size:0.88rem; font-weight:900; padding:10px 26px; border-radius:20px; cursor:pointer; box-shadow:0 0 20px rgba(0,255,229,0.5);">
-          ⚡ CONFIRM & LOCK
-        </button>
-      </div>
-    </div>
+  <!-- Animated Glowing Aura Logo (Hero Centerpiece) -->
+  <div class="hero-logo-container" id="hero-parallax-logo">
+    <div class="logo-aura-ring ring-outer"></div>
+    <div class="logo-aura-ring ring-inner"></div>
+    <div class="logo-halo-glow"></div>
+    <img src="/logo.png" alt="BigDGamesTV" class="hero-logo-img"/>
   </div>
 
   <div class="hero-eyebrow">
@@ -4315,6 +4353,113 @@ footer a:hover { color: var(--purple-300); }
     <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>thatonet</strong> linked Kick account under code <strong>BIGD</strong>!</div>
     <div class="ticker-item"><span class="ticker-tag tag-live">LIVE NOW</span> 🟢 <strong>BigDgamesTV</strong> is streaming live on Kick!</div>
     <div class="ticker-item"><span class="ticker-tag tag-reward">WEEKLY REWARDS</span> ⚡ <strong>10 Coins / $1</strong> on Slots & <strong>0.25 Coins / $1</strong> on House/Live!</div>
+  </div>
+</div>
+
+<!-- ================================================================
+     DAILY BIGD FIT MATRIX (FIRST SCROLL SHOWCASE)
+     ================================================================ -->
+<section class="fit-matrix-section" id="fit-matrix-section">
+  <div class="fit-matrix-container">
+    <div class="fit-matrix-header">
+      <div class="section-eyebrow">
+        <span class="cyber-dot"></span>
+        <span>DAILY STREAM IDENTITY</span>
+      </div>
+      <h2 class="section-title">
+        TODAY'S <span style="background:linear-gradient(135deg, var(--purple-400), var(--cyan-400)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">BIGD FIT</span> MATRIX
+      </h2>
+      <p class="section-desc">
+        Interact with the 3D rotating dial to select BigD's official stream look for today. Lock your fit or reselect anytime.
+      </p>
+    </div>
+
+    <!-- Interactive BigD Watch -->
+    <div class="bigd-watch-wrapper" id="bigd-watch-wrapper">
+      <div class="bigd-watch-device" id="bigd-watch-device" title="BigD Daily Fit Selector — Drag or Scroll to Rotate">
+        <!-- Outer Chassis Ring & Markings -->
+        <div class="watch-outer-chassis"></div>
+
+        <!-- Top Engraved Insignia Badge -->
+        <div class="watch-insignia-top">
+          <span class="insignia-crown">👑</span>
+          <span>BIGD TV</span>
+          <span style="color:var(--cyan-400); font-size:0.6rem;">• FIT MATRIX</span>
+        </div>
+
+        <!-- Left & Right Step Chevrons -->
+        <button class="watch-step-btn btn-prev" id="fit-prev-btn" title="Previous BigD Fit" aria-label="Previous Look">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="watch-step-btn btn-next" id="fit-next-btn" title="Next BigD Fit" aria-label="Next Look">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+
+        <!-- Rotating Dial Track (Populated dynamically with the 7 Orbiting Fit Pods) -->
+        <div class="watch-dial-track" id="watch-dial-track"></div>
+
+        <!-- Inner Holographic Crystal Chamber -->
+        <div class="watch-hologram-core" id="watch-hologram-core">
+          <div class="core-energy-disc"></div>
+          <div class="core-character-wrap" id="core-character-wrap">
+            <img src="/bigd-gamer.png" alt="BigD Fit Preview" class="core-character-img" id="core-character-img" draggable="false" />
+          </div>
+          <div class="core-look-nameplate">
+            <span class="core-day-tag" id="core-day-tag">MONDAY FIT</span>
+            <span class="core-look-title" id="core-look-title">GAMER BIGD</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Watch Action & Selection Deck -->
+      <div class="watch-action-deck" id="watch-action-deck">
+        <div class="watch-hint-text" id="watch-hint-text">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M2 12h20"/></svg>
+          <span>DRAG DIAL • SCROLL TO ROTATE</span>
+        </div>
+        <button class="watch-lock-btn" id="watch-lock-btn" onclick="openFitLockModal()">
+          <span>⚡ LOCK TODAY'S FIT</span>
+        </button>
+        <div class="watch-locked-group" id="watch-locked-group" style="display:none;">
+          <div class="watch-locked-status-badge" id="watch-locked-status-badge">
+            <span>🔒 TODAY'S FIT LOCKED</span>
+          </div>
+          <button type="button" class="watch-reselect-btn" id="watch-reselect-btn" onclick="unlockFitForReselection()" title="Choose another BigD look">
+            <span>🔄 Change / Reselect Fit</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BigD Fit Selection Confirmation Modal -->
+<div id="fit-lock-modal" class="modal-overlay">
+  <div class="modal-card fit-modal-card">
+    <button class="modal-close" onclick="closeFitLockModal()">×</button>
+    <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:0.06em;">
+      LOCK YOUR <span style="color:var(--cyan-400);">BIGD FIT</span>
+    </div>
+    <div class="fit-modal-char-preview">
+      <img src="/bigd-gamer.png" id="modal-char-preview-img" alt="Selected BigD Look" />
+    </div>
+    <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#ffd700; margin-bottom:4px;" id="modal-fit-title">
+      GAMER BIGD
+    </div>
+    <div style="font-family:var(--font-ui); font-size:0.8rem; font-weight:800; color:var(--cyan-400); text-transform:uppercase; margin-bottom:12px;" id="modal-fit-day">
+      MONDAY FIT
+    </div>
+    <p style="font-family:var(--font-ui); font-size:0.88rem; color:var(--text-secondary); line-height:1.5; margin-bottom:22px;">
+      Lock this as your official BigD look for today? You can reselect or change your fit anytime.
+    </p>
+    <div style="display:flex; justify-content:center; gap:12px;">
+      <button onclick="closeFitLockModal()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-family:var(--font-ui); font-size:0.85rem; font-weight:800; padding:10px 22px; border-radius:20px; cursor:pointer;">
+        CANCEL
+      </button>
+      <button onclick="confirmAndLockFit()" style="background:linear-gradient(135deg, #8800ff, #00ffe5); border:none; color:#fff; font-family:var(--font-display); font-size:0.88rem; font-weight:900; padding:10px 26px; border-radius:20px; cursor:pointer; box-shadow:0 0 20px rgba(0,255,229,0.5);">
+        ⚡ CONFIRM & LOCK
+      </button>
+    </div>
   </div>
 </div>
 
@@ -6909,15 +7054,16 @@ document.addEventListener('click', (e) => {
         });
 
         // Update Locked State UI
+        const lockedGroup = document.getElementById('watch-locked-group');
         if (isFitLockedToday) {
           if (device) device.classList.add('is-locked');
           if (lockBtn) lockBtn.style.display = 'none';
-          if (lockedBadge) lockedBadge.style.display = 'inline-flex';
+          if (lockedGroup) lockedGroup.style.display = 'flex';
           if (hintText) hintText.style.display = 'none';
         } else {
           if (device) device.classList.remove('is-locked');
           if (lockBtn) lockBtn.style.display = 'inline-flex';
-          if (lockedBadge) lockedBadge.style.display = 'none';
+          if (lockedGroup) lockedGroup.style.display = 'none';
           if (hintText) hintText.style.display = 'flex';
         }
       }
@@ -7163,6 +7309,19 @@ document.addEventListener('click', (e) => {
         } else {
           updateWatchVisuals(true);
         }
+      };
+
+      window.unlockFitForReselection = function() {
+        try {
+          localStorage.removeItem('bigd_daily_fit_selection');
+        } catch (e) {
+          console.error('LocalStorage error:', e);
+        }
+
+        isFitLockedToday = false;
+        lockedFitData = null;
+        playWatchTickSound();
+        updateWatchVisuals(true);
       };
 
       document.addEventListener('DOMContentLoaded', initBigDWatch);
