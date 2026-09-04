@@ -472,8 +472,8 @@ app.get("/api/leaderboard", async (req, res) => {
     const codeFilter = String(req.query.code || 'all').toLowerCase();
     let yeetWagers = [];
 
-    // Prize distribution for $3,000 Combined Prize Pool (Phase 9)
-    const COMBINED_PRIZE_POOL = [1500, 500, 300, 200, 150, 100, 80, 70, 50, 50];
+    // Prize distribution for $3,000 Combined Prize Pool (New Distribution)
+    const COMBINED_PRIZE_POOL = [1000, 500, 350, 250, 200, 175, 150, 125, 125, 125];
 
     if (supabase) {
       try {
