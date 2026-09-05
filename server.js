@@ -98,71 +98,26 @@ const KICK_CLIENT_ID = process.env.KICK_CLIENT_ID || "";
 const KICK_CLIENT_SECRET = process.env.KICK_CLIENT_SECRET || "";
 const KICK_REDIRECT_URI = process.env.KICK_REDIRECT_URI || `${BASE_URL}/auth/kick/callback`;
 
-// ─── SECURITY HARDENING & DEFENSE PATCH ───────────────────────────────────────
+app.use(cors());
 app.disable("x-powered-by");
 
-// 1. Block access to sensitive system files & patterns (.env, .git, etc.)
-const SENSITIVE_PATTERN = /(\.env|\.git|\.yml|\.yaml|\.lock|package\.json|\.config|\.sh|\.map|\.\.)/i;
+// Block only direct sensitive dotfile/config requests
 app.use((req, res, next) => {
-  if (SENSITIVE_PATTERN.test(req.path)) {
+  if (req.path.startsWith('/.env') || req.path.startsWith('/.git') || req.path === '/package.json') {
     return res.status(404).send("Not found");
   }
   next();
 });
 
-// 2. HTTP Security & Anti-Exploit Headers
+// Lightweight safe headers (no frame or cross-origin blocking)
 app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("X-Frame-Options", "SAMEORIGIN");
-  res.setHeader("X-XSS-Protection", "1; mode=block");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
-  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   next();
 });
 
-// 3. Lightweight In-Memory API Rate Limiter (Prevents scraping, bot spam & DDoS)
-const rateLimitMap = new Map();
-const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute window
-const MAX_REQUESTS_PER_WINDOW = 180;    // 180 requests per min (plenty for real users, stops scrapers)
-
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, data] of rateLimitMap.entries()) {
-    if (now - data.startTime > RATE_LIMIT_WINDOW_MS) {
-      rateLimitMap.delete(ip);
-    }
-  }
-}, 60 * 1000);
-
-function apiRateLimiter(req, res, next) {
-  if (!req.path.startsWith('/api/') && !req.path.startsWith('/auth/')) {
-    return next();
-  }
-  const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-  const now = Date.now();
-  let record = rateLimitMap.get(ip);
-
-  if (!record || (now - record.startTime > RATE_LIMIT_WINDOW_MS)) {
-    record = { count: 1, startTime: now };
-    rateLimitMap.set(ip, record);
-    return next();
-  }
-
-  record.count += 1;
-  if (record.count > MAX_REQUESTS_PER_WINDOW) {
-    return res.status(429).json({ error: "Too many requests. Please slow down." });
-  }
-
-  next();
-}
-
-app.use(apiRateLimiter);
-
-app.use(cors());
-
-app.use(express.json({ limit: "250kb" }));
-app.use(express.urlencoded({ extended: true, limit: "250kb" }));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(cookieParser(process.env.SESSION_SECRET || "bigdtv-dev-secret-change-in-production"));
 
 app.use(session({
