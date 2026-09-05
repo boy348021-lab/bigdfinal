@@ -6330,8 +6330,9 @@ function startBiweeklyCountdown() {
     return;
   }
 
-  // For September Yeet campaign: set coming soon
+  // Active Live Campaign — live 1s countdown timer
   initBiweeklyProgress(false);
+  bwCountdownInterval = setInterval(() => initBiweeklyProgress(true), 1000);
 }
 
 function initBiweeklyProgress(isIntervalUpdate = false) {
@@ -6361,17 +6362,24 @@ function initBiweeklyProgress(isIntervalUpdate = false) {
     return;
   }
 
-  // ⚡ SEPTEMBER 2026 YEET CAMPAIGN (Coming Soon)
-  if (datesEl) datesEl.textContent = 'Sep 1, 2026 → Sep 30, 2026';
-  if (daysLeftEl) daysLeftEl.textContent = 'COMING SOON';
-  if (startEl) startEl.textContent = 'Sep 1, 2026';
-  if (endEl)   endEl.textContent   = 'Sep 30, 2026';
-  if (pctEl)   pctEl.textContent   = 'Coming Soon';
-  if (fill)    fill.style.width    = '0%';
-  if (thunder) thunder.style.left  = '0%';
-  if (timerEl) timerEl.textContent = 'COMING SOON';
-  if (midNode) midNode.classList.remove('active');
-  if (endNode) endNode.classList.remove('active');
+  // ⚡ ACTIVE SEPTEMBER 2026 YEET CAMPAIGN (Live Monthly Race)
+  const { start, end, displayEnd, now } = getMonthlyPeriod();
+  const diffMs = Math.max(0, end.getTime() - now.getTime());
+  const totalMs = Math.max(1, end.getTime() - start.getTime());
+  const elapsedMs = Math.max(0, now.getTime() - start.getTime());
+  const pct = Math.min(100, Math.max(0, Math.round((elapsedMs / totalMs) * 100)));
+  const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+  if (datesEl) datesEl.textContent = `${bwFmtDate(start)} → ${bwFmtDate(displayEnd)}`;
+  if (daysLeftEl) daysLeftEl.textContent = String(daysLeft);
+  if (startEl) startEl.textContent = bwFmtDate(start);
+  if (endEl)   endEl.textContent   = bwFmtDate(displayEnd);
+  if (pctEl)   pctEl.textContent   = `${pct}% complete`;
+  if (fill)    fill.style.width    = `${pct}%`;
+  if (thunder) thunder.style.left  = `${Math.min(95, Math.max(0, pct - 2))}%`;
+  if (timerEl) timerEl.textContent = formatETCountdown(diffMs);
+  if (midNode) midNode.classList.toggle('active', pct >= 50);
+  if (endNode) endNode.classList.toggle('active', pct >= 100);
 }
 
 const BW_PRIZE_POOL = [1000, 500, 350, 250, 200, 175, 150, 125, 125, 125]; // $3,000 Combined Prize Pool (New Distribution)
@@ -6389,23 +6397,6 @@ async function fetchBiweeklyLeaderboard() {
   const bwContent = document.getElementById('bw-lb-content');
   if (!bwContent) return;
   bwContent.innerHTML = '<div class="lb-loading"><div class="spinner"></div>Loading monthly rankings…</div>';
-
-  if (currentCampaign === 'yeet') {
-    bwContent.innerHTML = `
-      <div class="lb-coming-soon" style="text-align:center; padding:52px 24px; background:rgba(18,12,36,0.6); border:1px solid rgba(0,255,229,0.25); border-radius:var(--radius-lg); box-shadow:0 0 30px rgba(0,255,229,0.08);">
-        <div style="font-size:3.2rem; margin-bottom:12px;">⚡</div>
-        <div style="font-family:var(--font-display); font-size:1.6rem; font-weight:900; color:#fff; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px;">
-          September $3,000 Combined Leaderboard <span style="color:var(--cyan-400);">Coming Soon</span>
-        </div>
-        <p style="font-family:var(--font-ui); color:var(--text-secondary); max-width:580px; margin:0 auto 20px; font-size:0.92rem; line-height:1.6;">
-          The September 2026 <strong>$3,000 Combined Wager Race (BIGD + BigBallz)</strong> is preparing for launch! Wager on Yeet using code <strong style="color:var(--cyan-400);">BIGD</strong> or <strong style="color:#ffd700;">BIGBALLZ</strong> to qualify for the $3,000 cash prize pool.
-        </p>
-        <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 18px; border-radius:20px; background:rgba(0,255,229,0.12); border:1px solid rgba(0,255,229,0.4); color:var(--cyan-400); font-family:var(--font-ui); font-size:0.8rem; font-weight:800; letter-spacing:0.1em; text-transform:uppercase;">
-          <span>●</span> $3,000 COMBINED RACE — SEPTEMBER 2026
-        </div>
-      </div>`;
-    return;
-  }
 
   const { start, end } = getMonthlyPeriod();
   const after  = bwFmtISO(start);
@@ -6438,8 +6429,11 @@ function renderBiweeklyLeaderboard(data) {
   const players = data.map(u => ({
     user_id:  u.user_id,
     username: u.username,
+    is_hidden: Boolean(u.is_hidden),
     source_code: u.source_code || 'BIGD',
-    total: (u.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0)
+    tier: u.tier || null,
+    tier_image: u.tier_image || null,
+    total: (u.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0) || Number(u.volume) || 0
   })).filter(p => p.total >= 0).sort((a, b) => b.total - a.total);
 
   if (players.length === 0) {
@@ -6453,8 +6447,11 @@ function renderBiweeklyLeaderboard(data) {
   const rows = players.map((p, i) => {
     const rank      = i + 1;
     const rankClass = rank <= 3 ? 'rank-' + rank : 'rank-n';
-    const isHidden  = p.user_id === -1;
-    const nameHtml  = isHidden ? '<span class="hidden-user">🔒 Hidden User</span>' : '<span>' + escHtml(p.username) + '</span>';
+    const isHidden  = p.user_id === -1 || p.is_hidden;
+    const tierBadge = p.tier && p.tier !== 'Unranked'
+      ? `<span style="display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:800; color:var(--cyan-400); background:rgba(0,255,229,0.1); border:1px solid rgba(0,255,229,0.25); padding:2px 6px; border-radius:12px; margin-left:6px;">${p.tier_image ? `<img src="${p.tier_image}" style="width:12px;height:12px;" alt="${p.tier}"/>` : ''}${escHtml(p.tier)}</span>`
+      : '';
+    const nameHtml  = isHidden ? '<span class="hidden-user">🔒 Hidden User</span>' : '<span>' + escHtml(p.username) + tierBadge + '</span>';
     const amtClass  = rank === 1 ? 'wager-amount gold' : 'wager-amount';
     const barPct    = top > 0 ? Math.round((p.total / top) * 100) : 0;
 

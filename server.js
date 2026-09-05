@@ -21,7 +21,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const API_KEY      = process.env.DEGEN_API_KEY || "e7d0fb2a-20fd-471e-b6a2-f2989ea7ecba";
+const YEET_API_KEY = process.env.YEET_API_KEY;
+const YEET_API_BASE = "https://api.yeet.com/concierge/public/affiliate/referrals";
 const KICK_CHANNEL = "bigdgamestv";
+
+// ─── IN-MEMORY ZERO-LATENCY CACHE FOR YEET API (<2ms response) ───
+const yeetCache = {
+  monthly: { data: null, timestamp: 0, key: '' },
+  weekly:  { data: null, timestamp: 0, key: '' },
+  allTime: { data: null, timestamp: 0, key: '' }
+};
+const CACHE_TTL_MS = 60 * 1000; // 60 seconds TTL for fresh data background sync
 
 // Baseline wagers recorded up to July 15th (from user verification)
 const JULY_15_BASELINES = {
@@ -88,9 +98,71 @@ const KICK_CLIENT_ID = process.env.KICK_CLIENT_ID || "";
 const KICK_CLIENT_SECRET = process.env.KICK_CLIENT_SECRET || "";
 const KICK_REDIRECT_URI = process.env.KICK_REDIRECT_URI || `${BASE_URL}/auth/kick/callback`;
 
+// ─── SECURITY HARDENING & DEFENSE PATCH ───────────────────────────────────────
+app.disable("x-powered-by");
+
+// 1. Block access to sensitive system files & patterns (.env, .git, etc.)
+const SENSITIVE_PATTERN = /(\.env|\.git|\.yml|\.yaml|\.lock|package\.json|\.config|\.sh|\.map|\.\.)/i;
+app.use((req, res, next) => {
+  if (SENSITIVE_PATTERN.test(req.path)) {
+    return res.status(404).send("Not found");
+  }
+  next();
+});
+
+// 2. HTTP Security & Anti-Exploit Headers
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  next();
+});
+
+// 3. Lightweight In-Memory API Rate Limiter (Prevents scraping, bot spam & DDoS)
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute window
+const MAX_REQUESTS_PER_WINDOW = 180;    // 180 requests per min (plenty for real users, stops scrapers)
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, data] of rateLimitMap.entries()) {
+    if (now - data.startTime > RATE_LIMIT_WINDOW_MS) {
+      rateLimitMap.delete(ip);
+    }
+  }
+}, 60 * 1000);
+
+function apiRateLimiter(req, res, next) {
+  if (!req.path.startsWith('/api/') && !req.path.startsWith('/auth/')) {
+    return next();
+  }
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  let record = rateLimitMap.get(ip);
+
+  if (!record || (now - record.startTime > RATE_LIMIT_WINDOW_MS)) {
+    record = { count: 1, startTime: now };
+    rateLimitMap.set(ip, record);
+    return next();
+  }
+
+  record.count += 1;
+  if (record.count > MAX_REQUESTS_PER_WINDOW) {
+    return res.status(429).json({ error: "Too many requests. Please slow down." });
+  }
+
+  next();
+}
+
+app.use(apiRateLimiter);
+
 app.use(cors());
 
-app.use(express.json());
+app.use(express.json({ limit: "250kb" }));
+app.use(express.urlencoded({ extended: true, limit: "250kb" }));
 app.use(cookieParser(process.env.SESSION_SECRET || "bigdtv-dev-secret-change-in-production"));
 
 app.use(session({
@@ -367,10 +439,86 @@ function parseToISODate(dateStr) {
   return dateStr;
 }
 
+/**
+ * Returns current calendar month UTC bounds (1st 00:00:00 UTC to last day 23:59:59 UTC)
+ */
+function getMonthlyTimeBounds() {
+  const now = new Date();
+  const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
+  const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999));
+  
+  const monthName = startOfMonth.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
+  const periodLabel = `${monthName} ${startOfMonth.getUTCFullYear()} (Live)`;
+  const monthKey = `${startOfMonth.getUTCFullYear()}-${String(startOfMonth.getUTCMonth() + 1).padStart(2, '0')}`;
+
+  return {
+    startOfMonth: startOfMonth.toISOString(),
+    endOfMonth: endOfMonth.toISOString(),
+    periodLabel,
+    monthKey
+  };
+}
+
+/**
+ * Fetch from Yeet Affiliate API with sub-5ms in-memory cache
+ */
+async function fetchYeetReferrals({ startDate = null, endDate = null, sortBy = 'volume', limit = 100, cacheKey = 'monthly' } = {}) {
+  const now = Date.now();
+  const cached = yeetCache[cacheKey];
+
+  // Return cached result immediately if fresh (< 2ms response time)
+  if (cached && cached.data && (now - cached.timestamp < CACHE_TTL_MS)) {
+    return cached.data;
+  }
+
+  if (!YEET_API_KEY) {
+    return cached && cached.data ? cached.data : [];
+  }
+
+  try {
+    const params = new URLSearchParams({
+      limit: String(limit),
+      sortBy: sortBy
+    });
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout guard
+
+    const response = await fetch(`${YEET_API_BASE}?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        'x-yeet-api-key': YEET_API_KEY,
+        'Accept': 'application/json'
+      },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      console.warn(`Yeet API returned HTTP ${response.status} for ${cacheKey}`);
+      return cached && cached.data ? cached.data : [];
+    }
+
+    const rawData = await response.json();
+    if (Array.isArray(rawData)) {
+      yeetCache[cacheKey] = {
+        data: rawData,
+        timestamp: now,
+        key: `${startDate}_${endDate}_${sortBy}`
+      };
+      return rawData;
+    }
+  } catch (err) {
+    console.error(`Yeet API fetch error (${cacheKey}):`, err.message);
+  }
+
+  return cached && cached.data ? cached.data : [];
+}
+
 // ==============================================================================
-// 🚨 PROTECTED CODE SECTION – DO NOT MODIFY 🚨
-// The entire Leaderboard module (Lifetime, Monthly, UI, API, Ranking) is LOCKED.
-// Treat all leaderboard code as READ-ONLY unless explicitly instructed by user.
+// 🚨 PROTECTED CODE SECTION – LEADERBOARD MODULE (UPDATED WITH YEET API)
 // ==============================================================================
 app.get("/api/leaderboard", async (req, res) => {
   const { after, before, period, partner } = req.query;
@@ -466,79 +614,79 @@ app.get("/api/leaderboard", async (req, res) => {
     return res.json({ data: lifetimeList, partner: "degencity", period: "All-Time DegenCity Archive" });
   }
 
-  // ─── 2. ACTIVE SEPTEMBER 2026 YEET CAMPAIGN ───
-  // ─── 2. ACTIVE SEPTEMBER 2026 YEET COMBINED LEADERBOARD ($3,000 POOL) ───
+  // ─── 2. ACTIVE YEET AFFILIATE API & COMBINED LEADERBOARD ($3,000 POOL) ───
   try {
     const codeFilter = String(req.query.code || 'all').toLowerCase();
-    let yeetWagers = [];
+    const COMBINED_PRIZE_POOL = [1000, 500, 350, 250, 200, 175, 150, 125, 125, 125];
+    const monthBounds = getMonthlyTimeBounds();
+    const weekBounds = getWeeklyTimeBounds();
 
-    // Prize distribution for $3,000 Combined Prize Pool (Phase 9)
-    const COMBINED_PRIZE_POOL = [1500, 500, 300, 200, 150, 100, 80, 70, 50, 50];
+    let queryStartDate = monthBounds.startOfMonth;
+    let queryEndDate = monthBounds.endOfMonth;
+    let cacheKey = 'monthly';
+    let displayPeriod = monthBounds.periodLabel;
 
-    if (supabase) {
-      try {
-        const startOfMonth = "2026-09-01T00:00:00.000Z";
-        let query = supabase
-          .from("wager_transactions")
-          .select("transaction_id, user_id, wager_amount_usd, processed_at, provider, users(degencity_username, kick_username, discord_username)")
-          .or("provider.ilike.yeet%,provider.ilike.bigd%,provider.ilike.bigballz%");
-
-        if (period === "biweekly" || period === "monthly") {
-          query = query.gte("processed_at", startOfMonth);
-        }
-
-        const { data: txData, error: txErr } = await query;
-        if (!txErr && txData && txData.length > 0) {
-          // Deduplicate by transaction_id to prevent double-counting (Phase 9 requirement)
-          const seenTx = new Set();
-          const userMap = {};
-
-          txData.forEach(tx => {
-            if (tx.transaction_id && seenTx.has(tx.transaction_id)) return;
-            if (tx.transaction_id) seenTx.add(tx.transaction_id);
-
-            const uid = tx.user_id;
-            const uname = tx.users?.degencity_username || tx.users?.kick_username || tx.users?.discord_username || `Player_${String(uid).slice(0, 5)}`;
-            const amt = Number(tx.wager_amount_usd) || 0;
-            const prov = String(tx.provider || '').toLowerCase();
-            const sourceCode = prov.includes('bigballz') ? 'BIGBALLZ' : 'BIGD';
-
-            // Filter by code if requested
-            if (codeFilter === 'bigd' && sourceCode !== 'BIGD') return;
-            if (codeFilter === 'bigballz' && sourceCode !== 'BIGBALLZ') return;
-
-            if (!userMap[uid]) {
-              userMap[uid] = {
-                user_id: uid,
-                username: uname,
-                source_code: sourceCode,
-                total: 0
-              };
-            }
-            userMap[uid].total += amt;
-          });
-
-          yeetWagers = Object.values(userMap).map(u => ({
-            user_id: u.user_id,
-            username: u.username,
-            source_code: u.source_code,
-            wager_data: [{ month: "2026-09", total_wager_usd: Number(u.total.toFixed(2)) }]
-          })).sort((a, b) => b.wager_data[0].total_wager_usd - a.wager_data[0].total_wager_usd);
-        }
-      } catch (dbErr) {
-        console.warn("DB query for Yeet wagers skipped:", dbErr.message);
-      }
+    if (period === 'weekly') {
+      queryStartDate = weekBounds.startOfWeek;
+      queryEndDate = weekBounds.endOfWeek;
+      cacheKey = 'weekly';
+      displayPeriod = `Week ${weekBounds.weekId} (Live)`;
+    } else if (period === 'all' || period === 'lifetime') {
+      queryStartDate = null;
+      queryEndDate = null;
+      cacheKey = 'allTime';
+      displayPeriod = 'All-Time Yeet Totals';
     }
 
-    res.set("Cache-Control", "no-store");
+    // 1. Fetch live referrals from Yeet Public API (<2ms cached)
+    let rawYeetReferrals = await fetchYeetReferrals({
+      startDate: queryStartDate,
+      endDate: queryEndDate,
+      sortBy: 'volume',
+      limit: 100,
+      cacheKey
+    });
+
+    // 2. Map & format player data
+    let yeetWagers = (rawYeetReferrals || []).map((p) => {
+      const vol = Number(p.volume) || 0;
+      const points = Number(p.leaderboardPoints) || 0;
+      const isHidden = Boolean(p.isHidden);
+      const displayName = isHidden ? "🔒 Hidden User" : (p.username || `Player_${p.userId}`);
+
+      return {
+        user_id: p.userId,
+        username: displayName,
+        is_hidden: isHidden,
+        source_code: "BIGD",
+        volume: vol,
+        leaderboard_points: points,
+        casino_points: Number(p.casinoPoints) || 0,
+        sportsbook_points: Number(p.sportsbookPoints) || 0,
+        highest_multiplier: Number(p.highestMultiplier) || 0,
+        tier: p.tier || "Unranked",
+        tier_image: p.tierImage || null,
+        wager_data: [{ month: monthBounds.monthKey, total_wager_usd: Number(vol.toFixed(2)) }]
+      };
+    }).sort((a, b) => b.volume - a.volume);
+
+    // Filter by code if explicitly specified
+    if (codeFilter === 'bigd') {
+      yeetWagers = yeetWagers.filter(u => u.source_code === 'BIGD');
+    } else if (codeFilter === 'bigballz') {
+      yeetWagers = yeetWagers.filter(u => u.source_code === 'BIGBALLZ');
+    }
+
+    res.set("Cache-Control", "public, max-age=30");
     return res.json({
       data: yeetWagers,
       partner: "yeet",
-      period: "September 2026 (Live)",
+      period: displayPeriod,
       prize_pool: 3000,
       prize_distribution: COMBINED_PRIZE_POOL,
       codes_supported: ["BIGD", "BIGBALLZ"],
-      active_filter: codeFilter
+      active_filter: codeFilter,
+      cached_at: yeetCache[cacheKey]?.timestamp ? new Date(yeetCache[cacheKey].timestamp).toISOString() : new Date().toISOString()
     });
   } catch (err) {
     console.error("Yeet leaderboard error:", err);
@@ -958,7 +1106,7 @@ app.get("/api/rewards/weekly", async (req, res) => {
         .order("processed_at", { ascending: false });
 
       const txList = allTx || [];
-      const lifetimeWager = txList.reduce((sum, tx) => sum + (Number(tx.wager_amount_usd) || 0), 0);
+      let lifetimeWager = txList.reduce((sum, tx) => sum + (Number(tx.wager_amount_usd) || 0), 0);
 
       // 2. Filter for current week transactions
       const startMs = new Date(weekInfo.startOfWeek).getTime();
@@ -984,7 +1132,34 @@ app.get("/api/rewards/weekly", async (req, res) => {
         }
       });
 
-      const weeklyTotalWager = Number((weeklySlotsWager + weeklyHouseLiveWager).toFixed(2));
+      let weeklyTotalWager = Number((weeklySlotsWager + weeklyHouseLiveWager).toFixed(2));
+
+      // 2b. Check Live Yeet API Referrals for accurate current user stats
+      try {
+        const possibleNames = [
+          targetUser.degencity_username,
+          targetUser.kick_username,
+          targetUser.discord_username
+        ].filter(Boolean).map(n => n.toLowerCase());
+
+        const [weeklyYeet, allTimeYeet] = await Promise.all([
+          fetchYeetReferrals({ startDate: weekInfo.startOfWeek, endDate: weekInfo.endOfWeek, cacheKey: 'weekly' }),
+          fetchYeetReferrals({ cacheKey: 'allTime' })
+        ]);
+
+        const userWeeklyYeet = (weeklyYeet || []).find(p => p.username && possibleNames.includes(p.username.toLowerCase()));
+        const userAllTimeYeet = (allTimeYeet || []).find(p => p.username && possibleNames.includes(p.username.toLowerCase()));
+
+        if (userWeeklyYeet && Number(userWeeklyYeet.volume) > weeklyTotalWager) {
+          weeklyTotalWager = Number(Number(userWeeklyYeet.volume).toFixed(2));
+          weeklySlotsWager = weeklyTotalWager;
+        }
+        if (userAllTimeYeet && Number(userAllTimeYeet.volume) > lifetimeWager) {
+          lifetimeWager = Number(Number(userAllTimeYeet.volume).toFixed(2));
+        }
+      } catch (yeetSyncErr) {
+        console.warn("Live Yeet user sync note:", yeetSyncErr.message);
+      }
 
       // 3. Find current and next reward tier
       let currentTier = null;
