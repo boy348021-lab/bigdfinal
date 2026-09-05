@@ -472,8 +472,8 @@ app.get("/api/leaderboard", async (req, res) => {
     const codeFilter = String(req.query.code || 'all').toLowerCase();
     let yeetWagers = [];
 
-    // Prize distribution for $3,000 Combined Prize Pool (New Distribution)
-    const COMBINED_PRIZE_POOL = [1000, 500, 350, 250, 200, 175, 150, 125, 125, 125];
+    // Prize distribution for $3,000 Combined Prize Pool (Phase 9)
+    const COMBINED_PRIZE_POOL = [1500, 500, 300, 200, 150, 100, 80, 70, 50, 50];
 
     if (supabase) {
       try {
@@ -864,11 +864,12 @@ const REWARD_MULTIPLIERS = {
 
 // Configurable Weekly Reward Tiers
 const WEEKLY_REWARD_TIERS = [
-  { tier: 1, name: "Bronze Grinder",    wager_threshold: 100,  reward_coins: 1000,  cash_value: 10,  badge: "🥉 Tier 1" },
-  { tier: 2, name: "Silver Roller",     wager_threshold: 250,  reward_coins: 2500,  cash_value: 25,  badge: "🥈 Tier 2" },
-  { tier: 3, name: "Gold High Roller",  wager_threshold: 500,  reward_coins: 5000,  cash_value: 50,  badge: "🥇 Tier 3" },
-  { tier: 4, name: "Platinum Whale",    wager_threshold: 1000, reward_coins: 10000, cash_value: 100, badge: "💎 Tier 4" },
-  { tier: 5, name: "Diamond Legend",    wager_threshold: 2500, reward_coins: 25000, cash_value: 250, badge: "👑 VIP Legend" }
+  { tier: 1, name: "Bronze Grinder",    wager_threshold: 250,   reward_coins: 2500,  cash_value: 5,   badge: "🥉 Tier 1" },
+  { tier: 2, name: "Silver Roller",     wager_threshold: 1000,  reward_coins: 10000, cash_value: 10,  badge: "🥈 Tier 2" },
+  { tier: 3, name: "Gold High Roller",  wager_threshold: 1500,  reward_coins: 15000, cash_value: 15,  badge: "🥇 Tier 3" },
+  { tier: 4, name: "Platinum Whale",    wager_threshold: 2500,  reward_coins: 25000, cash_value: 20,  badge: "💎 Tier 4" },
+  { tier: 5, name: "Diamond Legend",    wager_threshold: 5000,  reward_coins: 50000, cash_value: 30,  badge: "👑 Tier 5" },
+  { tier: 6, name: "Apex Master",       wager_threshold: 10000, reward_coins: 100000, cash_value: 40, badge: "🔥 Tier 6" }
 ];
 
 /**
@@ -1053,8 +1054,7 @@ app.get("/api/rewards/weekly", async (req, res) => {
     success: true,
     week_info: weekInfo,
     multipliers: REWARD_MULTIPLIERS,
-    reward_tiers_status: "coming_soon",
-    reward_tiers: [],
+    reward_tiers: WEEKLY_REWARD_TIERS,
     user_progression: userProgression,
     recent_ledger: recentLedger
   });
