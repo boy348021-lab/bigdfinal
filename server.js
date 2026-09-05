@@ -1053,7 +1053,8 @@ app.get("/api/rewards/weekly", async (req, res) => {
     success: true,
     week_info: weekInfo,
     multipliers: REWARD_MULTIPLIERS,
-    reward_tiers: WEEKLY_REWARD_TIERS,
+    reward_tiers_status: "coming_soon",
+    reward_tiers: [],
     user_progression: userProgression,
     recent_ledger: recentLedger
   });
