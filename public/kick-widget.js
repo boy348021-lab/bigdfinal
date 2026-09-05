@@ -486,10 +486,20 @@
 
     if (!pill || !body) return;
 
+    // Sync hero header Watch Live button status tag
+    const heroWatchTag = document.getElementById('watch-live-status-tag');
+    const heroWatchBtn = document.querySelector('.hero-btn-watch-live');
+
     if (isLive) {
       widget.classList.add('is-live-mode');
       pill.className = 'bkw-status-pill live';
       statusText.textContent = 'LIVE';
+
+      if (heroWatchTag) heroWatchTag.textContent = 'LIVE';
+      if (heroWatchBtn) {
+        heroWatchBtn.classList.remove('is-offline');
+        heroWatchBtn.classList.add('is-live');
+      }
 
       // Inject 16:9 Kick live stream iframe
       body.innerHTML = `
@@ -507,6 +517,12 @@
       widget.classList.remove('is-live-mode');
       pill.className = 'bkw-status-pill offline';
       statusText.textContent = 'OFFLINE';
+
+      if (heroWatchTag) heroWatchTag.textContent = 'OFFLINE';
+      if (heroWatchBtn) {
+        heroWatchBtn.classList.remove('is-live');
+        heroWatchBtn.classList.add('is-offline');
+      }
 
       // Inject offline card matching fraez.co layout
       body.innerHTML = `
@@ -554,10 +570,10 @@
 
   // ─── 7. First-Screen-Only Visibility (Hide on Scroll) ──────────────────────
   function handleScrollVisibility() {
-    // Determine the first screen boundary (Hero section height or 1 viewport height)
+    // Determine the hero section boundary so the widget stays visible on the landing screen
     const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
-    const heroEl = document.querySelector('.hero') || document.querySelector('#hero') || document.getElementById('tabs-section');
-    const threshold = heroEl ? Math.max(250, heroEl.offsetTop + (heroEl.offsetHeight * 0.45)) : (window.innerHeight * 0.6);
+    const heroEl = document.getElementById('hero') || document.querySelector('.hero');
+    const threshold = heroEl ? (heroEl.offsetTop + heroEl.offsetHeight - 120) : (window.innerHeight * 0.85);
 
     if (scrollY > threshold) {
       widget.classList.add('is-scrolled-out');
