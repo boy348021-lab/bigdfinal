@@ -2433,49 +2433,182 @@ body::after {
 }
 
 /* ============================================================
-   STATS STRIP
+   STATS STRIP (3D MECHANICAL TACTILE KEYS)
    ============================================================ */
 #stats-strip {
   position: relative;
   z-index: 2;
-  padding: 48px 40px;
-  background: linear-gradient(180deg, transparent, rgba(136,0,255,0.04), transparent);
-  border-top: 1px solid var(--border-subtle);
-  border-bottom: 1px solid var(--border-subtle);
+  padding: 56px 24px;
+  background: linear-gradient(180deg, transparent, rgba(136,0,255,0.03), transparent);
+  border-top: 1px solid rgba(136, 0, 255, 0.15);
+  border-bottom: 1px solid rgba(136, 0, 255, 0.15);
 }
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  max-width: 960px;
+  gap: 18px;
+  max-width: 1040px;
   margin: 0 auto;
-  background: var(--border-subtle);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  background: transparent;
+  border: none;
+  overflow: visible;
 }
-.stat-item {
-  background: var(--bg-deep);
-  padding: 32px 24px;
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+}
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.stat-item.stat-key-3d {
+  position: relative;
+  background: linear-gradient(145deg, rgba(26, 20, 48, 0.95) 0%, rgba(13, 10, 26, 0.98) 100%);
+  border: 1px solid rgba(136, 0, 255, 0.3);
+  border-radius: 16px;
+  padding: 24px 16px;
   text-align: center;
+  box-shadow: 
+    0 8px 0 rgba(10, 6, 20, 0.95),
+    0 12px 24px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  transform: translateY(0) translateZ(0);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 142px;
 }
+
+.stat-key-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.stat-item.stat-key-3d::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 15%; right: 15%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 229, 0.6), transparent);
+  opacity: 0.4;
+  transition: opacity 0.3s, left 0.3s, right 0.3s;
+}
+
+.stat-item.stat-key-3d::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(0, 255, 229, 0.2), transparent 50%, rgba(168, 85, 247, 0.2));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+/* 3D Keycap Hover Magnification & Standout */
+.stat-item.stat-key-3d:hover {
+  transform: translateY(-8px) scale(1.04);
+  border-color: rgba(0, 255, 229, 0.55);
+  box-shadow: 
+    0 16px 0 rgba(10, 6, 20, 0.95),
+    0 22px 36px rgba(0, 0, 0, 0.7),
+    0 0 28px rgba(0, 255, 229, 0.22),
+    0 0 40px rgba(168, 85, 247, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  z-index: 10;
+}
+
+.stat-item.stat-key-3d:hover::before {
+  opacity: 1;
+  left: 5%;
+  right: 5%;
+}
+
+.stat-item.stat-key-3d:hover::after {
+  opacity: 1;
+}
+
+/* Active 3D tactile press */
+.stat-item.stat-key-3d:active {
+  transform: translateY(2px) scale(0.99);
+  box-shadow: 
+    0 3px 0 rgba(10, 6, 20, 0.95),
+    0 6px 14px rgba(0, 0, 0, 0.6),
+    inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
 .stat-value {
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-size: clamp(1.65rem, 2.4vw, 2.2rem);
   font-weight: 900;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
-  line-height: 1;
-  margin-bottom: 8px;
+  line-height: 1.1;
+  margin-bottom: 6px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+  transition: transform 0.3s ease;
 }
+
+.stat-item.stat-key-3d:hover .stat-value {
+  transform: scale(1.05);
+}
+
+.stat-partner-name {
+  color: #ffd700 !important;
+  text-shadow: 0 0 16px rgba(255, 215, 0, 0.35);
+}
+
 .stat-value span { color: var(--purple-400); }
+
 .stat-label {
   font-family: var(--font-ui);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+
+.stat-item.stat-key-3d:hover .stat-label {
+  color: var(--cyan-400);
+}
+
+.stat-streamer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--cyan-400);
+  background: rgba(0, 255, 229, 0.08);
+  border: 1px solid rgba(0, 255, 229, 0.3);
+  padding: 3px 10px;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  letter-spacing: 0.04em;
+}
+
+.stat-streamer-btn:hover {
+  background: rgba(0, 255, 229, 0.22);
+  border-color: rgba(0, 255, 229, 0.7);
+  box-shadow: 0 0 14px rgba(0, 255, 229, 0.4);
+  transform: scale(1.06);
 }
 
 /* ============================================================
@@ -4528,30 +4661,36 @@ footer a:hover { color: var(--purple-300); }
 </div>
 
 <!-- ================================================================
-     STATS STRIP
+     STATS STRIP (3D TACTILE KEYS)
      ================================================================ -->
 <section id="stats-strip">
   <div class="stats-grid">
-    <div class="stat-item">
-      <div class="stat-value">$<span class="stat-total-live-val">102.9k</span><span style="color:var(--gold-400)">+</span></div>
-      <div class="stat-label">Total Wagered</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-value"><span class="stat-players-val">42</span></div>
-      <div class="stat-label">Referred Players</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-value">$<span id="stat-pool-val">3,000</span></div>
-      <div class="stat-label">Monthly Pool</div>
-    </div>
-    <div class="stat-item" style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
-      <div style="font-family:var(--font-display); font-size:clamp(1.4rem, 2.2vw, 1.85rem); font-weight:900; color:#ffd700; letter-spacing:0.02em; line-height:1.1; margin-bottom:4px;">
-        BigBallz
+    <div class="stat-item stat-key-3d">
+      <div class="stat-key-inner">
+        <div class="stat-value">$<span class="stat-total-live-val">102.9k</span><span style="color:var(--gold-400)">+</span></div>
+        <div class="stat-label">Total Wagered</div>
       </div>
-      <div class="stat-label" style="margin-bottom:8px;">Partnered Streamer</div>
-      <a href="https://ballpit.co/" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:4px; font-family:var(--font-ui); font-size:0.72rem; font-weight:800; color:var(--cyan-400); background:rgba(0,255,229,0.1); border:1px solid rgba(0,255,229,0.3); padding:4px 12px; border-radius:12px; text-decoration:none; transition:all 0.2s ease; letter-spacing:0.04em;" onmouseover="this.style.background='rgba(0,255,229,0.2)';this.style.borderColor='rgba(0,255,229,0.6)';" onmouseout="this.style.background='rgba(0,255,229,0.1)';this.style.borderColor='rgba(0,255,229,0.3)';">
-        <span>ballpit.co</span> ↗
-      </a>
+    </div>
+    <div class="stat-item stat-key-3d">
+      <div class="stat-key-inner">
+        <div class="stat-value"><span class="stat-players-val">42</span></div>
+        <div class="stat-label">Referred Players</div>
+      </div>
+    </div>
+    <div class="stat-item stat-key-3d">
+      <div class="stat-key-inner">
+        <div class="stat-value">$<span id="stat-pool-val">3,000</span></div>
+        <div class="stat-label">Monthly Pool</div>
+      </div>
+    </div>
+    <div class="stat-item stat-key-3d stat-partner-key">
+      <div class="stat-key-inner">
+        <div class="stat-value stat-partner-name">BigBallz</div>
+        <div class="stat-label">Partnered Streamer</div>
+        <a href="https://ballpit.co/" target="_blank" rel="noopener noreferrer" class="stat-streamer-btn">
+          <span>ballpit.co</span> ↗
+        </a>
+      </div>
     </div>
   </div>
 </section>
