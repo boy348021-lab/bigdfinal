@@ -910,7 +910,7 @@ async function syncWagerPointsForUser(userId) {
   try {
     const { data: user, error: uErr } = await supabase
       .from("users")
-      .select("id, degencity_username, kick_username, discord_username, metadata, points, points_balance")
+      .select("id, degencity_username, kick_username, discord_username, display_name, metadata, points")
       .eq("id", userId)
       .single();
 
@@ -920,8 +920,10 @@ async function syncWagerPointsForUser(userId) {
       user.degencity_username,
       user.kick_username,
       user.discord_username,
+      user.display_name,
       user.degencity_username?.replace(/[^a-z0-9]/gi, ''),
-      user.kick_username?.replace(/[^a-z0-9]/gi, '')
+      user.kick_username?.replace(/[^a-z0-9]/gi, ''),
+      user.discord_username?.replace(/[^a-z0-9]/gi, '')
     ].filter(Boolean).map(n => n.toLowerCase().trim());
 
     // Fetch live referrals from Yeet across both codes
@@ -930,8 +932,22 @@ async function syncWagerPointsForUser(userId) {
       fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
     ]);
 
-    const findMatch = (list) =>
-      (list || []).find(p => p.username && possibleNames.includes(p.username.toLowerCase().trim()));
+    const findMatch = (list) => {
+      if (!list || !Array.isArray(list)) return null;
+      let m = list.find(p => p.username && possibleNames.includes(p.username.toLowerCase().trim()));
+      if (m) return m;
+      m = list.find(p => {
+        const cleanP = (p.username || "").replace(/[^a-z0-9]/gi, '').toLowerCase();
+        return cleanP && possibleNames.some(n => n.replace(/[^a-z0-9]/gi, '') === cleanP);
+      });
+      if (m) return m;
+      m = list.find(p => {
+        const pName = (p.username || "").toLowerCase().trim();
+        if (!pName || pName.length < 4) return false;
+        return possibleNames.some(n => (n.length >= 4 && (n.includes(pName) || pName.includes(n))));
+      });
+      return m || null;
+    };
 
     const matchMonthly = findMatch(monthlyYeet);
     const matchAllTime = findMatch(allTimeYeet);
@@ -974,9 +990,8 @@ async function syncWagerPointsForUser(userId) {
       console.error("Error fetching blackjack audit logs:", bjErr.message);
     }
 
-    const currentBal = Number(user.points_balance || user.points || 0);
+    const currentBal = Number(user.points || 0);
     const calculatedTarget = Math.max(0, totalWagerPoints - redeemedPoints + blackjackNet);
-    // Use maximum of calculated target and existing balance so we never wipe earned coins
     const targetBalance = Math.max(currentBal, calculatedTarget);
 
     if (currentBal !== targetBalance || userMeta.yeet_wager_points !== totalWagerPoints) {
@@ -993,7 +1008,6 @@ async function syncWagerPointsForUser(userId) {
         .from("users")
         .update({ 
           points: targetBalance, 
-          points_balance: targetBalance,
           metadata: updatedMeta, 
           updated_at: new Date().toISOString() 
         })
@@ -1100,11 +1114,17 @@ function getWeeklyTimeBounds() {
 app.get("/api/rewards/weekly", async (req, res) => {
   const weekInfo = getWeeklyTimeBounds();
   const authHeader = req.headers.authorization;
+  let token = null;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  } else if (req.cookies && req.cookies.bigdtv_token) {
+    token = req.cookies.bigdtv_token;
+  }
+
   let targetUser = null;
 
-  if (authHeader && authHeader.startsWith("Bearer ") && supabase) {
+  if (token && supabase) {
     try {
-      const token = authHeader.split(" ")[1];
       const decoded = jwt.verify(token, JWT_SECRET);
       if (decoded && decoded.userId) {
         const { data: user } = await supabase
@@ -1165,9 +1185,11 @@ app.get("/api/rewards/weekly", async (req, res) => {
           targetUser.degencity_username,
           targetUser.kick_username,
           targetUser.discord_username,
+          targetUser.display_name,
           // Also try stripping common suffixes/prefixes
           targetUser.degencity_username?.replace(/[^a-z0-9]/gi, ''),
-          targetUser.kick_username?.replace(/[^a-z0-9]/gi, '')
+          targetUser.kick_username?.replace(/[^a-z0-9]/gi, ''),
+          targetUser.discord_username?.replace(/[^a-z0-9]/gi, '')
         ].filter(Boolean).map(n => n.toLowerCase().trim());
 
         const [weeklyYeet, monthlyYeet, allTimeYeet] = await Promise.all([
@@ -1176,9 +1198,23 @@ app.get("/api/rewards/weekly", async (req, res) => {
           fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
         ]);
 
-        // Normalize Yeet usernames for matching
-        const findYeetMatch = (list) =>
-          (list || []).find(p => p.username && possibleNames.includes(p.username.toLowerCase().trim()));
+        // Robust Yeet username matching (Exact -> Alphanumeric -> Substring)
+        const findYeetMatch = (list) => {
+          if (!list || !Array.isArray(list)) return null;
+          let m = list.find(p => p.username && possibleNames.includes(p.username.toLowerCase().trim()));
+          if (m) return m;
+          m = list.find(p => {
+            const cleanP = (p.username || "").replace(/[^a-z0-9]/gi, '').toLowerCase();
+            return cleanP && possibleNames.some(n => n.replace(/[^a-z0-9]/gi, '') === cleanP);
+          });
+          if (m) return m;
+          m = list.find(p => {
+            const pName = (p.username || "").toLowerCase().trim();
+            if (!pName || pName.length < 4) return false;
+            return possibleNames.some(n => n.length >= 4 && (n.includes(pName) || pName.includes(n)));
+          });
+          return m || null;
+        };
 
         const userWeeklyYeet  = findYeetMatch(weeklyYeet);
         const userMonthlyYeet = findYeetMatch(monthlyYeet);
@@ -1330,8 +1366,10 @@ app.post("/api/rewards/weekly/claim", requireAuth, async (req, res) => {
       req.user.degencity_username,
       req.user.kick_username,
       req.user.discord_username,
+      req.user.display_name,
       req.user.degencity_username?.replace(/[^a-z0-9]/gi, ''),
-      req.user.kick_username?.replace(/[^a-z0-9]/gi, '')
+      req.user.kick_username?.replace(/[^a-z0-9]/gi, ''),
+      req.user.discord_username?.replace(/[^a-z0-9]/gi, '')
     ].filter(Boolean).map(n => n.toLowerCase().trim());
 
     const [weeklyYeet, monthlyYeet, allTimeYeet] = await Promise.all([
@@ -1340,8 +1378,22 @@ app.post("/api/rewards/weekly/claim", requireAuth, async (req, res) => {
       fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
     ]);
 
-    const findMatch = (list) =>
-      (list || []).find(p => p.username && possibleNames.includes(p.username.toLowerCase().trim()));
+    const findMatch = (list) => {
+      if (!list || !Array.isArray(list)) return null;
+      let m = list.find(p => p.username && possibleNames.includes(p.username.toLowerCase().trim()));
+      if (m) return m;
+      m = list.find(p => {
+        const cleanP = (p.username || "").replace(/[^a-z0-9]/gi, '').toLowerCase();
+        return cleanP && possibleNames.some(n => n.replace(/[^a-z0-9]/gi, '') === cleanP);
+      });
+      if (m) return m;
+      m = list.find(p => {
+        const pName = (p.username || "").toLowerCase().trim();
+        if (!pName || pName.length < 4) return false;
+        return possibleNames.some(n => (n.length >= 4 && (n.includes(pName) || pName.includes(n))));
+      });
+      return m || null;
+    };
 
     const matchWeekly = findMatch(weeklyYeet);
     const matchMonthly = findMatch(monthlyYeet);
