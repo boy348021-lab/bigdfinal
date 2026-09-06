@@ -939,6 +939,33 @@ main {
   box-shadow: 0 0 32px rgba(0, 255, 128, 0.8);
   transform: translateY(-2px) scale(1.03);
 }
+.tier-card.redeemed {
+  border-color: #ffd700 !important;
+  box-shadow: 0 4px 28px rgba(255, 215, 0, 0.25) !important;
+  background: linear-gradient(135deg, rgba(30, 25, 10, 0.85) 0%, rgba(18, 14, 6, 0.95) 100%) !important;
+}
+.tier-card.redeemed::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.8), transparent) !important;
+}
+.tier-card.redeemed .tc-badge {
+  color: #ffd700 !important;
+  background: rgba(255, 215, 0, 0.12) !important;
+  border-color: rgba(255, 215, 0, 0.4) !important;
+}
+.tc-claim-btn.redeemed {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.18) 0%, rgba(255, 215, 0, 0.35) 100%) !important;
+  border: 1px solid #ffd700 !important;
+  color: #ffd700 !important;
+  cursor: default !important;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.3) !important;
+  font-weight: 900 !important;
+  opacity: 1 !important;
+}
+.tc-claim-btn.redeemed:hover {
+  transform: none !important;
+  border-color: #ffd700 !important;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.3) !important;
+}
 
 /* Ledger Table */
 .ledger-table-wrap {
@@ -2062,27 +2089,77 @@ async function loadWeeklyRewards(token) {
     const tiersGrid = document.getElementById("weekly-tiers-grid");
     if (tiersGrid && data.reward_tiers) {
       const userWager = prog ? prog.weekly_wager : 0;
+      const weekId = data.week_info ? data.week_info.weekId : "current";
+      const claimedList = prog?.claimed_tiers || [];
       tiersGrid.innerHTML = "";
 
       data.reward_tiers.forEach(t => {
         const isUnlocked = userWager >= t.wager_threshold;
+        const localRedeemed = localStorage.getItem(`bigd_claimed_tier_${weekId}_${t.tier}`) === "true";
+        const isRedeemed = claimedList.includes(t.tier) || localRedeemed;
 
         const card = document.createElement("div");
-        card.className = `tier-card${isUnlocked ? " unlocked" : ""}`;
+        card.className = `tier-card${isRedeemed ? " redeemed" : (isUnlocked ? " unlocked" : "")}`;
+
+        let badgeText = t.badge;
+        if (isRedeemed) badgeText += " ✓ REDEEMED";
+        else if (isUnlocked) badgeText += " ✓ UNLOCKED";
+
+        let btnClass = "tc-claim-btn";
+        let btnText = `Claim $${t.cash_value} via Discord 🎟️`;
+        let btnDisabled = false;
+
+        if (isRedeemed) {
+          btnClass = "tc-claim-btn redeemed";
+          btnText = "✅ REDEEMED";
+          btnDisabled = true;
+        } else if (isUnlocked) {
+          btnClass = "tc-claim-btn unlocked";
+          btnText = `Claim $${t.cash_value} Cash 🎟️`;
+        }
+
         card.innerHTML = `
-          <div class="tc-badge">${t.badge}${isUnlocked ? " ✓ UNLOCKED" : ""}</div>
+          <div class="tc-badge">${badgeText}</div>
           <div class="tc-wager">$${t.wager_threshold.toLocaleString()} Wager</div>
           <div class="tc-reward">🎁 $${t.cash_value} Cash</div>
-          <button class="tc-claim-btn${isUnlocked ? " unlocked" : ""}">
-            ${isUnlocked ? `Claim $${t.cash_value} Cash 🎟️` : `Claim $${t.cash_value} via Discord 🎟️`}
+          <button class="${btnClass}"${btnDisabled ? " disabled" : ""}>
+            ${btnText}
           </button>
         `;
 
-        // Direct, zero-latency Discord redirect on click
-        const btn = card.querySelector(".tc-claim-btn");
-        btn.addEventListener("click", function () {
-          window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
-        });
+        if (!isRedeemed) {
+          const btn = card.querySelector(".tc-claim-btn");
+          btn.addEventListener("click", async function () {
+            // 1. Direct zero-latency open of Discord ticket channel
+            window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
+
+            // 2. Mark as redeemed in localStorage so it stays redeemed across refreshes
+            localStorage.setItem(`bigd_claimed_tier_${weekId}_${t.tier}`, "true");
+
+            // 3. Immediately update UI to REDEEMED state for screenshot to Discord ticket
+            card.className = "tier-card redeemed";
+            const badgeEl = card.querySelector(".tc-badge");
+            if (badgeEl) badgeEl.textContent = `${t.badge} ✓ REDEEMED`;
+            this.className = "tc-claim-btn redeemed";
+            this.textContent = "✅ REDEEMED";
+            this.disabled = true;
+
+            // 4. Record to backend API in background if authenticated
+            if (currentAuthToken) {
+              try {
+                await fetch("/api/rewards/weekly/claim", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${currentAuthToken}`
+                  },
+                  body: JSON.stringify({ tier: t.tier })
+                });
+                await loadRedemptions(currentAuthToken);
+              } catch (e) {}
+            }
+          });
+        }
 
         tiersGrid.appendChild(card);
       });

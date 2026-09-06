@@ -1228,6 +1228,22 @@ app.get("/api/rewards/weekly", async (req, res) => {
         ? Math.max(0, Number((nextTier.wager_threshold - weeklyTotalWager).toFixed(2)))
         : 0;
 
+      let claimedTiers = [];
+      try {
+        const { data: claims } = await supabase
+          .from("redemptions")
+          .select("reward_id")
+          .eq("user_id", targetUser.id)
+          .like("reward_id", `weekly_tier_%_${weekInfo.weekId}`);
+
+        if (claims) {
+          claimedTiers = claims.map(c => {
+            const m = String(c.reward_id).match(/weekly_tier_(\d+)_/);
+            return m ? parseInt(m[1], 10) : null;
+          }).filter(Boolean);
+        }
+      } catch (cErr) {}
+
       userProgression = {
         user_id: targetUser.id,
         username: targetUser.degencity_username || targetUser.kick_username || targetUser.discord_username || "Verified Player",
@@ -1243,7 +1259,8 @@ app.get("/api/rewards/weekly", async (req, res) => {
         current_tier: currentTier,
         next_tier: nextTier,
         tier_progress_pct: tierProgressPct,
-        wager_remaining_for_next_tier: remainingForNext
+        wager_remaining_for_next_tier: remainingForNext,
+        claimed_tiers: claimedTiers
       };
 
       recentLedger = txList.slice(0, 15).map(tx => {
@@ -1277,6 +1294,64 @@ app.get("/api/rewards/weekly", async (req, res) => {
     user_progression: userProgression,
     recent_ledger: recentLedger
   });
+});
+
+// ─── POST /api/rewards/weekly/claim (Claim weekly tier reward — 1 per tier per week) ───
+app.post("/api/rewards/weekly/claim", requireAuth, async (req, res) => {
+  if (!supabase) return res.status(503).json({ error: "Database not configured" });
+  if (!req.user) return res.status(401).json({ error: "Please log in first." });
+
+  const { tier } = req.body;
+  const tierNum = parseInt(tier, 10);
+  const targetTier = WEEKLY_REWARD_TIERS.find(t => t.tier === tierNum);
+  if (!targetTier) return res.status(400).json({ error: "Invalid tier specified" });
+
+  const weekInfo = getWeeklyTimeBounds();
+  const rewardId = `weekly_tier_${tierNum}_${weekInfo.weekId}`;
+  const userId = req.user.id;
+
+  try {
+    // Check if already claimed this week
+    const { data: existing } = await supabase
+      .from("redemptions")
+      .select("id, created_at, status")
+      .eq("user_id", userId)
+      .eq("reward_id", rewardId)
+      .maybeSingle();
+
+    if (existing) {
+      return res.status(400).json({ error: `Tier ${tierNum} ($${targetTier.cash_value} Cash) already redeemed this week (${weekInfo.weekId}).` });
+    }
+
+    // Insert claim record into redemptions ledger
+    const { data: record, error: insErr } = await supabase
+      .from("redemptions")
+      .insert({
+        user_id: userId,
+        reward_id: rewardId,
+        reward_label: `Weekly Tier ${tierNum}: $${targetTier.cash_value} Cash (${weekInfo.weekId})`,
+        points_cost: 0,
+        status: "pending"
+      })
+      .select()
+      .single();
+
+    if (insErr) throw insErr;
+
+    console.log(`🎁 Weekly Tier Claim: User ${userId} claimed Tier ${tierNum} ($${targetTier.cash_value}) for ${weekInfo.weekId}`);
+
+    return res.json({
+      success: true,
+      tier: tierNum,
+      cash_value: targetTier.cash_value,
+      reward_id: rewardId,
+      week_id: weekInfo.weekId,
+      status: "redeemed"
+    });
+  } catch (err) {
+    console.error("Weekly tier claim error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ─── API: Real-Time Coin Conversion Calculator (Phase 5) ──────────────────────
