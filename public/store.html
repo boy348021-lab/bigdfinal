@@ -897,31 +897,47 @@ main {
 .tc-claim-btn {
   margin-top: 12px;
   width: 100%;
-  padding: 8px 14px;
+  padding: 10px 14px;
   border-radius: 8px;
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
+  font-family: var(--font-ui, 'Rajdhani', sans-serif);
+  font-size: 0.85rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  border: none;
-  cursor: not-allowed;
-  background: rgba(255,255,255,0.06);
-  color: var(--text-muted);
-  transition: all 0.25s ease;
-}
-.tc-claim-btn.claimable {
-  background: linear-gradient(135deg, #00c853 0%, #00ff80 100%);
-  color: #000;
+  border: 1px solid rgba(88, 101, 242, 0.5);
   cursor: pointer;
-  box-shadow: 0 0 16px rgba(0, 255, 128, 0.35);
+  background: linear-gradient(135deg, rgba(88, 101, 242, 0.25) 0%, rgba(88, 101, 242, 0.45) 100%);
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(88, 101, 242, 0.3);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
-.tc-claim-btn.claimable:hover {
+.tc-claim-btn:hover {
+  background: linear-gradient(135deg, #5865f2 0%, #7289da 100%);
+  border-color: #ffffff;
+  color: #ffffff;
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 0 28px rgba(0, 255, 128, 0.6);
+  box-shadow: 0 0 24px rgba(88, 101, 242, 0.7);
 }
-.tc-claim-btn.claimable:active {
+.tc-claim-btn:active {
   transform: translateY(1px) scale(0.98);
+}
+.tc-claim-btn.unlocked, .tc-claim-btn.claimable {
+  background: linear-gradient(135deg, #00c853 0%, #00ff80 100%);
+  border: 1px solid #00ff80;
+  color: #000000;
+  box-shadow: 0 0 20px rgba(0, 255, 128, 0.45);
+  font-weight: 900;
+}
+.tc-claim-btn.unlocked:hover, .tc-claim-btn.claimable:hover {
+  background: linear-gradient(135deg, #00e676 0%, #69f0ae 100%);
+  border-color: #ffffff;
+  color: #000000;
+  box-shadow: 0 0 32px rgba(0, 255, 128, 0.8);
+  transform: translateY(-2px) scale(1.03);
 }
 
 /* Ledger Table */
@@ -1585,37 +1601,37 @@ footer a:hover { color: var(--purple-200); }
           <div class="tc-badge">🥉 Tier 1</div>
           <div class="tc-wager">$250 Wager</div>
           <div class="tc-reward">🎁 $5 Cash</div>
-          <button class="tc-claim-btn" disabled>🔒 Locked</button>
+          <button class="tc-claim-btn" onclick="window.open('https://discord.gg/aHSVMX4DCr', '_blank', 'noopener,noreferrer')">Claim $5 Cash 🎟️</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">🥈 Tier 2</div>
           <div class="tc-wager">$1,000 Wager</div>
           <div class="tc-reward">🎁 $10 Cash</div>
-          <button class="tc-claim-btn" disabled>🔒 Locked</button>
+          <button class="tc-claim-btn" onclick="window.open('https://discord.gg/aHSVMX4DCr', '_blank', 'noopener,noreferrer')">Claim $10 Cash 🎟️</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">🥇 Tier 3</div>
           <div class="tc-wager">$1,500 Wager</div>
           <div class="tc-reward">🎁 $15 Cash</div>
-          <button class="tc-claim-btn" disabled>🔒 Locked</button>
+          <button class="tc-claim-btn" onclick="window.open('https://discord.gg/aHSVMX4DCr', '_blank', 'noopener,noreferrer')">Claim $15 Cash 🎟️</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">💎 Tier 4</div>
           <div class="tc-wager">$2,500 Wager</div>
           <div class="tc-reward">🎁 $20 Cash</div>
-          <button class="tc-claim-btn" disabled>🔒 Locked</button>
+          <button class="tc-claim-btn" onclick="window.open('https://discord.gg/aHSVMX4DCr', '_blank', 'noopener,noreferrer')">Claim $20 Cash 🎟️</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">👑 Tier 5</div>
           <div class="tc-wager">$5,000 Wager</div>
           <div class="tc-reward">🎁 $30 Cash</div>
-          <button class="tc-claim-btn" disabled>🔒 Locked</button>
+          <button class="tc-claim-btn" onclick="window.open('https://discord.gg/aHSVMX4DCr', '_blank', 'noopener,noreferrer')">Claim $30 Cash 🎟️</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">🔥 Tier 6</div>
           <div class="tc-wager">$10,000 Wager</div>
           <div class="tc-reward">🎁 $40 Cash</div>
-          <button class="tc-claim-btn" disabled>🔒 Locked</button>
+          <button class="tc-claim-btn" onclick="window.open('https://discord.gg/aHSVMX4DCr', '_blank', 'noopener,noreferrer')">Claim $40 Cash 🎟️</button>
         </div>
       </div>
     </div>
@@ -1802,8 +1818,12 @@ async function redeemReward(rewardId, btnEl) {
   // Prevent double-tap
   if (btnEl) {
     btnEl.disabled = true;
-    btnEl.textContent = "Processing…";
+    btnEl.textContent = "Opening Discord…";
   }
+
+  // ✅ Open Discord IMMEDIATELY inside the click handler — before any await/setTimeout
+  // Browsers block window.open if called after async gaps (popup blocker)
+  const discordWin = window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
 
   try {
     const res = await fetch("/api/store/redeem", {
@@ -1818,7 +1838,6 @@ async function redeemReward(rewardId, btnEl) {
     const data = await res.json();
 
     if (!res.ok) {
-      // Surface the exact server error (e.g. "Insufficient points balance")
       showToast(`❌ ${data.error || "Redemption failed. Try again."}`);
       if (btnEl) {
         btnEl.disabled = false;
@@ -1835,19 +1854,14 @@ async function redeemReward(rewardId, btnEl) {
       if (storeVal) storeVal.textContent = data.new_balance.toLocaleString();
     }
 
-    showToast("✅ Coins deducted! Opening Discord to create your ticket…");
-
-    // Small delay so the toast is readable, then open Discord ticket channel
-    setTimeout(() => {
-      window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
-    }, 900);
+    showToast("✅ Coins deducted! Create a ticket in Discord to claim your reward.");
 
     // Refresh redemption history
     if (currentAuthToken) await loadRedemptions(currentAuthToken);
 
     if (btnEl) {
       btnEl.textContent = "✅ Redeemed";
-      // Keep it disabled — they've already claimed this one this session
+      // Keep disabled — claimed this session
     }
 
   } catch (err) {
@@ -2059,24 +2073,16 @@ async function loadWeeklyRewards(token) {
           <div class="tc-badge">${t.badge}${isUnlocked ? " ✓ UNLOCKED" : ""}</div>
           <div class="tc-wager">$${t.wager_threshold.toLocaleString()} Wager</div>
           <div class="tc-reward">🎁 $${t.cash_value} Cash</div>
-          <button class="tc-claim-btn${isUnlocked ? " claimable" : ""}"${isUnlocked ? "" : " disabled"}>
-            ${isUnlocked ? "Claim Reward →" : "🔒 Locked"}
+          <button class="tc-claim-btn${isUnlocked ? " unlocked" : ""}">
+            ${isUnlocked ? `Claim $${t.cash_value} Cash 🎟️` : `Claim $${t.cash_value} via Discord 🎟️`}
           </button>
         `;
 
-        // Wire claim button AFTER it's in DOM
-        if (isUnlocked) {
-          const btn = card.querySelector(".tc-claim-btn");
-          btn.addEventListener("click", function () {
-            this.textContent = "Opening Discord…";
-            this.disabled = true;
-            setTimeout(() => {
-              window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
-              this.textContent = "Claim Reward →";
-              this.disabled = false;
-            }, 500);
-          });
-        }
+        // Direct, zero-latency Discord redirect on click
+        const btn = card.querySelector(".tc-claim-btn");
+        btn.addEventListener("click", function () {
+          window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
+        });
 
         tiersGrid.appendChild(card);
       });

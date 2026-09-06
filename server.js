@@ -1169,8 +1169,9 @@ app.get("/api/rewards/weekly", async (req, res) => {
           targetUser.kick_username?.replace(/[^a-z0-9]/gi, '')
         ].filter(Boolean).map(n => n.toLowerCase().trim());
 
-        const [weeklyYeet, allTimeYeet] = await Promise.all([
+        const [weeklyYeet, monthlyYeet, allTimeYeet] = await Promise.all([
           fetchCombinedYeetReferrals({ startDate: weekInfo.startOfWeek, endDate: weekInfo.endOfWeek, cacheKey: 'weekly' }),
+          fetchCombinedYeetReferrals({ cacheKey: 'monthly' }),
           fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
         ]);
 
@@ -1179,22 +1180,27 @@ app.get("/api/rewards/weekly", async (req, res) => {
           (list || []).find(p => p.username && possibleNames.includes(p.username.toLowerCase().trim()));
 
         const userWeeklyYeet  = findYeetMatch(weeklyYeet);
+        const userMonthlyYeet = findYeetMatch(monthlyYeet);
         const userAllTimeYeet = findYeetMatch(allTimeYeet);
 
-        // Yeet API is authoritative — use its volume whenever a match is found
-        // (covers players like Bluntz who have Yeet wager but no local DB transactions)
-        if (userWeeklyYeet) {
-          const yeetWeekly = Number(Number(userWeeklyYeet.volume).toFixed(2));
-          if (yeetWeekly > weeklyTotalWager) {
-            weeklyTotalWager = yeetWeekly;
-            weeklySlotsWager = yeetWeekly;
-          }
+        // Yeet API is authoritative — use highest recorded volume
+        const bestWeeklyVolume = Math.max(
+          Number(userWeeklyYeet?.volume) || 0,
+          Number(userMonthlyYeet?.volume) || 0
+        );
+
+        if (bestWeeklyVolume > weeklyTotalWager) {
+          weeklyTotalWager = Number(bestWeeklyVolume.toFixed(2));
+          weeklySlotsWager = weeklyTotalWager;
         }
-        if (userAllTimeYeet) {
-          const yeetLifetime = Number(Number(userAllTimeYeet.volume).toFixed(2));
-          if (yeetLifetime > lifetimeWager) {
-            lifetimeWager = yeetLifetime;
-          }
+
+        const bestLifetime = Math.max(
+          Number(userAllTimeYeet?.volume) || 0,
+          Number(userMonthlyYeet?.volume) || 0,
+          weeklyTotalWager
+        );
+        if (bestLifetime > lifetimeWager) {
+          lifetimeWager = Number(bestLifetime.toFixed(2));
         }
       } catch (yeetSyncErr) {
         console.warn("Live Yeet user sync note:", yeetSyncErr.message);
