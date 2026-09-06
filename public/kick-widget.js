@@ -477,8 +477,13 @@
   header.addEventListener('touchstart', onPointerDown, { passive: true });
 
   // ─── 5. Update UI for Live vs Offline (Matching Fraez.co Logic) ─────────────
+  let previousLiveState = null;
+
   function updateWidgetUI(liveState) {
-    isLive = Boolean(liveState);
+    const isNowLive = Boolean(liveState);
+    if (previousLiveState === isNowLive) return;
+    previousLiveState = isNowLive;
+    isLive = isNowLive;
 
     const pill = document.getElementById('bkw-status-pill');
     const statusText = document.getElementById('bkw-status-text');

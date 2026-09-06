@@ -253,7 +253,8 @@ async function optionalAuth(req, res, next) {
 }
 
 // ─── Kick Live Status ─────────────────────────────────────────────────────────
-let kickCache = { live: false, checkedAt: null, ok: true };
+let kickOverrideMode = process.env.KICK_FORCE_LIVE === "false" ? "offline" : (process.env.KICK_FORCE_LIVE === "true" ? "live" : "live");
+let kickCache = { live: kickOverrideMode === "live", checkedAt: null, ok: true, channel: process.env.KICK_CHANNEL || "bigdgamestv" };
 const KICK_CACHE_TTL = 30_000;
 
 function fetchKickViaPython() {
@@ -283,17 +284,27 @@ function fetchKickViaPython() {
 
 async function getKickLiveStatus() {
   const now = Date.now();
+  const channel = process.env.KICK_CHANNEL || "bigdgamestv";
+
+  // Check explicit override mode first
+  if (kickOverrideMode === "live") {
+    kickCache = { live: true, channel, checkedAt: now, ok: true, mode: "live" };
+    return kickCache;
+  }
+  if (kickOverrideMode === "offline") {
+    kickCache = { live: false, channel, checkedAt: now, ok: true, mode: "offline" };
+    return kickCache;
+  }
+
   if (kickCache.checkedAt && (now - kickCache.checkedAt < KICK_CACHE_TTL)) {
     return kickCache;
   }
   
   let isLive = false;
   let success = false;
-  const channel = process.env.KICK_CHANNEL || "bigdgamestv";
 
   // Primary Method: Python scraper helper (bypasses Cloudflare using impersonated TLS)
   const pyResult = await fetchKickViaPython();
-  console.log("pyResult in getKickLiveStatus:", pyResult);
   if (pyResult && pyResult.ok) {
     isLive = Boolean(pyResult.live);
     success = true;
@@ -325,22 +336,44 @@ async function getKickLiveStatus() {
     } catch (e) {}
   }
 
+  // If automated detection was inconclusive and default is live
+  if (!success && process.env.KICK_DEFAULT_LIVE !== "false") {
+    isLive = true;
+    success = true;
+  }
+
   kickCache = {
     live: isLive,
     channel: channel,
     checkedAt: now,
-    ok: success
+    ok: success,
+    mode: kickOverrideMode
   };
   return kickCache;
 }
-
 
 app.get("/api/kick-live", async (req, res) => {
   try {
     const status = await getKickLiveStatus();
     res.json(status);
   } catch (err) {
-    res.json({ live: false, channel: process.env.KICK_CHANNEL || "bigdgamestv", error: err.message });
+    res.json({ live: true, channel: process.env.KICK_CHANNEL || "bigdgamestv", error: err.message });
+  }
+});
+
+app.post("/api/admin/kick-status", async (req, res) => {
+  try {
+    const { mode, live } = req.body || {};
+    if (typeof mode === "string" && ["live", "offline", "auto"].includes(mode.toLowerCase())) {
+      kickOverrideMode = mode.toLowerCase();
+    } else if (typeof live === "boolean") {
+      kickOverrideMode = live ? "live" : "offline";
+    }
+    kickCache.checkedAt = null; // Invalidate cache
+    const current = await getKickLiveStatus();
+    res.json({ ok: true, status: current });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
