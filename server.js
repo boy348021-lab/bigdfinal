@@ -904,52 +904,44 @@ app.get("/api/challenges", (req, res) => {
 });
 
 // ─── Wager-to-Points Synchronization Helper ────────────────────────────
-// Automatically converts DegenCity slot wagers into wallet points ($1 wagered = 10 points) starting August 1st (EST)
+// Automatically converts Yeet wagers into wallet points ($1 wagered = 10 BigD Coins)
 async function syncWagerPointsForUser(userId) {
   if (!supabase || !userId) return 0;
   try {
     const { data: user, error: uErr } = await supabase
       .from("users")
-      .select("id, degencity_username, metadata, points")
+      .select("id, degencity_username, kick_username, discord_username, metadata, points, points_balance")
       .eq("id", userId)
       .single();
 
-    if (uErr || !user || !user.degencity_username) return user?.points || 0;
+    if (uErr || !user) return 0;
 
-    const degenUsername = user.degencity_username.trim().toLowerCase();
-    const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+    const possibleNames = [
+      user.degencity_username,
+      user.kick_username,
+      user.discord_username,
+      user.degencity_username?.replace(/[^a-z0-9]/gi, ''),
+      user.kick_username?.replace(/[^a-z0-9]/gi, '')
+    ].filter(Boolean).map(n => n.toLowerCase().trim());
 
-    // Fetch leaderboard wagers from DegenCity API starting August 1st EST
-    let rawList = [];
-    try {
-      const res = await fetch("https://api.degencity.com/api/v1/partner/affiliates/leaderboard?after=2026-08-01T00:00:00.000Z", {
-        headers: { "x-api-key": API_KEY, "Accept": "application/json", "User-Agent": USER_AGENT }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-      }
-    } catch (e) {}
+    // Fetch live referrals from Yeet across both codes
+    const [monthlyYeet, allTimeYeet] = await Promise.all([
+      fetchCombinedYeetReferrals({ cacheKey: 'monthly' }),
+      fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
+    ]);
 
-    // Fallback to local dataset if offline
-    if (!rawList || rawList.length === 0) {
-      try {
-        const fallbackPath = path.join(__dirname, "degencity_leaderboard_fallback.json");
-        if (fs.existsSync(fallbackPath)) {
-          const data = JSON.parse(fs.readFileSync(fallbackPath, "utf8"));
-          rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
-        }
-      } catch (e) {}
-    }
+    const findMatch = (list) =>
+      (list || []).find(p => p.username && possibleNames.includes(p.username.toLowerCase().trim()));
 
-    const match = rawList.find(u => (u.username || "").trim().toLowerCase() === degenUsername);
-    
-    // Time-gated cutoff: Filter wager_data strictly for month >= "2026-08" (August 1st EST onwards)
-    const augustWagerUsd = match ? (match.wager_data || [])
-      .filter(m => m.month >= "2026-08")
-      .reduce((sum, m) => sum + (Number(m.total_wager_usd) || 0), 0) : 0;
+    const matchMonthly = findMatch(monthlyYeet);
+    const matchAllTime = findMatch(allTimeYeet);
 
-    const augustWagerPoints = Math.floor(augustWagerUsd * 10);
+    const totalWagerUsd = Math.max(
+      Number(matchMonthly?.volume) || 0,
+      Number(matchAllTime?.volume) || 0
+    );
+
+    const totalWagerPoints = Math.floor(totalWagerUsd * 10);
 
     // Subtract redeemed points from Supabase redemptions table
     let redeemedPoints = 0;
@@ -965,7 +957,7 @@ async function syncWagerPointsForUser(userId) {
       }
     } catch (rErr) {}
 
-    // Calculate net blackjack gain/loss from audit_logs (bets are negative deltas, payouts are positive)
+    // Calculate net blackjack gain/loss from audit_logs
     const userMeta = user.metadata || {};
     let blackjackNet = 0;
     try {
@@ -982,14 +974,16 @@ async function syncWagerPointsForUser(userId) {
       console.error("Error fetching blackjack audit logs:", bjErr.message);
     }
 
-    const targetBalance = Math.max(0, augustWagerPoints - redeemedPoints + blackjackNet);
+    const currentBal = Number(user.points_balance || user.points || 0);
+    const calculatedTarget = Math.max(0, totalWagerPoints - redeemedPoints + blackjackNet);
+    // Use maximum of calculated target and existing balance so we never wipe earned coins
+    const targetBalance = Math.max(currentBal, calculatedTarget);
 
-    // Update user point wallet balance if it differs from targetBalance
-    if (user.points !== targetBalance || userMeta.august_wager_points !== augustWagerPoints) {
+    if (currentBal !== targetBalance || userMeta.yeet_wager_points !== totalWagerPoints) {
       const updatedMeta = { 
         ...userMeta, 
-        august_wager_usd: augustWagerUsd,
-        august_wager_points: augustWagerPoints,
+        yeet_wager_usd: totalWagerUsd,
+        yeet_wager_points: totalWagerPoints,
         redeemed_points: redeemedPoints,
         blackjack_net: blackjackNet,
         last_synced_at: new Date().toISOString()
@@ -997,14 +991,19 @@ async function syncWagerPointsForUser(userId) {
 
       await supabase
         .from("users")
-        .update({ points: targetBalance, metadata: updatedMeta, updated_at: new Date().toISOString() })
+        .update({ 
+          points: targetBalance, 
+          points_balance: targetBalance,
+          metadata: updatedMeta, 
+          updated_at: new Date().toISOString() 
+        })
         .eq("id", user.id);
 
-      console.log(`💸 Wager+Blackjack Points Sync: User ${user.id} (${degenUsername}) -> $${augustWagerUsd.toFixed(2)} August wagered = ${augustWagerPoints} pts earned - ${redeemedPoints} redeemed + ${blackjackNet} blackjack net = ${targetBalance} wallet balance.`);
+      console.log(`💸 Yeet Wager Sync: User ${user.id} -> $${totalWagerUsd.toFixed(2)} wagered = ${totalWagerPoints} pts earned - ${redeemedPoints} redeemed + ${blackjackNet} blackjack net = ${targetBalance} wallet balance.`);
       return targetBalance;
     }
 
-    return user.points || 0;
+    return targetBalance;
   } catch (err) {
     console.error("syncWagerPointsForUser error:", err.message);
     return 0;
@@ -2227,15 +2226,8 @@ app.patch("/profile/degencity", requireClerkAuth, async (req, res) => {
     return res.status(404).json({ error: "User profile not found. Please sync first." });
   }
 
-  // 1) Enforce Kick username is linked first
-  if (!req.user.kick_username) {
-    return res.status(400).json({ error: "Please link your Kick account first before linking DegenCity." });
-  }
 
-  // 2) Enforce permanent account linking (one-to-one)
-  if (req.user.degencity_username) {
-    return res.status(400).json({ error: "Your account is already permanently linked to a DegenCity username." });
-  }
+
 
   const { degencity_username } = req.body;
   if (!degencity_username) return res.status(400).json({ error: "Username required" });
@@ -2243,23 +2235,22 @@ app.patch("/profile/degencity", requireClerkAuth, async (req, res) => {
   const degenUsername = degencity_username.trim().toLowerCase();
 
   try {
-    // 1) Verify the DegenCity username exists in the leaderboard
-    const lbRes = await fetch("https://api.degencity.com/api/v1/partner/affiliates/leaderboard", {
-      headers: { "x-api-key": API_KEY, "Accept": "application/json" }
-    });
-    if (!lbRes.ok) throw new Error("Could not reach DegenCity API");
+    // 1) Verify the Yeet username exists in the live referrals list
+    const [monthlyYeet, allTimeYeet] = await Promise.all([
+      fetchCombinedYeetReferrals({ cacheKey: 'monthly' }),
+      fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
+    ]);
 
-    const lbData = await lbRes.json();
-    const users  = lbData.data || [];
-    const match  = users.find(u => (u.username || "").toLowerCase() === degenUsername);
+    const combinedList = [...(monthlyYeet || []), ...(allTimeYeet || [])];
+    const match = combinedList.find(u => (u.username || "").trim().toLowerCase() === degenUsername);
 
     if (!match) {
       return res.status(422).json({
-        error: `DegenCity username "${degencity_username}" was not found in the affiliates list. Make sure you registered on DegenCity using code BIGD.`
+        error: `Yeet username "${degencity_username}" was not found in the referrals list. Make sure you registered on Yeet using code BIGD or BIGBALLZ.`
       });
     }
 
-    // 2) Check if another user has already linked this DegenCity username
+    // 2) Check if another user has already linked this Yeet username
     if (supabase) {
       const { data: duplicateUser } = await supabase
         .from("users")
@@ -2269,10 +2260,10 @@ app.patch("/profile/degencity", requireClerkAuth, async (req, res) => {
         .maybeSingle();
 
       if (duplicateUser) {
-        return res.status(422).json({ error: "This DegenCity account is already linked to another player." });
+        return res.status(422).json({ error: "This Yeet account is already linked to another player." });
       }
 
-      // 3) Update DegenCity username in users table
+      // 3) Update Yeet username in users table
       const { data: updatedUser, error: updateError } = await supabase
         .from("users")
         .update({
@@ -2287,7 +2278,7 @@ app.patch("/profile/degencity", requireClerkAuth, async (req, res) => {
 
       if (updateError) throw updateError;
 
-      // Update linked_accounts table for DegenCity as well
+      // Update linked_accounts table for Yeet as well
       const { data: existingLink } = await supabase
         .from("linked_accounts")
         .select("*")
@@ -2317,7 +2308,7 @@ app.patch("/profile/degencity", requireClerkAuth, async (req, res) => {
           });
       }
 
-      // Immediately convert slot wagers to points ($1 = 10 pts) and credit user wallet
+      // Immediately convert wagers to points ($1 = 10 pts) and credit user wallet
       const newPoints = await syncWagerPointsForUser(req.user.id);
 
       return res.json({ success: true, degencity_username: degenUsername, verified: true, points: newPoints });
