@@ -4561,19 +4561,6 @@ footer a:hover { color: var(--purple-300); }
     <p class="story-sub">Active campaign status and historical monthly champions across partner casinos.</p>
   </div>
 
-  <!-- Active September 2026 Yeet Spotlight (Coming Soon) -->
-  <div style="background:linear-gradient(145deg, rgba(20,14,36,0.8) 0%, rgba(10,8,20,0.95) 100%); border:1px solid rgba(0,255,229,0.35); border-radius:var(--radius-lg); padding:32px 24px; text-align:center; max-width:980px; margin:0 auto 40px; box-shadow:0 0 35px rgba(0,255,229,0.08);">
-    <div style="font-size:2.8rem; margin-bottom:10px;">⚡</div>
-    <div style="font-family:var(--font-display); font-size:1.45rem; font-weight:900; color:#fff; text-transform:uppercase; margin-bottom:8px; letter-spacing:0.06em;">
-      September 2026 Yeet Hall of Fame: <span style="color:var(--cyan-400);">COMING SOON</span>
-    </div>
-    <p style="font-family:var(--font-ui); font-size:0.92rem; color:var(--text-secondary); max-width:600px; margin:0 auto 18px; line-height:1.6;">
-      The active September 2026 leaderboard race is preparing for launch! Once the Yeet API key is connected, live top rankings and player podiums will update here automatically.
-    </p>
-    <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 18px; border-radius:20px; background:rgba(0,255,229,0.1); border:1px solid rgba(0,255,229,0.35); color:var(--cyan-400); font-family:var(--font-ui); font-size:0.8rem; font-weight:800; letter-spacing:0.1em; text-transform:uppercase;">
-      <span>●</span> Active Partner: Yeet Casino (Code: BIGD) — Awaiting API Key
-    </div>
-  </div>
 
   <!-- PREVIOUS MONTHS HALL OF FAME (WITH SITE DETAILS) -->
   <div style="max-width:1150px; margin:0 auto;">
@@ -6451,7 +6438,10 @@ function renderBiweeklyLeaderboard(data) {
     const tierBadge = p.tier && p.tier !== 'Unranked'
       ? `<span style="display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:800; color:var(--cyan-400); background:rgba(0,255,229,0.1); border:1px solid rgba(0,255,229,0.25); padding:2px 6px; border-radius:12px; margin-left:6px;">${p.tier_image ? `<img src="${p.tier_image}" style="width:12px;height:12px;" alt="${p.tier}"/>` : ''}${escHtml(p.tier)}</span>`
       : '';
-    const nameHtml  = isHidden ? '<span class="hidden-user">🔒 Hidden User</span>' : '<span>' + escHtml(p.username) + tierBadge + '</span>';
+    const codeBadge = p.source_code
+      ? `<span style="display:inline-flex; align-items:center; font-size:0.65rem; font-weight:800; color:${p.source_code.includes('BIGBALLZ') ? '#ffd700' : 'var(--cyan-400)'}; background:${p.source_code.includes('BIGBALLZ') ? 'rgba(255,215,0,0.1)' : 'rgba(0,255,229,0.08)'}; border:1px solid ${p.source_code.includes('BIGBALLZ') ? 'rgba(255,215,0,0.25)' : 'rgba(0,255,229,0.2)'}; padding:1px 6px; border-radius:10px; margin-left:6px; letter-spacing:0.04em;">${escHtml(p.source_code)}</span>`
+      : '';
+    const nameHtml  = isHidden ? '<span class="hidden-user">🔒 Hidden User</span>' : '<span>' + escHtml(p.username) + tierBadge + codeBadge + '</span>';
     const amtClass  = rank === 1 ? 'wager-amount gold' : 'wager-amount';
     const barPct    = top > 0 ? Math.round((p.total / top) * 100) : 0;
 

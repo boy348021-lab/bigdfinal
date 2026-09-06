@@ -20,16 +20,24 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const API_KEY      = process.env.DEGEN_API_KEY || "e7d0fb2a-20fd-471e-b6a2-f2989ea7ecba";
-const YEET_API_KEY = process.env.YEET_API_KEY;
-const YEET_API_BASE = "https://api.yeet.com/concierge/public/affiliate/referrals";
-const KICK_CHANNEL = "bigdgamestv";
+const API_KEY               = process.env.DEGEN_API_KEY || "e7d0fb2a-20fd-471e-b6a2-f2989ea7ecba";
+const YEET_API_KEY          = process.env.YEET_API_KEY || "2d820a56cb7d4479b8799f0cb4eea78f";
+const YEET_BIGBALLZ_API_KEY = process.env.YEET_BIGBALLZ_API_KEY || process.env.DRTPT_API_KEY || "8e4cf0f57a2941109a4ba73fcc8fe5f4";
+const YEET_API_BASE         = "https://api.yeet.com/concierge/public/affiliate/referrals";
+const KICK_CHANNEL          = "bigdgamestv";
 
 // ─── IN-MEMORY ZERO-LATENCY CACHE FOR YEET API (<2ms response) ───
 const yeetCache = {
-  monthly: { data: null, timestamp: 0, key: '' },
-  weekly:  { data: null, timestamp: 0, key: '' },
-  allTime: { data: null, timestamp: 0, key: '' }
+  bigd: {
+    monthly: { data: null, timestamp: 0, key: '' },
+    weekly:  { data: null, timestamp: 0, key: '' },
+    allTime: { data: null, timestamp: 0, key: '' }
+  },
+  bigballz: {
+    monthly: { data: null, timestamp: 0, key: '' },
+    weekly:  { data: null, timestamp: 0, key: '' },
+    allTime: { data: null, timestamp: 0, key: '' }
+  }
 };
 const CACHE_TTL_MS = 60 * 1000; // 60 seconds TTL for fresh data background sync
 
@@ -415,18 +423,19 @@ function getMonthlyTimeBounds() {
 }
 
 /**
- * Fetch from Yeet Affiliate API with sub-5ms in-memory cache
+ * Fetch from Yeet Affiliate API for a specific streamer with in-memory caching (<2ms)
  */
-async function fetchYeetReferrals({ startDate = null, endDate = null, sortBy = 'volume', limit = 100, cacheKey = 'monthly' } = {}) {
+async function fetchYeetReferralsForStreamer(apiKey, streamerCode, { startDate = null, endDate = null, sortBy = 'volume', limit = 100, cacheKey = 'monthly' } = {}) {
   const now = Date.now();
-  const cached = yeetCache[cacheKey];
+  const cacheBucket = streamerCode === 'BIGBALLZ' ? yeetCache.bigballz : yeetCache.bigd;
+  const cached = cacheBucket ? cacheBucket[cacheKey] : null;
 
   // Return cached result immediately if fresh (< 2ms response time)
   if (cached && cached.data && (now - cached.timestamp < CACHE_TTL_MS)) {
     return cached.data;
   }
 
-  if (!YEET_API_KEY) {
+  if (!apiKey) {
     return cached && cached.data ? cached.data : [];
   }
 
@@ -444,7 +453,7 @@ async function fetchYeetReferrals({ startDate = null, endDate = null, sortBy = '
     const response = await fetch(`${YEET_API_BASE}?${params.toString()}`, {
       method: 'GET',
       headers: {
-        'x-yeet-api-key': YEET_API_KEY,
+        'x-yeet-api-key': apiKey,
         'Accept': 'application/json'
       },
       signal: controller.signal
@@ -452,24 +461,79 @@ async function fetchYeetReferrals({ startDate = null, endDate = null, sortBy = '
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      console.warn(`Yeet API returned HTTP ${response.status} for ${cacheKey}`);
+      console.warn(`Yeet API (${streamerCode}) returned HTTP ${response.status} for ${cacheKey}`);
       return cached && cached.data ? cached.data : [];
     }
 
     const rawData = await response.json();
     if (Array.isArray(rawData)) {
-      yeetCache[cacheKey] = {
-        data: rawData,
-        timestamp: now,
-        key: `${startDate}_${endDate}_${sortBy}`
-      };
+      if (cacheBucket) {
+        cacheBucket[cacheKey] = {
+          data: rawData,
+          timestamp: now,
+          key: `${startDate}_${endDate}_${sortBy}`
+        };
+      }
       return rawData;
     }
   } catch (err) {
-    console.error(`Yeet API fetch error (${cacheKey}):`, err.message);
+    console.error(`Yeet API fetch error (${streamerCode} / ${cacheKey}):`, err.message);
   }
 
   return cached && cached.data ? cached.data : [];
+}
+
+/**
+ * Fetch and combine live referrals across both streamer codes (BIGD + BIGBALLZ)
+ */
+async function fetchCombinedYeetReferrals({ startDate = null, endDate = null, sortBy = 'volume', limit = 100, cacheKey = 'monthly' } = {}) {
+  const [bigdRaw, bigballzRaw] = await Promise.all([
+    fetchYeetReferralsForStreamer(YEET_API_KEY, 'BIGD', { startDate, endDate, sortBy, limit, cacheKey }),
+    fetchYeetReferralsForStreamer(YEET_BIGBALLZ_API_KEY, 'BIGBALLZ', { startDate, endDate, sortBy, limit, cacheKey })
+  ]);
+
+  const playerMap = new Map();
+
+  function processReferral(p, sourceCode) {
+    if (!p) return;
+    const vol = Number(p.volume) || 0;
+    const points = Number(p.leaderboardPoints) || 0;
+    const isHidden = Boolean(p.isHidden);
+    // Group by normalized username if available, else by unique userId + sourceCode
+    const normUser = (p.username && !isHidden && p.username.trim()) ? p.username.trim().toLowerCase() : null;
+    const key = normUser ? normUser : `id_${p.userId}_${sourceCode}`;
+
+    if (playerMap.has(key)) {
+      const existing = playerMap.get(key);
+      existing.volume += vol;
+      existing.leaderboardPoints += points;
+      existing.casinoPoints += (Number(p.casinoPoints) || 0);
+      existing.sportsbookPoints += (Number(p.sportsbookPoints) || 0);
+      existing.highestMultiplier = Math.max(existing.highestMultiplier, Number(p.highestMultiplier) || 0);
+      if (!existing.sourceCode.includes(sourceCode)) {
+        existing.sourceCode = `${existing.sourceCode} + ${sourceCode}`;
+      }
+    } else {
+      playerMap.set(key, {
+        userId: p.userId,
+        username: isHidden ? "🔒 Hidden User" : (p.username || `Player_${p.userId}`),
+        isHidden: isHidden,
+        sourceCode: sourceCode,
+        volume: vol,
+        leaderboardPoints: points,
+        casinoPoints: Number(p.casinoPoints) || 0,
+        sportsbookPoints: Number(p.sportsbookPoints) || 0,
+        highestMultiplier: Number(p.highestMultiplier) || 0,
+        tier: p.tier || "Unranked",
+        tierImage: p.tierImage || null
+      });
+    }
+  }
+
+  (bigdRaw || []).forEach(p => processReferral(p, 'BIGD'));
+  (bigballzRaw || []).forEach(p => processReferral(p, 'BIGBALLZ'));
+
+  return Array.from(playerMap.values());
 }
 
 // ==============================================================================
@@ -593,8 +657,8 @@ app.get("/api/leaderboard", async (req, res) => {
       displayPeriod = 'All-Time Yeet Totals';
     }
 
-    // 1. Fetch live referrals from Yeet Public API (<2ms cached)
-    let rawYeetReferrals = await fetchYeetReferrals({
+    // 1. Fetch live combined referrals across both streamers (<2ms cached)
+    let rawYeetReferrals = await fetchCombinedYeetReferrals({
       startDate: queryStartDate,
       endDate: queryEndDate,
       sortBy: 'volume',
@@ -607,13 +671,12 @@ app.get("/api/leaderboard", async (req, res) => {
       const vol = Number(p.volume) || 0;
       const points = Number(p.leaderboardPoints) || 0;
       const isHidden = Boolean(p.isHidden);
-      const displayName = isHidden ? "🔒 Hidden User" : (p.username || `Player_${p.userId}`);
 
       return {
         user_id: p.userId,
-        username: displayName,
+        username: p.username,
         is_hidden: isHidden,
-        source_code: "BIGD",
+        source_code: p.sourceCode || "BIGD",
         volume: vol,
         leaderboard_points: points,
         casino_points: Number(p.casinoPoints) || 0,
@@ -627,10 +690,15 @@ app.get("/api/leaderboard", async (req, res) => {
 
     // Filter by code if explicitly specified
     if (codeFilter === 'bigd') {
-      yeetWagers = yeetWagers.filter(u => u.source_code === 'BIGD');
+      yeetWagers = yeetWagers.filter(u => u.source_code.includes('BIGD'));
     } else if (codeFilter === 'bigballz') {
-      yeetWagers = yeetWagers.filter(u => u.source_code === 'BIGBALLZ');
+      yeetWagers = yeetWagers.filter(u => u.source_code.includes('BIGBALLZ'));
     }
+
+    const latestTimestamp = Math.max(
+      yeetCache.bigd[cacheKey]?.timestamp || 0,
+      yeetCache.bigballz[cacheKey]?.timestamp || 0
+    );
 
     res.set("Cache-Control", "public, max-age=30");
     return res.json({
@@ -641,7 +709,7 @@ app.get("/api/leaderboard", async (req, res) => {
       prize_distribution: COMBINED_PRIZE_POOL,
       codes_supported: ["BIGD", "BIGBALLZ"],
       active_filter: codeFilter,
-      cached_at: yeetCache[cacheKey]?.timestamp ? new Date(yeetCache[cacheKey].timestamp).toISOString() : new Date().toISOString()
+      cached_at: latestTimestamp ? new Date(latestTimestamp).toISOString() : new Date().toISOString()
     });
   } catch (err) {
     console.error("Yeet leaderboard error:", err);
@@ -1098,8 +1166,8 @@ app.get("/api/rewards/weekly", async (req, res) => {
         ].filter(Boolean).map(n => n.toLowerCase());
 
         const [weeklyYeet, allTimeYeet] = await Promise.all([
-          fetchYeetReferrals({ startDate: weekInfo.startOfWeek, endDate: weekInfo.endOfWeek, cacheKey: 'weekly' }),
-          fetchYeetReferrals({ cacheKey: 'allTime' })
+          fetchCombinedYeetReferrals({ startDate: weekInfo.startOfWeek, endDate: weekInfo.endOfWeek, cacheKey: 'weekly' }),
+          fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
         ]);
 
         const userWeeklyYeet = (weeklyYeet || []).find(p => p.username && possibleNames.includes(p.username.toLowerCase()));
