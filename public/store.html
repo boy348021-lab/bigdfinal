@@ -2111,8 +2111,14 @@ async function loadWeeklyRewards(token) {
 
       data.reward_tiers.forEach(t => {
         const isUnlocked = userWager >= t.wager_threshold;
-        const localRedeemed = localStorage.getItem(`bigd_claimed_tier_${weekId}_${t.tier}`) === "true";
-        const isRedeemed = claimedList.includes(t.tier) || localRedeemed;
+
+        // Auto-purge any stale glitch claim from localStorage if user is not eligible
+        if (!isUnlocked) {
+          localStorage.removeItem(`bigd_claimed_tier_${weekId}_${t.tier}`);
+        }
+
+        const localRedeemed = isUnlocked && (localStorage.getItem(`bigd_claimed_tier_${weekId}_${t.tier}`) === "true");
+        const isRedeemed = isUnlocked && (claimedList.includes(t.tier) || localRedeemed);
 
         const card = document.createElement("div");
         card.className = `tier-card${isRedeemed ? " redeemed" : (isUnlocked ? " unlocked" : "")}`;
