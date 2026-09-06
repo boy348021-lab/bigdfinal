@@ -1159,26 +1159,42 @@ app.get("/api/rewards/weekly", async (req, res) => {
 
       // 2b. Check Live Yeet API Referrals for accurate current user stats
       try {
+        // Build a normalized set of possible names to match against
         const possibleNames = [
           targetUser.degencity_username,
           targetUser.kick_username,
-          targetUser.discord_username
-        ].filter(Boolean).map(n => n.toLowerCase());
+          targetUser.discord_username,
+          // Also try stripping common suffixes/prefixes
+          targetUser.degencity_username?.replace(/[^a-z0-9]/gi, ''),
+          targetUser.kick_username?.replace(/[^a-z0-9]/gi, '')
+        ].filter(Boolean).map(n => n.toLowerCase().trim());
 
         const [weeklyYeet, allTimeYeet] = await Promise.all([
           fetchCombinedYeetReferrals({ startDate: weekInfo.startOfWeek, endDate: weekInfo.endOfWeek, cacheKey: 'weekly' }),
           fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
         ]);
 
-        const userWeeklyYeet = (weeklyYeet || []).find(p => p.username && possibleNames.includes(p.username.toLowerCase()));
-        const userAllTimeYeet = (allTimeYeet || []).find(p => p.username && possibleNames.includes(p.username.toLowerCase()));
+        // Normalize Yeet usernames for matching
+        const findYeetMatch = (list) =>
+          (list || []).find(p => p.username && possibleNames.includes(p.username.toLowerCase().trim()));
 
-        if (userWeeklyYeet && Number(userWeeklyYeet.volume) > weeklyTotalWager) {
-          weeklyTotalWager = Number(Number(userWeeklyYeet.volume).toFixed(2));
-          weeklySlotsWager = weeklyTotalWager;
+        const userWeeklyYeet  = findYeetMatch(weeklyYeet);
+        const userAllTimeYeet = findYeetMatch(allTimeYeet);
+
+        // Yeet API is authoritative — use its volume whenever a match is found
+        // (covers players like Bluntz who have Yeet wager but no local DB transactions)
+        if (userWeeklyYeet) {
+          const yeetWeekly = Number(Number(userWeeklyYeet.volume).toFixed(2));
+          if (yeetWeekly > weeklyTotalWager) {
+            weeklyTotalWager = yeetWeekly;
+            weeklySlotsWager = yeetWeekly;
+          }
         }
-        if (userAllTimeYeet && Number(userAllTimeYeet.volume) > lifetimeWager) {
-          lifetimeWager = Number(Number(userAllTimeYeet.volume).toFixed(2));
+        if (userAllTimeYeet) {
+          const yeetLifetime = Number(Number(userAllTimeYeet.volume).toFixed(2));
+          if (yeetLifetime > lifetimeWager) {
+            lifetimeWager = yeetLifetime;
+          }
         }
       } catch (yeetSyncErr) {
         console.warn("Live Yeet user sync note:", yeetSyncErr.message);
