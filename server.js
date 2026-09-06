@@ -903,121 +903,19 @@ app.get("/api/challenges", (req, res) => {
   res.json({ success: true, challenges: list });
 });
 
-// ─── Wager-to-Points Synchronization Helper ────────────────────────────
-// Automatically converts Yeet wagers into wallet points ($1 wagered = 10 BigD Coins)
+// ─── User Points Helper ────────────────────────────────────────────────
+// Returns the authentic spendable BigD Coins wallet balance from the database
 async function syncWagerPointsForUser(userId) {
   if (!supabase || !userId) return 0;
   try {
     const { data: user, error: uErr } = await supabase
       .from("users")
-      .select("id, degencity_username, kick_username, discord_username, display_name, metadata, points")
+      .select("id, points")
       .eq("id", userId)
       .single();
 
     if (uErr || !user) return 0;
-
-    const possibleNames = [
-      user.degencity_username,
-      user.kick_username,
-      user.discord_username,
-      user.display_name,
-      user.degencity_username?.replace(/[^a-z0-9]/gi, ''),
-      user.kick_username?.replace(/[^a-z0-9]/gi, ''),
-      user.discord_username?.replace(/[^a-z0-9]/gi, '')
-    ].filter(Boolean).map(n => n.toLowerCase().trim());
-
-    // Fetch live referrals from Yeet across both codes
-    const [monthlyYeet, allTimeYeet] = await Promise.all([
-      fetchCombinedYeetReferrals({ cacheKey: 'monthly' }),
-      fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
-    ]);
-
-    const findMatch = (list) => {
-      if (!list || !Array.isArray(list)) return null;
-      let m = list.find(p => p.username && possibleNames.includes(p.username.toLowerCase().trim()));
-      if (m) return m;
-      m = list.find(p => {
-        const cleanP = (p.username || "").replace(/[^a-z0-9]/gi, '').toLowerCase();
-        return cleanP && possibleNames.some(n => n.replace(/[^a-z0-9]/gi, '') === cleanP);
-      });
-      if (m) return m;
-      m = list.find(p => {
-        const pName = (p.username || "").toLowerCase().trim();
-        if (!pName || pName.length < 4) return false;
-        return possibleNames.some(n => (n.length >= 4 && (n.includes(pName) || pName.includes(n))));
-      });
-      return m || null;
-    };
-
-    const matchMonthly = findMatch(monthlyYeet);
-    const matchAllTime = findMatch(allTimeYeet);
-
-    const totalWagerUsd = Math.max(
-      Number(matchMonthly?.volume) || 0,
-      Number(matchAllTime?.volume) || 0
-    );
-
-    const totalWagerPoints = Math.floor(totalWagerUsd * 10);
-
-    // Subtract redeemed points from Supabase redemptions table
-    let redeemedPoints = 0;
-    try {
-      const { data: redemptions } = await supabase
-        .from("redemptions")
-        .select("points_cost")
-        .eq("user_id", userId)
-        .neq("status", "rejected");
-
-      if (redemptions) {
-        redeemedPoints = redemptions.reduce((sum, r) => sum + (Number(r.points_cost) || 0), 0);
-      }
-    } catch (rErr) {}
-
-    // Calculate net blackjack gain/loss from audit_logs
-    const userMeta = user.metadata || {};
-    let blackjackNet = 0;
-    try {
-      const { data: bjLogs } = await supabase
-        .from("audit_logs")
-        .select("points_before, points_after")
-        .eq("user_id", userId)
-        .eq("source", "blackjack");
-
-      if (bjLogs && bjLogs.length > 0) {
-        blackjackNet = bjLogs.reduce((sum, log) => sum + ((log.points_after || 0) - (log.points_before || 0)), 0);
-      }
-    } catch (bjErr) {
-      console.error("Error fetching blackjack audit logs:", bjErr.message);
-    }
-
-    const currentBal = Number(user.points || 0);
-    const calculatedTarget = Math.max(0, totalWagerPoints - redeemedPoints + blackjackNet);
-    const targetBalance = Math.max(currentBal, calculatedTarget);
-
-    if (currentBal !== targetBalance || userMeta.yeet_wager_points !== totalWagerPoints) {
-      const updatedMeta = { 
-        ...userMeta, 
-        yeet_wager_usd: totalWagerUsd,
-        yeet_wager_points: totalWagerPoints,
-        redeemed_points: redeemedPoints,
-        blackjack_net: blackjackNet,
-        last_synced_at: new Date().toISOString()
-      };
-
-      await supabase
-        .from("users")
-        .update({ 
-          points: targetBalance, 
-          metadata: updatedMeta, 
-          updated_at: new Date().toISOString() 
-        })
-        .eq("id", user.id);
-
-      console.log(`💸 Yeet Wager Sync: User ${user.id} -> $${totalWagerUsd.toFixed(2)} wagered = ${totalWagerPoints} pts earned - ${redeemedPoints} redeemed + ${blackjackNet} blackjack net = ${targetBalance} wallet balance.`);
-      return targetBalance;
-    }
-
-    return targetBalance;
+    return Number(user.points || 0);
   } catch (err) {
     console.error("syncWagerPointsForUser error:", err.message);
     return 0;
