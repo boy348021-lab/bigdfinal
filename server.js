@@ -1105,13 +1105,15 @@ app.get("/api/rewards/weekly", async (req, res) => {
   if (authHeader && authHeader.startsWith("Bearer ") && supabase) {
     try {
       const token = authHeader.split(" ")[1];
-      const { data: session } = await supabase
-        .from("sessions")
-        .select("user_id, users(*)")
-        .eq("token", token)
-        .gt("expires_at", new Date().toISOString())
-        .single();
-      if (session?.users) targetUser = session.users;
+      const decoded = jwt.verify(token, JWT_SECRET);
+      if (decoded && decoded.userId) {
+        const { data: user } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", decoded.userId)
+          .maybeSingle();
+        if (user) targetUser = user;
+      }
     } catch (e) {}
   }
 
@@ -1344,8 +1346,28 @@ app.post("/api/rewards/weekly/claim", requireAuth, async (req, res) => {
     const matchWeekly = findMatch(weeklyYeet);
     const matchMonthly = findMatch(monthlyYeet);
     const matchAllTime = findMatch(allTimeYeet);
+    // Check database transactions for this week
+    let dbWeeklyWager = 0;
+    try {
+      const { data: dbTx } = await supabase
+        .from("wager_transactions")
+        .select("wager_amount_usd, processed_at")
+        .eq("user_id", userId);
+
+      if (dbTx && dbTx.length > 0) {
+        const startMs = new Date(weekInfo.startOfWeek).getTime();
+        const endMs = new Date(weekInfo.endOfWeek).getTime();
+        dbWeeklyWager = dbTx
+          .filter(tx => {
+            const ms = new Date(tx.processed_at).getTime();
+            return ms >= startMs && ms <= endMs;
+          })
+          .reduce((sum, tx) => sum + (Number(tx.wager_amount_usd) || 0), 0);
+      }
+    } catch (e) {}
 
     const userWager = Math.max(
+      dbWeeklyWager,
       Number(matchWeekly?.volume) || 0,
       Number(matchMonthly?.volume) || 0,
       Number(matchAllTime?.volume) || 0
