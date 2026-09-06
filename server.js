@@ -1323,6 +1323,40 @@ app.post("/api/rewards/weekly/claim", requireAuth, async (req, res) => {
       return res.status(400).json({ error: `Tier ${tierNum} ($${targetTier.cash_value} Cash) already redeemed this week (${weekInfo.weekId}).` });
     }
 
+    // Verify user meets the wager threshold for this tier
+    const possibleNames = [
+      req.user.degencity_username,
+      req.user.kick_username,
+      req.user.discord_username,
+      req.user.degencity_username?.replace(/[^a-z0-9]/gi, ''),
+      req.user.kick_username?.replace(/[^a-z0-9]/gi, '')
+    ].filter(Boolean).map(n => n.toLowerCase().trim());
+
+    const [weeklyYeet, monthlyYeet, allTimeYeet] = await Promise.all([
+      fetchCombinedYeetReferrals({ startDate: weekInfo.startOfWeek, endDate: weekInfo.endOfWeek, cacheKey: 'weekly' }),
+      fetchCombinedYeetReferrals({ cacheKey: 'monthly' }),
+      fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
+    ]);
+
+    const findMatch = (list) =>
+      (list || []).find(p => p.username && possibleNames.includes(p.username.toLowerCase().trim()));
+
+    const matchWeekly = findMatch(weeklyYeet);
+    const matchMonthly = findMatch(monthlyYeet);
+    const matchAllTime = findMatch(allTimeYeet);
+
+    const userWager = Math.max(
+      Number(matchWeekly?.volume) || 0,
+      Number(matchMonthly?.volume) || 0,
+      Number(matchAllTime?.volume) || 0
+    );
+
+    if (userWager < targetTier.wager_threshold) {
+      return res.status(403).json({
+        error: `Insufficient wager: You have $${userWager.toFixed(2)} wagered this week, but Tier ${tierNum} requires $${targetTier.wager_threshold.toLocaleString()} wager.`
+      });
+    }
+
     // Insert claim record into redemptions ledger
     const { data: record, error: insErr } = await supabase
       .from("redemptions")

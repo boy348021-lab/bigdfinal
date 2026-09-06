@@ -966,6 +966,22 @@ main {
   border-color: #ffd700 !important;
   box-shadow: 0 0 16px rgba(255, 215, 0, 0.3) !important;
 }
+.tc-claim-btn.locked {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-muted) !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+  opacity: 0.7;
+}
+.tc-claim-btn.locked:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-muted) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
 
 /* Ledger Table */
 .ledger-table-wrap {
@@ -1628,37 +1644,37 @@ footer a:hover { color: var(--purple-200); }
           <div class="tc-badge">🥉 Tier 1</div>
           <div class="tc-wager">$250 Wager</div>
           <div class="tc-reward">🎁 $5 Cash</div>
-          <button class="tc-claim-btn" onclick="window.open('https://discord.gg/aHSVMX4DCr', '_blank', 'noopener,noreferrer')">Claim $5 Cash 🎟️</button>
+          <button class="tc-claim-btn locked" disabled>Need $250 Wager</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">🥈 Tier 2</div>
           <div class="tc-wager">$1,000 Wager</div>
           <div class="tc-reward">🎁 $10 Cash</div>
-          <button class="tc-claim-btn" onclick="window.open('https://discord.gg/aHSVMX4DCr', '_blank', 'noopener,noreferrer')">Claim $10 Cash 🎟️</button>
+          <button class="tc-claim-btn locked" disabled>Need $1,000 Wager</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">🥇 Tier 3</div>
           <div class="tc-wager">$1,500 Wager</div>
           <div class="tc-reward">🎁 $15 Cash</div>
-          <button class="tc-claim-btn" onclick="window.open('https://discord.gg/aHSVMX4DCr', '_blank', 'noopener,noreferrer')">Claim $15 Cash 🎟️</button>
+          <button class="tc-claim-btn locked" disabled>Need $1,500 Wager</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">💎 Tier 4</div>
           <div class="tc-wager">$2,500 Wager</div>
           <div class="tc-reward">🎁 $20 Cash</div>
-          <button class="tc-claim-btn" onclick="window.open('https://discord.gg/aHSVMX4DCr', '_blank', 'noopener,noreferrer')">Claim $20 Cash 🎟️</button>
+          <button class="tc-claim-btn locked" disabled>Need $2,500 Wager</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">👑 Tier 5</div>
           <div class="tc-wager">$5,000 Wager</div>
           <div class="tc-reward">🎁 $30 Cash</div>
-          <button class="tc-claim-btn" onclick="window.open('https://discord.gg/aHSVMX4DCr', '_blank', 'noopener,noreferrer')">Claim $30 Cash 🎟️</button>
+          <button class="tc-claim-btn locked" disabled>Need $5,000 Wager</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">🔥 Tier 6</div>
           <div class="tc-wager">$10,000 Wager</div>
           <div class="tc-reward">🎁 $40 Cash</div>
-          <button class="tc-claim-btn" onclick="window.open('https://discord.gg/aHSVMX4DCr', '_blank', 'noopener,noreferrer')">Claim $40 Cash 🎟️</button>
+          <button class="tc-claim-btn locked" disabled>Need $10,000 Wager</button>
         </div>
       </div>
     </div>
@@ -2105,9 +2121,24 @@ async function loadWeeklyRewards(token) {
         if (isRedeemed) badgeText += " ✓ REDEEMED";
         else if (isUnlocked) badgeText += " ✓ UNLOCKED";
 
-        let btnClass = isRedeemed ? "tc-claim-btn redeemed" : "tc-claim-btn unlocked";
-        let btnText = isRedeemed ? "✅ REDEEMED" : `Claim $${t.cash_value} Cash 🎟️`;
-        let btnDisabled = isRedeemed;
+        let btnClass = "tc-claim-btn";
+        let btnText = "";
+        let btnDisabled = false;
+
+        if (isRedeemed) {
+          btnClass = "tc-claim-btn redeemed";
+          btnText = "✅ REDEEMED";
+          btnDisabled = true;
+        } else if (isUnlocked) {
+          btnClass = "tc-claim-btn unlocked";
+          btnText = `Claim $${t.cash_value} Cash 🎟️`;
+          btnDisabled = false;
+        } else {
+          btnClass = "tc-claim-btn locked";
+          const diff = Math.max(0, t.wager_threshold - userWager);
+          btnText = prog ? `Need $${Math.ceil(diff).toLocaleString()} More Wager` : `Need $${t.wager_threshold.toLocaleString()} Wager`;
+          btnDisabled = true;
+        }
 
         card.innerHTML = `
           <div class="tc-badge">${badgeText}</div>
@@ -2118,7 +2149,7 @@ async function loadWeeklyRewards(token) {
           </button>
         `;
 
-        if (!isRedeemed) {
+        if (isUnlocked && !isRedeemed) {
           const btn = card.querySelector(".tc-claim-btn");
           btn.addEventListener("click", async function () {
             // 1. Direct zero-latency open of Discord ticket channel
