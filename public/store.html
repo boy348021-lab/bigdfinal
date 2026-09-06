@@ -2105,18 +2105,9 @@ async function loadWeeklyRewards(token) {
         if (isRedeemed) badgeText += " ✓ REDEEMED";
         else if (isUnlocked) badgeText += " ✓ UNLOCKED";
 
-        let btnClass = "tc-claim-btn";
-        let btnText = `Claim $${t.cash_value} via Discord 🎟️`;
-        let btnDisabled = false;
-
-        if (isRedeemed) {
-          btnClass = "tc-claim-btn redeemed";
-          btnText = "✅ REDEEMED";
-          btnDisabled = true;
-        } else if (isUnlocked) {
-          btnClass = "tc-claim-btn unlocked";
-          btnText = `Claim $${t.cash_value} Cash 🎟️`;
-        }
+        let btnClass = isRedeemed ? "tc-claim-btn redeemed" : "tc-claim-btn unlocked";
+        let btnText = isRedeemed ? "✅ REDEEMED" : `Claim $${t.cash_value} Cash 🎟️`;
+        let btnDisabled = isRedeemed;
 
         card.innerHTML = `
           <div class="tc-badge">${badgeText}</div>
