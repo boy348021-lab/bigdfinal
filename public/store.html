@@ -894,6 +894,35 @@ main {
   border-radius: 8px;
   width: 100%;
 }
+.tc-claim-btn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: none;
+  cursor: not-allowed;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-muted);
+  transition: all 0.25s ease;
+}
+.tc-claim-btn.claimable {
+  background: linear-gradient(135deg, #00c853 0%, #00ff80 100%);
+  color: #000;
+  cursor: pointer;
+  box-shadow: 0 0 16px rgba(0, 255, 128, 0.35);
+}
+.tc-claim-btn.claimable:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 28px rgba(0, 255, 128, 0.6);
+}
+.tc-claim-btn.claimable:active {
+  transform: translateY(1px) scale(0.98);
+}
 
 /* Ledger Table */
 .ledger-table-wrap {
@@ -1357,6 +1386,15 @@ footer a:hover { color: var(--purple-200); }
 <!-- ── MAIN ───────────────────────────────────────────────── -->
 <main style="display:flex;flex-direction:column;align-items:center;padding:110px 20px 60px;">
 
+  <!-- ── PAGE HEADING ─────────────────────────────────────────── -->
+  <div style="width:100%; max-width:900px; margin-bottom:32px; text-align:center;">
+    <div style="font-family:var(--font-display); font-size:2.4rem; font-weight:900; letter-spacing:0.06em; color:#fff; text-transform:uppercase; line-height:1.1;">
+      BigD <span style="color:var(--cyan-400);">Store</span>
+    </div>
+    <div style="font-family:var(--font-ui); font-size:0.82rem; color:var(--text-muted); letter-spacing:0.15em; text-transform:uppercase; margin-top:6px;">
+      Redeem your BigD Coins for exclusive rewards
+    </div>
+  </div>
 
   <!-- Store Integration & Connection Header -->
   <div id="store-user-bar" class="store-user-bar" style="display:none; width:100%; max-width:800px; flex-direction:column; gap:16px;">
@@ -1387,7 +1425,7 @@ footer a:hover { color: var(--purple-200); }
     </div>
   </div>
 
-  <div id="store-login-prompt" class="store-user-bar" style="display:none; justify-content:center; text-align:center; padding:24px; max-width:800px; width:100%;">
+  <div id="store-login-prompt" class="store-user-bar" style="display:flex; justify-content:center; text-align:center; padding:24px; max-width:800px; width:100%;">
     <div>
       <p style="margin-bottom:12px; font-size:0.95rem; color:var(--text-secondary);" id="store-prompt-msg">Log in with Discord and verify your Yeet account to use your BigD Coins!</p>
       <button onclick="loginWithDiscord()" class="nav-btn-auth" style="padding:10px 20px; font-size:0.9rem;">Login with Discord</button>
@@ -1397,6 +1435,13 @@ footer a:hover { color: var(--purple-200); }
   <!-- ══════════════════════════════════════════════════════════
        WEEKLY WAGER REWARDS SECTION (PHASES 4, 5, 6, 7)
        ══════════════════════════════════════════════════════════ -->
+  <!-- ── SECTION DIVIDER: WEEKLY WAGER REWARDS ───────────────────── -->
+  <div style="width:100%; max-width:900px; margin:40px 0 20px; display:flex; align-items:center; gap:16px;">
+    <div style="flex:1; height:1px; background:rgba(255,255,255,0.08);"></div>
+    <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:900; letter-spacing:0.1em; color:var(--cyan-400); text-transform:uppercase; white-space:nowrap;">⚡ Weekly Wager Rewards</div>
+    <div style="flex:1; height:1px; background:rgba(255,255,255,0.08);"></div>
+  </div>
+
   <div class="weekly-rewards-container" id="weekly-rewards-section">
     
     <!-- Hero Card & Timer -->
@@ -1540,31 +1585,37 @@ footer a:hover { color: var(--purple-200); }
           <div class="tc-badge">🥉 Tier 1</div>
           <div class="tc-wager">$250 Wager</div>
           <div class="tc-reward">🎁 $5 Cash</div>
+          <button class="tc-claim-btn" disabled>🔒 Locked</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">🥈 Tier 2</div>
           <div class="tc-wager">$1,000 Wager</div>
           <div class="tc-reward">🎁 $10 Cash</div>
+          <button class="tc-claim-btn" disabled>🔒 Locked</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">🥇 Tier 3</div>
           <div class="tc-wager">$1,500 Wager</div>
           <div class="tc-reward">🎁 $15 Cash</div>
+          <button class="tc-claim-btn" disabled>🔒 Locked</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">💎 Tier 4</div>
           <div class="tc-wager">$2,500 Wager</div>
           <div class="tc-reward">🎁 $20 Cash</div>
+          <button class="tc-claim-btn" disabled>🔒 Locked</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">👑 Tier 5</div>
           <div class="tc-wager">$5,000 Wager</div>
           <div class="tc-reward">🎁 $30 Cash</div>
+          <button class="tc-claim-btn" disabled>🔒 Locked</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">🔥 Tier 6</div>
           <div class="tc-wager">$10,000 Wager</div>
           <div class="tc-reward">🎁 $40 Cash</div>
+          <button class="tc-claim-btn" disabled>🔒 Locked</button>
         </div>
       </div>
     </div>
@@ -1614,16 +1665,12 @@ footer a:hover { color: var(--purple-200); }
 
   </div>
 
-  <!-- Store Maintenance / Unavailable Banner -->
-  <div id="store-unavailable-banner" style="width:100%; max-width:900px; background:rgba(255,180,0,0.06); border:1px solid rgba(255,180,0,0.35); border-radius:var(--radius-md); padding:24px 28px; text-align:center; margin-bottom:32px; box-shadow:0 0 25px rgba(255,180,0,0.1); backdrop-filter:blur(10px);">
-    <div style="font-size:2.2rem; margin-bottom:8px;">⚠️</div>
-    <div style="font-family:var(--font-display); font-size:1.35rem; font-weight:800; color:#ffd700; letter-spacing:0.06em; margin-bottom:8px; text-transform:uppercase;">Redemptions Currently Unavailable</div>
-    <p style="font-family:var(--font-body); font-size:0.92rem; color:var(--text-secondary); line-height:1.6; max-width:620px; margin:0 auto 14px;">
-      Store redemptions are temporarily paused for maintenance and stock restocking. You can still earn and accumulate BigD Coins by wagering on Yeet with code <strong>BIGD</strong>!
-    </p>
-    <a href="https://discord.gg/aHSVMX4DCr" target="_blank" rel="noopener" class="history-claim-btn" style="display:inline-flex; font-size:0.82rem; padding:8px 18px;">
-      Join Discord for Updates 📢
-    </a>
+
+  <!-- ── SECTION DIVIDER: REDEEM COINS ────────────────────────────── -->
+  <div style="width:100%; max-width:900px; margin:48px 0 20px; display:flex; align-items:center; gap:16px;">
+    <div style="flex:1; height:1px; background:rgba(255,255,255,0.08);"></div>
+    <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:900; letter-spacing:0.1em; color:#ffd700; text-transform:uppercase; white-space:nowrap;">🪙 Redeem Coins</div>
+    <div style="flex:1; height:1px; background:rgba(255,255,255,0.08);"></div>
   </div>
 
   <!-- Rewards Grid -->
@@ -1746,9 +1793,71 @@ async function loadRedemptions(token) {
   }
 }
 
-async function redeemReward(rewardId) {
-  showToast("Store redemptions are currently unavailable.");
-  return;
+async function redeemReward(rewardId, btnEl) {
+  if (!currentAuthToken) {
+    showToast("⚠️ Please log in to redeem rewards.");
+    return;
+  }
+
+  // Prevent double-tap
+  if (btnEl) {
+    btnEl.disabled = true;
+    btnEl.textContent = "Processing…";
+  }
+
+  try {
+    const res = await fetch("/api/store/redeem", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${currentAuthToken}`
+      },
+      body: JSON.stringify({ reward_id: rewardId })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // Surface the exact server error (e.g. "Insufficient points balance")
+      showToast(`❌ ${data.error || "Redemption failed. Try again."}`);
+      if (btnEl) {
+        btnEl.disabled = false;
+        btnEl.textContent = "Redeem";
+      }
+      return;
+    }
+
+    // ✅ Success — update coin HUD immediately
+    if (data.new_balance !== undefined) {
+      const valEl = document.getElementById("coin-value");
+      const storeVal = document.getElementById("store-points-val");
+      if (valEl) valEl.textContent = data.new_balance.toLocaleString();
+      if (storeVal) storeVal.textContent = data.new_balance.toLocaleString();
+    }
+
+    showToast("✅ Coins deducted! Opening Discord to create your ticket…");
+
+    // Small delay so the toast is readable, then open Discord ticket channel
+    setTimeout(() => {
+      window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
+    }, 900);
+
+    // Refresh redemption history
+    if (currentAuthToken) await loadRedemptions(currentAuthToken);
+
+    if (btnEl) {
+      btnEl.textContent = "✅ Redeemed";
+      // Keep it disabled — they've already claimed this one this session
+    }
+
+  } catch (err) {
+    console.error("Redeem error:", err);
+    showToast("❌ Network error. Please try again.");
+    if (btnEl) {
+      btnEl.disabled = false;
+      btnEl.textContent = "Redeem";
+    }
+  }
 }
 
 function showToast(msg) {
@@ -1775,14 +1884,18 @@ async function initStore() {
     data.rewards.forEach(r => {
       const card = document.createElement("div");
       card.className = "reward-card";
-      card.style.opacity = "0.75";
       card.innerHTML = `
         <div class="reward-card-emoji">${r.emoji || "🏆"}</div>
         <div class="reward-card-title">${escHtml(r.label)}</div>
         <div class="reward-card-desc">${escHtml(r.description)}</div>
         <div class="reward-card-cost">${r.points_cost.toLocaleString()} Coins</div>
-        <button class="reward-card-btn" disabled style="background:rgba(255,255,255,0.08); color:var(--text-muted); border:1px solid rgba(255,255,255,0.12); cursor:not-allowed; box-shadow:none;">Currently Unavailable</button>
+        <button class="reward-card-btn" data-reward-id="${escHtml(r.id)}">Redeem</button>
       `;
+      // Wire button AFTER it's in the DOM so we can pass it as `this`
+      const btn = card.querySelector(".reward-card-btn");
+      btn.addEventListener("click", function () {
+        redeemReward(r.id, this);
+      });
       grid.appendChild(card);
     });
   } catch (err) {
@@ -1851,10 +1964,7 @@ onAuthReady(async (user) => {
         if (userBar) userBar.style.display = 'flex';
         if (loginPrompt) loginPrompt.style.display = 'none';
 
-        // Toast prompt if Kick is not connected
-        if (!d.kickUsername) {
-          showToast("⚡ Connect your Kick account to earn 10 BigD Coins / 5 minutes of chat activity!");
-        }
+
 
         await loadRedemptions(token);
         await loadWeeklyRewards(token);
@@ -1938,16 +2048,38 @@ async function loadWeeklyRewards(token) {
     const tiersGrid = document.getElementById("weekly-tiers-grid");
     if (tiersGrid && data.reward_tiers) {
       const userWager = prog ? prog.weekly_wager : 0;
-      tiersGrid.innerHTML = data.reward_tiers.map(t => {
+      tiersGrid.innerHTML = "";
+
+      data.reward_tiers.forEach(t => {
         const isUnlocked = userWager >= t.wager_threshold;
-        return `
-          <div class="tier-card ${isUnlocked ? 'unlocked' : ''}">
-            <div class="tc-badge">${t.badge} ${isUnlocked ? '✓ UNLOCKED' : ''}</div>
-            <div class="tc-wager">$${t.wager_threshold.toLocaleString()} Wager</div>
-            <div class="tc-reward">🎁 $${t.cash_value} Cash</div>
-          </div>
+
+        const card = document.createElement("div");
+        card.className = `tier-card${isUnlocked ? " unlocked" : ""}`;
+        card.innerHTML = `
+          <div class="tc-badge">${t.badge}${isUnlocked ? " ✓ UNLOCKED" : ""}</div>
+          <div class="tc-wager">$${t.wager_threshold.toLocaleString()} Wager</div>
+          <div class="tc-reward">🎁 $${t.cash_value} Cash</div>
+          <button class="tc-claim-btn${isUnlocked ? " claimable" : ""}"${isUnlocked ? "" : " disabled"}>
+            ${isUnlocked ? "Claim Reward →" : "🔒 Locked"}
+          </button>
         `;
-      }).join('');
+
+        // Wire claim button AFTER it's in DOM
+        if (isUnlocked) {
+          const btn = card.querySelector(".tc-claim-btn");
+          btn.addEventListener("click", function () {
+            this.textContent = "Opening Discord…";
+            this.disabled = true;
+            setTimeout(() => {
+              window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
+              this.textContent = "Claim Reward →";
+              this.disabled = false;
+            }, 500);
+          });
+        }
+
+        tiersGrid.appendChild(card);
+      });
     }
 
     // 4. Render Auditable Ledger

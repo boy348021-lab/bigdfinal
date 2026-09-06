@@ -2445,15 +2445,15 @@ const chatActivityTracker = {
   },
 
   async awardInterval() {
-    // Legacy chat points disabled. Points are strictly wager-based ($1 = 10 pts) starting August 1st EST.
+    // Points are wager-only. Kick chat awards disabled.
     return;
   },
 };
 
-// ─── Stream Watch Time Heartbeat Endpoint (Disabled) ─────────────────────────
+// ─── Stream Watch Time Heartbeat Endpoint (Disabled — wager-only points) ─────
 app.post("/api/stream-heartbeat", requireAuth, async (req, res) => {
-  // Legacy watch time points disabled. Points are strictly wager-based ($1 = 10 pts) starting August 1st EST.
-  res.json({ success: true, awarded: false, message: "Watch points disabled; points are wager-only ($1 = 10 pts)" });
+  // Points are wager-only. Watch time awards disabled.
+  res.json({ success: true, awarded: false, message: "Watch points disabled; points are wager-only" });
 });
 
 
