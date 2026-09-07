@@ -499,6 +499,34 @@ onAuthReady((user) => {
 // Start auth boot
 bootAuth();
 
+// Initialize Global Kick Live / Offline Badge Controller across all pages
+(function initGlobalKickBadge() {
+  async function syncBadge() {
+    const badge = document.getElementById('kick-live-badge');
+    const badgeText = document.getElementById('kick-live-text');
+    if (!badge) return;
+
+    try {
+      const res = await fetch('/api/kick-live', { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        const live = Boolean(data && data.live);
+        badge.classList.toggle('is-live', live);
+        badge.classList.toggle('is-offline', !live);
+        if (badgeText) badgeText.textContent = live ? 'ONLINE' : 'OFFLINE';
+        badge.setAttribute('title', live ? 'BigDgamesTV is ONLINE on Kick' : 'BigDgamesTV is OFFLINE on Kick');
+      }
+    } catch (e) {
+      badge.classList.remove('is-live');
+      badge.classList.add('is-offline');
+      if (badgeText) badgeText.textContent = 'OFFLINE';
+    }
+  }
+
+  syncBadge();
+  setInterval(syncBadge, 25000);
+})();
+
 // Initialize Big D Floating Kick Widget
 (function loadKickWidget() {
   if (document.getElementById('bigd-kick-widget-script')) return;

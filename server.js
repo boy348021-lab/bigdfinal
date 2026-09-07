@@ -520,7 +520,7 @@ async function fetchYeetReferralsForStreamer(apiKey, streamerCode, { startDate =
 /**
  * Fetch and combine live referrals across both streamer codes (BIGD + BIGBALLZ)
  */
-async function fetchCombinedYeetReferrals({ startDate = null, endDate = null, sortBy = 'volume', limit = 100, cacheKey = 'monthly' } = {}) {
+async function fetchCombinedYeetReferrals({ startDate = null, endDate = null, sortBy = 'leaderboardPoints', limit = 100, cacheKey = 'monthly' } = {}) {
   const [bigdRaw, bigballzRaw] = await Promise.all([
     fetchYeetReferralsForStreamer(YEET_API_KEY, 'BIGD', { startDate, endDate, sortBy, limit, cacheKey }),
     fetchYeetReferralsForStreamer(YEET_BIGBALLZ_API_KEY, 'BIGBALLZ', { startDate, endDate, sortBy, limit, cacheKey })
@@ -696,14 +696,14 @@ app.get("/api/leaderboard", async (req, res) => {
       fetchCombinedYeetReferrals({
         startDate: queryStartDate,
         endDate: queryEndDate,
-        sortBy: 'volume',
+        sortBy: 'leaderboardPoints',
         limit: 100,
         cacheKey
       }),
       fetchCombinedYeetReferrals({
         startDate: weekBounds.startOfWeek,
         endDate: weekBounds.endOfWeek,
-        sortBy: 'volume',
+        sortBy: 'leaderboardPoints',
         limit: 100,
         cacheKey: `weekly_${weekBounds.weekId}`
       })
@@ -714,6 +714,7 @@ app.get("/api/leaderboard", async (req, res) => {
     (rawWeeklyReferrals || []).forEach(p => {
       const u = p.username ? p.username.toLowerCase().trim() : `id_${p.userId}`;
       const vol = Number(p.volume) || 0;
+      const pts = Number(p.leaderboardPoints) || 0;
       const casino = Number(p.casinoPoints) || 0;
       const sports = Number(p.sportsbookPoints) || 0;
       // CRITICAL: Yeet API `volume` is the TOTAL wager (Slots + House combined).
@@ -725,21 +726,23 @@ app.get("/api/leaderboard", async (req, res) => {
         total_volume: vol,
         slots_volume: 0,   // NEVER assume Yeet volume = slots qualifying — no API split exists
         house_volume: vol, // Treat full Yeet volume as house until DB slots data overrides
+        points: pts,
         casino_points: casino,
         sportsbook_points: sports
       });
     });
 
-    // 2. Map & format player data
+    // 2. Map & format player data — Scoring logic: Points = Wager * House Edge (matching BigBallz)
     let yeetWagers = (rawYeetReferrals || []).map((p) => {
       const vol = Number(p.volume) || 0;
       const points = Number(p.leaderboardPoints) || 0;
       const isHidden = Boolean(p.isHidden);
       const uKey = p.username ? p.username.toLowerCase().trim() : `id_${p.userId}`;
-      const wStats = weeklyMap.get(uKey) || { total_volume: 0, slots_volume: 0, house_volume: 0, casino_points: 0, sportsbook_points: 0 };
+      const wStats = weeklyMap.get(uKey) || { total_volume: 0, slots_volume: 0, house_volume: 0, points: 0, casino_points: 0, sportsbook_points: 0 };
       const weeklyVol = wStats.total_volume;
       const weeklySlots = wStats.slots_volume;
       const weeklyHouse = wStats.house_volume;
+      const weeklyPts = wStats.points;
 
       return {
         user_id: p.userId,
@@ -751,6 +754,7 @@ app.get("/api/leaderboard", async (req, res) => {
         weekly_slots_volume: Number(weeklySlots.toFixed(2)),
         weekly_house_volume: Number(weeklyHouse.toFixed(2)),
         leaderboard_points: points,
+        weekly_points: weeklyPts,
         casino_points: Number(p.casinoPoints) || 0,
         sportsbook_points: Number(p.sportsbookPoints) || 0,
         highest_multiplier: Number(p.highestMultiplier) || 0,
@@ -758,7 +762,12 @@ app.get("/api/leaderboard", async (req, res) => {
         tier_image: p.tierImage || null,
         wager_data: [{ month: monthBounds.monthKey, total_wager_usd: Number(vol.toFixed(2)), weekly_wager_usd: Number(weeklyVol.toFixed(2)) }]
       };
-    }).sort((a, b) => b.volume - a.volume);
+    }).sort((a, b) => {
+      if (period === 'weekly') {
+        return (b.weekly_points - a.weekly_points) || (b.weekly_volume - a.weekly_volume);
+      }
+      return (b.leaderboard_points - a.leaderboard_points) || (b.volume - a.volume);
+    });
 
     // Filter by code if explicitly specified
     if (codeFilter === 'bigd') {
@@ -782,6 +791,8 @@ app.get("/api/leaderboard", async (req, res) => {
       prize_distribution: COMBINED_PRIZE_POOL,
       codes_supported: ["BIGD", "BIGBALLZ"],
       active_filter: codeFilter,
+      scoring_rule: "POINTS_HOUSE_EDGE",
+      scoring_formula: "POINTS = WAGER × HOUSE EDGE",
       cached_at: latestTimestamp ? new Date(latestTimestamp).toISOString() : new Date().toISOString()
     });
   } catch (err) {
