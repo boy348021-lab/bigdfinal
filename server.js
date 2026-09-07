@@ -253,7 +253,7 @@ async function optionalAuth(req, res, next) {
 }
 
 // ─── Kick Live Status ─────────────────────────────────────────────────────────
-let kickOverrideMode = process.env.KICK_FORCE_LIVE === "false" ? "offline" : (process.env.KICK_FORCE_LIVE === "true" ? "live" : "live");
+let kickOverrideMode = process.env.KICK_FORCE_LIVE === "false" ? "offline" : (process.env.KICK_FORCE_LIVE === "true" ? "live" : "auto");
 let kickCache = { live: kickOverrideMode === "live", checkedAt: null, ok: true, channel: process.env.KICK_CHANNEL || "bigdgamestv" };
 const KICK_CACHE_TTL = 30_000;
 
@@ -336,10 +336,10 @@ async function getKickLiveStatus() {
     } catch (e) {}
   }
 
-  // If automated detection was inconclusive and default is live
-  if (!success && process.env.KICK_DEFAULT_LIVE !== "false") {
-    isLive = true;
-    success = true;
+  // If automated detection was inconclusive, safely default to false (offline)
+  if (!success) {
+    isLive = false;
+    success = false;
   }
 
   kickCache = {
@@ -357,7 +357,7 @@ app.get("/api/kick-live", async (req, res) => {
     const status = await getKickLiveStatus();
     res.json(status);
   } catch (err) {
-    res.json({ live: true, channel: process.env.KICK_CHANNEL || "bigdgamestv", error: err.message });
+    res.json({ live: false, channel: process.env.KICK_CHANNEL || "bigdgamestv", error: err.message });
   }
 });
 
