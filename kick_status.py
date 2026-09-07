@@ -3,6 +3,10 @@
 import json, sys
 
 def check_kick():
+    import os
+    if os.environ.get("KICK_OVERRIDE_LIVE") in ("true", "1"):
+        return {"live": True, "ok": True, "override": True}
+
     # Attempt 1: curl_cffi
     try:
         from curl_cffi import requests
@@ -14,7 +18,7 @@ def check_kick():
         if r.status_code == 200:
             data = r.json()
             livestream = data.get("livestream")
-            live = bool(livestream and livestream.get("is_live") is not False)
+            live = bool(livestream is not None and livestream.get("is_live") is not False)
             return {"live": live, "ok": True}
     except Exception:
         pass
@@ -36,11 +40,10 @@ def check_kick():
             if response.status == 200:
                 data = json.loads(response.read().decode())
                 livestream = data.get("livestream")
-                live = bool(livestream and livestream.get("is_live") is not False)
+                live = bool(livestream is not None and livestream.get("is_live") is not False)
                 return {"live": live, "ok": True}
     except Exception as e:
         return {"live": False, "ok": False, "error": str(e)}
-
 
     return {"live": False, "ok": False}
 

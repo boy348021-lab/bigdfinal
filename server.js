@@ -283,6 +283,10 @@ function fetchKickViaPython() {
 }
 
 async function getKickLiveStatus() {
+  if (process.env.KICK_OVERRIDE_LIVE === 'true' || process.env.KICK_OVERRIDE_LIVE === '1') {
+    return { live: true, channel: process.env.KICK_CHANNEL || "bigdgamestv", checkedAt: Date.now(), ok: true, override: true };
+  }
+
   const now = Date.now();
   const channel = process.env.KICK_CHANNEL || "bigdgamestv";
 
@@ -311,7 +315,7 @@ async function getKickLiveStatus() {
   }
 
   // Fallback Method: Direct fetch if Python helper had an issue
-  if (!success) {
+  if (!success || !isLive) {
     try {
       const res = await fetch(`https://kick.com/api/v2/channels/${channel}`, {
         headers: {
@@ -324,13 +328,8 @@ async function getKickLiveStatus() {
         success = true;
         if (data.livestream && data.livestream.is_live !== false) {
           isLive = true;
-        } else if (data.playback_url) {
-          try {
-            const hlsRes = await fetch(data.playback_url, { method: 'HEAD' });
-            if (hlsRes.ok && hlsRes.status === 200) {
-              isLive = true;
-            }
-          } catch (hlsErr) {}
+        } else if (data.livestream !== null && data.livestream !== undefined) {
+          isLive = true;
         }
       }
     } catch (e) {}

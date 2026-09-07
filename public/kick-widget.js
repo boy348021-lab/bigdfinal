@@ -564,7 +564,7 @@
       });
       if (res.ok) {
         const data = await res.json();
-        const live = Boolean(data && data.livestream && data.livestream.is_live !== false);
+        const live = Boolean(data && data.livestream !== null && data.livestream !== undefined && data.livestream.is_live !== false);
         updateWidgetUI(live);
         return;
       }
