@@ -2173,17 +2173,18 @@ async function loadWeeklyRewards(token) {
             this.disabled = true;
 
             // 4. Record to backend API in background if authenticated
-            if (currentAuthToken) {
+            const tokenToUse = currentAuthToken || (typeof getAuthToken === "function" ? getAuthToken() : null);
+            if (tokenToUse) {
               try {
                 await fetch("/api/rewards/weekly/claim", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${currentAuthToken}`
+                    "Authorization": `Bearer ${tokenToUse}`
                   },
                   body: JSON.stringify({ tier: t.tier })
                 });
-                await loadRedemptions(currentAuthToken);
+                await loadRedemptions(tokenToUse);
               } catch (e) {}
             }
           });

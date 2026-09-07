@@ -1200,14 +1200,16 @@ app.get("/api/rewards/weekly", async (req, res) => {
         const { data: claims } = await supabase
           .from("redemptions")
           .select("reward_id")
-          .eq("user_id", targetUser.id)
-          .like("reward_id", `weekly_tier_%_${weekInfo.weekId}`);
+          .eq("user_id", targetUser.id);
 
         if (claims) {
-          claimedTiers = claims.map(c => {
-            const m = String(c.reward_id).match(/weekly_tier_(\d+)_/);
-            return m ? parseInt(m[1], 10) : null;
-          }).filter(Boolean);
+          claimedTiers = claims
+            .filter(c => c.reward_id && c.reward_id.startsWith("weekly_tier_") && c.reward_id.includes(weekInfo.weekId))
+            .map(c => {
+              const m = String(c.reward_id).match(/weekly_tier_(\d+)_/);
+              return m ? parseInt(m[1], 10) : null;
+            })
+            .filter(Boolean);
         }
       } catch (cErr) {}
 
@@ -1279,14 +1281,16 @@ app.post("/api/rewards/weekly/claim", requireAuth, async (req, res) => {
 
   try {
     // Check if already claimed this week
-    const { data: existing } = await supabase
+    const { data: existingClaims } = await supabase
       .from("redemptions")
-      .select("id, created_at, status")
-      .eq("user_id", userId)
-      .eq("reward_id", rewardId)
-      .maybeSingle();
+      .select("id, reward_id, created_at, status")
+      .eq("user_id", userId);
 
-    if (existing) {
+    const alreadyClaimed = (existingClaims || []).some(
+      c => c.reward_id && (c.reward_id === rewardId || (c.reward_id.startsWith(`weekly_tier_${tierNum}_`) && c.reward_id.includes(weekInfo.weekId)))
+    );
+
+    if (alreadyClaimed) {
       return res.status(400).json({ error: `Tier ${tierNum} ($${targetTier.cash_value} Cash) already redeemed this week (${weekInfo.weekId}).` });
     }
 
