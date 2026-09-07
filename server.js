@@ -460,11 +460,12 @@ function getMonthlyTimeBounds() {
  */
 async function fetchYeetReferralsForStreamer(apiKey, streamerCode, { startDate = null, endDate = null, sortBy = 'volume', limit = 100, cacheKey = 'monthly' } = {}) {
   const now = Date.now();
+  const expectedKey = `${startDate}_${endDate}_${sortBy}`;
   const cacheBucket = streamerCode === 'BIGBALLZ' ? yeetCache.bigballz : yeetCache.bigd;
   const cached = cacheBucket ? cacheBucket[cacheKey] : null;
 
-  // Return cached result immediately if fresh (< 2ms response time)
-  if (cached && cached.data && (now - cached.timestamp < CACHE_TTL_MS)) {
+  // Return cached result immediately if fresh (< 2ms response time) and key matches
+  if (cached && cached.data && (now - cached.timestamp < CACHE_TTL_MS) && (!cached.key || cached.key === expectedKey)) {
     return cached.data;
   }
 
@@ -1124,7 +1125,7 @@ app.get("/api/rewards/weekly", async (req, res) => {
         ].filter(Boolean).map(n => n.toLowerCase().trim());
 
         const [weeklyYeet, monthlyYeet, allTimeYeet] = await Promise.all([
-          fetchCombinedYeetReferrals({ startDate: weekInfo.startOfWeek, endDate: weekInfo.endOfWeek, cacheKey: 'weekly' }),
+          fetchCombinedYeetReferrals({ startDate: weekInfo.startOfWeek, endDate: weekInfo.endOfWeek, cacheKey: `weekly_${weekInfo.weekId}` }),
           fetchCombinedYeetReferrals({ cacheKey: 'monthly' }),
           fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
         ]);
@@ -1151,20 +1152,17 @@ app.get("/api/rewards/weekly", async (req, res) => {
         const userMonthlyYeet = findYeetMatch(monthlyYeet);
         const userAllTimeYeet = findYeetMatch(allTimeYeet);
 
-        // Yeet API is authoritative — use highest recorded volume
-        const bestWeeklyVolume = Math.max(
-          Number(userWeeklyYeet?.volume) || 0,
-          Number(userMonthlyYeet?.volume) || 0
-        );
-
-        if (bestWeeklyVolume > weeklyTotalWager) {
-          weeklyTotalWager = Number(bestWeeklyVolume.toFixed(2));
+        // Weekly wager MUST strictly reflect the current week's volume
+        const currentWeeklyYeetVolume = Number(userWeeklyYeet?.volume) || 0;
+        if (currentWeeklyYeetVolume > weeklyTotalWager) {
+          weeklyTotalWager = Number(currentWeeklyYeetVolume.toFixed(2));
           weeklySlotsWager = weeklyTotalWager;
         }
 
         const bestLifetime = Math.max(
           Number(userAllTimeYeet?.volume) || 0,
           Number(userMonthlyYeet?.volume) || 0,
+          lifetimeWager,
           weeklyTotalWager
         );
         if (bestLifetime > lifetimeWager) {
@@ -1303,10 +1301,8 @@ app.post("/api/rewards/weekly/claim", requireAuth, async (req, res) => {
       req.user.discord_username?.replace(/[^a-z0-9]/gi, '')
     ].filter(Boolean).map(n => n.toLowerCase().trim());
 
-    const [weeklyYeet, monthlyYeet, allTimeYeet] = await Promise.all([
-      fetchCombinedYeetReferrals({ startDate: weekInfo.startOfWeek, endDate: weekInfo.endOfWeek, cacheKey: 'weekly' }),
-      fetchCombinedYeetReferrals({ cacheKey: 'monthly' }),
-      fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
+    const [weeklyYeet] = await Promise.all([
+      fetchCombinedYeetReferrals({ startDate: weekInfo.startOfWeek, endDate: weekInfo.endOfWeek, cacheKey: `weekly_${weekInfo.weekId}` })
     ]);
 
     const findMatch = (list) => {
@@ -1327,8 +1323,7 @@ app.post("/api/rewards/weekly/claim", requireAuth, async (req, res) => {
     };
 
     const matchWeekly = findMatch(weeklyYeet);
-    const matchMonthly = findMatch(monthlyYeet);
-    const matchAllTime = findMatch(allTimeYeet);
+
     // Check database transactions for this week
     let dbWeeklyWager = 0;
     try {
@@ -1349,16 +1344,14 @@ app.post("/api/rewards/weekly/claim", requireAuth, async (req, res) => {
       }
     } catch (e) {}
 
-    const userWager = Math.max(
+    const userWeeklyWager = Math.max(
       dbWeeklyWager,
-      Number(matchWeekly?.volume) || 0,
-      Number(matchMonthly?.volume) || 0,
-      Number(matchAllTime?.volume) || 0
+      Number(matchWeekly?.volume) || 0
     );
 
-    if (userWager < targetTier.wager_threshold) {
+    if (userWeeklyWager < targetTier.wager_threshold) {
       return res.status(403).json({
-        error: `Insufficient wager: You have $${userWager.toFixed(2)} wagered this week, but Tier ${tierNum} requires $${targetTier.wager_threshold.toLocaleString()} wager.`
+        error: `Insufficient wager: You have $${userWeeklyWager.toFixed(2)} wagered this week (${weekInfo.weekId}), but Tier ${tierNum} requires $${targetTier.wager_threshold.toLocaleString()} weekly wager.`
       });
     }
 
