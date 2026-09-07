@@ -570,7 +570,7 @@
       }
     } catch (e) {}
 
-    updateWidgetUI(true);
+    updateWidgetUI(false);
   }
 
   // ─── 7. First-Screen-Only Visibility (Hide on Scroll) ──────────────────────

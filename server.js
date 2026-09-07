@@ -253,7 +253,7 @@ async function optionalAuth(req, res, next) {
 }
 
 // ─── Kick Live Status ─────────────────────────────────────────────────────────
-let kickOverrideMode = process.env.KICK_FORCE_LIVE === "false" ? "offline" : (process.env.KICK_FORCE_LIVE === "auto" ? "auto" : "live");
+let kickOverrideMode = process.env.KICK_FORCE_LIVE === "false" ? "offline" : (process.env.KICK_FORCE_LIVE === "true" ? "live" : "auto");
 let kickCache = { live: kickOverrideMode === "live", checkedAt: null, ok: true, channel: process.env.KICK_CHANNEL || "bigdgamestv" };
 const KICK_CACHE_TTL = 15_000;
 
