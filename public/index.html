@@ -6820,9 +6820,10 @@ function renderWeeklyLeaderboard(data) {
         <td class="${amtClass}" style="color:#00ff80; font-weight:800; font-size:1.05rem;">${fmt(p.weekly_volume)}</td>
         <td>${rewardsHtml}</td>
         <td>
-          <a href="store.html" class="tc-claim-btn unlocked" style="display:inline-block; font-size:0.75rem; padding:6px 12px; text-decoration:none; border-radius:8px;">
-            Claim 🎟️
-          </a>
+          ${p.weekly_volume >= 250
+            ? `<a href="store.html" class="tc-claim-btn unlocked" style="display:inline-block; font-size:0.75rem; padding:6px 12px; text-decoration:none; border-radius:8px;">Redeem 🎁</a>`
+            : `<a href="store.html" class="tc-claim-btn locked" style="display:inline-block; font-size:0.75rem; padding:6px 12px; text-decoration:none; border-radius:8px; opacity:0.65;">Store 🛒</a>`
+          }
         </td>
       </tr>
     `;
