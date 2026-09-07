@@ -1012,33 +1012,70 @@ function calculateCoinConversion(slotsWager = 0, houseLiveWager = 0) {
 }
 
 /**
- * Returns current week UTC bounds and week identifier (Phase 7)
+ * Returns current week UTC bounds and week identifier according to US Eastern Time (Sunday midnight reset)
  */
 function getWeeklyTimeBounds() {
   const now = new Date();
-  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-  const day = d.getUTCDay();
-  const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1); // Monday is start of week
-  const startOfWeek = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), diff, 0, 0, 0, 0));
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 6);
-  endOfWeek.setUTCHours(23, 59, 59, 999);
-
-  const msRemaining = Math.max(0, endOfWeek.getTime() - now.getTime());
+  
+  // Format current time in America/New_York timezone
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+  
+  const parts = formatter.formatToParts(now);
+  const map = {};
+  parts.forEach(p => map[p.type] = p.value);
+  
+  const y = parseInt(map.year, 10);
+  const m = parseInt(map.month, 10);
+  const d = parseInt(map.day, 10);
+  
+  // Calculate day of week in ET (0 = Sun, 1 = Mon, ..., 6 = Sat)
+  const etCalendarDate = new Date(Date.UTC(y, m - 1, d));
+  const dayOfWeek = etCalendarDate.getUTCDay();
+  
+  // Monday is start of week in ET (Sunday midnight reset)
+  const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  
+  // Start Monday date in ET
+  const mondayET = new Date(Date.UTC(y, m - 1, d + diffToMonday));
+  const monY = mondayET.getUTCFullYear();
+  const monM = String(mondayET.getUTCMonth() + 1).padStart(2, '0');
+  const monD = String(mondayET.getUTCDate()).padStart(2, '0');
+  
+  // End Sunday date in ET
+  const sundayET = new Date(Date.UTC(y, m - 1, d + diffToMonday + 6));
+  const sunY = sundayET.getUTCFullYear();
+  const sunM = String(sundayET.getUTCMonth() + 1).padStart(2, '0');
+  const sunD = String(sundayET.getUTCDate()).padStart(2, '0');
+  
+  const startOfWeekUTC = etDateStringToUTC(`${monY}-${monM}-${monD}`, '00:00:00');
+  const endOfWeekUTC = new Date(etDateStringToUTC(`${sunY}-${sunM}-${sunD}`, '23:59:59').getTime() + 999);
+  
+  const msRemaining = Math.max(0, endOfWeekUTC.getTime() - now.getTime());
   const daysRemaining = Math.floor(msRemaining / (1000 * 60 * 60 * 24));
   const hoursRemaining = Math.floor((msRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutesRemaining = Math.floor((msRemaining % (1000 * 60 * 60)) / (1000 * 60));
-
-  const weekNumber = Math.ceil((((startOfWeek - new Date(Date.UTC(startOfWeek.getUTCFullYear(), 0, 1))) / 86400000) + 1) / 7);
-  const weekId = `${startOfWeek.getUTCFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
-
+  
+  const weekNumber = Math.ceil((((mondayET - new Date(Date.UTC(monY, 0, 1))) / 86400000) + 1) / 7);
+  const weekId = `${monY}-W${String(weekNumber).padStart(2, '0')}`;
+  
   return {
     weekId,
-    startOfWeek: startOfWeek.toISOString(),
-    endOfWeek: endOfWeek.toISOString(),
-    msRemaining,
+    startOfWeek: startOfWeekUTC.toISOString(),
+    endOfWeek: endOfWeekUTC.toISOString(),
+    startOfWeekET: `${monY}-${monM}-${monD} 00:00:00 ET`,
+    endOfWeekET: `${sunY}-${sunM}-${sunD} 23:59:59 ET`,
     countdown: `${daysRemaining}d ${hoursRemaining}h ${minutesRemaining}m`,
-    daysRemaining
+    daysRemaining,
+    msRemaining
   };
 }
 
