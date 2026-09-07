@@ -2158,34 +2158,53 @@ async function loadWeeklyRewards(token) {
         if (isUnlocked && !isRedeemed) {
           const btn = card.querySelector(".tc-claim-btn");
           btn.addEventListener("click", async function () {
-            // 1. Direct zero-latency open of Discord ticket channel
-            window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
-
-            // 2. Mark as redeemed in localStorage so it stays redeemed across refreshes
-            localStorage.setItem(`bigd_claimed_tier_${weekId}_${t.tier}`, "true");
-
-            // 3. Immediately update UI to REDEEMED state for screenshot to Discord ticket
-            card.className = "tier-card redeemed";
-            const badgeEl = card.querySelector(".tc-badge");
-            if (badgeEl) badgeEl.textContent = `${t.badge} ✓ REDEEMED`;
-            this.className = "tc-claim-btn redeemed";
-            this.textContent = "✅ REDEEMED";
-            this.disabled = true;
-
-            // 4. Record to backend API in background if authenticated
             const tokenToUse = currentAuthToken || (typeof getAuthToken === "function" ? getAuthToken() : null);
-            if (tokenToUse) {
-              try {
-                await fetch("/api/rewards/weekly/claim", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${tokenToUse}`
-                  },
-                  body: JSON.stringify({ tier: t.tier })
-                });
-                await loadRedemptions(tokenToUse);
-              } catch (e) {}
+            if (!tokenToUse) {
+              alert("Please log in with Discord / Kick to claim weekly rewards.");
+              return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "Verifying eligibility...";
+
+            try {
+              const claimRes = await fetch("/api/rewards/weekly/claim", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${tokenToUse}`
+                },
+                body: JSON.stringify({ tier: t.tier })
+              });
+
+              const claimJson = await claimRes.json();
+
+              if (!claimRes.ok || !claimJson.success) {
+                alert(claimJson.error || "Claim failed: you are not eligible for this reward tier.");
+                btn.disabled = false;
+                btn.textContent = `Claim $${t.cash_value} Cash 🎟️`;
+                return;
+              }
+
+              // Server approved and verified in database ledger!
+              localStorage.setItem(`bigd_claimed_tier_${weekId}_${t.tier}`, "true");
+              card.className = "tier-card redeemed";
+              const badgeEl = card.querySelector(".tc-badge");
+              if (badgeEl) badgeEl.textContent = `${t.badge} ✓ REDEEMED`;
+              btn.className = "tc-claim-btn redeemed";
+              btn.textContent = "✅ REDEEMED";
+              btn.disabled = true;
+
+              // Open Discord ticket channel for payout processing
+              window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
+
+              await loadWeeklyRewards(tokenToUse);
+              await loadRedemptions(tokenToUse);
+            } catch (err) {
+              console.error("Claim error:", err);
+              alert("Network error while verifying claim. Please try again.");
+              btn.disabled = false;
+              btn.textContent = `Claim $${t.cash_value} Cash 🎟️`;
             }
           });
         }
