@@ -1507,7 +1507,7 @@ footer a:hover { color: var(--purple-200); }
     <div class="weekly-hero-card">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
         <div class="weekly-badge-pill">
-          <span>⚡</span> WEEKLY WAGER CHASE
+          <span>⚡</span> WEEKLY SLOTS WAGER CHASE
         </div>
         <div style="font-family:var(--font-ui); font-size:0.8rem; font-weight:800; color:var(--cyan-400); background:rgba(0,255,229,0.12); border:1px solid rgba(0,255,229,0.3); padding:4px 14px; border-radius:20px;" id="weekly-countdown-pill">
           🕒 RESETS IN: <strong id="weekly-time-left">Loading…</strong>
@@ -1518,20 +1518,28 @@ footer a:hover { color: var(--purple-200); }
         Weekly <span>Wager Rewards</span>
       </div>
       <p class="weekly-sub">
-        Wager on Yeet using code <strong style="color:var(--cyan-400);">BIGD</strong> to accumulate weekly coins and unlock cash rewards! The more you wager each week, the more cash you can redeem.
+        Wager on Yeet using code <strong style="color:var(--cyan-400);">BIGD</strong>. Earn coins on all games and unlock weekly cash rewards from <strong>qualifying Slots wager</strong>!
       </p>
+
+      <!-- Prominent Groundrule Notice -->
+      <div style="margin-top:14px; padding:12px 16px; background:rgba(0,255,229,0.06); border:1px solid rgba(0,255,229,0.25); border-radius:12px; display:flex; align-items:center; gap:12px;">
+        <span style="font-size:1.3rem;">🎰</span>
+        <div style="font-size:0.82rem; color:var(--text-primary); line-height:1.4;">
+          <strong style="color:var(--cyan-400);">GROUNDRULE:</strong> Weekly Cash Reward Tiers ($5 → $40) are unlocked <strong style="color:#00ff80;">strictly and solely by Slots wager</strong>. House & Live Casino games earn BigD Coins but do not count toward unlocking weekly cash reward tiers.
+        </div>
+      </div>
 
       <!-- User Stats HUD -->
       <div class="weekly-hud-stats">
         <div class="weekly-stat-box">
-          <div class="ws-label">This Week Wagered</div>
-          <div class="ws-val cyan" id="hud-weekly-wager">$0.00</div>
+          <div class="ws-label">Qualifying Slots Wager</div>
+          <div class="ws-val green" id="hud-weekly-wager">$0.00</div>
           <div class="ws-note" id="hud-wager-breakdown">Slots: $0 | House: $0</div>
         </div>
         <div class="weekly-stat-box">
-          <div class="ws-label">Lifetime Wagered</div>
-          <div class="ws-val" id="hud-lifetime-wager">$0.00</div>
-          <div class="ws-note">Permanent All-Time Record</div>
+          <div class="ws-label">Total Wager (All Games)</div>
+          <div class="ws-val cyan" id="hud-total-weekly-wager">$0.00</div>
+          <div class="ws-note">Slots + House Combined</div>
         </div>
         <div class="weekly-stat-box">
           <div class="ws-label">BigD Coins Balance</div>
@@ -1541,22 +1549,22 @@ footer a:hover { color: var(--purple-200); }
         <div class="weekly-stat-box">
           <div class="ws-label">Current Tier Rank</div>
           <div class="ws-val green" id="hud-tier-name" style="font-size:1.3rem;">Bronze Starter</div>
-          <div class="ws-note" id="hud-tier-badge">Tier 1 Target: $100</div>
+          <div class="ws-note" id="hud-tier-badge">Tier 1 Target: $250 Slots</div>
         </div>
       </div>
 
       <!-- Weekly Progression Bar (Phase 4) -->
       <div class="weekly-prog-wrap">
         <div class="weekly-prog-header">
-          <span class="weekly-prog-title" id="weekly-prog-bar-title">THIS WEEK PROGRESSION</span>
+          <span class="weekly-prog-title" id="weekly-prog-bar-title">THIS WEEK SLOTS PROGRESSION</span>
           <span style="font-family:var(--font-display); font-size:0.92rem; font-weight:800; color:#ffd700;" id="weekly-prog-pct">0% toward next reward</span>
         </div>
         <div class="weekly-prog-track">
           <div class="weekly-prog-fill" id="weekly-prog-fill" style="width:0%;"></div>
         </div>
         <div class="weekly-prog-footer">
-          <span id="weekly-prog-current">$0.00 Wagered This Week</span>
-          <strong style="color:var(--cyan-400);" id="weekly-prog-remaining">$100.00 remaining until next reward</strong>
+          <span id="weekly-prog-current">$0.00 Slots Wagered This Week</span>
+          <strong style="color:var(--cyan-400);" id="weekly-prog-remaining">$250.00 remaining until next reward</strong>
         </div>
       </div>
 
@@ -1642,39 +1650,39 @@ footer a:hover { color: var(--purple-200); }
       <div class="tiers-grid" id="weekly-tiers-grid">
         <div class="tier-card">
           <div class="tc-badge">🥉 Tier 1</div>
-          <div class="tc-wager">$250 Wager</div>
+          <div class="tc-wager">$250 Slots Wager</div>
           <div class="tc-reward">🎁 $5 Cash</div>
-          <button class="tc-claim-btn locked" disabled>Need $250 Wager</button>
+          <button class="tc-claim-btn locked" disabled>Need $250 Slots Wager</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">🥈 Tier 2</div>
-          <div class="tc-wager">$1,000 Wager</div>
+          <div class="tc-wager">$1,000 Slots Wager</div>
           <div class="tc-reward">🎁 $10 Cash</div>
-          <button class="tc-claim-btn locked" disabled>Need $1,000 Wager</button>
+          <button class="tc-claim-btn locked" disabled>Need $1,000 Slots Wager</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">🥇 Tier 3</div>
-          <div class="tc-wager">$1,500 Wager</div>
+          <div class="tc-wager">$1,500 Slots Wager</div>
           <div class="tc-reward">🎁 $15 Cash</div>
-          <button class="tc-claim-btn locked" disabled>Need $1,500 Wager</button>
+          <button class="tc-claim-btn locked" disabled>Need $1,500 Slots Wager</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">💎 Tier 4</div>
-          <div class="tc-wager">$2,500 Wager</div>
+          <div class="tc-wager">$2,500 Slots Wager</div>
           <div class="tc-reward">🎁 $20 Cash</div>
-          <button class="tc-claim-btn locked" disabled>Need $2,500 Wager</button>
+          <button class="tc-claim-btn locked" disabled>Need $2,500 Slots Wager</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">👑 Tier 5</div>
-          <div class="tc-wager">$5,000 Wager</div>
+          <div class="tc-wager">$5,000 Slots Wager</div>
           <div class="tc-reward">🎁 $30 Cash</div>
-          <button class="tc-claim-btn locked" disabled>Need $5,000 Wager</button>
+          <button class="tc-claim-btn locked" disabled>Need $5,000 Slots Wager</button>
         </div>
         <div class="tier-card">
           <div class="tc-badge">🔥 Tier 6</div>
-          <div class="tc-wager">$10,000 Wager</div>
+          <div class="tc-wager">$10,000 Slots Wager</div>
           <div class="tc-reward">🎁 $40 Cash</div>
-          <button class="tc-claim-btn locked" disabled>Need $10,000 Wager</button>
+          <button class="tc-claim-btn locked" disabled>Need $10,000 Slots Wager</button>
         </div>
       </div>
     </div>
@@ -2075,8 +2083,10 @@ async function loadWeeklyRewards(token) {
     const progRemaining = document.getElementById("weekly-prog-remaining");
 
     if (prog) {
-      if (hudWeekly) hudWeekly.textContent = "$" + prog.weekly_wager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      if (hudBreakdown) hudBreakdown.textContent = `Slots: $${prog.weekly_slots_wager} | House/Live: $${prog.weekly_house_live_wager}`;
+      const hudTotalWeekly = document.getElementById("hud-total-weekly-wager");
+      if (hudWeekly) hudWeekly.textContent = "$" + prog.weekly_slots_wager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (hudTotalWeekly) hudTotalWeekly.textContent = "$" + prog.weekly_wager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (hudBreakdown) hudBreakdown.textContent = `Slots: $${prog.weekly_slots_wager} | House: $${prog.weekly_house_live_wager}`;
       if (hudLifetime) hudLifetime.textContent = "$" + prog.lifetime_wager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       if (hudCoins) hudCoins.textContent = prog.points_balance.toLocaleString();
       if (hudWeeklyCoins) hudWeeklyCoins.textContent = `+${prog.weekly_coins_earned.toLocaleString()} coins earned this week`;
@@ -2084,18 +2094,18 @@ async function loadWeeklyRewards(token) {
       const cTier = prog.current_tier;
       const nTier = prog.next_tier;
       if (hudTierName) hudTierName.textContent = cTier ? cTier.name : "Bronze Starter";
-      if (hudTierBadge) hudTierBadge.textContent = nTier ? `Next: ${nTier.badge} ($${nTier.wager_threshold})` : "Max VIP Level Reached!";
+      if (hudTierBadge) hudTierBadge.textContent = nTier ? `Next: ${nTier.badge} ($${nTier.wager_threshold} Slots)` : "Max VIP Level Reached!";
 
       if (progPct) progPct.textContent = `${prog.tier_progress_pct}% toward ${nTier ? nTier.name : 'Max VIP'}`;
       if (progFill) progFill.style.width = `${prog.tier_progress_pct}%`;
-      if (progCurrent) progCurrent.textContent = `$${prog.weekly_wager.toFixed(2)} Wagered This Week (${data.week_info.weekId})`;
+      if (progCurrent) progCurrent.textContent = `$${prog.weekly_slots_wager.toFixed(2)} Slots Wagered (${data.week_info.weekId})`;
       if (progRemaining) {
         progRemaining.textContent = nTier
           ? `$${prog.wager_remaining_for_next_tier.toFixed(2)} remaining until next reward (${nTier.reward_coins.toLocaleString()} Coins / $${nTier.cash_value} Cash)`
           : "🎉 Maximum VIP Tier Unlocked This Week!";
       }
     } else {
-      if (progCurrent) progCurrent.textContent = `$0.00 Wagered This Week (${data.week_info ? data.week_info.weekId : 'Current Week'})`;
+      if (progCurrent) progCurrent.textContent = `$0.00 Slots Wagered This Week (${data.week_info ? data.week_info.weekId : 'Current Week'})`;
       if (progRemaining) progRemaining.textContent = "$250.00 remaining until Tier 1 Reward ($5 Cash)";
       if (progFill) progFill.style.width = "0%";
       if (progPct) progPct.textContent = "0% toward Tier 1";
@@ -2104,13 +2114,13 @@ async function loadWeeklyRewards(token) {
     // 3. Render Reward Tiers
     const tiersGrid = document.getElementById("weekly-tiers-grid");
     if (tiersGrid && data.reward_tiers) {
-      const userWager = prog ? prog.weekly_wager : 0;
+      const userSlotsWager = prog ? (prog.weekly_slots_wager !== undefined ? prog.weekly_slots_wager : prog.weekly_wager) : 0;
       const weekId = data.week_info ? data.week_info.weekId : "current";
       const claimedList = prog?.claimed_tiers || [];
       tiersGrid.innerHTML = "";
 
       data.reward_tiers.forEach(t => {
-        const isUnlocked = userWager >= t.wager_threshold;
+        const isUnlocked = userSlotsWager >= t.wager_threshold;
 
         // Auto-purge any stale glitch claim from localStorage if user is not eligible
         if (!isUnlocked) {
@@ -2141,14 +2151,14 @@ async function loadWeeklyRewards(token) {
           btnDisabled = false;
         } else {
           btnClass = "tc-claim-btn locked";
-          const diff = Math.max(0, t.wager_threshold - userWager);
-          btnText = prog ? `Need $${Math.ceil(diff).toLocaleString()} More Wager` : `Need $${t.wager_threshold.toLocaleString()} Wager`;
+          const diff = Math.max(0, t.wager_threshold - userSlotsWager);
+          btnText = prog ? `Need $${Math.ceil(diff).toLocaleString()} More Slots Wager` : `Need $${t.wager_threshold.toLocaleString()} Slots Wager`;
           btnDisabled = true;
         }
 
         card.innerHTML = `
           <div class="tc-badge">${badgeText}</div>
-          <div class="tc-wager">$${t.wager_threshold.toLocaleString()} Wager</div>
+          <div class="tc-wager">$${t.wager_threshold.toLocaleString()} Slots Wager</div>
           <div class="tc-reward">🎁 $${t.cash_value} Cash</div>
           <button class="${btnClass}"${btnDisabled ? " disabled" : ""}>
             ${btnText}

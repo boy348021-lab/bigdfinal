@@ -5010,18 +5010,19 @@ footer a:hover { color: var(--purple-300); }
       </div>
 
       <!-- Weekly Tier Rewards Quick-Reference Banner -->
-      <div class="prize-pool-banner" style="margin-bottom:24px;">
+      <div class="prize-pool-banner" style="margin-bottom:24px; border:1px solid rgba(0,255,229,0.3); background:linear-gradient(135deg, rgba(20,12,38,0.92) 0%, rgba(10,6,22,0.96) 100%);">
         <div>
-          <div class="prize-pool-label">Weekly Cash Reward Tiers ($80 Max Total)</div>
-          <div class="prize-pool-total" style="color:#00ff80;">$80 Cash</div>
+          <div class="prize-pool-label" style="color:var(--cyan-400); font-weight:800; font-size:0.75rem; letter-spacing:0.08em;">🎰 SLOTS ONLY WEEKLY CASH TIERS</div>
+          <div class="prize-pool-total" style="color:#00ff80; font-size:1.4rem;">$120 Max Cash</div>
+          <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:2px;">Only wagers on Slots qualify for cash reward tiers (House games excluded).</div>
         </div>
         <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-          <span class="prize-badge" style="background:rgba(205,127,50,0.2); border:1px solid rgba(205,127,50,0.5); color:#e6a15c;">🥉 Tier 1: $250 ($5)</span>
-          <span class="prize-badge" style="background:rgba(192,192,192,0.2); border:1px solid rgba(192,192,192,0.5); color:#dcdcdc;">🥈 Tier 2: $1,000 ($10)</span>
-          <span class="prize-badge" style="background:rgba(255,215,0,0.2); border:1px solid rgba(255,215,0,0.5); color:#ffd700;">🥇 Tier 3: $1,500 ($15)</span>
-          <span class="prize-badge" style="background:rgba(0,255,229,0.2); border:1px solid rgba(0,255,229,0.5); color:var(--cyan-400);">💎 Tier 4: $2,500 ($20)</span>
-          <span class="prize-badge" style="background:rgba(168,85,247,0.2); border:1px solid rgba(168,85,247,0.5); color:#c084fc;">👑 Tier 5: $5,000 ($30)</span>
-          <span class="prize-badge" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.5); color:#f87171;">🔥 Tier 6: $10,000 ($40)</span>
+          <span class="prize-badge" style="background:rgba(205,127,50,0.2); border:1px solid rgba(205,127,50,0.5); color:#e6a15c;">🥉 T1: $250 Slots ($5)</span>
+          <span class="prize-badge" style="background:rgba(192,192,192,0.2); border:1px solid rgba(192,192,192,0.5); color:#dcdcdc;">🥈 T2: $1,000 Slots ($10)</span>
+          <span class="prize-badge" style="background:rgba(255,215,0,0.2); border:1px solid rgba(255,215,0,0.5); color:#ffd700;">🥇 T3: $1,500 Slots ($15)</span>
+          <span class="prize-badge" style="background:rgba(0,255,229,0.2); border:1px solid rgba(0,255,229,0.5); color:var(--cyan-400);">💎 T4: $2,500 Slots ($20)</span>
+          <span class="prize-badge" style="background:rgba(168,85,247,0.2); border:1px solid rgba(168,85,247,0.5); color:#c084fc;">👑 T5: $5,000 Slots ($30)</span>
+          <span class="prize-badge" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.5); color:#f87171;">🔥 T6: $10,000 Slots ($40)</span>
         </div>
         <a href="store.html" class="campaign-toggle-btn active" style="font-size:0.75rem; padding:6px 14px; text-decoration:none;">
           Claim Tiers in Store 🎟️
@@ -6794,6 +6795,9 @@ function renderWeeklyLeaderboard(data) {
     tier: u.tier || null,
     tier_image: u.tier_image || null,
     weekly_volume: Number(u.weekly_volume !== undefined ? u.weekly_volume : u.volume) || 0,
+    weekly_slots_volume: Number(u.weekly_slots_volume !== undefined ? u.weekly_slots_volume : (u.weekly_volume || u.volume)) || 0,
+    weekly_house_volume: Number(u.weekly_house_volume || 0),
+    sportsbook_points: Number(u.sportsbook_points || 0),
     total: Number(u.volume) || 0
   })).sort((a, b) => b.weekly_volume - a.weekly_volume);
 
@@ -6811,16 +6815,25 @@ function renderWeeklyLeaderboard(data) {
       ? `<span class="hidden-user">🔒 Hidden User</span>`
       : `<span>${escHtml(p.username)}${tierBadge}${codeBadge}</span>`;
     const amtClass = rank === 1 ? 'wager-amount gold' : 'wager-amount';
-    const rewardsHtml = getEligibleRewardsHtml(p.weekly_volume);
+    // Rewards strictly based on SLOTS wager
+    const rewardsHtml = getEligibleRewardsHtml(p.weekly_slots_volume);
 
     return `
       <tr class="lb-main-row">
         <td><span class="rank-badge ${rankClass}">${rank}</span></td>
         <td class="lb-player-cell">${nameHtml}</td>
-        <td class="${amtClass}" style="color:#00ff80; font-weight:800; font-size:1.05rem;">${fmt(p.weekly_volume)}</td>
+        <td class="${amtClass}" style="color:#ffffff; font-weight:800; font-size:1rem;">${fmt(p.weekly_volume)}</td>
+        <td style="color:#00ff80; font-weight:800; font-size:1.05rem;">
+          ${fmt(p.weekly_slots_volume)}
+          <span style="display:block; font-size:0.68rem; color:var(--cyan-400); font-weight:700;">Qualifying</span>
+        </td>
+        <td style="color:#a49bc2; font-size:0.9rem; font-weight:600;">
+          ${fmt(p.weekly_house_volume)}
+          ${p.sportsbook_points > 0 ? `<span style="display:block; font-size:0.68rem; color:#ffd700;">+${p.sportsbook_points} sports</span>` : ''}
+        </td>
         <td>${rewardsHtml}</td>
         <td>
-          ${p.weekly_volume >= 250
+          ${p.weekly_slots_volume >= 250
             ? `<a href="store.html" class="tc-claim-btn unlocked" style="display:inline-block; font-size:0.75rem; padding:6px 12px; text-decoration:none; border-radius:8px;">Redeem 🎁</a>`
             : `<a href="store.html" class="tc-claim-btn locked" style="display:inline-block; font-size:0.75rem; padding:6px 12px; text-decoration:none; border-radius:8px; opacity:0.65;">Store 🛒</a>`
           }
@@ -6836,8 +6849,10 @@ function renderWeeklyLeaderboard(data) {
           <tr>
             <th>Rank</th>
             <th>Player</th>
-            <th>Weekly Wager (Mon–Sun ET) ⚡</th>
-            <th>Eligible Rewards (This Week) 🎁</th>
+            <th>Total Wager ⚡</th>
+            <th>Slots Wager (Qualifying) 🎰</th>
+            <th>House / Sports 🎲</th>
+            <th>Eligible Rewards (Slots Only) 🎁</th>
             <th>Action</th>
           </tr>
         </thead>

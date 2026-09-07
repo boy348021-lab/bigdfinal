@@ -709,11 +709,21 @@ app.get("/api/leaderboard", async (req, res) => {
       })
     ]);
 
-    // Build weekly volume lookup map by normalized username / userId
+    // Build weekly volume & points lookup map by normalized username / userId
     const weeklyMap = new Map();
     (rawWeeklyReferrals || []).forEach(p => {
       const u = p.username ? p.username.toLowerCase().trim() : `id_${p.userId}`;
-      weeklyMap.set(u, Number(p.volume) || 0);
+      const vol = Number(p.volume) || 0;
+      const casino = Number(p.casinoPoints) || 0;
+      const sports = Number(p.sportsbookPoints) || 0;
+      // In Yeet system, casino volume corresponds to slots / casino games, sportsbook to sports
+      weeklyMap.set(u, {
+        total_volume: vol,
+        slots_volume: vol, // All casino volume is slots-eligible unless designated house
+        house_volume: 0,
+        casino_points: casino,
+        sportsbook_points: sports
+      });
     });
 
     // 2. Map & format player data
@@ -722,7 +732,10 @@ app.get("/api/leaderboard", async (req, res) => {
       const points = Number(p.leaderboardPoints) || 0;
       const isHidden = Boolean(p.isHidden);
       const uKey = p.username ? p.username.toLowerCase().trim() : `id_${p.userId}`;
-      const weeklyVol = weeklyMap.get(uKey) || 0;
+      const wStats = weeklyMap.get(uKey) || { total_volume: 0, slots_volume: 0, house_volume: 0, casino_points: 0, sportsbook_points: 0 };
+      const weeklyVol = wStats.total_volume;
+      const weeklySlots = wStats.slots_volume;
+      const weeklyHouse = wStats.house_volume;
 
       return {
         user_id: p.userId,
@@ -731,6 +744,8 @@ app.get("/api/leaderboard", async (req, res) => {
         source_code: p.sourceCode || "BIGD",
         volume: vol,
         weekly_volume: Number(weeklyVol.toFixed(2)),
+        weekly_slots_volume: Number(weeklySlots.toFixed(2)),
+        weekly_house_volume: Number(weeklyHouse.toFixed(2)),
         leaderboard_points: points,
         casino_points: Number(p.casinoPoints) || 0,
         sportsbook_points: Number(p.sportsbookPoints) || 0,
@@ -1229,12 +1244,12 @@ app.get("/api/rewards/weekly", async (req, res) => {
         console.warn("Live Yeet user sync note:", yeetSyncErr.message);
       }
 
-      // 3. Find current and next reward tier
+      // 3. Find current and next reward tier strictly based on SLOTS wager
       let currentTier = null;
       let nextTier = WEEKLY_REWARD_TIERS[0];
       for (let i = 0; i < WEEKLY_REWARD_TIERS.length; i++) {
         const tier = WEEKLY_REWARD_TIERS[i];
-        if (weeklyTotalWager >= tier.wager_threshold) {
+        if (weeklySlotsWager >= tier.wager_threshold) {
           currentTier = tier;
           nextTier = WEEKLY_REWARD_TIERS[i + 1] || null;
         }
@@ -1243,13 +1258,13 @@ app.get("/api/rewards/weekly", async (req, res) => {
       const prevThreshold = currentTier ? currentTier.wager_threshold : 0;
       const nextThreshold = nextTier ? nextTier.wager_threshold : WEEKLY_REWARD_TIERS[WEEKLY_REWARD_TIERS.length - 1].wager_threshold;
       const span = Math.max(1, nextThreshold - prevThreshold);
-      const progressInTier = Math.max(0, weeklyTotalWager - prevThreshold);
+      const progressInTier = Math.max(0, weeklySlotsWager - prevThreshold);
       const tierProgressPct = nextTier
         ? Math.min(100, Math.max(0, Math.round((progressInTier / span) * 100)))
         : 100;
 
       const remainingForNext = nextTier
-        ? Math.max(0, Number((nextTier.wager_threshold - weeklyTotalWager).toFixed(2)))
+        ? Math.max(0, Number((nextTier.wager_threshold - weeklySlotsWager).toFixed(2)))
         : 0;
 
       let claimedTiers = [];
@@ -1286,7 +1301,8 @@ app.get("/api/rewards/weekly", async (req, res) => {
         next_tier: nextTier,
         tier_progress_pct: tierProgressPct,
         wager_remaining_for_next_tier: remainingForNext,
-        claimed_tiers: claimedTiers
+        claimed_tiers: claimedTiers,
+        reward_eligibility_basis: "SLOTS_ONLY"
       };
 
       recentLedger = txList.slice(0, 15).map(tx => {
@@ -1317,12 +1333,13 @@ app.get("/api/rewards/weekly", async (req, res) => {
     week_info: weekInfo,
     multipliers: REWARD_MULTIPLIERS,
     reward_tiers: WEEKLY_REWARD_TIERS,
+    qualification_rule: "SLOTS_ONLY",
     user_progression: userProgression,
     recent_ledger: recentLedger
   });
 });
 
-// ─── POST /api/rewards/weekly/claim (Claim weekly tier reward — 1 per tier per week) ───
+// ─── POST /api/rewards/weekly/claim (Claim weekly tier reward — 1 per tier per week, SLOTS ONLY) ───
 app.post("/api/rewards/weekly/claim", requireAuth, async (req, res) => {
   if (!supabase) return res.status(503).json({ error: "Database not configured" });
   if (!req.user) return res.status(401).json({ error: "Please log in first." });
@@ -1351,7 +1368,7 @@ app.post("/api/rewards/weekly/claim", requireAuth, async (req, res) => {
       return res.status(400).json({ error: `Tier ${tierNum} ($${targetTier.cash_value} Cash) already redeemed this week (${weekInfo.weekId}).` });
     }
 
-    // Verify user meets the wager threshold for this tier
+    // Verify user meets the slots wager threshold for this tier
     const possibleNames = [
       req.user.degencity_username,
       req.user.kick_username,
@@ -1385,34 +1402,36 @@ app.post("/api/rewards/weekly/claim", requireAuth, async (req, res) => {
 
     const matchWeekly = findMatch(weeklyYeet);
 
-    // Check database transactions for this week
-    let dbWeeklyWager = 0;
+    // Check database transactions for this week (SLOTS ONLY)
+    let dbWeeklySlotsWager = 0;
     try {
       const { data: dbTx } = await supabase
         .from("wager_transactions")
-        .select("wager_amount_usd, processed_at")
+        .select("wager_amount_usd, provider, processed_at")
         .eq("user_id", userId);
 
       if (dbTx && dbTx.length > 0) {
         const startMs = new Date(weekInfo.startOfWeek).getTime();
         const endMs = new Date(weekInfo.endOfWeek).getTime();
-        dbWeeklyWager = dbTx
+        dbWeeklySlotsWager = dbTx
           .filter(tx => {
             const ms = new Date(tx.processed_at).getTime();
-            return ms >= startMs && ms <= endMs;
+            const isHouse = String(tx.provider || '').toLowerCase().includes('house') || String(tx.provider || '').toLowerCase().includes('live');
+            return ms >= startMs && ms <= endMs && !isHouse;
           })
           .reduce((sum, tx) => sum + (Number(tx.wager_amount_usd) || 0), 0);
       }
     } catch (e) {}
 
-    const userWeeklyWager = Math.max(
-      dbWeeklyWager,
+    // Slots wager qualification (House games do not qualify for weekly cash rewards)
+    const userWeeklySlotsWager = Math.max(
+      dbWeeklySlotsWager,
       Number(matchWeekly?.volume) || 0
     );
 
-    if (userWeeklyWager < targetTier.wager_threshold) {
+    if (userWeeklySlotsWager < targetTier.wager_threshold) {
       return res.status(403).json({
-        error: `Insufficient wager: You have $${userWeeklyWager.toFixed(2)} wagered this week (${weekInfo.weekId}), but Tier ${tierNum} requires $${targetTier.wager_threshold.toLocaleString()} weekly wager.`
+        error: `Insufficient slots wager: You have $${userWeeklySlotsWager.toFixed(2)} slots wagered this week (${weekInfo.weekId}), but Tier ${tierNum} requires $${targetTier.wager_threshold.toLocaleString()} in slots wager. House games do not qualify for weekly cash rewards.`
       });
     }
 
