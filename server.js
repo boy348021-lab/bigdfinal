@@ -716,11 +716,15 @@ app.get("/api/leaderboard", async (req, res) => {
       const vol = Number(p.volume) || 0;
       const casino = Number(p.casinoPoints) || 0;
       const sports = Number(p.sportsbookPoints) || 0;
-      // In Yeet system, casino volume corresponds to slots / casino games, sportsbook to sports
+      // CRITICAL: Yeet API `volume` is the TOTAL wager (Slots + House combined).
+      // There is NO per-game-type dollar split available from the Yeet API.
+      // We CANNOT assume any of it is slots-eligible.
+      // slots_volume = 0 (unknown from Yeet; only DB wager_transactions with provider=SLOTS is authoritative)
+      // house_volume = vol (all Yeet volume is treated as house/non-qualifying for safety)
       weeklyMap.set(u, {
         total_volume: vol,
-        slots_volume: vol, // All casino volume is slots-eligible unless designated house
-        house_volume: 0,
+        slots_volume: 0,   // NEVER assume Yeet volume = slots qualifying — no API split exists
+        house_volume: vol, // Treat full Yeet volume as house until DB slots data overrides
         casino_points: casino,
         sportsbook_points: sports
       });
@@ -1224,11 +1228,16 @@ app.get("/api/rewards/weekly", async (req, res) => {
         const userMonthlyYeet = findYeetMatch(monthlyYeet);
         const userAllTimeYeet = findYeetMatch(allTimeYeet);
 
-        // Weekly wager MUST strictly reflect the current week's volume
+        // Weekly wager MUST strictly reflect the current week's volume.
+        // IMPORTANT: Yeet API volume = total (Slots + House combined) — NO split available.
+        // We update weeklyTotalWager for display purposes ONLY.
+        // We NEVER update weeklySlotsWager from Yeet — only DB wager_transactions (provider=SLOTS) is authoritative.
         const currentWeeklyYeetVolume = Number(userWeeklyYeet?.volume) || 0;
         if (currentWeeklyYeetVolume > weeklyTotalWager) {
           weeklyTotalWager = Number(currentWeeklyYeetVolume.toFixed(2));
-          weeklySlotsWager = weeklyTotalWager;
+          // DO NOT set weeklySlotsWager = weeklyTotalWager here.
+          // That would incorrectly mark house/live bets as slots-qualifying.
+          // weeklySlotsWager stays as computed from DB wager_transactions only.
         }
 
         const bestLifetime = Math.max(

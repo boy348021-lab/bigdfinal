@@ -6795,7 +6795,7 @@ function renderWeeklyLeaderboard(data) {
     tier: u.tier || null,
     tier_image: u.tier_image || null,
     weekly_volume: Number(u.weekly_volume !== undefined ? u.weekly_volume : u.volume) || 0,
-    weekly_slots_volume: Number(u.weekly_slots_volume !== undefined ? u.weekly_slots_volume : (u.weekly_volume || u.volume)) || 0,
+    weekly_slots_volume: Number(u.weekly_slots_volume) || 0, // NEVER fallback to full volume — 0 means no qualifying Slots data
     weekly_house_volume: Number(u.weekly_house_volume || 0),
     sportsbook_points: Number(u.sportsbook_points || 0),
     total: Number(u.volume) || 0
