@@ -691,13 +691,29 @@ app.get("/api/leaderboard", async (req, res) => {
       displayPeriod = 'All-Time Yeet Totals';
     }
 
-    // 1. Fetch live combined referrals across both streamers (<2ms cached)
-    let rawYeetReferrals = await fetchCombinedYeetReferrals({
-      startDate: queryStartDate,
-      endDate: queryEndDate,
-      sortBy: 'volume',
-      limit: 100,
-      cacheKey
+    // 1. Fetch live combined referrals across both streamers (<2ms cached) for period AND weekly
+    const [rawYeetReferrals, rawWeeklyReferrals] = await Promise.all([
+      fetchCombinedYeetReferrals({
+        startDate: queryStartDate,
+        endDate: queryEndDate,
+        sortBy: 'volume',
+        limit: 100,
+        cacheKey
+      }),
+      fetchCombinedYeetReferrals({
+        startDate: weekBounds.startOfWeek,
+        endDate: weekBounds.endOfWeek,
+        sortBy: 'volume',
+        limit: 100,
+        cacheKey: `weekly_${weekBounds.weekId}`
+      })
+    ]);
+
+    // Build weekly volume lookup map by normalized username / userId
+    const weeklyMap = new Map();
+    (rawWeeklyReferrals || []).forEach(p => {
+      const u = p.username ? p.username.toLowerCase().trim() : `id_${p.userId}`;
+      weeklyMap.set(u, Number(p.volume) || 0);
     });
 
     // 2. Map & format player data
@@ -705,6 +721,8 @@ app.get("/api/leaderboard", async (req, res) => {
       const vol = Number(p.volume) || 0;
       const points = Number(p.leaderboardPoints) || 0;
       const isHidden = Boolean(p.isHidden);
+      const uKey = p.username ? p.username.toLowerCase().trim() : `id_${p.userId}`;
+      const weeklyVol = weeklyMap.get(uKey) || 0;
 
       return {
         user_id: p.userId,
@@ -712,13 +730,14 @@ app.get("/api/leaderboard", async (req, res) => {
         is_hidden: isHidden,
         source_code: p.sourceCode || "BIGD",
         volume: vol,
+        weekly_volume: Number(weeklyVol.toFixed(2)),
         leaderboard_points: points,
         casino_points: Number(p.casinoPoints) || 0,
         sportsbook_points: Number(p.sportsbookPoints) || 0,
         highest_multiplier: Number(p.highestMultiplier) || 0,
         tier: p.tier || "Unranked",
         tier_image: p.tierImage || null,
-        wager_data: [{ month: monthBounds.monthKey, total_wager_usd: Number(vol.toFixed(2)) }]
+        wager_data: [{ month: monthBounds.monthKey, total_wager_usd: Number(vol.toFixed(2)), weekly_wager_usd: Number(weeklyVol.toFixed(2)) }]
       };
     }).sort((a, b) => b.volume - a.volume);
 

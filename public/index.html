@@ -6171,34 +6171,47 @@ const PRIZE_TOTAL = 1500;
 
 function renderLeaderboard(data, rangeLabel) {
   const lbContent = document.getElementById('lb-content');
+  if (!lbContent) return;
 
   if (!data || data.length === 0) {
     lbContent.innerHTML = `<div class="lb-empty">No wager data found for the selected period.</div>`;
     return;
   }
 
+  const isYeet = currentCampaign === 'yeet';
+  const fmt = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtShort = (n) => '$' + (n >= 1000 ? (n/1000).toFixed(1) + 'k' : Number(n || 0).toFixed(2));
+
   // flatten and sort by total wager
   const players = data.map(u => ({
-    user_id:  u.user_id,
+    user_id: u.user_id,
     username: u.username,
-    total: (u.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0),
+    is_hidden: Boolean(u.is_hidden),
+    source_code: u.source_code || 'BIGD',
+    tier: u.tier || null,
+    tier_image: u.tier_image || null,
+    weekly_volume: Number(u.weekly_volume) || 0,
+    total: Number(u.volume) || (u.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0),
     months: (u.wager_data || []).slice().sort((a, b) => b.month.localeCompare(a.month))
   })).sort((a, b) => b.total - a.total);
 
-  const fmt  = (n) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const fmtShort = (n) => '$' + (n >= 1000 ? (n/1000).toFixed(1) + 'k' : n.toFixed(2));
-
   let rows = players.map((p, i) => {
-    const rank      = i + 1;
+    const rank = i + 1;
     const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-n';
-    const isHidden  = p.user_id === -1;
-    const rowId     = `lb-expand-${i}`;
-    const nameHtml  = isHidden
+    const isHidden = p.user_id === -1 || p.is_hidden;
+    const rowId = `lb-expand-${i}`;
+    const tierBadge = p.tier && p.tier !== 'Unranked'
+      ? `<span style="display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:800; color:var(--cyan-400); background:rgba(0,255,229,0.1); border:1px solid rgba(0,255,229,0.25); padding:2px 6px; border-radius:12px; margin-left:6px;">${p.tier_image ? `<img src="${p.tier_image}" style="width:12px;height:12px;" alt="${p.tier}"/>` : ''}${escHtml(p.tier)}</span>`
+      : '';
+    const codeBadge = p.source_code
+      ? `<span style="display:inline-flex; align-items:center; font-size:0.65rem; font-weight:800; color:${p.source_code.includes('BIGBALLZ') ? '#ffd700' : 'var(--cyan-400)'}; background:${p.source_code.includes('BIGBALLZ') ? 'rgba(255,215,0,0.1)' : 'rgba(0,255,229,0.08)'}; border:1px solid ${p.source_code.includes('BIGBALLZ') ? 'rgba(255,215,0,0.25)' : 'rgba(0,255,229,0.2)'}; padding:1px 6px; border-radius:10px; margin-left:6px; letter-spacing:0.04em;">${escHtml(p.source_code)}</span>`
+      : '';
+    const nameHtml = isHidden
       ? `<span class="hidden-user">🔒 Hidden User</span>`
-      : `<span>${escHtml(p.username)}</span>`;
-    const amtClass  = rank === 1 ? 'wager-amount gold' : 'wager-amount';
+      : `<span>${escHtml(p.username)}${tierBadge}${codeBadge}</span>`;
+    const amtClass = rank === 1 ? 'wager-amount gold' : 'wager-amount';
     const monthCount = p.months.length;
-    const hasMonths  = monthCount > 0;
+    const hasMonths = !isYeet && monthCount > 0;
 
     const monthRows = p.months.map(m => `
       <div class="expand-month-row">
@@ -6208,6 +6221,17 @@ function renderLeaderboard(data, rangeLabel) {
         </span>
         <span class="expand-month-amt">${fmtShort(m.total_wager_usd)}</span>
       </div>`).join('');
+
+    if (isYeet) {
+      return `
+        <tr class="lb-main-row">
+          <td><span class="rank-badge ${rankClass}">${rank}</span></td>
+          <td class="lb-player-cell">${nameHtml}</td>
+          <td style="color:#00ff80; font-weight:700;">${fmt(p.weekly_volume)}</td>
+          <td class="${amtClass}">${fmt(p.total)}</td>
+        </tr>
+      `;
+    }
 
     return `
       <tr class="lb-main-row ${hasMonths ? 'expandable' : ''}" onclick="${hasMonths ? `toggleExpand('${rowId}', this)` : ''}">
@@ -6257,19 +6281,26 @@ function renderLeaderboard(data, rangeLabel) {
     ? `<div class="lb-period-banner">📅 Showing data for: <strong>${rangeLabel}</strong></div>`
     : '';
 
+  const tableHeaderHtml = isYeet
+    ? `<tr>
+        <th>Rank</th>
+        <th>Player</th>
+        <th>Weekly Wager (Mon–Sun ET) ⚡</th>
+        <th>Total Wager (USD)</th>
+      </tr>`
+    : `<tr>
+        <th>Rank</th>
+        <th>Player</th>
+        <th>Months Active</th>
+        <th>Total Wager (USD)</th>
+      </tr>`;
+
   lbContent.innerHTML = `
     ${degenTotalBanner}
     ${labelBanner}
     <div class="lb-table-wrap">
       <table class="lb-table">
-        <thead>
-          <tr>
-            <th>Rank</th>
-            <th>Player</th>
-            <th>Months Active</th>
-            <th>Total Wager (USD)</th>
-          </tr>
-        </thead>
+        <thead>${tableHeaderHtml}</thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
@@ -6564,6 +6595,7 @@ function renderBiweeklyLeaderboard(data) {
     source_code: u.source_code || 'BIGD',
     tier: u.tier || null,
     tier_image: u.tier_image || null,
+    weekly_volume: Number(u.weekly_volume) || 0,
     total: (u.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0) || Number(u.volume) || 0
   })).filter(p => p.total >= 0).sort((a, b) => b.total - a.total);
 
@@ -6572,7 +6604,7 @@ function renderBiweeklyLeaderboard(data) {
     return;
   }
 
-  const fmt = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmt = n => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const top = players[0].total;
 
   const rows = players.map((p, i) => {
@@ -6595,12 +6627,13 @@ function renderBiweeklyLeaderboard(data) {
     return '<tr class="lb-main-row"><td><span class="rank-badge ' + rankClass + '">' + rank + '</span></td>'
       + '<td class="lb-player-cell">' + nameHtml + '</td>'
       + '<td>' + prizeHtml + '</td>'
+      + '<td style="color:#00ff80; font-weight:700;">' + fmt(p.weekly_volume) + '</td>'
       + '<td><div class="bw-bar-wrap"><div class="bw-bar-fill" style="width:' + barPct + '%"></div></div></td>'
       + '<td class="' + amtClass + '">' + fmt(p.total) + '</td></tr>';
   }).join('');
 
   bwContent.innerHTML = '<div class="lb-table-wrap"><table class="lb-table"><thead><tr>'
-    + '<th>Rank</th><th>Player</th><th>Prize</th><th>Activity</th><th>Period Wager (USD)</th>'
+    + '<th>Rank</th><th>Player</th><th>Prize</th><th>Weekly Wager (Mon–Sun ET) ⚡</th><th>Activity</th><th>Monthly Wager (USD)</th>'
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
