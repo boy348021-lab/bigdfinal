@@ -758,6 +758,7 @@ app.get("/api/leaderboard", async (req, res) => {
       data: yeetWagers,
       partner: "yeet",
       period: displayPeriod,
+      week_info: weekBounds,
       prize_pool: 3000,
       prize_distribution: COMBINED_PRIZE_POOL,
       codes_supported: ["BIGD", "BIGBALLZ"],

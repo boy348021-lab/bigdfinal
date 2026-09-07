@@ -4967,6 +4967,7 @@ footer a:hover { color: var(--purple-300); }
 
   <div class="tabs-nav">
     <button class="tab-btn active" data-panel="leaderboard">Lifetime Wager</button>
+    <button class="tab-btn" data-panel="weekly">Weekly Leaderboard</button>
     <button class="tab-btn" data-panel="biweekly">Monthly Leaderboard</button>
     <button class="tab-btn" data-panel="challenges">Challenges</button>
     <button class="tab-btn" data-panel="milestones">Milestones</button>
@@ -4991,6 +4992,64 @@ footer a:hover { color: var(--purple-300); }
           Fetching leaderboard data…
         </div>
       </div>
+    </div>
+
+    <!-- WEEKLY LEADERBOARD PANEL -->
+    <div class="tab-panel" id="panel-weekly">
+
+      <!-- Period Header -->
+      <div class="bw-period-header">
+        <div class="bw-period-info">
+          <div class="bw-period-label">ACTIVE WEEKLY PERIOD (MON 00:01 → SUN 11:59 PM ET)</div>
+          <div class="bw-period-dates" id="weekly-period-dates">Loading weekly window…</div>
+        </div>
+        <div class="bw-period-countdown">
+          <span class="bw-days-left" id="weekly-days-left">—</span>
+          <span class="bw-days-label">days remaining</span>
+        </div>
+      </div>
+
+      <!-- Weekly Tier Rewards Quick-Reference Banner -->
+      <div class="prize-pool-banner" style="margin-bottom:24px;">
+        <div>
+          <div class="prize-pool-label">Weekly Cash Reward Tiers ($80 Max Total)</div>
+          <div class="prize-pool-total" style="color:#00ff80;">$80 Cash</div>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+          <span class="prize-badge" style="background:rgba(205,127,50,0.2); border:1px solid rgba(205,127,50,0.5); color:#e6a15c;">🥉 Tier 1: $250 ($5)</span>
+          <span class="prize-badge" style="background:rgba(192,192,192,0.2); border:1px solid rgba(192,192,192,0.5); color:#dcdcdc;">🥈 Tier 2: $1,000 ($10)</span>
+          <span class="prize-badge" style="background:rgba(255,215,0,0.2); border:1px solid rgba(255,215,0,0.5); color:#ffd700;">🥇 Tier 3: $1,500 ($15)</span>
+          <span class="prize-badge" style="background:rgba(0,255,229,0.2); border:1px solid rgba(0,255,229,0.5); color:var(--cyan-400);">💎 Tier 4: $2,500 ($20)</span>
+          <span class="prize-badge" style="background:rgba(168,85,247,0.2); border:1px solid rgba(168,85,247,0.5); color:#c084fc;">👑 Tier 5: $5,000 ($30)</span>
+          <span class="prize-badge" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.5); color:#f87171;">🔥 Tier 6: $10,000 ($40)</span>
+        </div>
+        <a href="store.html" class="campaign-toggle-btn active" style="font-size:0.75rem; padding:6px 14px; text-decoration:none;">
+          Claim Tiers in Store 🎟️
+        </a>
+      </div>
+
+      <!-- Weekly Filter Tabs -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
+        <div class="leaderboard-header" style="margin:0;">
+          <div class="section-title">Weekly <span>Rankings (Live)</span></div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="campaign-toggle-btn active" id="code-btn-weekly-all" onclick="setWeeklyCodeFilter('all')" style="font-size:0.75rem; padding:5px 12px;">
+            🌐 All Codes
+          </button>
+          <button class="campaign-toggle-btn" id="code-btn-weekly-bigd" onclick="setWeeklyCodeFilter('bigd')" style="font-size:0.75rem; padding:5px 12px;">
+            ⚡ Code BIGD
+          </button>
+          <button class="campaign-toggle-btn" id="code-btn-weekly-bigballz" onclick="setWeeklyCodeFilter('bigballz')" style="font-size:0.75rem; padding:5px 12px;">
+            💎 Code BigBallz
+          </button>
+        </div>
+      </div>
+
+      <div id="weekly-lb-content">
+        <div class="lb-loading"><div class="spinner"></div>Loading weekly rankings…</div>
+      </div>
+
     </div>
 
     <!-- CHALLENGES PANEL (PHASES 13, 14, 15) -->
@@ -5901,7 +5960,7 @@ function activateTab(panelId) {
   });
 
   // Keep navigation active states dynamically updated
-  const activeTabName = (panelId === 'biweekly' || panelId === 'leaderboard') ? 'leaderboard' : panelId;
+  const activeTabName = (panelId === 'weekly' || panelId === 'biweekly' || panelId === 'leaderboard') ? 'leaderboard' : panelId;
   document.querySelectorAll('.nav-links a[data-tab]').forEach(a => {
     a.classList.toggle('active', a.dataset.tab === activeTabName);
   });
@@ -5909,7 +5968,9 @@ function activateTab(panelId) {
     a.classList.toggle('active', a.dataset.tab === activeTabName);
   });
 
-  if (panelId === 'biweekly') {
+  if (panelId === 'weekly') {
+    fetchWeeklyLeaderboard();
+  } else if (panelId === 'biweekly') {
     initBiweeklyProgress();
     fetchBiweeklyLeaderboard();
     startBiweeklyCountdown();
@@ -6227,7 +6288,7 @@ function renderLeaderboard(data, rangeLabel) {
         <tr class="lb-main-row">
           <td><span class="rank-badge ${rankClass}">${rank}</span></td>
           <td class="lb-player-cell">${nameHtml}</td>
-          <td style="color:#00ff80; font-weight:700;">${fmt(p.weekly_volume)}</td>
+          <td><span class="month-count-badge">Active (Yeet)</span></td>
           <td class="${amtClass}">${fmt(p.total)}</td>
         </tr>
       `;
@@ -6281,26 +6342,19 @@ function renderLeaderboard(data, rangeLabel) {
     ? `<div class="lb-period-banner">📅 Showing data for: <strong>${rangeLabel}</strong></div>`
     : '';
 
-  const tableHeaderHtml = isYeet
-    ? `<tr>
-        <th>Rank</th>
-        <th>Player</th>
-        <th>Weekly Wager (Mon–Sun ET) ⚡</th>
-        <th>Total Wager (USD)</th>
-      </tr>`
-    : `<tr>
-        <th>Rank</th>
-        <th>Player</th>
-        <th>Months Active</th>
-        <th>Total Wager (USD)</th>
-      </tr>`;
-
   lbContent.innerHTML = `
     ${degenTotalBanner}
     ${labelBanner}
     <div class="lb-table-wrap">
       <table class="lb-table">
-        <thead>${tableHeaderHtml}</thead>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Months Active</th>
+            <th>Total Wager (USD)</th>
+          </tr>
+        </thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
@@ -6627,18 +6681,170 @@ function renderBiweeklyLeaderboard(data) {
     return '<tr class="lb-main-row"><td><span class="rank-badge ' + rankClass + '">' + rank + '</span></td>'
       + '<td class="lb-player-cell">' + nameHtml + '</td>'
       + '<td>' + prizeHtml + '</td>'
-      + '<td style="color:#00ff80; font-weight:700;">' + fmt(p.weekly_volume) + '</td>'
       + '<td><div class="bw-bar-wrap"><div class="bw-bar-fill" style="width:' + barPct + '%"></div></div></td>'
       + '<td class="' + amtClass + '">' + fmt(p.total) + '</td></tr>';
   }).join('');
 
   bwContent.innerHTML = '<div class="lb-table-wrap"><table class="lb-table"><thead><tr>'
-    + '<th>Rank</th><th>Player</th><th>Prize</th><th>Weekly Wager (Mon–Sun ET) ⚡</th><th>Activity</th><th>Monthly Wager (USD)</th>'
+    + '<th>Rank</th><th>Player</th><th>Prize</th><th>Activity</th><th>Monthly Wager (USD)</th>'
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
 // Initialize monthly progress state on load
 initBiweeklyProgress(false);
+
+/* ──────────────────────────────────────────
+   WEEKLY LEADERBOARD CONTROLLER & ELIGIBLE REWARDS
+   ────────────────────────────────────────── */
+let selectedWeeklyCodeFilter = 'all';
+
+function setWeeklyCodeFilter(code) {
+  selectedWeeklyCodeFilter = code;
+  document.getElementById('code-btn-weekly-all')?.classList.toggle('active', code === 'all');
+  document.getElementById('code-btn-weekly-bigd')?.classList.toggle('active', code === 'bigd');
+  document.getElementById('code-btn-weekly-bigballz')?.classList.toggle('active', code === 'bigballz');
+  fetchWeeklyLeaderboard();
+}
+
+function getEligibleRewardsHtml(wager) {
+  const w = Number(wager || 0);
+  const tiers = [
+    { tier: 1, thresh: 250, cash: 5, name: 'Tier 1' },
+    { tier: 2, thresh: 1000, cash: 10, name: 'Tier 2' },
+    { tier: 3, thresh: 1500, cash: 15, name: 'Tier 3' },
+    { tier: 4, thresh: 2500, cash: 20, name: 'Tier 4' },
+    { tier: 5, thresh: 5000, cash: 30, name: 'Tier 5' },
+    { tier: 6, thresh: 10000, cash: 40, name: 'Tier 6' }
+  ];
+
+  const unlocked = tiers.filter(t => w >= t.thresh);
+  if (unlocked.length === 0) {
+    const diff = Math.max(0, 250 - w);
+    return `<div style="font-size:0.8rem; color:var(--text-muted);">
+      <span style="display:inline-block; padding:2px 8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px;">🔒 Locked</span>
+      <span style="display:block; margin-top:3px; font-size:0.75rem; color:#ff8080;">Need $${diff.toFixed(2)} for Tier 1 ($5)</span>
+    </div>`;
+  }
+
+  const totalCash = unlocked.reduce((s, t) => s + t.cash, 0);
+  const maxTier = unlocked[unlocked.length - 1].tier;
+  const nextTier = tiers.find(t => w < t.thresh);
+  const nextNote = nextTier
+    ? `<span style="display:block; margin-top:3px; font-size:0.75rem; color:var(--cyan-400);">Need $${(nextTier.thresh - w).toFixed(2)} for Tier ${nextTier.tier} ($${nextTier.cash})</span>`
+    : `<span style="display:block; margin-top:3px; font-size:0.75rem; color:#ffd700;">👑 Max Tier 6 Unlocked!</span>`;
+
+  return `<div>
+    <span style="display:inline-flex; align-items:center; gap:4px; font-size:0.82rem; font-weight:800; color:#00ff80; background:rgba(0,255,128,0.12); border:1px solid rgba(0,255,128,0.4); padding:3px 10px; border-radius:12px;">
+      🎁 ${unlocked.length === 1 ? `Tier 1 ($5 Cash)` : `Tiers 1–${maxTier} ($${totalCash} Cash)`}
+    </span>
+    ${nextNote}
+  </div>`;
+}
+
+async function fetchWeeklyLeaderboard() {
+  const content = document.getElementById('weekly-lb-content');
+  if (!content) return;
+  content.innerHTML = '<div class="lb-loading"><div class="spinner"></div>Loading weekly rankings…</div>';
+
+  try {
+    const url = `${API_BASE}?period=weekly&partner=yeet&code=${encodeURIComponent(selectedWeeklyCodeFilter)}`;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) {
+      content.innerHTML = '<div class="lb-error">⚠️ Error loading weekly data. Try again.</div>';
+      return;
+    }
+    const json = await res.json();
+    
+    // Update dates & countdown
+    const datesEl = document.getElementById('weekly-period-dates');
+    const daysLeftEl = document.getElementById('weekly-days-left');
+    if (json.week_info) {
+      if (datesEl) {
+        const s = new Date(json.week_info.startOfWeek);
+        const e = new Date(json.week_info.endOfWeek);
+        datesEl.textContent = `${bwFmtDate(s)} → ${bwFmtDate(e)} (${json.week_info.weekId})`;
+      }
+      if (daysLeftEl) daysLeftEl.textContent = String(json.week_info.daysRemaining ?? '—');
+    }
+    
+    renderWeeklyLeaderboard(json.data || []);
+  } catch (err) {
+    console.error('Weekly leaderboard error:', err);
+    content.innerHTML = '<div class="lb-error">⚠️ Network error loading weekly rankings.</div>';
+  }
+}
+
+function renderWeeklyLeaderboard(data) {
+  const content = document.getElementById('weekly-lb-content');
+  if (!content) return;
+
+  if (!data || data.length === 0) {
+    content.innerHTML = '<div class="lb-empty">No wager activity logged yet this week (Monday 00:01 → Sunday 11:59 PM ET).</div>';
+    return;
+  }
+
+  const fmt = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // Map and sort players by weekly volume
+  const players = data.map(u => ({
+    user_id: u.user_id,
+    username: u.username,
+    is_hidden: Boolean(u.is_hidden),
+    source_code: u.source_code || 'BIGD',
+    tier: u.tier || null,
+    tier_image: u.tier_image || null,
+    weekly_volume: Number(u.weekly_volume !== undefined ? u.weekly_volume : u.volume) || 0,
+    total: Number(u.volume) || 0
+  })).sort((a, b) => b.weekly_volume - a.weekly_volume);
+
+  const rows = players.map((p, i) => {
+    const rank = i + 1;
+    const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-n';
+    const isHidden = p.user_id === -1 || p.is_hidden;
+    const tierBadge = p.tier && p.tier !== 'Unranked'
+      ? `<span style="display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:800; color:var(--cyan-400); background:rgba(0,255,229,0.1); border:1px solid rgba(0,255,229,0.25); padding:2px 6px; border-radius:12px; margin-left:6px;">${p.tier_image ? `<img src="${p.tier_image}" style="width:12px;height:12px;" alt="${p.tier}"/>` : ''}${escHtml(p.tier)}</span>`
+      : '';
+    const codeBadge = p.source_code
+      ? `<span style="display:inline-flex; align-items:center; font-size:0.65rem; font-weight:800; color:${p.source_code.includes('BIGBALLZ') ? '#ffd700' : 'var(--cyan-400)'}; background:${p.source_code.includes('BIGBALLZ') ? 'rgba(255,215,0,0.1)' : 'rgba(0,255,229,0.08)'}; border:1px solid ${p.source_code.includes('BIGBALLZ') ? 'rgba(255,215,0,0.25)' : 'rgba(0,255,229,0.2)'}; padding:1px 6px; border-radius:10px; margin-left:6px; letter-spacing:0.04em;">${escHtml(p.source_code)}</span>`
+      : '';
+    const nameHtml = isHidden
+      ? `<span class="hidden-user">🔒 Hidden User</span>`
+      : `<span>${escHtml(p.username)}${tierBadge}${codeBadge}</span>`;
+    const amtClass = rank === 1 ? 'wager-amount gold' : 'wager-amount';
+    const rewardsHtml = getEligibleRewardsHtml(p.weekly_volume);
+
+    return `
+      <tr class="lb-main-row">
+        <td><span class="rank-badge ${rankClass}">${rank}</span></td>
+        <td class="lb-player-cell">${nameHtml}</td>
+        <td class="${amtClass}" style="color:#00ff80; font-weight:800; font-size:1.05rem;">${fmt(p.weekly_volume)}</td>
+        <td>${rewardsHtml}</td>
+        <td>
+          <a href="store.html" class="tc-claim-btn unlocked" style="display:inline-block; font-size:0.75rem; padding:6px 12px; text-decoration:none; border-radius:8px;">
+            Claim 🎟️
+          </a>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="lb-table-wrap">
+      <table class="lb-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Weekly Wager (Mon–Sun ET) ⚡</th>
+            <th>Eligible Rewards (This Week) 🎁</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
 
 /* ──────────────────────────────────────────
    CHALLENGES STATUS FILTER (PHASES 13, 14, 15)
