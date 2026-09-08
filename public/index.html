@@ -5351,16 +5351,16 @@ footer a:hover { color: var(--purple-300); }
           <div class="prize-pool-total" style="color:#ffd700;">$3,000</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-          <span class="prize-badge prize-badge-1">🥇 $1,000</span>
+          <span class="prize-badge prize-badge-1">🥇 $1,500</span>
           <span class="prize-badge prize-badge-2">🥈 $500</span>
-          <span class="prize-badge prize-badge-3">🥉 $350</span>
-          <span class="prize-badge prize-badge-n">4th $250</span>
-          <span class="prize-badge prize-badge-n">5th $200</span>
-          <span class="prize-badge prize-badge-n">6th $175</span>
-          <span class="prize-badge prize-badge-n">7th $150</span>
-          <span class="prize-badge prize-badge-n">8th $125</span>
-          <span class="prize-badge prize-badge-n">9th $125</span>
-          <span class="prize-badge prize-badge-n">10th $125</span>
+          <span class="prize-badge prize-badge-3">🥉 $300</span>
+          <span class="prize-badge prize-badge-n">4th $200</span>
+          <span class="prize-badge prize-badge-n">5th $150</span>
+          <span class="prize-badge prize-badge-n">6th $100</span>
+          <span class="prize-badge prize-badge-n">7th $80</span>
+          <span class="prize-badge prize-badge-n">8th $70</span>
+          <span class="prize-badge prize-badge-n">9th $50</span>
+          <span class="prize-badge prize-badge-n">10th $50</span>
         </div>
         <span class="prize-pool-cadence" style="color:var(--cyan-400);">⚡ Combined Race</span>
       </div>
@@ -6389,7 +6389,7 @@ function initBiweeklyProgress(isIntervalUpdate = false) {
   if (endNode) endNode.classList.toggle('active', pct >= 100);
 }
 
-const BW_PRIZE_POOL = [1000, 500, 350, 250, 200, 175, 150, 125, 125, 125]; // $3,000 Combined Prize Pool (New Distribution)
+const BW_PRIZE_POOL = [1500, 500, 300, 200, 150, 100, 80, 70, 50, 50]; // $3,000 Combined Prize Pool (Phase 9)
 let selectedCodeFilter = 'all';
 
 function setCodeFilter(code) {
@@ -6435,17 +6435,21 @@ function renderBiweeklyLeaderboard(data) {
 
   const fmtPts = n => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  const players = data.map(u => ({
-    user_id:  u.user_id,
-    username: u.username,
-    is_hidden: Boolean(u.is_hidden),
-    source_code: u.source_code || 'BIGD',
-    tier: u.tier || null,
-    tier_image: u.tier_image || null,
-    points: Number(u.leaderboard_points || 0),
-    weekly_volume: Number(u.weekly_volume) || 0,
-    total: (u.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0) || Number(u.volume) || 0
-  })).filter(p => p.total >= 0).sort((a, b) => (b.points - a.points) || (b.total - a.total));
+  const players = data.map(u => {
+    const wagerDataSum = (u.wager_data || []).reduce((s, m) => s + (Number(m.total_wager_usd) || 0), 0);
+    const totalWager = wagerDataSum > 0 ? wagerDataSum : (Number(u.volume) || 0);
+    return {
+      user_id:  u.user_id,
+      username: u.username,
+      is_hidden: Boolean(u.is_hidden),
+      source_code: u.source_code || 'BIGD',
+      tier: u.tier || null,
+      tier_image: u.tier_image || null,
+      points: Number(u.leaderboard_points || 0),
+      weekly_volume: Number(u.weekly_volume) || 0,
+      total: totalWager
+    };
+  }).filter(p => p.total >= 0 || p.points > 0).sort((a, b) => (b.points - a.points) || (b.total - a.total));
 
   if (players.length === 0) {
     bwContent.innerHTML = '<div class="lb-empty">No activity yet this period. Check back soon!</div>';
