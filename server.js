@@ -894,14 +894,14 @@ const STORE_REWARDS = [
   {
     id:          "tip_10",
     label:       "$10 Tip",
-    description: "Redeem your coins for a $10 Tip sent directly to BigDGamesTV on Kick.",
+    description: "Redeem your BigD Points for a $10 Tip sent directly to BigDGamesTV on Kick.",
     points_cost: 10000,
     emoji:       "💵"
   },
   {
     id:          "tip_20",
     label:       "$20 Tip",
-    description: "Redeem your coins for a $20 Tip sent directly to BigDGamesTV on Kick.",
+    description: "Redeem your BigD Points for a $20 Tip sent directly to BigDGamesTV on Kick.",
     points_cost: 17500,
     emoji:       "💰"
   }
@@ -1310,7 +1310,7 @@ app.get("/api/rewards/weekly", async (req, res) => {
         discord_username: targetUser.discord_username,
         kick_username: targetUser.kick_username,
         yeet_username: targetUser.degencity_username,
-        points_balance: targetUser.points_balance || 0,
+        points_balance: targetUser.points ?? targetUser.points_balance ?? 0,
         lifetime_wager: Number(lifetimeWager.toFixed(2)),
         weekly_wager: weeklyTotalWager,
         weekly_slots_wager: Number(weeklySlotsWager.toFixed(2)),

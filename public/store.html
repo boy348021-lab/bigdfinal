@@ -1644,9 +1644,12 @@ footer a:hover { color: var(--purple-200); }
 
     <!-- Weekly Reward Tiers Grid -->
     <div style="text-align:left;">
-      <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.06em;">
+      <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase; margin-bottom:4px; letter-spacing:0.06em;">
         Weekly <span>Reward Tiers</span>
       </div>
+      <p style="font-family:var(--font-ui); font-size:0.84rem; color:var(--text-secondary); margin:0 0 16px 0;">
+        ⚡ Unlocked strictly by <strong>Live Slots Wager</strong> during the current week. <strong>$0 Coins / Points Required</strong> to claim once tier is reached.
+      </p>
       <div class="tiers-grid" id="weekly-tiers-grid">
         <div class="tier-card">
           <div class="tc-badge">🥉 Tier 1</div>
@@ -1726,17 +1729,17 @@ footer a:hover { color: var(--purple-200); }
       <ul style="margin-left:18px; margin-top:4px;">
         <li><strong>Lifetime Wager:</strong> Continues indefinitely and never resets.</li>
         <li><strong>Weekly Wager & Tier Progression:</strong> Resets every Sunday at 23:59:59 UTC to begin a fresh weekly rewards race.</li>
-        <li><strong>BigD Coins:</strong> Persist in your balance to spend on rewards anytime!</li>
+        <li><strong>BigD Coins & Points:</strong> Virtual balances remain distinct and never alter live-wagering reward tier eligibility.</li>
       </ul>
     </div>
 
   </div>
 
 
-  <!-- ── SECTION DIVIDER: REDEEM COINS ────────────────────────────── -->
+  <!-- ── SECTION DIVIDER: REDEEM POINTS (KICK TIPS) ────────────────────────────── -->
   <div style="width:100%; max-width:900px; margin:48px 0 20px; display:flex; align-items:center; gap:16px;">
     <div style="flex:1; height:1px; background:rgba(255,255,255,0.08);"></div>
-    <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:900; letter-spacing:0.1em; color:#ffd700; text-transform:uppercase; white-space:nowrap;">🪙 Redeem Coins</div>
+    <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:900; letter-spacing:0.1em; color:#ffd700; text-transform:uppercase; white-space:nowrap;">🪙 Redeem BigD Points (Kick Tips)</div>
     <div style="flex:1; height:1px; background:rgba(255,255,255,0.08);"></div>
   </div>
 
@@ -1905,7 +1908,7 @@ async function redeemReward(rewardId, btnEl) {
       if (storeVal) storeVal.textContent = data.new_balance.toLocaleString();
     }
 
-    showToast("✅ Coins deducted! Create a ticket in Discord to claim your reward.");
+    showToast("✅ Points deducted! Create a ticket in Discord to claim your Kick Tip.");
 
     // Refresh redemption history
     if (currentAuthToken) await loadRedemptions(currentAuthToken);
@@ -1953,7 +1956,7 @@ async function initStore() {
         <div class="reward-card-emoji">${r.emoji || "🏆"}</div>
         <div class="reward-card-title">${escHtml(r.label)}</div>
         <div class="reward-card-desc">${escHtml(r.description)}</div>
-        <div class="reward-card-cost">${r.points_cost.toLocaleString()} Coins</div>
+        <div class="reward-card-cost">${r.points_cost.toLocaleString()} Points</div>
         <button class="reward-card-btn" data-reward-id="${escHtml(r.id)}">Redeem</button>
       `;
       // Wire button AFTER it's in the DOM so we can pass it as `this`
@@ -2114,7 +2117,7 @@ async function loadWeeklyRewards(token) {
     // 3. Render Reward Tiers
     const tiersGrid = document.getElementById("weekly-tiers-grid");
     if (tiersGrid && data.reward_tiers) {
-      const userSlotsWager = prog ? (prog.weekly_slots_wager !== undefined ? prog.weekly_slots_wager : prog.weekly_wager) : 0;
+      const userSlotsWager = prog ? (Number(prog.weekly_slots_wager) || 0) : 0;
       const weekId = data.week_info ? data.week_info.weekId : "current";
       const claimedList = prog?.claimed_tiers || [];
       tiersGrid.innerHTML = "";
@@ -2159,7 +2162,7 @@ async function loadWeeklyRewards(token) {
         card.innerHTML = `
           <div class="tc-badge">${badgeText}</div>
           <div class="tc-wager">$${t.wager_threshold.toLocaleString()} Slots Wager</div>
-          <div class="tc-reward">🎁 $${t.cash_value} Cash</div>
+          <div class="tc-reward">🎁 $${t.cash_value} Cash (Free Claim)</div>
           <button class="${btnClass}"${btnDisabled ? " disabled" : ""}>
             ${btnText}
           </button>
