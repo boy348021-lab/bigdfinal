@@ -6406,12 +6406,8 @@ async function fetchBiweeklyLeaderboard() {
   if (!bwContent) return;
   bwContent.innerHTML = '<div class="lb-loading"><div class="spinner"></div>Loading monthly rankings…</div>';
 
-  const { start, end } = getMonthlyPeriod();
-  const after  = bwFmtISO(start);
-  const before = bwFmtISO(end);
-
   try {
-    const url = API_BASE + '?after=' + encodeURIComponent(after) + '&before=' + encodeURIComponent(before) + '&period=monthly&partner=' + encodeURIComponent(currentCampaign) + '&code=' + encodeURIComponent(selectedCodeFilter);
+    const url = `${API_BASE}?period=monthly&partner=yeet&code=${encodeURIComponent(selectedCodeFilter)}`;
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) {
       bwContent.innerHTML = '<div class="lb-error">⚠️ Error loading monthly data (' + res.status + '). Try again.</div>';
