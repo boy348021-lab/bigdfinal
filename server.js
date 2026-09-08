@@ -569,6 +569,69 @@ async function fetchCombinedYeetReferrals({ startDate = null, endDate = null, so
   return Array.from(playerMap.values());
 }
 
+/**
+ * Auto-Sync Yeet Wager Volume to Supabase DB User Coins (points_balance)
+ */
+async function syncYeetWagersToUserCoins(user, yeetMatch) {
+  if (!supabase || !user || !yeetMatch) return null;
+  try {
+    const totalYeetVolume = Number(yeetMatch.volume) || 0;
+    if (totalYeetVolume <= 0) return null;
+
+    // Fetch existing synced wagers from DB
+    const { data: txs } = await supabase
+      .from("wager_transactions")
+      .select("wager_amount_usd, transaction_id")
+      .eq("user_id", user.id);
+
+    const syncedYeetTx = (txs || []).find(t => t.transaction_id && t.transaction_id.startsWith("yeet_auto_sync_"));
+    const lastSyncedWager = syncedYeetTx ? (Number(syncedYeetTx.wager_amount_usd) || 0) : 0;
+
+    const wagerDelta = Number((totalYeetVolume - lastSyncedWager).toFixed(2));
+    if (wagerDelta <= 0.05) return null; // No significant new wager delta
+
+    // Default rate for general Yeet API volume: 10 coins per $1 (Category A)
+    const pointsDelta = Math.round(wagerDelta * REWARD_MULTIPLIERS.SLOTS);
+    const syncTxId = `yeet_auto_sync_${user.id}`;
+
+    // Execute points mutation via RPC
+    const { data: newBalance, error: rpcErr } = await supabase.rpc("modify_points", {
+      p_user_id: user.id,
+      p_delta:   pointsDelta,
+      p_action:  "yeet_wager_sync",
+      p_source:  "yeet_affiliate_api",
+      p_ref:     syncTxId
+    });
+
+    if (rpcErr) {
+      console.error(`Sync error for user ${user.id}:`, rpcErr.message);
+      return null;
+    }
+
+    // Upsert transaction ledger checkpoint
+    if (syncedYeetTx) {
+      await supabase.from("wager_transactions")
+        .update({ wager_amount_usd: totalYeetVolume, points_awarded: Math.round(totalYeetVolume * REWARD_MULTIPLIERS.SLOTS), processed_at: new Date().toISOString() })
+        .eq("user_id", user.id)
+        .eq("transaction_id", syncTxId);
+    } else {
+      await supabase.from("wager_transactions").insert({
+        user_id:          user.id,
+        transaction_id:   syncTxId,
+        provider:         "yeet_slots",
+        wager_amount_usd: totalYeetVolume,
+        points_awarded:   Math.round(totalYeetVolume * REWARD_MULTIPLIERS.SLOTS)
+      });
+    }
+
+    console.log(`🪙 AUTO-COIN SYNC: Accrued +${pointsDelta} BigD Coins for ${user.degencity_username || user.kick_username || user.discord_username} (Wager: $${totalYeetVolume})`);
+    return { points_awarded: pointsDelta, new_balance: newBalance };
+  } catch (err) {
+    console.error("syncYeetWagersToUserCoins error:", err.message);
+    return null;
+  }
+}
+
 // ==============================================================================
 // 🚨 PROTECTED CODE SECTION – LEADERBOARD MODULE (UPDATED WITH YEET API)
 // ==============================================================================
@@ -1238,6 +1301,9 @@ app.get("/api/rewards/weekly", async (req, res) => {
         const userMonthlyYeet = findYeetMatch(monthlyYeet);
         const userAllTimeYeet = findYeetMatch(allTimeYeet);
 
+        // Auto-Sync Yeet Wagers to Database Points Balance
+        await syncYeetWagersToUserCoins(targetUser, userAllTimeYeet || userMonthlyYeet || userWeeklyYeet);
+
         // Weekly wager MUST strictly reflect the current week's volume.
         // IMPORTANT: Yeet API volume = total (Slots + House combined) — NO split available.
         // We update weeklyTotalWager for display purposes ONLY.
@@ -1356,6 +1422,52 @@ app.get("/api/rewards/weekly", async (req, res) => {
     user_progression: userProgression,
     recent_ledger: recentLedger
   });
+});
+
+// ─── POST /api/rewards/sync-my-coins (Trigger manual coin sync for logged-in user) ───
+app.post("/api/rewards/sync-my-coins", requireAuth, async (req, res) => {
+  if (!supabase) return res.status(503).json({ error: "Database not configured" });
+  if (!req.user) return res.status(401).json({ error: "Please log in first." });
+
+  try {
+    const possibleNames = [
+      req.user.degencity_username,
+      req.user.kick_username,
+      req.user.discord_username,
+      req.user.display_name,
+      req.user.degencity_username?.replace(/[^a-z0-9]/gi, ''),
+      req.user.kick_username?.replace(/[^a-z0-9]/gi, ''),
+      req.user.discord_username?.replace(/[^a-z0-9]/gi, '')
+    ].filter(Boolean).map(n => n.toLowerCase().trim());
+
+    const allTimeYeet = await fetchCombinedYeetReferrals({ cacheKey: 'allTime' });
+
+    const findMatch = (list) => {
+      if (!list || !Array.isArray(list)) return null;
+      let m = list.find(p => p.username && possibleNames.includes(p.username.toLowerCase().trim()));
+      if (m) return m;
+      m = list.find(p => {
+        const cleanP = (p.username || "").replace(/[^a-z0-9]/gi, '').toLowerCase();
+        return cleanP && possibleNames.some(n => n.replace(/[^a-z0-9]/gi, '') === cleanP);
+      });
+      return m || null;
+    };
+
+    const match = findMatch(allTimeYeet);
+    if (!match) {
+      return res.json({ ok: true, synced: false, message: "No active Yeet wager referrals matched your account handles yet." });
+    }
+
+    const syncRes = await syncYeetWagersToUserCoins(req.user, match);
+    if (syncRes) {
+      return res.json({ ok: true, synced: true, points_awarded: syncRes.points_awarded, new_balance: syncRes.new_balance });
+    }
+
+    return res.json({ ok: true, synced: false, message: "Your BigD Coin balance is already up to date with your latest wagers!" });
+  } catch (err) {
+    console.error("sync-my-coins error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ─── POST /api/rewards/weekly/claim (Claim weekly tier reward — 1 per tier per week, SLOTS ONLY) ───

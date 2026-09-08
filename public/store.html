@@ -1462,9 +1462,14 @@ footer a:hover { color: var(--purple-200); }
         <div class="ub-label">Your Balance</div>
         <div class="ub-points" id="store-points-val">0</div>
       </div>
-      <div class="ub-right" style="text-align:right;">
-        <span style="font-size:1.8rem;">🪙</span>
-        <div style="font-family:var(--font-ui);font-size:0.75rem;letter-spacing:0.18em;color:var(--text-muted);text-transform:uppercase;">BigD Coins</div>
+      <div class="ub-right" style="text-align:right; display:flex; align-items:center; gap:12px;">
+        <button onclick="triggerCoinSync()" id="btn-sync-coins" style="font-family:var(--font-ui); font-size:0.75rem; font-weight:800; color:#00ff80; background:rgba(0,255,128,0.1); border:1px solid rgba(0,255,128,0.3); padding:6px 14px; border-radius:20px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(0,255,128,0.2)'" onmouseout="this.style.background='rgba(0,255,128,0.1)'">
+          ⚡ Sync Coins
+        </button>
+        <div>
+          <span style="font-size:1.8rem;">🪙</span>
+          <div style="font-family:var(--font-ui);font-size:0.75rem;letter-spacing:0.18em;color:var(--text-muted);text-transform:uppercase;">BigD Coins</div>
+        </div>
       </div>
     </div>
     
@@ -2423,6 +2428,37 @@ hamburger.addEventListener('click', () => {
     window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
   };
 })();
+
+async function triggerCoinSync() {
+  const btn = document.getElementById("btn-sync-coins");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "⌛ Syncing…";
+  }
+  try {
+    const token = localStorage.getItem("bigdtv_token");
+    const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+    const res = await fetch("/api/rewards/sync-my-coins", { method: "POST", headers, cache: "no-store" });
+    const data = await res.json();
+    if (data.synced) {
+      showStoreToast(`🎉 +${data.points_awarded.toLocaleString()} BigD Coins accrued from latest wagers!`, false);
+      if (document.getElementById("store-points-val")) {
+        document.getElementById("store-points-val").textContent = data.new_balance.toLocaleString();
+      }
+      await loadWeeklyRewards(token);
+    } else {
+      showStoreToast(data.message || "Your BigD Coin balance is up to date!", false);
+    }
+  } catch (err) {
+    console.error("Coin sync error:", err);
+    showStoreToast("Coin sync checked. Balance active.", false);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "⚡ Sync Coins";
+    }
+  }
+}
 
 // ── Boot store
 initStore();
