@@ -872,12 +872,12 @@
 /* Rich Floating Hover Card */
 .sg-step-pin-tooltip {
   position: absolute;
-  bottom: calc(100% + 10px);
+  bottom: calc(100% + 12px);
   left: 50%;
   transform: translateX(-50%) translateY(4px);
-  min-width: 170px;
+  min-width: 180px;
   background: linear-gradient(135deg, rgba(16, 10, 32, 0.98) 0%, rgba(9, 5, 20, 0.98) 100%);
-  border: 1px solid rgba(0, 255, 229, 0.5);
+  border: 1px solid rgba(0, 255, 229, 0.6);
   border-radius: 10px;
   padding: 10px 12px;
   font-family: var(--font-ui);
@@ -885,8 +885,8 @@
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 100;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s;
+  z-index: 99999 !important;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.95), 0 0 20px rgba(0, 255, 229, 0.25);
   backdrop-filter: blur(12px);
   text-align: left;
@@ -899,12 +899,28 @@
   transform: translateX(-50%);
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid rgba(0, 255, 229, 0.5);
+  border-top: 6px solid rgba(0, 255, 229, 0.6);
 }
+
+/* Tooltip Left-Edge Clamp */
+.sg-track-runner-pin.near-left .sg-step-pin-tooltip {
+  left: 0;
+  transform: translateX(0) translateY(4px);
+}
+.sg-track-runner-pin.near-left .sg-step-pin-tooltip::after {
+  left: 20px;
+  transform: translateX(0);
+}
+
+.sg-track-runner-pin:hover .sg-step-pin-tooltip,
 .sg-step-pin:hover .sg-step-pin-tooltip {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateX(-50%) translateY(0) !important;
+  pointer-events: auto;
+}
+.sg-track-runner-pin.near-left:hover .sg-step-pin-tooltip {
+  transform: translateX(0) translateY(0) !important;
 }
 .pin-tt-header {
   display: flex;

@@ -2642,15 +2642,13 @@ function renderStoreSquidGameTracker(players, userProgression) {
       const icon = avatarIcons[(players || []).indexOf(p) % avatarIcons.length] || '🦑';
 
       // Calculate continuous track rail position (0% - 100%)
-      let exactPct = Math.min(96, Math.max(2, (pVol / 15000) * 100));
+      let exactPct = isLeader
+        ? Math.min(96, Math.max(14, (pVol / 15000) * 100))
+        : Math.min(11.5, Math.max(2.5, 2.5 + (pIdx - 1) * 1.5));
 
-      // Visual anti-collision stagger for low/tied wagers so all pins are visible & clickable
-      let visualTop = (pIdx % 2 === 0) ? -2 : 14;
-      if (pVol === 0) {
-        exactPct = 2 + (pIdx * 2.8);
-      } else if (pVol < 500 && !isLeader) {
-        exactPct = Math.max(3, exactPct + (pIdx * 1.5));
-      }
+      // Dual-lane vertical stagger to prevent overlap
+      let visualTop = isLeader ? 0 : (pIdx % 2 === 0 ? -6 : 16);
+      const isNearLeft = exactPct < 8;
 
       // Display name inside circle: prioritize readable acronym or EDDIE for bettyeddy
       let displayName = rawName;
@@ -2666,7 +2664,7 @@ function renderStoreSquidGameTracker(players, userProgression) {
       const zIndex = isLeader ? 75 : (isUserSelf ? 70 : (isSelected ? 65 : (40 - pIdx)));
 
       return `
-        <div class="sg-track-runner-pin ${isLeader ? 'is-leader' : ''} ${isWinner ? 'is-winner' : ''} ${isUserSelf ? 'is-self' : ''} ${isSelected ? 'is-selected' : ''}" 
+        <div class="sg-track-runner-pin ${isNearLeft ? 'near-left' : ''} ${isLeader ? 'is-leader' : ''} ${isWinner ? 'is-winner' : ''} ${isUserSelf ? 'is-self' : ''} ${isSelected ? 'is-selected' : ''}" 
              style="left: ${exactPct}%; top: ${visualTop}px; z-index: ${zIndex};"
              onclick="selectStoreSquidPlayer('${escHtml(rawName)}')"
              title="${escHtml(rawName)}: $${pVol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}">
