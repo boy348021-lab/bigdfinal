@@ -7,7 +7,7 @@
 <meta name="description" content="Earn BigD Coins by watching and chatting in BigDGamesTV streams and redeem them for exclusive rewards in the BigD Store."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/style.css"/>
 <style>
 /* ============================================================
@@ -41,9 +41,9 @@
   --glow-purple:    0 0 25px rgba(157,0,255,0.45), 0 0 70px rgba(157,0,255,0.2);
   --glow-gold:      0 0 25px rgba(255,215,0,0.45), 0 0 60px rgba(255,215,0,0.18);
   --glow-intense:   0 0 45px rgba(157,0,255,0.7), 0 0 110px rgba(0,255,229,0.3);
-  --font-display:   'Bring Bold Nineties', 'Nineties Bold', 'Syne', -apple-system, BlinkMacSystemFont, 'Impact', sans-serif;
-  --font-ui:        'Neue Haas Grotesk Display Pro', 'Neue Haas Display', 'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --font-body:      'Neue Haas Grotesk Text Pro', 'Neue Haas Display', 'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-display:   'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-ui:        'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-body:      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --radius-sm:      6px;
   --radius-md:      12px;
   --radius-lg:      20px;
@@ -522,6 +522,369 @@ main {
   font-size: 0.88rem;
 }
 
+/* ============================================================
+   SQUID GAME THEMED WEEKLY AIRDROP TRACKER & PIGGY BANK
+   ============================================================ */
+/* ============================================================
+   SQUID GAME THEMED WEEKLY AIRDROP TRACKER & PIGGY BANK
+   ============================================================ */
+.squid-arena-wrap {
+  background: radial-gradient(circle at 80% 20%, rgba(255, 42, 122, 0.16) 0%, transparent 55%),
+              linear-gradient(135deg, rgba(22, 12, 36, 0.96) 0%, rgba(10, 6, 18, 0.98) 100%);
+  border: 1px solid rgba(255, 42, 122, 0.45);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 35px rgba(255, 42, 122, 0.2);
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+}
+.squid-arena-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #ff2a7a, #ffd700, #00ffe5, #ff2a7a);
+  background-size: 300% 100%;
+  animation: neon-gradient-sweep 6s linear infinite;
+}
+@keyframes neon-gradient-sweep {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 300% 0%; }
+}
+.squid-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+.squid-info-col {
+  flex: 1;
+  min-width: 280px;
+  text-align: left;
+}
+.squid-symbols-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 42, 122, 0.16);
+  border: 1px solid rgba(255, 42, 122, 0.55);
+  color: #ff3388;
+  font-family: var(--font-display);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 0 16px rgba(255, 42, 122, 0.25);
+}
+.squid-symbols-badge span.sym {
+  font-size: 0.95rem;
+  letter-spacing: 0.22em;
+  color: #00ffe5;
+  text-shadow: 0 0 8px rgba(0, 255, 229, 0.7);
+}
+.squid-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.45rem, 3vw, 1.85rem);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin: 0 0 8px 0;
+}
+.squid-title span {
+  background: linear-gradient(135deg, #ff2a7a 0%, #ff77aa 50%, #ffd700 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 18px rgba(255, 42, 122, 0.45));
+}
+.squid-desc {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  max-width: 620px;
+}
+.squid-payout-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.sq-payout-pill {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.12);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  padding: 4px 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.squid-piggy-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.piggy-ball-container {
+  width: 130px;
+  height: 130px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 215, 0, 0.45) 0%, rgba(255, 42, 122, 0.3) 50%, rgba(10, 5, 20, 0.98) 100%);
+  border: 2px solid rgba(255, 215, 0, 0.75);
+  box-shadow: 0 0 35px rgba(255, 215, 0, 0.4), 0 0 50px rgba(255, 42, 122, 0.25), inset 0 0 25px rgba(255, 215, 0, 0.3);
+  animation: pulsePiggy 3s ease-in-out infinite alternate;
+}
+@keyframes pulsePiggy {
+  0% { transform: scale(1); box-shadow: 0 0 25px rgba(255, 215, 0, 0.35), inset 0 0 18px rgba(255, 215, 0, 0.25); }
+  100% { transform: scale(1.05); box-shadow: 0 0 45px rgba(255, 215, 0, 0.6), 0 0 65px rgba(255, 42, 122, 0.35), inset 0 0 30px rgba(255, 42, 122, 0.4); }
+}
+.piggy-inner-cash {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+.piggy-float-icons {
+  font-size: 1.1rem;
+  letter-spacing: 0.14em;
+  margin-bottom: 2px;
+  animation: floatCash 2.5s ease-in-out infinite alternate;
+}
+@keyframes floatCash {
+  0% { transform: translateY(-3px); }
+  100% { transform: translateY(3px); }
+}
+.piggy-amount {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ffd700;
+  line-height: 1;
+  text-shadow: 0 0 16px rgba(255, 215, 0, 0.7);
+  letter-spacing: -0.02em;
+}
+.piggy-label {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #00ffe5;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-top: 3px;
+  text-shadow: 0 0 8px rgba(0, 255, 229, 0.6);
+}
+.squid-bridge-section {
+  background: rgba(8, 4, 18, 0.75);
+  border: 1px solid rgba(0, 255, 229, 0.25);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  margin-top: 14px;
+}
+.bridge-top-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.bridge-track-wrapper {
+  position: relative;
+  padding: 55px 24px 35px;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 10px;
+  border: 1px dashed rgba(255, 42, 122, 0.35);
+  overflow-x: auto;
+}
+.bridge-rail-line {
+  position: absolute;
+  top: 62px;
+  left: 30px;
+  right: 30px;
+  height: 6px;
+  background: linear-gradient(90deg, rgba(255,42,122,0.4), rgba(0,255,229,0.5), rgba(255,215,0,0.7));
+  border-radius: 4px;
+  box-shadow: 0 0 12px rgba(0,255,229,0.35);
+}
+.bridge-milestone-nodes {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  z-index: 2;
+  min-width: 500px;
+}
+.b-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.b-node-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #120922;
+  border: 2px solid rgba(0, 255, 229, 0.6);
+  box-shadow: 0 0 10px rgba(0, 255, 229, 0.45);
+  margin-top: 55px;
+  transition: all 0.3s;
+}
+.b-node.vip .b-node-dot {
+  width: 22px;
+  height: 22px;
+  background: #ffd700;
+  border: 2px solid #fff;
+  box-shadow: 0 0 20px #ffd700, 0 0 40px rgba(255, 215, 0, 0.5);
+  margin-top: 51px;
+}
+.b-node-label {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #9c94b8;
+  margin-top: 6px;
+}
+.b-node.vip .b-node-label {
+  color: #ffd700;
+  font-weight: 900;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+.bridge-player-pins-layer {
+  position: absolute;
+  top: 14px;
+  left: 30px;
+  right: 30px;
+  height: 48px;
+  pointer-events: none;
+  min-width: 500px;
+}
+.player-pin {
+  position: absolute;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+.player-pin-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #150b28;
+  border: 2px solid #00ffe5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  box-shadow: 0 0 8px rgba(0, 255, 229, 0.5);
+  transition: transform 0.2s;
+}
+.player-pin:hover .player-pin-avatar {
+  transform: scale(1.25) translateY(-3px);
+  box-shadow: 0 0 16px #ffd700;
+}
+.player-pin-name {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #e4e0ec;
+  background: rgba(12, 6, 24, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-top: 2px;
+  max-width: 65px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player-pin-tooltip {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #140b24;
+  border: 1px solid #00ffe5;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+  color: #fff;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+  z-index: 20;
+}
+.player-pin:hover .player-pin-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-3px);
+}
+.vip-winners-showcase {
+  margin-top: 14px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.06) 0%, rgba(255, 42, 122, 0.06) 100%);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.vip-showcase-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #ffd700;
+  text-transform: uppercase;
+}
+.vip-leaders-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.vip-leader-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 215, 0, 0.6);
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+}
+.vip-leader-prize {
+  color: #00ff80;
+  font-weight: 800;
+}
+
 /* ─── WEEKLY REWARDS SECTION STYLES (PHASE 4, 5, 6, 7) ──────────────── */
 .weekly-rewards-container {
   width: 100%;
@@ -585,40 +948,49 @@ main {
 
 .weekly-hud-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 16px;
-  margin: 24px 0;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
 }
 .weekly-stat-box {
-  background: rgba(14,10,30,0.7);
-  border: 1px solid rgba(136,0,255,0.25);
-  border-radius: var(--radius-md);
-  padding: 18px 16px;
+  background: rgba(14, 10, 28, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
   text-align: left;
+  overflow: hidden;
 }
 .weekly-stat-box .ws-label {
   font-family: var(--font-ui);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-muted);
   margin-bottom: 4px;
 }
 .weekly-stat-box .ws-val {
   font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 900;
+  font-size: 1.3rem;
+  font-weight: 800;
   color: #ffffff;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.weekly-stat-box .ws-val.gold { color: #ffd700; text-shadow: 0 0 15px rgba(255,215,0,0.4); }
-.weekly-stat-box .ws-val.cyan { color: var(--cyan-400); text-shadow: 0 0 15px rgba(0,255,229,0.4); }
-.weekly-stat-box .ws-val.green { color: #00ff80; text-shadow: 0 0 15px rgba(0,255,128,0.4); }
+.weekly-stat-box .ws-val.gold { color: #ffd700; text-shadow: 0 0 12px rgba(255,215,0,0.35); }
+.weekly-stat-box .ws-val.cyan { color: var(--cyan-400); text-shadow: 0 0 12px rgba(0,255,229,0.35); }
+.weekly-stat-box .ws-val.green { color: #00ff80; text-shadow: 0 0 12px rgba(0,255,128,0.35); }
 .weekly-stat-box .ws-note {
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
   color: var(--text-secondary);
   margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Progression Bar Track */
@@ -1447,11 +1819,14 @@ footer a:hover { color: var(--purple-200); }
 
   <!-- ── PAGE HEADING ─────────────────────────────────────────── -->
   <div style="width:100%; max-width:900px; margin-bottom:32px; text-align:center;">
-    <div style="font-family:var(--font-display); font-size:2.4rem; font-weight:900; letter-spacing:0.06em; color:#fff; text-transform:uppercase; line-height:1.1;">
-      BigD <span style="color:var(--cyan-400);">Store</span>
+    <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(255,215,0,0.12); border:1px solid rgba(255,215,0,0.35); padding:4px 14px; border-radius:20px; font-family:var(--font-ui); font-size:0.75rem; font-weight:800; color:#ffd700; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:14px; box-shadow:0 0 16px rgba(255,215,0,0.2);">
+      <span>⚡ LIVE WEEKLY VAULT</span> &bull; <span>$125 VIP AIRDROP ACTIVE</span>
     </div>
-    <div style="font-family:var(--font-ui); font-size:0.82rem; color:var(--text-muted); letter-spacing:0.15em; text-transform:uppercase; margin-top:6px;">
-      Redeem your BigD Coins for exclusive rewards
+    <div style="font-family:var(--font-display); font-size:clamp(2.4rem, 5vw, 3.4rem); font-weight:900; letter-spacing:0.02em; color:#fff; text-transform:uppercase; line-height:1.05;">
+      BIGD <span style="background:linear-gradient(135deg, #00ffe5, #be4dff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; filter:drop-shadow(0 0 20px rgba(0,255,229,0.4));">VIP STORE & ARENA</span>
+    </div>
+    <div style="font-family:var(--font-ui); font-size:0.92rem; color:var(--text-secondary); letter-spacing:0.04em; margin-top:8px; max-width:600px; margin-left:auto; margin-right:auto;">
+      Wager on Yeet with code <strong style="color:#fff;">BIGDTV</strong>, climb the Squid Game bridge to $15k VIP, and dominate the weekly $125 airdrop pool.
     </div>
   </div>
 
@@ -1508,43 +1883,48 @@ footer a:hover { color: var(--purple-200); }
 
   <div class="weekly-rewards-container" id="weekly-rewards-section">
     
-    <!-- Hero Card & Timer -->
-    <div class="weekly-hero-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-        <div class="weekly-badge-pill">
-          <span>⚡</span> WEEKLY SLOTS WAGER CHASE
+    <!-- Squid Game Themed Weekly Airdrop Tracker & Piggy Bank -->
+    <div class="squid-arena-wrap">
+      <div class="squid-header-row">
+        <div class="squid-info-col">
+          <div class="squid-symbols-badge">
+            <span class="sym">◯ △ ▢</span> SQUID GAME VIP ARENA
+          </div>
+          <div class="squid-title">THE $125 <span>WEEKLY VIP AIRDROP</span></div>
+          <div class="squid-desc">
+            Wager on Yeet using affiliate code <strong style="color:#fff;">BIGDTV</strong> to advance across the bridge. Reach <strong style="color:#ffd700;">$15,000 Wager</strong> to unlock permanent VIP status! The <strong style="color:#00ffe5;">Top 5 VIPs</strong> on the leaderboard each week split the <strong>$125 Cash ($25/each)</strong>.
+          </div>
+          <div class="squid-payout-row">
+            <span class="sq-payout-pill">🥇 1st: $25</span>
+            <span class="sq-payout-pill">🥈 2nd: $25</span>
+            <span class="sq-payout-pill">🥉 3rd: $25</span>
+            <span class="sq-payout-pill">🎖️ 4th: $25</span>
+            <span class="sq-payout-pill">🎖️ 5th: $25</span>
+          </div>
         </div>
-        <div style="font-family:var(--font-ui); font-size:0.8rem; font-weight:800; color:var(--cyan-400); background:rgba(0,255,229,0.12); border:1px solid rgba(0,255,229,0.3); padding:4px 14px; border-radius:20px;" id="weekly-countdown-pill">
-          🕒 RESETS IN: <strong id="weekly-time-left">Loading…</strong>
-        </div>
-      </div>
-
-      <div class="weekly-title">
-        Weekly <span>Wager Rewards</span>
-      </div>
-      <p class="weekly-sub">
-        Wager on Yeet using code <strong style="color:var(--cyan-400);">BIGDTV</strong>. Earn coins on all games and unlock weekly cash rewards from <strong>qualifying Slots wager</strong>!
-      </p>
-
-      <!-- Prominent Groundrule Notice -->
-      <div style="margin-top:14px; padding:12px 16px; background:rgba(0,255,229,0.06); border:1px solid rgba(0,255,229,0.25); border-radius:12px; display:flex; align-items:center; gap:12px;">
-        <span style="font-size:1.3rem;">🎰</span>
-        <div style="font-size:0.82rem; color:var(--text-primary); line-height:1.4;">
-          <strong style="color:var(--cyan-400);">GROUNDRULE:</strong> Weekly Cash Reward Tiers ($5 → $40) are unlocked <strong style="color:#00ff80;">strictly and solely by Slots wager</strong>. House & Live Casino games earn BigD Coins but do not count toward unlocking weekly cash reward tiers.
+        
+        <div class="squid-piggy-col">
+          <div class="piggy-ball-container">
+            <div class="piggy-inner-cash">
+              <div class="piggy-float-icons">💰 💵 💸</div>
+              <div class="piggy-amount">$125</div>
+              <div class="piggy-label">AIRDROP POOL</div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- User Stats HUD -->
-      <div class="weekly-hud-stats">
+      <div class="weekly-hud-stats" style="margin-bottom:16px;">
         <div class="weekly-stat-box">
-          <div class="ws-label">Qualifying Slots Wager</div>
+          <div class="ws-label">Your Weekly Wager</div>
           <div class="ws-val green" id="hud-weekly-wager">$0.00</div>
-          <div class="ws-note" id="hud-wager-breakdown">Slots: $0 | House: $0</div>
+          <div class="ws-note" id="hud-wager-breakdown">Slots + House Combined</div>
         </div>
         <div class="weekly-stat-box">
-          <div class="ws-label">Total Wager (All Games)</div>
-          <div class="ws-val cyan" id="hud-total-weekly-wager">$0.00</div>
-          <div class="ws-note">Slots + House Combined</div>
+          <div class="ws-label">VIP Distance ($15k Goal)</div>
+          <div class="ws-val cyan" id="hud-vip-distance">$15,000.00</div>
+          <div class="ws-note" id="hud-vip-status-note">🏃 Advancing to VIP</div>
         </div>
         <div class="weekly-stat-box">
           <div class="ws-label">BigD Coins Balance</div>
@@ -1552,150 +1932,55 @@ footer a:hover { color: var(--purple-200); }
           <div class="ws-note" id="hud-weekly-coins-note">+0 coins earned this week</div>
         </div>
         <div class="weekly-stat-box">
-          <div class="ws-label">Current Tier Rank</div>
-          <div class="ws-val green" id="hud-tier-name" style="font-size:1.3rem;">Bronze Starter</div>
-          <div class="ws-note" id="hud-tier-badge">Tier 1 Target: $250 Slots</div>
+          <div class="ws-label">VIP Status</div>
+          <div class="ws-val green" id="hud-tier-name" style="font-size:1.15rem;">Racer</div>
+          <div class="ws-note" id="hud-tier-badge">15k Wager unlocks VIP</div>
         </div>
       </div>
 
-      <!-- Weekly Progression Bar (Phase 4) -->
-      <div class="weekly-prog-wrap">
-        <div class="weekly-prog-header">
-          <span class="weekly-prog-title" id="weekly-prog-bar-title">THIS WEEK SLOTS PROGRESSION</span>
-          <span style="font-family:var(--font-display); font-size:0.92rem; font-weight:800; color:#ffd700;" id="weekly-prog-pct">0% toward next reward</span>
+      <!-- Squid Game Stepping Bridge Track -->
+      <div class="squid-bridge-section">
+        <div class="bridge-top-hud">
+          <span style="color:var(--text-muted);">🚦 $0 STARTING ZONE</span>
+          <span style="color:#ff2a7a;">🦑 SQUID GAME BRIDGE TO $15,000 VIP</span>
+          <span style="color:#ffd700;">🏆 VIP AIRDROP ZONE ($15K+)</span>
         </div>
-        <div class="weekly-prog-track">
-          <div class="weekly-prog-fill" id="weekly-prog-fill" style="width:0%;"></div>
-        </div>
-        <div class="weekly-prog-footer">
-          <span id="weekly-prog-current">$0.00 Slots Wagered This Week</span>
-          <strong style="color:var(--cyan-400);" id="weekly-prog-remaining">$250.00 remaining until next reward</strong>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Wager -> Coin Conversion Rules (Phase 5) -->
-    <div style="text-align:left;">
-      <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.06em;">
-        Wager to Coin <span>Conversion Rates</span>
-      </div>
-      <div class="multipliers-grid">
-        <div class="multiplier-card slots">
-          <span class="mc-tag slots">🎰 Category A — Slots</span>
-          <div class="mc-rate">$1 Wager = 10 Coins</div>
-          <p class="mc-formula">
-            For every $1 wagered on qualifying slot games, receive <strong>10 BigD Coins</strong>.<br/>
-            <em>Formula: slotCoins = slotWager × 10</em>
-          </p>
-        </div>
-        <div class="multiplier-card house">
-          <span class="mc-tag house">🎲 Category B — House / Live Games</span>
-          <div class="mc-rate">$1 Wager = 0.25 Coins</div>
-          <p class="mc-formula">
-            For every $1 spent on qualifying house or live casino games, receive <strong>0.25 BigD Coins</strong>.<br/>
-            <em>Formula: houseCoins = houseWager × 0.25</em>
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Real-Time Interactive Coin Calculator (Phase 5) -->
-    <div class="calculator-box">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:6px;">
-        <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase;">
-          🧮 Live Wager <span>Coin Calculator</span>
-        </div>
-        <span style="font-family:var(--font-ui); font-size:0.75rem; color:var(--cyan-400); font-weight:700;">⚡ Instant Conversion</span>
-      </div>
-      <p style="font-family:var(--font-ui); font-size:0.88rem; color:var(--text-secondary); margin-bottom:14px;">
-        Test and simulate exact coin conversions with our verified mathematical formula:
-      </p>
-
-      <div class="calc-presets">
-        <span style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); padding-top:4px; font-weight:800;">QUICK EXAMPLES:</span>
-        <button class="calc-preset-btn" onclick="setCalcPreset(100, 100)">$100 Slots + $100 House</button>
-        <button class="calc-preset-btn" onclick="setCalcPreset(500, 0)">$500 Slots</button>
-        <button class="calc-preset-btn" onclick="setCalcPreset(0, 500)">$500 House</button>
-        <button class="calc-preset-btn" onclick="setCalcPreset(250, 750)">$250 Slots + $750 House</button>
-      </div>
-
-      <div class="calc-inputs-grid">
-        <div class="calc-input-group">
-          <label>🎰 Slots Wager ($ USD)</label>
-          <input type="number" id="calc-slots-input" class="calc-input-field" placeholder="0" value="100" min="0" oninput="runCoinCalculation()"/>
-        </div>
-        <div class="calc-input-group">
-          <label>🎲 House / Live Games Wager ($ USD)</label>
-          <input type="number" id="calc-house-input" class="calc-input-field" placeholder="0" value="100" min="0" oninput="runCoinCalculation()"/>
-        </div>
-      </div>
-
-      <div class="calc-result-strip">
-        <div>
-          <div style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Breakdown</div>
-          <div style="font-family:var(--font-ui); font-size:0.95rem; color:#fff; margin-top:2px;">
-            Slots: <strong style="color:var(--cyan-400);" id="calc-res-slots">1,000 coins</strong> &nbsp;|&nbsp; House: <strong style="color:#ffd700;" id="calc-res-house">25 coins</strong>
+        <div class="bridge-track-wrapper">
+          <div class="bridge-rail-line"></div>
+          <div class="bridge-milestone-nodes">
+            <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$0</div></div>
+            <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$2.5k</div></div>
+            <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$5k</div></div>
+            <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$7.5k</div></div>
+            <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$10k</div></div>
+            <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$12.5k</div></div>
+            <div class="b-node vip"><div class="b-node-dot"></div><div class="b-node-label">$15k VIP 🏆</div></div>
           </div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Total Qualifying Reward</div>
-          <div style="font-family:var(--font-display); font-size:1.8rem; font-weight:900; color:#00ff80; text-shadow:0 0 15px rgba(0,255,128,0.4);" id="calc-res-total">
-            1,025 Coins
+          <div class="bridge-player-pins-layer" id="store-squid-bridge-pins">
+            <!-- Dynamically populated with active players -->
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Weekly Reward Tiers Grid -->
-    <div style="text-align:left;">
-      <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase; margin-bottom:4px; letter-spacing:0.06em;">
-        Weekly <span>Reward Tiers</span>
+      <!-- VIP Winners Podium Section -->
+      <div class="vip-winners-showcase" id="store-vip-winners-showcase">
+        <div class="vip-showcase-title">
+          <span>👑</span> TOP 5 VIP AIRDROP LEADERS
+        </div>
+        <div class="vip-leaders-list" id="store-vip-leaders-list">
+          <span style="color:var(--text-muted); font-size:0.75rem;">Racers are advancing toward the $15k VIP Bridge!</span>
+        </div>
       </div>
-      <p style="font-family:var(--font-ui); font-size:0.84rem; color:var(--text-secondary); margin:0 0 16px 0;">
-        ⚡ Unlocked strictly by <strong>Live Slots Wager</strong> during the current week. <strong>$0 Coins / Points Required</strong> to claim once tier is reached.
-      </p>
-      <div class="tiers-grid" id="weekly-tiers-grid">
-        <div class="tier-card">
-          <div class="tc-badge">🥉 Tier 1</div>
-          <div class="tc-wager">$250 Slots Wager</div>
-          <div class="tc-reward">🎁 $5 Cash</div>
-          <button class="tc-claim-btn locked" disabled>Need $250 Slots Wager</button>
-        </div>
-        <div class="tier-card">
-          <div class="tc-badge">🥈 Tier 2</div>
-          <div class="tc-wager">$1,000 Slots Wager</div>
-          <div class="tc-reward">🎁 $10 Cash</div>
-          <button class="tc-claim-btn locked" disabled>Need $1,000 Slots Wager</button>
-        </div>
-        <div class="tier-card">
-          <div class="tc-badge">🥇 Tier 3</div>
-          <div class="tc-wager">$1,500 Slots Wager</div>
-          <div class="tc-reward">🎁 $15 Cash</div>
-          <button class="tc-claim-btn locked" disabled>Need $1,500 Slots Wager</button>
-        </div>
-        <div class="tier-card">
-          <div class="tc-badge">💎 Tier 4</div>
-          <div class="tc-wager">$2,500 Slots Wager</div>
-          <div class="tc-reward">🎁 $20 Cash</div>
-          <button class="tc-claim-btn locked" disabled>Need $2,500 Slots Wager</button>
-        </div>
-        <div class="tier-card">
-          <div class="tc-badge">👑 Tier 5</div>
-          <div class="tc-wager">$5,000 Slots Wager</div>
-          <div class="tc-reward">🎁 $30 Cash</div>
-          <button class="tc-claim-btn locked" disabled>Need $5,000 Slots Wager</button>
-        </div>
-        <div class="tier-card">
-          <div class="tc-badge">🔥 Tier 6</div>
-          <div class="tc-wager">$10,000 Slots Wager</div>
-          <div class="tc-reward">🎁 $40 Cash</div>
-          <button class="tc-claim-btn locked" disabled>Need $10,000 Slots Wager</button>
-        </div>
+
+      <!-- Wager CTA -->
+      <div style="margin-top:20px; text-align:center;">
+        <a href="https://yeet.com" target="_blank" rel="noopener" class="campaign-toggle-btn active" style="display:inline-block; font-size:0.92rem; font-weight:800; padding:12px 28px; text-decoration:none; background:linear-gradient(135deg, #ff2a7a, #9d00ff); border:none; border-radius:8px; color:#fff; box-shadow:0 0 20px rgba(255,42,122,0.4);">
+          Wager on Yeet with Code BIGDTV ⚡
+        </a>
       </div>
     </div>
 
-    <!-- Auditable Transaction Ledger (Phase 6) -->
+    <!-- Auditable Transaction Ledger -->
     <div style="text-align:left;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
         <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase;">
@@ -1726,63 +2011,19 @@ footer a:hover { color: var(--purple-200); }
       </div>
     </div>
 
-    <!-- Weekly Reset Rules Box (Phase 7) -->
+    <!-- Weekly Reset Rules Box -->
     <div style="background:rgba(12,10,22,0.7); border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius-md); padding:20px; text-align:left; font-family:var(--font-ui); font-size:0.88rem; color:var(--text-secondary); line-height:1.6;">
       <div style="font-weight:800; color:#fff; margin-bottom:4px; font-size:0.95rem;">
         ℹ️ Weekly Reset & Persistence Architecture:
       </div>
       <ul style="margin-left:18px; margin-top:4px;">
-        <li><strong>Lifetime Wager:</strong> Continues indefinitely and never resets.</li>
-        <li><strong>Weekly Wager & Tier Progression:</strong> Resets every Sunday at 23:59:59 UTC to begin a fresh weekly rewards race.</li>
-        <li><strong>BigD Coins & Points:</strong> Virtual balances remain distinct and never alter live-wagering reward tier eligibility.</li>
+        <li><strong>Lifetime Wager & VIP Status:</strong> Crossing $15k locks you into VIP for life.</li>
+        <li><strong>Weekly Airdrop:</strong> Resets every Sunday at 23:59:59 ET. Top 5 active VIPs of the week split the $125 airdrop ($25 each).</li>
+        <li><strong>BigD Coins & Points:</strong> Virtual balances remain distinct and never alter live-wagering reward eligibility.</li>
       </ul>
     </div>
 
   </div>
-
-
-  <!-- ── SECTION DIVIDER: REDEEM POINTS (KICK TIPS) ────────────────────────────── -->
-  <div style="width:100%; max-width:900px; margin:48px 0 20px; display:flex; align-items:center; gap:16px;">
-    <div style="flex:1; height:1px; background:rgba(255,255,255,0.08);"></div>
-    <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:900; letter-spacing:0.1em; color:#ffd700; text-transform:uppercase; white-space:nowrap;">🪙 Redeem BigD Points (Kick Tips)</div>
-    <div style="flex:1; height:1px; background:rgba(255,255,255,0.08);"></div>
-  </div>
-
-  <!-- Rewards Grid -->
-  <div class="rewards-grid" id="rewards-grid" style="max-width:900px;"><!-- JS renders cards --></div>
-
-  <!-- Redemption History -->
-  <section class="history-section" id="history-section" style="display:none;">
-    <div class="section-label">Redemption History</div>
-    <div class="history-table">
-      <div class="history-header">
-        <span>Reward</span>
-        <span style="margin-left:auto;margin-right:48px;">Points</span>
-        <span style="margin-right:12px;">Date</span>
-        <span>Status</span>
-      </div>
-      <div id="history-list"></div>
-    </div>
-  </section>
-
-  <!-- How to Earn -->
-  <section class="earn-section">
-    <div class="section-label">How to Earn BigD Coins</div>
-    <div class="earn-grid">
-      <div class="earn-card">
-        <span class="earn-card-icon">⚡</span>
-        <div class="earn-card-title">Wager on Yeet</div>
-        <p class="earn-card-desc">Every $1 wagered on Yeet using code BIGDTV earns you 10 coins automatically.</p>
-        <span class="earn-card-badge">10 coins / $1</span>
-      </div>
-      <div class="earn-card">
-        <span class="earn-card-icon">🏆</span>
-        <div class="earn-card-title">Redeem Rewards</div>
-        <p class="earn-card-desc">Spend your BigD Coins on tips, exclusive prizes, and more perks above.</p>
-        <span class="earn-card-badge">Live Now</span>
-      </div>
-    </div>
-  </section>
 </main>
 
 
@@ -2059,179 +2300,97 @@ onAuthReady(async (user) => {
   await initStore();
 });
 
-/* ── Weekly Rewards & Coin Converter Logic (Phase 4, 5, 6, 7) ── */
-let weeklyTimerInterval = null;
+/* ── Weekly VIP Airdrop & Squid Game Tracker Logic ── */
+function renderStoreSquidGameTracker(players) {
+  const pinsContainer = document.getElementById('store-squid-bridge-pins');
+  const vipList = document.getElementById('store-vip-leaders-list');
+  if (!pinsContainer) return;
+
+  pinsContainer.innerHTML = '';
+  const avatarIcons = ['🦑', '👑', '⚡', '💎', '🔥', '🎲', '🚀', '⭐', '🎯', '🕹️'];
+
+  const topRacers = (players || []).slice(0, 10);
+  topRacers.forEach((p, idx) => {
+    const vol = p.weekly_volume || 0;
+    const pct = Math.min(100, Math.max(0, (vol / 15000) * 100));
+    const icon = avatarIcons[idx % avatarIcons.length];
+    const isVip = vol >= 15000;
+    const isWinner = isVip && (idx < 5);
+
+    const pin = document.createElement('div');
+    pin.className = 'player-pin';
+    pin.style.left = `${pct}%`;
+    pin.innerHTML = `
+      <div class="player-pin-avatar" style="${isWinner ? 'border-color:#ffd700; box-shadow:0 0 16px #ffd700;' : ''}">${icon}</div>
+      <div class="player-pin-name">${escHtml(p.username || 'Player')}</div>
+      <div class="player-pin-tooltip">
+        <strong>${escHtml(p.username || 'Player')}</strong> (${pct.toFixed(1)}%)<br/>
+        Wager: $${vol.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br/>
+        ${isWinner ? '👑 TOP 5 VIP ($25 Airdrop Winner)' : (isVip ? '⭐ VIP Qualified ($15k+)' : `$${(15000 - vol).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} remaining to VIP`)}
+      </div>
+    `;
+    pinsContainer.appendChild(pin);
+  });
+
+  if (vipList) {
+    const vipWinners = (players || []).filter(p => p.weekly_volume >= 15000).slice(0, 5);
+    if (vipWinners.length === 0) {
+      vipList.innerHTML = '<span style="color:var(--text-muted); font-size:0.75rem; font-style:italic;">No racers have reached $15,000 VIP yet this week. Be the first to claim your $25 share!</span>';
+    } else {
+      vipList.innerHTML = vipWinners.map((w, i) => `
+        <span class="vip-leader-tag">
+          <span>${i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : '🎖️'))} ${escHtml(w.username)}</span>
+          <span class="vip-leader-prize">$25 Airdrop</span>
+        </span>
+      `).join('');
+    }
+  }
+}
 
 async function loadWeeklyRewards(token) {
   try {
     const headers = token ? { "Authorization": `Bearer ${token}` } : {};
-    const res = await fetch("/api/rewards/weekly", { headers, cache: "no-store" });
-    if (!res.ok) return;
-    const data = await res.json();
+    const [resRewards, resLb] = await Promise.all([
+      fetch("/api/rewards/weekly", { headers, cache: "no-store" }),
+      fetch("/api/leaderboard?period=weekly&partner=yeet&code=all", { cache: "no-store" })
+    ]);
 
-    // 1. Countdown timer
-    const timeLeftEl = document.getElementById("weekly-time-left");
-    if (timeLeftEl && data.week_info) {
-      timeLeftEl.textContent = data.week_info.countdown;
+    if (resLb.ok) {
+      const lbData = await resLb.json();
+      if (lbData && lbData.data) {
+        renderStoreSquidGameTracker(lbData.data);
+      }
     }
 
-    // 2. User progression HUD
+    if (!resRewards.ok) return;
+    const data = await resRewards.json();
+
+    // 1. User progression HUD & VIP stats
     const prog = data.user_progression;
     const hudWeekly = document.getElementById("hud-weekly-wager");
-    const hudBreakdown = document.getElementById("hud-wager-breakdown");
-    const hudLifetime = document.getElementById("hud-lifetime-wager");
+    const hudVipDist = document.getElementById("hud-vip-distance");
+    const hudVipStatusNote = document.getElementById("hud-vip-status-note");
     const hudCoins = document.getElementById("hud-coins-val");
     const hudWeeklyCoins = document.getElementById("hud-weekly-coins-note");
     const hudTierName = document.getElementById("hud-tier-name");
     const hudTierBadge = document.getElementById("hud-tier-badge");
 
-    const progFill = document.getElementById("weekly-prog-fill");
-    const progPct = document.getElementById("weekly-prog-pct");
-    const progCurrent = document.getElementById("weekly-prog-current");
-    const progRemaining = document.getElementById("weekly-prog-remaining");
-
     if (prog) {
-      const hudTotalWeekly = document.getElementById("hud-total-weekly-wager");
-      if (hudWeekly) hudWeekly.textContent = "$" + prog.weekly_slots_wager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      if (hudTotalWeekly) hudTotalWeekly.textContent = "$" + prog.weekly_wager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      if (hudBreakdown) hudBreakdown.textContent = `Slots: $${prog.weekly_slots_wager} | House: $${prog.weekly_house_live_wager}`;
-      if (hudLifetime) hudLifetime.textContent = "$" + prog.lifetime_wager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      if (hudCoins) hudCoins.textContent = prog.points_balance.toLocaleString();
-      if (hudWeeklyCoins) hudWeeklyCoins.textContent = `+${prog.weekly_coins_earned.toLocaleString()} coins earned this week`;
+      const userWager = Number(prog.weekly_wager || prog.weekly_slots_wager || 0);
+      const isVip = userWager >= 15000;
+      const dist = Math.max(0, 15000 - userWager);
+
+      if (hudWeekly) hudWeekly.textContent = "$" + userWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (hudVipDist) hudVipDist.textContent = isVip ? "⭐ VIP UNLOCKED" : `$${dist.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      if (hudVipStatusNote) hudVipStatusNote.textContent = isVip ? "🎉 Eligible for $125 Airdrop Split" : `🏃 Need $${dist.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} for VIP`;
+      if (hudCoins) hudCoins.textContent = (prog.points_balance || 0).toLocaleString();
+      if (hudWeeklyCoins) hudWeeklyCoins.textContent = `+${(prog.weekly_coins_earned || 0).toLocaleString()} coins earned this week`;
       
-      const cTier = prog.current_tier;
-      const nTier = prog.next_tier;
-      if (hudTierName) hudTierName.textContent = cTier ? cTier.name : "Bronze Starter";
-      if (hudTierBadge) hudTierBadge.textContent = nTier ? `Next: ${nTier.badge} ($${nTier.wager_threshold} Slots)` : "Max VIP Level Reached!";
-
-      if (progPct) progPct.textContent = `${prog.tier_progress_pct}% toward ${nTier ? nTier.name : 'Max VIP'}`;
-      if (progFill) progFill.style.width = `${prog.tier_progress_pct}%`;
-      if (progCurrent) progCurrent.textContent = `$${prog.weekly_slots_wager.toFixed(2)} Slots Wagered (${data.week_info.weekId})`;
-      if (progRemaining) {
-        progRemaining.textContent = nTier
-          ? `$${prog.wager_remaining_for_next_tier.toFixed(2)} remaining until next reward (${nTier.reward_coins.toLocaleString()} Coins / $${nTier.cash_value} Cash)`
-          : "🎉 Maximum VIP Tier Unlocked This Week!";
-      }
-    } else {
-      if (progCurrent) progCurrent.textContent = `$0.00 Slots Wagered This Week (${data.week_info ? data.week_info.weekId : 'Current Week'})`;
-      if (progRemaining) progRemaining.textContent = "$250.00 remaining until Tier 1 Reward ($5 Cash)";
-      if (progFill) progFill.style.width = "0%";
-      if (progPct) progPct.textContent = "0% toward Tier 1";
+      if (hudTierName) hudTierName.textContent = isVip ? "⭐ VIP Qualifier" : "🏃 Challenger";
+      if (hudTierBadge) hudTierBadge.textContent = isVip ? "Permanent VIP Status Active" : "$15k Wager unlocks VIP & Airdrop";
     }
 
-    // 3. Render Reward Tiers
-    const tiersGrid = document.getElementById("weekly-tiers-grid");
-    if (tiersGrid && data.reward_tiers) {
-      const userSlotsWager = prog ? (Number(prog.weekly_slots_wager) || 0) : 0;
-      const weekId = data.week_info ? data.week_info.weekId : "current";
-      const claimedList = prog?.claimed_tiers || [];
-      tiersGrid.innerHTML = "";
-
-      data.reward_tiers.forEach(t => {
-        const isUnlocked = userSlotsWager >= t.wager_threshold;
-
-        // Auto-purge any stale glitch claim from localStorage if user is not eligible
-        if (!isUnlocked) {
-          localStorage.removeItem(`bigd_claimed_tier_${weekId}_${t.tier}`);
-        }
-
-        const localRedeemed = isUnlocked && (localStorage.getItem(`bigd_claimed_tier_${weekId}_${t.tier}`) === "true");
-        const isRedeemed = isUnlocked && (claimedList.includes(t.tier) || localRedeemed);
-
-        const card = document.createElement("div");
-        card.className = `tier-card${isRedeemed ? " redeemed" : (isUnlocked ? " unlocked" : "")}`;
-
-        let badgeText = t.badge;
-        if (isRedeemed) badgeText += " ✓ REDEEMED";
-        else if (isUnlocked) badgeText += " ✓ UNLOCKED";
-
-        let btnClass = "tc-claim-btn";
-        let btnText = "";
-        let btnDisabled = false;
-
-        if (isRedeemed) {
-          btnClass = "tc-claim-btn redeemed";
-          btnText = "✅ REDEEMED";
-          btnDisabled = true;
-        } else if (isUnlocked) {
-          btnClass = "tc-claim-btn unlocked";
-          btnText = `Claim $${t.cash_value} Cash 🎟️`;
-          btnDisabled = false;
-        } else {
-          btnClass = "tc-claim-btn locked";
-          const diff = Math.max(0, t.wager_threshold - userSlotsWager);
-          btnText = prog ? `Need $${Math.ceil(diff).toLocaleString()} More Slots Wager` : `Need $${t.wager_threshold.toLocaleString()} Slots Wager`;
-          btnDisabled = true;
-        }
-
-        card.innerHTML = `
-          <div class="tc-badge">${badgeText}</div>
-          <div class="tc-wager">$${t.wager_threshold.toLocaleString()} Slots Wager</div>
-          <div class="tc-reward">🎁 $${t.cash_value} Cash (Free Claim)</div>
-          <button class="${btnClass}"${btnDisabled ? " disabled" : ""}>
-            ${btnText}
-          </button>
-        `;
-
-        if (isUnlocked && !isRedeemed) {
-          const btn = card.querySelector(".tc-claim-btn");
-          btn.addEventListener("click", async function () {
-            const tokenToUse = currentAuthToken || (typeof getAuthToken === "function" ? getAuthToken() : null);
-            if (!tokenToUse) {
-              alert("Please log in with Discord / Kick to claim weekly rewards.");
-              return;
-            }
-
-            btn.disabled = true;
-            btn.textContent = "Verifying eligibility...";
-
-            try {
-              const claimRes = await fetch("/api/rewards/weekly/claim", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "Authorization": `Bearer ${tokenToUse}`
-                },
-                body: JSON.stringify({ tier: t.tier })
-              });
-
-              const claimJson = await claimRes.json();
-
-              if (!claimRes.ok || !claimJson.success) {
-                alert(claimJson.error || "Claim failed: you are not eligible for this reward tier.");
-                btn.disabled = false;
-                btn.textContent = `Claim $${t.cash_value} Cash 🎟️`;
-                return;
-              }
-
-              // Server approved and verified in database ledger!
-              localStorage.setItem(`bigd_claimed_tier_${weekId}_${t.tier}`, "true");
-              card.className = "tier-card redeemed";
-              const badgeEl = card.querySelector(".tc-badge");
-              if (badgeEl) badgeEl.textContent = `${t.badge} ✓ REDEEMED`;
-              btn.className = "tc-claim-btn redeemed";
-              btn.textContent = "✅ REDEEMED";
-              btn.disabled = true;
-
-              // Open Discord ticket channel for payout processing
-              window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
-
-              await loadWeeklyRewards(tokenToUse);
-              await loadRedemptions(tokenToUse);
-            } catch (err) {
-              console.error("Claim error:", err);
-              alert("Network error while verifying claim. Please try again.");
-              btn.disabled = false;
-              btn.textContent = `Claim $${t.cash_value} Cash 🎟️`;
-            }
-          });
-        }
-
-        tiersGrid.appendChild(card);
-      });
-    }
-
-    // 4. Render Auditable Ledger
+    // 2. Render Auditable Ledger
     const ledgerBody = document.getElementById("ledger-table-body");
     if (ledgerBody) {
       if (data.recent_ledger && data.recent_ledger.length > 0) {

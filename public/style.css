@@ -30,38 +30,39 @@
   50%      { transform: translateX(100%); }
 }
 .bw-period-label {
-  font-family: var(--font-ui, 'Neue Haas Grotesk Display Pro', 'Neue Haas Display', sans-serif);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.28em;
+  font-family: var(--font-ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
   color: #00ffe5;
   margin-bottom: 8px;
   text-transform: uppercase;
 }
 .bw-period-dates {
-  font-family: var(--font-display, 'Bring Bold Nineties', 'Nineties Bold', 'Syne', sans-serif);
-  font-size: clamp(0.85rem, 2vw, 1.1rem);
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-family: var(--font-display, 'Plus Jakarta Sans', sans-serif);
+  font-size: clamp(0.95rem, 2vw, 1.25rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
   color: #f0e8ff;
 }
 .bw-period-countdown { text-align: right; }
 .bw-days-left {
-  font-family: var(--font-display, 'Bring Bold Nineties', 'Nineties Bold', 'Syne', sans-serif);
-  font-size: 2.4rem;
+  font-family: var(--font-display, 'Plus Jakarta Sans', sans-serif);
+  font-size: 2.5rem;
   font-weight: 900;
+  letter-spacing: -0.02em;
   color: #00ffe5;
   text-shadow: 0 0 20px rgba(0,255,229,0.55), 0 0 40px rgba(0,255,229,0.2);
   display: block;
   line-height: 1;
 }
 .bw-days-label {
-  font-family: var(--font-ui, 'Neue Haas Grotesk Display Pro', 'Neue Haas Display', sans-serif);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-family: var(--font-ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #5a5480;
+  color: #8a82aa;
 }
 
 /* ── Thunder Progress Bar ─────────────────────────── */
@@ -70,11 +71,11 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: #5a5480;
+  font-family: var(--font-ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #8a82aa;
 }
 #bw-prog-pct {
   color: #00ffe5;
@@ -171,24 +172,25 @@
   gap: 10px;
 }
 .bw-countdown-label {
-  font-family: var(--font-ui, 'Neue Haas Grotesk Display Pro', 'Neue Haas Display', sans-serif);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-family: var(--font-ui, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #5a5480;
+  color: #8a82aa;
 }
 .bw-countdown-timer {
-  font-family: var(--font-display, 'Bring Bold Nineties', 'Nineties Bold', 'Syne', sans-serif);
-  font-size: 0.9rem;
+  font-family: var(--font-display, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.95rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
   color: #33fff0;
   text-shadow: 0 0 12px rgba(0,255,229,0.5);
-  background: rgba(0,255,229,0.03);
-  border: 1px solid rgba(0,255,229,0.15);
-  border-radius: 4px;
-  padding: 5px 12px;
+  background: rgba(0,255,229,0.04);
+  border: 1px solid rgba(0,255,229,0.22);
+  border-radius: 6px;
+  padding: 6px 14px;
   display: inline-block;
   min-width: 145px;
   text-align: center;

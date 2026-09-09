@@ -6,7 +6,7 @@
 <title>BigDGamesTV — Play. Earn. Dominate.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/style.css"/>
 <link rel="stylesheet" href="/blackjack/blackjack.css"/>
 <style>
@@ -52,10 +52,10 @@
   --cyan-400:       #22d3ee;
   --cyan-glow:      0 0 25px rgba(34, 211, 238, 0.45);
 
-  /* Text & Typography Hierarchy (Neue Haas & Bring Bold Nineties) */
-  --font-display:   'Neue Haas Grotesk Display Pro', 'Neue Haas Display', 'Neue Haas Grotesk', 'Bring Bold Nineties', 'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --font-ui:        'Neue Haas Grotesk Display Pro', 'Neue Haas Display', 'Neue Haas Grotesk', 'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --font-body:      'Neue Haas Grotesk Text Pro', 'Neue Haas Display', 'Neue Haas Grotesk', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  /* Text & Typography Hierarchy */
+  --font-display:   'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-ui:        'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-body:      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 
   --text-primary:   #f5f3ff;
   --text-secondary: #a7a2bc;
@@ -2846,6 +2846,369 @@ body::after {
 .btn-buy:hover { background: rgba(201,162,39,0.3); box-shadow: var(--glow-gold); }
 
 /* ============================================================
+   SQUID GAME THEMED WEEKLY AIRDROP TRACKER & PIGGY BANK
+   ============================================================ */
+/* ============================================================
+   SQUID GAME THEMED WEEKLY AIRDROP TRACKER & PIGGY BANK
+   ============================================================ */
+.squid-arena-wrap {
+  background: radial-gradient(circle at 80% 20%, rgba(255, 42, 122, 0.16) 0%, transparent 55%),
+              linear-gradient(135deg, rgba(22, 12, 36, 0.96) 0%, rgba(10, 6, 18, 0.98) 100%);
+  border: 1px solid rgba(255, 42, 122, 0.45);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 35px rgba(255, 42, 122, 0.2);
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+}
+.squid-arena-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #ff2a7a, #ffd700, #00ffe5, #ff2a7a);
+  background-size: 300% 100%;
+  animation: neon-gradient-sweep 6s linear infinite;
+}
+@keyframes neon-gradient-sweep {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 300% 0%; }
+}
+.squid-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+.squid-info-col {
+  flex: 1;
+  min-width: 280px;
+  text-align: left;
+}
+.squid-symbols-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 42, 122, 0.16);
+  border: 1px solid rgba(255, 42, 122, 0.55);
+  color: #ff3388;
+  font-family: var(--font-display);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 0 16px rgba(255, 42, 122, 0.25);
+}
+.squid-symbols-badge span.sym {
+  font-size: 0.95rem;
+  letter-spacing: 0.22em;
+  color: #00ffe5;
+  text-shadow: 0 0 8px rgba(0, 255, 229, 0.7);
+}
+.squid-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.45rem, 3vw, 1.85rem);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin: 0 0 8px 0;
+}
+.squid-title span {
+  background: linear-gradient(135deg, #ff2a7a 0%, #ff77aa 50%, #ffd700 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 18px rgba(255, 42, 122, 0.45));
+}
+.squid-desc {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  max-width: 620px;
+}
+.squid-payout-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.sq-payout-pill {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.12);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  padding: 4px 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.squid-piggy-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.piggy-ball-container {
+  width: 130px;
+  height: 130px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 215, 0, 0.45) 0%, rgba(255, 42, 122, 0.3) 50%, rgba(10, 5, 20, 0.98) 100%);
+  border: 2px solid rgba(255, 215, 0, 0.75);
+  box-shadow: 0 0 35px rgba(255, 215, 0, 0.4), 0 0 50px rgba(255, 42, 122, 0.25), inset 0 0 25px rgba(255, 215, 0, 0.3);
+  animation: pulsePiggy 3s ease-in-out infinite alternate;
+}
+@keyframes pulsePiggy {
+  0% { transform: scale(1); box-shadow: 0 0 25px rgba(255, 215, 0, 0.35), inset 0 0 18px rgba(255, 215, 0, 0.25); }
+  100% { transform: scale(1.05); box-shadow: 0 0 45px rgba(255, 215, 0, 0.6), 0 0 65px rgba(255, 42, 122, 0.35), inset 0 0 30px rgba(255, 42, 122, 0.4); }
+}
+.piggy-inner-cash {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+.piggy-float-icons {
+  font-size: 1.1rem;
+  letter-spacing: 0.14em;
+  margin-bottom: 2px;
+  animation: floatCash 2.5s ease-in-out infinite alternate;
+}
+@keyframes floatCash {
+  0% { transform: translateY(-3px); }
+  100% { transform: translateY(3px); }
+}
+.piggy-amount {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ffd700;
+  line-height: 1;
+  text-shadow: 0 0 16px rgba(255, 215, 0, 0.7);
+  letter-spacing: -0.02em;
+}
+.piggy-label {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #00ffe5;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-top: 3px;
+  text-shadow: 0 0 8px rgba(0, 255, 229, 0.6);
+}
+.squid-bridge-section {
+  background: rgba(8, 4, 18, 0.75);
+  border: 1px solid rgba(0, 255, 229, 0.25);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  margin-top: 14px;
+}
+.bridge-top-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.bridge-track-wrapper {
+  position: relative;
+  padding: 55px 24px 35px;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 10px;
+  border: 1px dashed rgba(255, 42, 122, 0.35);
+  overflow-x: auto;
+}
+.bridge-rail-line {
+  position: absolute;
+  top: 62px;
+  left: 30px;
+  right: 30px;
+  height: 6px;
+  background: linear-gradient(90deg, rgba(255,42,122,0.4), rgba(0,255,229,0.5), rgba(255,215,0,0.7));
+  border-radius: 4px;
+  box-shadow: 0 0 12px rgba(0,255,229,0.35);
+}
+.bridge-milestone-nodes {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  z-index: 2;
+  min-width: 500px;
+}
+.b-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.b-node-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #120922;
+  border: 2px solid rgba(0, 255, 229, 0.6);
+  box-shadow: 0 0 10px rgba(0, 255, 229, 0.45);
+  margin-top: 55px;
+  transition: all 0.3s;
+}
+.b-node.vip .b-node-dot {
+  width: 22px;
+  height: 22px;
+  background: #ffd700;
+  border: 2px solid #fff;
+  box-shadow: 0 0 20px #ffd700, 0 0 40px rgba(255, 215, 0, 0.5);
+  margin-top: 51px;
+}
+.b-node-label {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #9c94b8;
+  margin-top: 6px;
+}
+.b-node.vip .b-node-label {
+  color: #ffd700;
+  font-weight: 900;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+.bridge-player-pins-layer {
+  position: absolute;
+  top: 14px;
+  left: 30px;
+  right: 30px;
+  height: 48px;
+  pointer-events: none;
+  min-width: 500px;
+}
+.player-pin {
+  position: absolute;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+.player-pin-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #150b28;
+  border: 2px solid #00ffe5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  box-shadow: 0 0 8px rgba(0, 255, 229, 0.5);
+  transition: transform 0.2s;
+}
+.player-pin:hover .player-pin-avatar {
+  transform: scale(1.25) translateY(-3px);
+  box-shadow: 0 0 16px #ffd700;
+}
+.player-pin-name {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #e4e0ec;
+  background: rgba(12, 6, 24, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-top: 2px;
+  max-width: 65px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player-pin-tooltip {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #140b24;
+  border: 1px solid #00ffe5;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+  color: #fff;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+  z-index: 20;
+}
+.player-pin:hover .player-pin-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-3px);
+}
+.vip-winners-showcase {
+  margin-top: 14px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.06) 0%, rgba(255, 42, 122, 0.06) 100%);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.vip-showcase-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #ffd700;
+  text-transform: uppercase;
+}
+.vip-leaders-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.vip-leader-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 215, 0, 0.6);
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+}
+.vip-leader-prize {
+  color: #00ff80;
+  font-weight: 800;
+}
+
+/* ============================================================
    FOOTER
    ============================================================ */
 footer {
@@ -4351,7 +4714,7 @@ footer a:hover { color: var(--purple-300); }
 
   <div class="hero-eyebrow">
     <span class="cyber-dot"></span>
-    <span>BigDGamesTV Official Hub</span>
+    <span>BigDGamesTV Official Hub &bull; $3,000 Monthly &bull; $125 Weekly VIP Airdrops</span>
   </div>
 
   <h1 class="hero-headline">
@@ -4361,7 +4724,7 @@ footer a:hover { color: var(--purple-300); }
     <span class="word-repeat">DOMINATE.</span>
   </h1>
 
-  <p class="hero-sub">The #1 Community for Gamblers. Compete on live wager leaderboards, earn cash rewards, and unlock exclusive perks.</p>
+  <p class="hero-sub">The Premier High-Roller Casino Community. Compete on live wager races, claim weekly VIP airdrops, and unlock real cash rewards.</p>
 
   <!-- Hero Action Buttons (Join Discord | Watch Live Dynamic) -->
   <div class="hero-2btn-grid">
@@ -4730,31 +5093,31 @@ footer a:hover { color: var(--purple-300); }
         </div>
       </div>
 
-      <!-- Card 2: Weekly Performance & Cash Store -->
-      <div style="background:rgba(14,10,26,0.85); border:1px solid rgba(0,255,229,0.3); border-radius:var(--radius-md); padding:24px; display:flex; flex-direction:column; gap:14px; box-shadow:0 0 25px rgba(0,255,229,0.08);">
-        <div style="border-bottom:1px solid rgba(0,255,229,0.2); padding-bottom:12px;">
+      <!-- Card 2: Weekly $125 VIP Airdrop & Squid Game Race -->
+      <div style="background:rgba(14,10,26,0.85); border:1px solid rgba(255,42,122,0.35); border-radius:var(--radius-md); padding:24px; display:flex; flex-direction:column; gap:14px; box-shadow:0 0 25px rgba(255,42,122,0.08);">
+        <div style="border-bottom:1px solid rgba(255,42,122,0.2); padding-bottom:12px;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#fff;">Weekly Performance</div>
-            <span style="background:rgba(0,255,229,0.15); color:var(--cyan-400); font-family:var(--font-ui); font-size:0.72rem; font-weight:800; padding:3px 8px; border-radius:4px; border:1px solid rgba(0,255,229,0.3);">
-              SLOTS TIERS
+            <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#fff;">Weekly VIP Airdrop</div>
+            <span style="background:rgba(255,42,122,0.15); color:#ff2a7a; font-family:var(--font-ui); font-size:0.72rem; font-weight:800; padding:3px 8px; border-radius:4px; border:1px solid rgba(255,42,122,0.3);">
+              $125 AIRDROP POOL
             </span>
           </div>
           <div style="font-family:var(--font-ui); font-size:0.78rem; color:var(--text-secondary); margin-top:4px;">
-            Weekly Reset: Sunday 11:59 PM ET &nbsp;|&nbsp; Instant Store Claims
+            Weekly Reset: Sunday 11:59 PM ET &nbsp;|&nbsp; Top 5 VIPs Split $125 ($25 Each)
           </div>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:10px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:8px 12px; background:rgba(0,255,229,0.08); border-radius:6px;">
-            <div>🎰 <strong>Slots Qualifying Play</strong></div>
-            <strong style="color:var(--cyan-400); font-family:var(--font-display); font-size:1.05rem;">$120 MAX CASH</strong>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-ui); font-size:0.88rem; padding:8px 12px; background:rgba(255,42,122,0.08); border-radius:6px;">
+            <div>🦑 <strong>$15k VIP Qualification</strong></div>
+            <strong style="color:#ffd700; font-family:var(--font-display); font-size:1.05rem;">$125 TOTAL POOL</strong>
           </div>
           <div style="font-family:var(--font-ui); font-size:0.84rem; color:var(--text-secondary); line-height:1.5;">
-            Play slots using code <strong style="color:#fff;">BIGDTV</strong> to unlock progressive cash vouchers ($5, $10, $15, $20, $30, $40) redeemable weekly.
+            Wager on Yeet using code <strong style="color:#fff;">BIGDTV</strong> to cross the Squid Game bridge into VIP status ($15,000 threshold). Top 5 VIPs split the weekly $125 airdrop!
           </div>
           <div style="margin-top:auto;">
-            <a href="store.html" class="campaign-toggle-btn active" style="display:inline-block; width:100%; text-align:center; font-size:0.8rem; padding:8px 0; text-decoration:none;">
-              Visit Reward Store 🛒
+            <a href="#tabs-section" onclick="const btn = document.querySelector('[data-panel=\'weekly\']'); if(btn) btn.click();" class="campaign-toggle-btn active" style="display:inline-block; width:100%; text-align:center; font-size:0.8rem; padding:8px 0; text-decoration:none; background:linear-gradient(135deg, #ff2a7a, #9d00ff); border-color:#ff2a7a;">
+              View Squid Game VIP Track 🦑
             </a>
           </div>
         </div>
@@ -4997,24 +5360,70 @@ footer a:hover { color: var(--purple-300); }
         </div>
       </div>
 
-      <!-- Weekly Tier Rewards Quick-Reference Banner -->
-      <div class="prize-pool-banner" style="margin-bottom:24px; border:1px solid rgba(0,255,229,0.3); background:linear-gradient(135deg, rgba(20,12,38,0.92) 0%, rgba(10,6,22,0.96) 100%);">
-        <div>
-          <div class="prize-pool-label" style="color:var(--cyan-400); font-weight:800; font-size:0.75rem; letter-spacing:0.08em;">🎰 SLOTS ONLY WEEKLY CASH TIERS</div>
-          <div class="prize-pool-total" style="color:#00ff80; font-size:1.4rem;">$120 Max Cash</div>
-          <div style="font-size:0.72rem; color:var(--text-secondary); margin-top:2px;">Only wagers on Slots qualify for cash reward tiers (House games excluded).</div>
+      <!-- Squid Game Themed Weekly Airdrop Tracker & Piggy Bank -->
+      <div class="squid-arena-wrap">
+        <div class="squid-header-row">
+          <div class="squid-info-col">
+            <div class="squid-symbols-badge">
+              <span class="sym">◯ △ ▢</span> SQUID GAME WEEKLY ARENA
+            </div>
+            <div class="squid-title">THE $125 <span>WEEKLY VIP AIRDROP</span></div>
+            <div class="squid-desc">
+              Wager on Yeet using code <strong style="color:#fff;">BIGDTV</strong> to advance across the Squid Game bridge. Hit <strong style="color:#ffd700;">$15,000 Wager</strong> to unlock permanent VIP status! The <strong style="color:#00ffe5;">Top 5 VIPs</strong> on the leaderboard each week split the <strong>$125 Cash ($25/each)</strong>.
+            </div>
+            <div class="squid-payout-row">
+              <span class="sq-payout-pill">🥇 1st: $25</span>
+              <span class="sq-payout-pill">🥈 2nd: $25</span>
+              <span class="sq-payout-pill">🥉 3rd: $25</span>
+              <span class="sq-payout-pill">🎖️ 4th: $25</span>
+              <span class="sq-payout-pill">🎖️ 5th: $25</span>
+            </div>
+          </div>
+          
+          <div class="squid-piggy-col">
+            <div class="piggy-ball-container">
+              <div class="piggy-inner-cash">
+                <div class="piggy-float-icons">💰 💵 💸</div>
+                <div class="piggy-amount">$125</div>
+                <div class="piggy-label">AIRDROP POOL</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-          <span class="prize-badge" style="background:rgba(205,127,50,0.2); border:1px solid rgba(205,127,50,0.5); color:#e6a15c;">🥉 T1: $250 Slots ($5)</span>
-          <span class="prize-badge" style="background:rgba(192,192,192,0.2); border:1px solid rgba(192,192,192,0.5); color:#dcdcdc;">🥈 T2: $1,000 Slots ($10)</span>
-          <span class="prize-badge" style="background:rgba(255,215,0,0.2); border:1px solid rgba(255,215,0,0.5); color:#ffd700;">🥇 T3: $1,500 Slots ($15)</span>
-          <span class="prize-badge" style="background:rgba(0,255,229,0.2); border:1px solid rgba(0,255,229,0.5); color:var(--cyan-400);">💎 T4: $2,500 Slots ($20)</span>
-          <span class="prize-badge" style="background:rgba(168,85,247,0.2); border:1px solid rgba(168,85,247,0.5); color:#c084fc;">👑 T5: $5,000 Slots ($30)</span>
-          <span class="prize-badge" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.5); color:#f87171;">🔥 T6: $10,000 Slots ($40)</span>
+
+        <!-- Squid Game Stepping Bridge Track -->
+        <div class="squid-bridge-section">
+          <div class="bridge-top-hud">
+            <span style="color:var(--text-muted);">🚦 $0 STARTING ZONE</span>
+            <span style="color:#ff2a7a;">🦑 SQUID GAME BRIDGE TO $15,000 VIP</span>
+            <span style="color:#ffd700;">🏆 VIP AIRDROP ZONE ($15K+)</span>
+          </div>
+          <div class="bridge-track-wrapper">
+            <div class="bridge-rail-line"></div>
+            <div class="bridge-milestone-nodes">
+              <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$0</div></div>
+              <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$2.5k</div></div>
+              <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$5k</div></div>
+              <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$7.5k</div></div>
+              <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$10k</div></div>
+              <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$12.5k</div></div>
+              <div class="b-node vip"><div class="b-node-dot"></div><div class="b-node-label">$15k VIP 🏆</div></div>
+            </div>
+            <div class="bridge-player-pins-layer" id="squid-bridge-pins">
+              <!-- Dynamically populated with active players -->
+            </div>
+          </div>
         </div>
-        <a href="store.html" class="campaign-toggle-btn active" style="font-size:0.75rem; padding:6px 14px; text-decoration:none;">
-          Claim Tiers in Store 🎟️
-        </a>
+
+        <!-- VIP Winners Podium Section -->
+        <div class="vip-winners-showcase" id="squid-vip-winners-showcase">
+          <div class="vip-showcase-title">
+            <span>👑</span> ACTIVE VIP AIRDROP QUALIFIERS
+          </div>
+          <div class="vip-leaders-list" id="squid-vip-leaders-list">
+            <span style="color:var(--text-muted); font-size:0.75rem;">Racers are advancing toward the $15k VIP Bridge!</span>
+          </div>
+        </div>
       </div>
 
       <!-- Weekly Filter Tabs -->
@@ -6569,12 +6978,59 @@ async function fetchWeeklyLeaderboard() {
   }
 }
 
+function renderSquidGameTracker(players) {
+  const pinsContainer = document.getElementById('squid-bridge-pins');
+  const vipList = document.getElementById('squid-vip-leaders-list');
+  if (!pinsContainer) return;
+
+  pinsContainer.innerHTML = '';
+  const avatarIcons = ['🦑', '👑', '⚡', '💎', '🔥', '🎲', '🚀', '⭐', '🎯', '🕹️'];
+
+  const topRacers = (players || []).slice(0, 10);
+  topRacers.forEach((p, idx) => {
+    const vol = p.weekly_volume || 0;
+    const pct = Math.min(100, Math.max(0, (vol / 15000) * 100));
+    const icon = avatarIcons[idx % avatarIcons.length];
+    const isVip = vol >= 15000;
+    const isWinner = isVip && (idx < 5);
+
+    const pin = document.createElement('div');
+    pin.className = 'player-pin';
+    pin.style.left = `${pct}%`;
+    pin.innerHTML = `
+      <div class="player-pin-avatar" style="${isWinner ? 'border-color:#ffd700; box-shadow:0 0 16px #ffd700;' : ''}">${icon}</div>
+      <div class="player-pin-name">${escHtml(p.username || 'Player')}</div>
+      <div class="player-pin-tooltip">
+        <strong>${escHtml(p.username || 'Player')}</strong> (${pct.toFixed(1)}%)<br/>
+        Wager: $${vol.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br/>
+        ${isWinner ? '👑 TOP 5 VIP ($25 Airdrop Winner)' : (isVip ? '⭐ VIP Qualified ($15k+)' : `$${(15000 - vol).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} remaining to VIP`)}
+      </div>
+    `;
+    pinsContainer.appendChild(pin);
+  });
+
+  if (vipList) {
+    const vipWinners = (players || []).filter(p => p.weekly_volume >= 15000).slice(0, 5);
+    if (vipWinners.length === 0) {
+      vipList.innerHTML = '<span style="color:var(--text-muted); font-size:0.75rem; font-style:italic;">No racers have reached $15,000 VIP yet this week. Be the first to claim your $25 share!</span>';
+    } else {
+      vipList.innerHTML = vipWinners.map((w, i) => `
+        <span class="vip-leader-tag">
+          <span>${i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : '🎖️'))} ${escHtml(w.username)}</span>
+          <span class="vip-leader-prize">$25 Airdrop</span>
+        </span>
+      `).join('');
+    }
+  }
+}
+
 function renderWeeklyLeaderboard(data) {
   const content = document.getElementById('weekly-lb-content');
   if (!content) return;
 
   if (!data || data.length === 0) {
     content.innerHTML = '<div class="lb-empty">No wager activity logged yet this week (Monday 00:01 → Sunday 11:59 PM ET).</div>';
+    renderSquidGameTracker([]);
     return;
   }
 
@@ -6586,16 +7042,19 @@ function renderWeeklyLeaderboard(data) {
     user_id: u.user_id,
     username: u.username,
     is_hidden: Boolean(u.is_hidden),
-    source_code: u.source_code || 'BIGD',
+    source_code: u.source_code || 'BIGDTV',
     tier: u.tier || null,
     tier_image: u.tier_image || null,
     points: Number(u.weekly_points !== undefined ? u.weekly_points : (u.leaderboard_points || 0)),
     weekly_volume: Number(u.weekly_volume !== undefined ? u.weekly_volume : u.volume) || 0,
-    weekly_slots_volume: Number(u.weekly_slots_volume) || 0, // NEVER fallback to full volume — 0 means no qualifying Slots data
+    weekly_slots_volume: Number(u.weekly_slots_volume) || 0,
     weekly_house_volume: Number(u.weekly_house_volume || 0),
     sportsbook_points: Number(u.sportsbook_points || 0),
     total: Number(u.volume) || 0
   })).sort((a, b) => (b.points - a.points) || (b.weekly_volume - a.weekly_volume));
+
+  // Render Squid Game Tracker with active players
+  renderSquidGameTracker(players);
 
   const rows = players.map((p, i) => {
     const rank = i + 1;
@@ -6611,8 +7070,17 @@ function renderWeeklyLeaderboard(data) {
       ? `<span class="hidden-user">🔒 Hidden User</span>`
       : `<span>${escHtml(p.username)}${tierBadge}${codeBadge}</span>`;
     const amtClass = rank === 1 ? 'wager-amount gold' : 'wager-amount';
-    // Rewards strictly based on SLOTS wager
-    const rewardsHtml = getEligibleRewardsHtml(p.weekly_slots_volume);
+
+    // VIP Status & Airdrop Qualification
+    let vipStatusHtml = '';
+    if (p.weekly_volume >= 15000 && rank <= 5) {
+      vipStatusHtml = `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,215,0,0.18); border:1px solid rgba(255,215,0,0.6); color:#ffd700; font-weight:800; font-size:0.75rem; padding:4px 8px; border-radius:6px; box-shadow:0 0 10px rgba(255,215,0,0.3);">👑 WINNER: $25 Split</span>`;
+    } else if (p.weekly_volume >= 15000) {
+      vipStatusHtml = `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(0,255,229,0.15); border:1px solid rgba(0,255,229,0.4); color:var(--cyan-400); font-weight:800; font-size:0.75rem; padding:4px 8px; border-radius:6px;">⭐ VIP QUALIFIED</span>`;
+    } else {
+      const diff = Math.max(0, 15000 - p.weekly_volume);
+      vipStatusHtml = `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.72rem; padding:3px 8px; border-radius:6px;">🔒 Need ${fmt(diff)} to VIP</span>`;
+    }
 
     return `
       <tr class="lb-main-row">
@@ -6631,12 +7099,11 @@ function renderWeeklyLeaderboard(data) {
           ${fmt(p.weekly_house_volume)}
           ${p.sportsbook_points > 0 ? `<span style="display:block; font-size:0.65rem; color:#ffd700;">+${p.sportsbook_points} sports</span>` : ''}
         </td>
-        <td>${rewardsHtml}</td>
+        <td>${vipStatusHtml}</td>
         <td>
-          ${p.weekly_slots_volume >= 250
-            ? `<a href="store.html" class="tc-claim-btn unlocked" style="display:inline-block; font-size:0.75rem; padding:6px 12px; text-decoration:none; border-radius:8px;">Redeem 🎁</a>`
-            : `<a href="store.html" class="tc-claim-btn locked" style="display:inline-block; font-size:0.75rem; padding:6px 12px; text-decoration:none; border-radius:8px; opacity:0.65;">Store 🛒</a>`
-          }
+          <a href="https://yeet.com" target="_blank" rel="noopener" class="tc-claim-btn unlocked" style="display:inline-block; font-size:0.72rem; padding:5px 10px; text-decoration:none; border-radius:6px; background:linear-gradient(135deg, #ff2a7a, #9d00ff); border:none; color:#fff; font-weight:700;">
+            Play on Yeet ⚡
+          </a>
         </td>
       </tr>
     `;
@@ -6671,7 +7138,7 @@ function renderWeeklyLeaderboard(data) {
             <th>Total Wager ($)</th>
             <th>Slots (Qualifying) 🎰</th>
             <th>House / Sports 🎲</th>
-            <th>Weekly Cash Tier 🎁</th>
+            <th>VIP Status ($15k) 🦑</th>
             <th>Action</th>
           </tr>
         </thead>

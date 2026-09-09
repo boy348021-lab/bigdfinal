@@ -822,6 +822,9 @@ app.get("/api/leaderboard", async (req, res) => {
         highest_multiplier: Number(p.highestMultiplier) || 0,
         tier: p.tier || "Unranked",
         tier_image: p.tierImage || null,
+        is_vip: Boolean(weeklyVol >= WEEKLY_AIRDROP_CONFIG.vip_threshold_usd),
+        wager_to_vip: Math.max(0, Number((WEEKLY_AIRDROP_CONFIG.vip_threshold_usd - weeklyVol).toFixed(2))),
+        vip_progress_pct: Math.min(100, Math.round((weeklyVol / WEEKLY_AIRDROP_CONFIG.vip_threshold_usd) * 100)),
         wager_data: [{ month: monthBounds.monthKey, total_wager_usd: Number(vol.toFixed(2)), weekly_wager_usd: Number(weeklyVol.toFixed(2)) }]
       };
     }).sort((a, b) => {
@@ -851,6 +854,7 @@ app.get("/api/leaderboard", async (req, res) => {
       week_info: weekBounds,
       prize_pool: 3000,
       prize_distribution: COMBINED_PRIZE_POOL,
+      airdrop_config: WEEKLY_AIRDROP_CONFIG,
       codes_supported: ["BIGD", "BIGBALLZ"],
       active_filter: codeFilter,
       scoring_rule: "POINTS_HOUSE_EDGE",
@@ -1090,7 +1094,16 @@ const REWARD_MULTIPLIERS = {
   HOUSE_LIVE: 0.25     // $1 spent on house/live games = 0.25 coins
 };
 
-// Configurable Weekly Reward Tiers
+// ─── WEEKLY $125 AIRDROP & $15K VIP REWARDS CONFIG (BIGD UPDATE) ─────────────
+const WEEKLY_AIRDROP_CONFIG = {
+  prize_pool_usd: 125,
+  vip_threshold_usd: 15000,
+  top_winners_count: 5,
+  payout_per_winner_usd: 25,
+  theme: "squid_game"
+};
+
+// Configurable Weekly Reward Tiers (Legacy reference)
 const WEEKLY_REWARD_TIERS = [
   { tier: 1, name: "Bronze Grinder",    wager_threshold: 250,   reward_coins: 2500,  cash_value: 5,   badge: "🥉 Tier 1" },
   { tier: 2, name: "Silver Roller",     wager_threshold: 1000,  reward_coins: 10000, cash_value: 10,  badge: "🥈 Tier 2" },
@@ -1387,7 +1400,10 @@ app.get("/api/rewards/weekly", async (req, res) => {
         tier_progress_pct: tierProgressPct,
         wager_remaining_for_next_tier: remainingForNext,
         claimed_tiers: claimedTiers,
-        reward_eligibility_basis: "SLOTS_ONLY"
+        reward_eligibility_basis: "SLOTS_ONLY",
+        is_vip: Boolean(weeklyTotalWager >= WEEKLY_AIRDROP_CONFIG.vip_threshold_usd),
+        wager_remaining_for_vip: Math.max(0, Number((WEEKLY_AIRDROP_CONFIG.vip_threshold_usd - weeklyTotalWager).toFixed(2))),
+        vip_progress_pct: Math.min(100, Math.round((weeklyTotalWager / WEEKLY_AIRDROP_CONFIG.vip_threshold_usd) * 100))
       };
 
       recentLedger = txList.slice(0, 15).map(tx => {
@@ -1416,6 +1432,7 @@ app.get("/api/rewards/weekly", async (req, res) => {
   res.json({
     success: true,
     week_info: weekInfo,
+    airdrop_config: WEEKLY_AIRDROP_CONFIG,
     multipliers: REWARD_MULTIPLIERS,
     reward_tiers: WEEKLY_REWARD_TIERS,
     qualification_rule: "SLOTS_ONLY",
