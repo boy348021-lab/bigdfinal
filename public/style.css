@@ -742,66 +742,188 @@
 /* Multi-Player Pins Stacked on RLGL Nodes */
 .sg-rlgl-players-stack {
   position: absolute;
-  top: -36px;
+  top: -46px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  z-index: 15;
+  gap: 6px;
+  z-index: 20;
   left: 50%;
   transform: translateX(-50%);
+  flex-wrap: nowrap;
 }
 .sg-step-pin {
   position: relative;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), z-index 0.2s;
+}
+.sg-step-pin:hover {
+  z-index: 50;
+  transform: translateY(-3px) scale(1.1);
 }
 .sg-step-pin-avatar {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: rgba(14, 8, 28, 0.9);
+  background: linear-gradient(135deg, rgba(30, 16, 52, 0.95) 0%, rgba(14, 8, 28, 0.98) 100%);
   border: 1.5px solid rgba(0, 255, 229, 0.6);
-  box-shadow: 0 0 10px rgba(0, 255, 229, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 255, 229, 0.3);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  user-select: none;
+}
+.sg-step-pin-avatar .pin-uname {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #00ffe5;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.sg-step-pin-avatar .pin-amt {
+  font-family: var(--font-display);
+  font-size: 0.52rem;
+  font-weight: 800;
+  color: #ffd700;
+  line-height: 1;
+  margin-top: 2px;
 }
 .sg-step-pin:hover .sg-step-pin-avatar {
-  transform: scale(1.25);
-  box-shadow: 0 0 16px rgba(0, 255, 229, 0.8);
   border-color: #00ffe5;
-  z-index: 20;
+  box-shadow: 0 0 18px rgba(0, 255, 229, 0.8), 0 6px 16px rgba(0, 0, 0, 0.9);
+  background: linear-gradient(135deg, rgba(45, 25, 80, 0.98) 0%, rgba(20, 10, 40, 1) 100%);
 }
 .sg-step-pin.is-winner .sg-step-pin-avatar {
   border-color: #ffd700;
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.7);
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.6);
 }
+.sg-step-pin.is-winner .sg-step-pin-avatar .pin-uname {
+  color: #ffd700;
+}
+.sg-step-pin.is-self .sg-step-pin-avatar {
+  border-color: #00ff80;
+  box-shadow: 0 0 16px rgba(0, 255, 128, 0.6);
+}
+.sg-step-pin.is-self .sg-step-pin-avatar .pin-uname {
+  color: #00ff80;
+}
+
+/* Rich Floating Hover Card */
 .sg-step-pin-tooltip {
   position: absolute;
-  bottom: calc(100% + 6px);
+  bottom: calc(100% + 10px);
   left: 50%;
-  transform: translateX(-50%);
-  background: rgba(10, 6, 20, 0.96);
-  border: 1px solid rgba(0, 255, 229, 0.4);
-  border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 0.68rem;
+  transform: translateX(-50%) translateY(4px);
+  min-width: 170px;
+  background: linear-gradient(135deg, rgba(16, 10, 32, 0.98) 0%, rgba(9, 5, 20, 0.98) 100%);
+  border: 1px solid rgba(0, 255, 229, 0.5);
+  border-radius: 10px;
+  padding: 10px 12px;
   font-family: var(--font-ui);
   color: #fff;
-  white-space: nowrap;
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  z-index: 30;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.8);
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.95), 0 0 20px rgba(0, 255, 229, 0.25);
+  backdrop-filter: blur(12px);
+  text-align: left;
+}
+.sg-step-pin-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid rgba(0, 255, 229, 0.5);
 }
 .sg-step-pin:hover .sg-step-pin-tooltip {
   opacity: 1;
   visibility: visible;
-  transform: translateX(-50%) translateY(-2px);
+  transform: translateX(-50%) translateY(0);
+}
+.pin-tt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.pin-tt-name {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.pin-tt-rank {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: rgba(0, 255, 229, 0.15);
+  color: #00ffe5;
+  border: 1px solid rgba(0, 255, 229, 0.35);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.pin-tt-wager-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.pin-tt-lbl {
+  font-size: 0.68rem;
+  color: var(--text-muted, #9f9ab5);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.pin-tt-val {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 900;
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+.pin-tt-bar-wrap {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+.pin-tt-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ffe5, #00ff80);
+  border-radius: 4px;
+  box-shadow: 0 0 8px #00ffe5;
+}
+.pin-tt-footer {
+  font-size: 0.62rem;
+  color: #00ffe5;
+  font-weight: 700;
+  text-align: right;
+  margin-top: 2px;
 }
 
 /* ────────────────────────────────────────────────────────────

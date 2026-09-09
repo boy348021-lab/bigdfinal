@@ -7340,20 +7340,42 @@ function renderSquidGameTracker(players) {
 
       const pinsHtml = playersOnStep.slice(0, 6).map((p, pIdx) => {
         const pVol = Number(p.weekly_volume) || 0;
+        const rawName = (p.username || 'Player').trim();
+        const shortName = rawName.length > 3 ? rawName.slice(0, 3) : rawName;
         const icon = avatarIcons[(players || []).indexOf(p) % avatarIcons.length] || '🦑';
-        const isWinner = pVol >= 15000 && ((players || []).indexOf(p) < 5);
+        const rankIdx = (players || []).indexOf(p) + 1;
+        const isWinner = pVol >= 15000 && (rankIdx <= 5);
         const pPct = Math.min(100, Math.max(0, (pVol / 15000) * 100));
-        const isSelected = selectedSquidPlayer && (selectedSquidPlayer.toLowerCase() === (p.username || '').toLowerCase());
-        const isUserSelf = Boolean(currentTokenUser && currentTokenUser.username && p.username && (p.username.toLowerCase() === currentTokenUser.username.toLowerCase()));
+        const isSelected = selectedSquidPlayer && (selectedSquidPlayer.toLowerCase() === rawName.toLowerCase());
+        const isUserSelf = Boolean(currentTokenUser && currentTokenUser.username && (currentTokenUser.username.toLowerCase() === rawName.toLowerCase()));
+
+        // Compact formatted wager for inside circle (e.g. $2k, $500, $12k)
+        const compactAmt = pVol >= 1000 ? `$${(pVol / 1000).toFixed(pVol >= 10000 ? 0 : 1)}k` : `$${Math.round(pVol)}`;
 
         return `
-          <div class="sg-step-pin ${isWinner ? 'is-winner' : ''} ${isSelected ? 'is-selected' : ''}" onclick="selectSquidPlayer('${escHtml(p.username || '')}')" style="position:relative;" title="${escHtml(p.username || 'Player')}">
-            <div class="sg-step-pin-avatar" style="${isUserSelf ? 'border-color:#00ffe5; box-shadow:0 0 14px #00ffe5;' : ''}">${icon}</div>
+          <div class="sg-step-pin ${isWinner ? 'is-winner' : ''} ${isUserSelf ? 'is-self' : ''} ${isSelected ? 'is-selected' : ''}" onclick="selectSquidPlayer('${escHtml(rawName)}')" title="${escHtml(rawName)}">
+            <div class="sg-step-pin-avatar">
+              <span class="pin-uname">${escHtml(shortName)}</span>
+              <span class="pin-amt">${compactAmt}</span>
+            </div>
             <div class="sg-step-pin-tooltip">
-              <strong>${escHtml(p.username || 'Player')}</strong> ${isUserSelf ? '<span style="color:#00ffe5;">(You)</span>' : ''} (${pPct.toFixed(1)}%)<br/>
-              Wager: $${pVol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              ${isWinner ? '<br/><span style="color:#ffd700;">👑 Top 5 VIP Winner</span>' : ''}
-              <br/><span style="color:#00ffe5; font-size:0.65rem;">Click to inspect</span>
+              <div class="pin-tt-header">
+                <div class="pin-tt-name">${icon} ${escHtml(rawName)} ${isUserSelf ? '<span style="color:#00ff80; font-size:0.68rem;">(You)</span>' : ''}</div>
+                <div class="pin-tt-rank">#${rankIdx}</div>
+              </div>
+              <div class="pin-tt-wager-row">
+                <span class="pin-tt-lbl">Weekly Wager</span>
+                <span class="pin-tt-val">$${pVol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div class="pin-tt-wager-row">
+                <span class="pin-tt-lbl">VIP Progress</span>
+                <span style="font-family:var(--font-display); font-size:0.8rem; font-weight:800; color:#00ffe5;">${pPct.toFixed(1)}%</span>
+              </div>
+              <div class="pin-tt-bar-wrap">
+                <div class="pin-tt-bar-fill" style="width: ${pPct}%;"></div>
+              </div>
+              ${isWinner ? '<div style="color:#ffd700; font-size:0.68rem; font-weight:800; margin-top:2px;">👑 Top 5 VIP Qualified</div>' : ''}
+              <div class="pin-tt-footer">Click to inspect player details ➜</div>
             </div>
           </div>
         `;
