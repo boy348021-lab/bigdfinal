@@ -195,3 +195,820 @@
   min-width: 145px;
   text-align: center;
 }
+
+/* ============================================================
+   SQUID GAME VIP SUITE — INSPIRATION MATCHING VISUAL SYSTEM
+   (3D Glass Bridge, Enhanced Milestones, Multiplayer Race, HUDs)
+   ============================================================ */
+
+.sg-suite-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+/* Mode Switcher Pills */
+.sg-mode-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(14, 8, 28, 0.85);
+  border: 1px solid rgba(255, 42, 122, 0.3);
+  border-radius: 30px;
+  padding: 6px 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.sg-mode-label {
+  font-family: var(--font-display);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: #ff3388;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 8px;
+}
+.sg-mode-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.sg-mode-btn {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #a49bc2;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.sg-mode-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 42, 122, 0.5);
+  background: rgba(255, 42, 122, 0.12);
+}
+.sg-mode-btn.active {
+  color: #fff;
+  background: linear-gradient(135deg, #ff2a7a 0%, #9d00ff 100%);
+  border-color: #ff2a7a;
+  box-shadow: 0 0 16px rgba(255, 42, 122, 0.4);
+}
+
+/* ────────────────────────────────────────────────────────────
+   1. RED LIGHT, GREEN LIGHT ARENA (Inspiration Layout #2)
+   ──────────────────────────────────────────────────────────── */
+.sg-glass-arena {
+  position: relative;
+  background: #090514;
+  border: 1px solid rgba(255, 42, 122, 0.45);
+  border-radius: var(--radius-lg);
+  padding: 24px 24px 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(255, 42, 122, 0.2);
+  overflow: hidden;
+}
+
+/* Arena Header */
+.sg-arena-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 5;
+}
+.sg-arena-title-group {
+  display: flex;
+  flex-direction: column;
+}
+.sg-arena-badge {
+  font-family: var(--font-display);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: #ff2a7a;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.sg-arena-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.sg-arena-subtitle {
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  color: #a49bc2;
+  margin-top: 2px;
+}
+.sg-wager-pill {
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #ff3388;
+  background: rgba(255, 42, 122, 0.12);
+  border: 1px solid rgba(255, 42, 122, 0.35);
+  padding: 8px 16px;
+  border-radius: 8px;
+  box-shadow: 0 0 16px rgba(255, 42, 122, 0.15);
+}
+.sg-wager-pct {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffd700;
+  display: block;
+}
+
+/* Cinematic Background Stage with Giant Doll 3D Layers */
+.sg-rlgl-stage {
+  position: relative;
+  width: 100%;
+  min-height: 380px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 30%, #2b1236 0%, #15091d 60%, #0c0512 100%);
+  border: 1px solid rgba(255, 42, 122, 0.3);
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.95), 0 16px 40px rgba(0,0,0,0.8), 0 0 25px rgba(255, 42, 122, 0.15);
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px 28px 28px;
+  box-sizing: border-box;
+  transition: transform 0.2s ease-out, box-shadow 0.3s ease;
+}
+
+/* 3D Layers */
+.sg-3d-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform-style: preserve-3d;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Layer 1: Clean Arena Sunset Plate (No duplicate figures or mountains) */
+.sg-3d-layer-sky {
+  transform: translateZ(-30px) scale(1.06);
+  background: url('/squid_clean_arena_bg.jpg') center 40% / cover no-repeat;
+  filter: brightness(0.92) contrast(1.05);
+  opacity: 0.95;
+}
+.sg-3d-layer-sky::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(12, 6, 20, 0.15) 0%, rgba(12, 6, 20, 0.05) 50%, rgba(12, 6, 20, 0.85) 100%);
+}
+.sg-3d-sun-glow {
+  position: absolute;
+  top: 36%;
+  left: 64%;
+  transform: translate(-50%, -50%);
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 140, 50, 0.6) 0%, rgba(255, 60, 120, 0.2) 45%, transparent 70%);
+  filter: blur(8px);
+  pointer-events: none;
+  animation: sun-pulse 4s ease-in-out infinite alternate;
+}
+@keyframes sun-pulse {
+  0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.7; }
+  100% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+}
+
+/* Layer 2: Giant Realistic Center Robot Doll (Young-hee) */
+.sg-3d-layer-doll {
+  transform: translateZ(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  pointer-events: auto;
+}
+.sg-doll-silhouette {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s;
+}
+.sg-doll-silhouette:hover {
+  transform: translateX(-50%) scale(1.04) translateY(-2px);
+  filter: drop-shadow(0 0 16px rgba(255, 42, 122, 0.75));
+}
+.sg-doll-img-wrap {
+  position: relative;
+  width: 96px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sg-doll-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.9));
+}
+.sg-doll-eye-lasers {
+  position: absolute;
+  top: 26px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.sg-doll-laser-beam {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ff0055;
+  box-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055, 0 0 30px #ff0055;
+  animation: laser-flicker 1.4s infinite alternate;
+}
+@keyframes laser-flicker {
+  0% { opacity: 0.5; transform: scale(0.85); box-shadow: 0 0 8px #ff0055; }
+  100% { opacity: 1; transform: scale(1.25); box-shadow: 0 0 16px #ff0055, 0 0 28px #ff0055; }
+}
+.sg-doll-status-beacon {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(14, 8, 24, 0.92);
+  border: 1px solid rgba(255, 42, 122, 0.6);
+  padding: 3px 10px;
+  border-radius: 12px;
+  box-shadow: 0 0 14px rgba(255, 42, 122, 0.35);
+}
+.sg-beacon-glow {
+  width: 6px;
+  height: 6px;
+  background: #00ff80;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #00ff80;
+  animation: beacon-blink 1.2s infinite;
+}
+@keyframes beacon-blink {
+  0%, 100% { opacity: 1; transform: scale(1.1); }
+  50% { opacity: 0.3; transform: scale(0.8); }
+}
+.sg-beacon-text {
+  font-family: var(--font-display);
+  font-size: 0.64rem;
+  font-weight: 900;
+  color: #ff2a7a;
+  letter-spacing: 0.1em;
+}
+
+/* Layer 3: Foreground Track & Status Callouts */
+.sg-3d-layer-foreground {
+  transform: translateZ(20px);
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  pointer-events: auto;
+}
+
+/* Green Light / Red Light Zone Banners */
+.sg-rlgl-callouts {
+  position: relative;
+  z-index: 12;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+.sg-callout-green {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 255, 128, 0.16);
+  border: 1px solid rgba(0, 255, 128, 0.55);
+  padding: 8px 16px;
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 18px rgba(0, 255, 128, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.sg-callout-green:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 26px rgba(0, 255, 128, 0.5);
+}
+.sg-callout-green .sg-co-tag {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #00ff80;
+  text-shadow: 0 0 10px rgba(0, 255, 128, 0.6);
+  letter-spacing: 0.08em;
+}
+.sg-callout-green .sg-co-sub {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  color: #c0ffd8;
+  font-weight: 700;
+}
+
+.sg-callout-red {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+  background: rgba(255, 42, 122, 0.18);
+  border: 1px solid rgba(255, 42, 122, 0.6);
+  padding: 8px 16px;
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 18px rgba(255, 42, 122, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.sg-callout-red:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 26px rgba(255, 42, 122, 0.5);
+}
+.sg-callout-red .sg-co-tag {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #ff2a7a;
+  text-shadow: 0 0 10px rgba(255, 42, 122, 0.6);
+  letter-spacing: 0.08em;
+}
+.sg-callout-red .sg-co-sub {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  color: #ffccd8;
+  font-weight: 700;
+}
+
+/* Asphalt Track Strip & Glowing Step Nodes */
+.sg-rlgl-track-wrap {
+  position: relative;
+  z-index: 15;
+  margin-top: 60px;
+  width: 100%;
+}
+.sg-rlgl-asphalt-rail {
+  position: absolute;
+  top: 36px;
+  left: 20px;
+  right: 20px;
+  height: 12px;
+  background: #15111e;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+.sg-rlgl-green-fill {
+  position: absolute;
+  top: 36px;
+  left: 20px;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #00ff80, #00ffe5);
+  box-shadow: 0 0 18px #00ff80;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sg-rlgl-nodes {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  z-index: 5;
+  width: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+.sg-rlgl-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  min-width: 60px;
+}
+
+/* Round Spotlights on Track */
+.sg-node-spotlight {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Passed / Green Light Nodes */
+.sg-rlgl-node.passed .sg-node-spotlight {
+  background: radial-gradient(circle at 35% 35%, #00ff80 0%, #008f48 100%);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 22px #00ff80, 0 6px 14px rgba(0, 0, 0, 0.8);
+}
+.sg-rlgl-node.passed .sg-node-spotlight::after {
+  content: '';
+  position: absolute;
+  top: -24px;
+  width: 38px;
+  height: 24px;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 255, 128, 0.35) 100%);
+  clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%);
+  pointer-events: none;
+}
+
+/* Active Node (Current Position - Magenta/Pink Spotlight with Runner) */
+.sg-rlgl-node.active .sg-node-spotlight {
+  background: radial-gradient(circle at 35% 35%, #ff2a7a 0%, #a00045 100%);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 26px #ff2a7a, 0 0 45px rgba(255, 42, 122, 0.6), 0 6px 16px rgba(0, 0, 0, 0.9);
+  animation: active-spotlight-pulse 1.8s ease-in-out infinite alternate;
+}
+@keyframes active-spotlight-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 20px #ff2a7a; }
+  100% { transform: scale(1.15); box-shadow: 0 0 35px #ff2a7a, 0 0 60px rgba(255, 42, 122, 0.8); }
+}
+
+/* Locked / Red Light Nodes */
+.sg-rlgl-node.locked .sg-node-spotlight {
+  background: radial-gradient(circle at 35% 35%, #e11d48 0%, #60051b 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 14px rgba(225, 29, 72, 0.4), 0 4px 10px rgba(0, 0, 0, 0.7);
+  opacity: 0.7;
+}
+
+/* VIP Finish Zone ($15k VIP Trophy) */
+.sg-rlgl-node.vip .sg-node-spotlight {
+  background: radial-gradient(circle at 35% 35%, #ffd700 0%, #b8860b 100%);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 26px #ffd700, 0 0 50px rgba(255, 215, 0, 0.6);
+}
+.sg-rlgl-trophy {
+  position: absolute;
+  top: -34px;
+  font-size: 1.7rem;
+  filter: drop-shadow(0 0 12px #ffd700);
+  animation: trophy-bounce 2s ease-in-out infinite alternate;
+}
+@keyframes trophy-bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
+}
+
+.sg-rlgl-amount {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 10px;
+}
+.sg-rlgl-node.vip .sg-rlgl-amount {
+  color: #ffd700;
+  font-weight: 900;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+/* Active Player Speech Bubble "You're Here" */
+.sg-rlgl-speech-bubble {
+  position: absolute;
+  top: -54px;
+  background: rgba(16, 8, 28, 0.95);
+  border: 1.5px solid #ff2a7a;
+  border-radius: 8px;
+  padding: 4px 10px;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.9), 0 0 16px rgba(255, 42, 122, 0.5);
+  z-index: 25;
+  pointer-events: none;
+}
+.sg-rlgl-speech-bubble strong {
+  color: #ff3388;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  display: block;
+}
+.sg-rlgl-speech-bubble span {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  color: #e4e2ed;
+  font-weight: 700;
+}
+.sg-rlgl-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #ff2a7a;
+}
+
+/* Multi-Player Pins Stacked on RLGL Nodes */
+.sg-rlgl-players-stack {
+  position: absolute;
+  top: -36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  z-index: 15;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.sg-step-pin {
+  position: relative;
+  cursor: pointer;
+}
+.sg-step-pin-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(14, 8, 28, 0.9);
+  border: 1.5px solid rgba(0, 255, 229, 0.6);
+  box-shadow: 0 0 10px rgba(0, 255, 229, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.sg-step-pin:hover .sg-step-pin-avatar {
+  transform: scale(1.25);
+  box-shadow: 0 0 16px rgba(0, 255, 229, 0.8);
+  border-color: #00ffe5;
+  z-index: 20;
+}
+.sg-step-pin.is-winner .sg-step-pin-avatar {
+  border-color: #ffd700;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.7);
+}
+.sg-step-pin-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 6, 20, 0.96);
+  border: 1px solid rgba(0, 255, 229, 0.4);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.68rem;
+  font-family: var(--font-ui);
+  color: #fff;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 30;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.8);
+}
+.sg-step-pin:hover .sg-step-pin-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+/* ────────────────────────────────────────────────────────────
+   2. ENHANCED HORIZONTAL TRACK & 3-CARD TELEMETRY STRIP (Layout #4)
+   ──────────────────────────────────────────────────────────── */
+.sg-horizontal-arena {
+  background: rgba(14, 8, 28, 0.95);
+  border: 1px solid rgba(0, 255, 229, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+.sg-h-track-wrap {
+  position: relative;
+  padding: 55px 20px 25px;
+  overflow-x: auto;
+}
+.sg-h-rail {
+  position: absolute;
+  top: 66px;
+  left: 30px; right: 30px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+.sg-h-rail-active {
+  position: absolute;
+  top: 66px;
+  left: 30px;
+  height: 6px;
+  background: linear-gradient(90deg, #00ffe5, #ff2a7a);
+  border-radius: 3px;
+  box-shadow: 0 0 14px #00ffe5;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sg-h-nodes {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  z-index: 2;
+  min-width: 540px;
+}
+.sg-h-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.sg-h-dot {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: #140b24;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  color: #787291;
+  transition: all 0.3s;
+}
+.sg-h-node.completed .sg-h-dot {
+  background: #00ffe5;
+  border-color: #fff;
+  color: #000;
+  font-weight: 900;
+  box-shadow: 0 0 16px #00ffe5;
+}
+.sg-h-node.active .sg-h-dot {
+  background: #ff2a7a;
+  border-color: #fff;
+  color: #fff;
+  box-shadow: 0 0 20px #ff2a7a;
+}
+.sg-h-node.vip .sg-h-dot {
+  width: 32px; height: 32px;
+  background: #ffd700;
+  border-color: #fff;
+  color: #000;
+  box-shadow: 0 0 24px #ffd700;
+}
+.sg-h-label {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #a49bc2;
+  margin-top: 8px;
+}
+
+/* 3-Card Summary Strip (Layout #4) */
+.sg-3card-telemetry {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+@media (max-width: 768px) {
+  .sg-3card-telemetry { grid-template-columns: 1fr; }
+}
+.sg-telemetry-card {
+  background: rgba(8, 4, 16, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+}
+.sg-tc-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ff3388;
+  margin-bottom: 6px;
+}
+.sg-tc-value {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #ffffff;
+}
+.sg-tc-sub {
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  color: #a49bc2;
+  margin-top: 4px;
+}
+
+/* ────────────────────────────────────────────────────────────
+   3. MULTIPLAYER COMPARISON RACE (Inspiration Layout #6)
+   ──────────────────────────────────────────────────────────── */
+.sg-multiplayer-arena {
+  background: rgba(14, 8, 28, 0.95);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+.sg-multiplayer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 24px;
+  margin-top: 16px;
+}
+@media (max-width: 860px) {
+  .sg-multiplayer-grid { grid-template-columns: 1fr; }
+}
+.sg-mp-col-title {
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a49bc2;
+  margin-bottom: 12px;
+}
+.sg-mp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+}
+.sg-mp-row.is-user {
+  background: rgba(0, 255, 229, 0.12);
+  border-color: #00ffe5;
+  box-shadow: 0 0 14px rgba(0, 255, 229, 0.25);
+}
+.sg-mp-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.sg-mp-bar-user {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #ffffff;
+  min-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sg-mp-track {
+  flex: 1;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 7px;
+  overflow: hidden;
+  position: relative;
+}
+.sg-mp-fill {
+  height: 100%;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #ff2a7a, #00ffe5);
+  box-shadow: 0 0 12px rgba(0, 255, 229, 0.5);
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sg-mp-crown {
+  font-size: 1.1rem;
+  filter: drop-shadow(0 0 8px #ffd700);
+}

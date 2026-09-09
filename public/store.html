@@ -1896,7 +1896,7 @@ footer a:hover { color: var(--purple-200); }
       BIGD <span style="background:linear-gradient(135deg, #00ffe5, #be4dff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; filter:drop-shadow(0 0 20px rgba(0,255,229,0.4));">VIP STORE & ARENA</span>
     </div>
     <div style="font-family:var(--font-ui); font-size:0.92rem; color:var(--text-secondary); letter-spacing:0.04em; margin-top:8px; max-width:600px; margin-left:auto; margin-right:auto;">
-      Wager on Yeet with code <strong style="color:#fff;">BIGDTV</strong>, climb the Squid Game bridge to $15k VIP, and dominate the weekly $125 airdrop pool.
+      Wager on Yeet with code <strong style="color:#fff;">BIGDTV</strong>, conquer The Airdrop Gauntlet to $15k VIP, and dominate the weekly $125 airdrop pool.
     </div>
   </div>
 
@@ -1953,107 +1953,190 @@ footer a:hover { color: var(--purple-200); }
 
   <div class="weekly-rewards-container" id="weekly-rewards-section">
     
-    <!-- Squid Game Themed Weekly Airdrop Tracker & Piggy Bank -->
-    <div class="squid-arena-wrap">
-      <div class="squid-header-row">
-        <div class="squid-info-col">
-          <div class="squid-symbols-badge">
-            <span class="sym">◯ △ ▢</span> SQUID GAME VIP ARENA
+    <!-- THE AIRDROP GAUNTLET VIP SUITE -->
+    <div class="sg-suite-container">
+      
+      <!-- Interactive View Switcher (Switch between 3D Gauntlet Track, Milestone HUD, and Multiplayer Race) -->
+      <div class="sg-mode-switcher">
+        <div class="sg-mode-label">
+          <span>⚡</span> THE AIRDROP GAUNTLET
+        </div>
+        <div class="sg-mode-pills">
+          <button type="button" class="sg-mode-btn active" id="btn-mode-3d" onclick="switchSgView('3d')">
+            <span>🔥</span> 3D Gauntlet Arena
+          </button>
+          <button type="button" class="sg-mode-btn" id="btn-mode-horizontal" onclick="switchSgView('horizontal')">
+            <span>📊</span> Milestone HUD
+          </button>
+          <button type="button" class="sg-mode-btn" id="btn-mode-multiplayer" onclick="switchSgView('multiplayer')">
+            <span>👥</span> Multiplayer Race
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW 1: 3D GAUNTLET TRACK -->
+      <div class="sg-glass-arena" id="sg-view-3d">
+        <div class="sg-arena-header">
+          <div class="sg-arena-title-group">
+            <div class="sg-arena-badge">
+              <span>◯ △ ▢</span> 1. THE AIRDROP GAUNTLET (3D ARENA)
+            </div>
+            <div class="sg-arena-title">
+              Keep moving. <span>Don't stop until you reach the VIP zone.</span>
+            </div>
+            <div class="sg-arena-subtitle">
+              Wager on Yeet with code <strong style="color:#fff;">BIGDTV</strong> to sprint forward. Reach $15,000 Wager to unlock permanent VIP and split the $125 weekly airdrop!
+            </div>
           </div>
-          <div class="squid-title">THE $125 <span>WEEKLY VIP AIRDROP</span></div>
-          <div class="squid-desc">
-            Wager on Yeet using affiliate code <strong style="color:#fff;">BIGDTV</strong> to advance across the bridge. Reach <strong style="color:#ffd700;">$15,000 Wager</strong> to unlock permanent VIP status! The <strong style="color:#00ffe5;">Top 5 VIPs</strong> on the leaderboard each week split the <strong>$125 Cash ($25/each)</strong>.
-          </div>
-          <div class="squid-payout-row">
-            <span class="sq-payout-pill">🥇 1st: $25</span>
-            <span class="sq-payout-pill">🥈 2nd: $25</span>
-            <span class="sq-payout-pill">🥉 3rd: $25</span>
-            <span class="sq-payout-pill">🎖️ 4th: $25</span>
-            <span class="sq-payout-pill">🎖️ 5th: $25</span>
+          <div class="sg-wager-pill">
+            <span id="sg-3d-wager-display">$0.00</span> / $15,000
+            <span class="sg-wager-pct" id="sg-3d-pct-display">0.0% complete</span>
           </div>
         </div>
-        
-        <div class="squid-piggy-col">
-          <div class="piggy-ball-container">
-            <div class="piggy-inner-cash">
-              <div class="piggy-float-icons">💰 💵 💸</div>
-              <div class="piggy-amount">$125</div>
-              <div class="piggy-label">AIRDROP POOL</div>
+
+        <!-- Red Light Green Light Arena Stage with Clean Background & 3D Center Doll -->
+        <div class="sg-rlgl-stage" id="sg-rlgl-3d-stage">
+          <!-- 3D Layer 1: Atmospheric Sunset Scenery Plate (Clean Arena Background) -->
+          <div class="sg-3d-layer sg-3d-layer-sky">
+            <div class="sg-3d-sun-glow"></div>
+          </div>
+
+          <!-- 3D Layer 2: Giant Robotic Doll (Young-hee) with Laser Scanning Eyes & Status Beacon -->
+          <div class="sg-3d-layer sg-3d-layer-doll" id="sg-3d-doll">
+            <div class="sg-doll-silhouette" title="Young-hee Robot Doll">
+              <div class="sg-doll-img-wrap">
+                <img src="/squid_doll_center.png" alt="Squid Game Doll" class="sg-doll-img" />
+                <div class="sg-doll-eye-lasers">
+                  <span class="sg-doll-laser-beam left"></span>
+                  <span class="sg-doll-laser-beam right"></span>
+                </div>
+              </div>
+              <div class="sg-doll-status-beacon" id="sg-doll-status-beacon">
+                <span class="sg-beacon-glow"></span>
+                <span class="sg-beacon-text">SCANNING VIP TRACK</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3D Layer 3: Foreground Track & Status Callouts -->
+          <div class="sg-3d-layer sg-3d-layer-foreground">
+            <div class="sg-rlgl-callouts">
+              <div class="sg-callout-green">
+                <span class="sg-co-tag">🟢 GREEN LIGHT</span>
+                <span class="sg-co-sub">Keep wagering!</span>
+              </div>
+              <div class="sg-callout-red">
+                <span class="sg-co-tag">🔴 RED LIGHT</span>
+                <span class="sg-co-sub">VIP awaits…</span>
+              </div>
+            </div>
+
+            <!-- Asphalt Progression Strip with Spotlights & Runner -->
+            <div class="sg-rlgl-track-wrap">
+              <div class="sg-rlgl-asphalt-rail"></div>
+              <div class="sg-rlgl-green-fill" id="sg-rlgl-fill" style="width: 0%;"></div>
+              <div class="sg-rlgl-nodes" id="sg-3d-steps-container">
+                <!-- Dynamically populated ($0, $2.5k, $5k, $7.5k, $10k, $12.5k, $15k VIP) -->
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- User Stats HUD -->
-      <div class="weekly-hud-stats" style="margin-bottom:16px;">
-        <div class="weekly-stat-box">
-          <div class="ws-label">Your Weekly Wager</div>
-          <div class="ws-val green" id="hud-weekly-wager">$0.00</div>
-          <div class="ws-note" id="hud-wager-breakdown">Slots + House Combined</div>
-        </div>
-        <div class="weekly-stat-box">
-          <div class="ws-label">VIP Distance ($15k Goal)</div>
-          <div class="ws-val cyan" id="hud-vip-distance">$15,000.00</div>
-          <div class="ws-note" id="hud-vip-status-note">🏃 Advancing to VIP</div>
-        </div>
-        <div class="weekly-stat-box">
-          <div class="ws-label">BigD Coins Balance</div>
-          <div class="ws-val gold" id="hud-coins-val">0</div>
-          <div class="ws-note" id="hud-weekly-coins-note">+0 coins earned this week</div>
-        </div>
-        <div class="weekly-stat-box">
-          <div class="ws-label">VIP Status</div>
-          <div class="ws-val green" id="hud-tier-name" style="font-size:1.15rem;">Racer</div>
-          <div class="ws-note" id="hud-tier-badge">15k Wager unlocks VIP</div>
-        </div>
-      </div>
-
-      <!-- Squid Game Stepping Bridge Track -->
-      <div class="squid-bridge-section">
-        <div class="bridge-top-hud">
-          <span style="color:var(--text-muted);">🚦 $0 STARTING ZONE</span>
-          <span style="color:#ff2a7a;">🦑 SQUID GAME BRIDGE TO $15,000 VIP</span>
-          <span style="color:#ffd700;">🏆 VIP AIRDROP ZONE ($15K+)</span>
-        </div>
-        <div class="bridge-track-wrapper">
-          <div class="bridge-rail-line"></div>
-          <div class="bridge-milestone-nodes">
-            <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$0</div></div>
-            <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$2.5k</div></div>
-            <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$5k</div></div>
-            <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$7.5k</div></div>
-            <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$10k</div></div>
-            <div class="b-node"><div class="b-node-dot"></div><div class="b-node-label">$12.5k</div></div>
-            <div class="b-node vip"><div class="b-node-dot"></div><div class="b-node-label">$15k VIP 🏆</div></div>
+      <!-- VIEW 2: ENHANCED HORIZONTAL TRACK & 3-CARD TELEMETRY STRIP -->
+      <div class="sg-horizontal-arena" id="sg-view-horizontal" style="display: none;">
+        <div class="sg-arena-header">
+          <div class="sg-arena-title-group">
+            <div class="sg-arena-badge">
+              <span>◯ △ ▢</span> 2. MILESTONE HUD
+            </div>
+            <div class="sg-arena-title">
+              Clean, modern and <span>detailed milestone view.</span>
+            </div>
           </div>
-          <div class="bridge-player-pins-layer" id="store-squid-bridge-pins">
-            <!-- Dynamically populated with active players -->
+          <div class="sg-wager-pill">
+            <span id="sg-h-wager-display">$0.00</span> / $15,000
+            <span class="sg-wager-pct" id="sg-h-pct-display">0.0% complete</span>
+          </div>
+        </div>
+
+        <div class="sg-h-track-wrap">
+          <div class="sg-h-rail"></div>
+          <div class="sg-h-rail-active" id="sg-h-rail-fill" style="width: 0%;"></div>
+          <div class="sg-h-nodes" id="sg-h-nodes-container">
+            <!-- Rendered horizontally -->
+          </div>
+        </div>
+
+        <!-- 3-Card Summary Strip -->
+        <div class="sg-3card-telemetry">
+          <div class="sg-telemetry-card">
+            <div class="sg-tc-header">🎯 NEXT TARGET</div>
+            <div class="sg-tc-value" id="sg-tc-target-val">$2,500</div>
+            <div class="sg-tc-sub" id="sg-tc-target-sub">$2,500 remaining to Stage 1</div>
+          </div>
+          <div class="sg-telemetry-card">
+            <div class="sg-tc-header">⚡ YOUR PROGRESS</div>
+            <div class="sg-tc-value" id="sg-tc-prog-val">$0.00 / $15,000</div>
+            <div class="sg-tc-sub" id="sg-tc-prog-sub">0.0% complete toward VIP</div>
+          </div>
+          <div class="sg-telemetry-card" style="border-color:rgba(255,215,0,0.35); background:rgba(255,215,0,0.04);">
+            <div class="sg-tc-header" style="color:#ffd700;">👑 VIP REWARD</div>
+            <div class="sg-tc-value" style="color:#ffd700;">$15,000 Wager</div>
+            <div class="sg-tc-sub">VIP Airdrop Zone ($125 Weekly Pool)</div>
           </div>
         </div>
       </div>
 
-      <!-- VIP Winners Podium Section -->
-      <div class="vip-winners-showcase" id="store-vip-winners-showcase">
-        <div class="vip-showcase-title">
-          <span>👑</span> TOP 5 VIP AIRDROP LEADERS
+      <!-- VIEW 3: MULTIPLAYER LIVE COMPARISON RACER -->
+      <div class="sg-multiplayer-arena" id="sg-view-multiplayer" style="display: none;">
+        <div class="sg-arena-header">
+          <div class="sg-arena-title-group">
+            <div class="sg-arena-badge">
+              <span>◯ △ ▢</span> 3. MULTIPLAYER RACE (LIVE COMPARISON)
+            </div>
+            <div class="sg-arena-title">
+              See how you <span>stack up against other racers.</span>
+            </div>
+          </div>
+          <div class="sg-wager-pill">
+            <span>$125 AIRDROP</span>
+            <span class="sg-wager-pct">Top 5 VIPs Split $25/each</span>
+          </div>
         </div>
-        <div class="vip-leaders-list" id="store-vip-leaders-list">
-          <span style="color:var(--text-muted); font-size:0.75rem;">Racers are advancing toward the $15k VIP Bridge!</span>
+
+        <div class="sg-multiplayer-grid">
+          <!-- Left Column: Top Players Table -->
+          <div>
+            <div class="sg-mp-col-title">TOP RACERS THIS WEEK</div>
+            <div id="sg-mp-table-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Right Column: Parallel Progression Tracks -->
+          <div>
+            <div class="sg-mp-col-title">LIVE PROGRESSION TRACK ($0 → $15k VIP)</div>
+            <div id="sg-mp-bars-list">
+              <!-- Dynamically populated racing bars -->
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Wager CTA -->
-      <div style="margin-top:20px; text-align:center;">
-        <a href="https://yeet.com" target="_blank" rel="noopener" class="campaign-toggle-btn active" style="display:inline-block; font-size:0.92rem; font-weight:800; padding:12px 28px; text-decoration:none; background:linear-gradient(135deg, #ff2a7a, #9d00ff); border:none; border-radius:8px; color:#fff; box-shadow:0 0 20px rgba(255,42,122,0.4);">
-          Wager on Yeet with Code BIGDTV ⚡
-        </a>
-      </div>
+    </div>
+
+    <!-- Wager Call To Action -->
+    <div style="margin-top:8px; text-align:center;">
+      <a href="https://yeet.com" target="_blank" rel="noopener" class="campaign-toggle-btn active" style="display:inline-flex; align-items:center; gap:8px; font-size:0.95rem; font-weight:900; padding:14px 32px; text-decoration:none; background:linear-gradient(135deg, #ff2a7a, #9d00ff); border:none; border-radius:30px; color:#fff; box-shadow:0 0 25px rgba(255,42,122,0.5);">
+        <span>Wager on Yeet with Code BIGDTV ⚡</span>
+      </a>
     </div>
 
     <!-- Auditable Transaction Ledger -->
-    <div style="text-align:left;">
+    <div style="text-align:left; margin-top:28px;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-        <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase;">
+        <div style="font-family:var(--font-display); font-size:1.25rem; font-weight:900; color:#fff; text-transform:uppercase;">
           📋 Auditable <span>Coin & Wager Ledger</span>
         </div>
         <span style="font-family:var(--font-ui); font-size:0.75rem; color:var(--text-muted); font-weight:700;">VERIFIED LOG</span>
@@ -2370,49 +2453,312 @@ onAuthReady(async (user) => {
   await initStore();
 });
 
-/* ── Weekly VIP Airdrop & Squid Game Tracker Logic ── */
-function renderStoreSquidGameTracker(players) {
-  const pinsContainer = document.getElementById('store-squid-bridge-pins');
-  const vipList = document.getElementById('store-vip-leaders-list');
-  if (!pinsContainer) return;
+function switchSgView(mode) {
+  document.querySelectorAll('.sg-mode-btn').forEach(b => {
+    b.classList.toggle('active', b.id === `btn-mode-${mode}`);
+  });
+  const v3d = document.getElementById('sg-view-3d');
+  const vHoriz = document.getElementById('sg-view-horizontal');
+  const vMulti = document.getElementById('sg-view-multiplayer');
+  if (v3d) v3d.style.display = mode === '3d' ? 'block' : 'none';
+  if (vHoriz) vHoriz.style.display = mode === 'horizontal' ? 'block' : 'none';
+  if (vMulti) vMulti.style.display = mode === 'multiplayer' ? 'block' : 'none';
+}
 
-  pinsContainer.innerHTML = '';
-  const avatarIcons = ['🦑', '👑', '⚡', '💎', '🔥', '🎲', '🚀', '⭐', '🎯', '🕹️'];
+let selectedStoreSquidPlayer = null;
+let lastStoreWeeklyPlayersList = [];
+let lastStoreUserProgression = null;
 
-  const topRacers = (players || []).slice(0, 10);
-  topRacers.forEach((p, idx) => {
-    const vol = p.weekly_volume || 0;
-    const pct = Math.min(100, Math.max(0, (vol / 15000) * 100));
-    const icon = avatarIcons[idx % avatarIcons.length];
-    const isVip = vol >= 15000;
-    const isWinner = isVip && (idx < 5);
+function selectStoreSquidPlayer(username) {
+  if (selectedStoreSquidPlayer === username) {
+    selectedStoreSquidPlayer = null;
+  } else {
+    selectedStoreSquidPlayer = username;
+  }
+  renderStoreSquidGameTracker(lastStoreWeeklyPlayersList, lastStoreUserProgression);
+}
 
-    const pin = document.createElement('div');
-    pin.className = 'player-pin';
-    pin.style.left = `${pct}%`;
-    pin.innerHTML = `
-      <div class="player-pin-avatar" style="${isWinner ? 'border-color:#ffd700; box-shadow:0 0 16px #ffd700;' : ''}">${icon}</div>
-      <div class="player-pin-name">${escHtml(p.username || 'Player')}</div>
-      <div class="player-pin-tooltip">
-        <strong>${escHtml(p.username || 'Player')}</strong> (${pct.toFixed(1)}%)<br/>
-        Wager: $${vol.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br/>
-        ${isWinner ? '👑 TOP 5 VIP ($25 Airdrop Winner)' : (isVip ? '⭐ VIP Qualified ($15k+)' : `$${(15000 - vol).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} remaining to VIP`)}
-      </div>
-    `;
-    pinsContainer.appendChild(pin);
+function initStoreSquidParallax() {
+  const stage = document.getElementById('sg-rlgl-3d-stage');
+  if (!stage || stage._parallaxInit) return;
+  stage._parallaxInit = true;
+
+  const sky = stage.querySelector('.sg-3d-layer-sky');
+  const doll = stage.querySelector('.sg-3d-layer-doll');
+  const foreground = stage.querySelector('.sg-3d-layer-foreground');
+
+  stage.addEventListener('mousemove', (e) => {
+    const rect = stage.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+
+    // Subtle gentle tilt
+    const rotX = -(y / (rect.height / 2)) * 3.5;
+    const rotY = (x / (rect.width / 2)) * 4.5;
+
+    stage.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg)`;
+
+    if (sky) sky.style.transform = `translateZ(-30px) scale(1.06) translateX(${(-rotY * 0.6).toFixed(1)}px) translateY(${(-rotX * 0.4).toFixed(1)}px)`;
+    if (doll) doll.style.transform = `translateZ(5px) translateX(${(rotY * 0.4).toFixed(1)}px) translateY(${(rotX * 0.3).toFixed(1)}px)`;
+    if (foreground) foreground.style.transform = `translateZ(20px) translateX(${(rotY * 0.8).toFixed(1)}px) translateY(${(rotX * 0.5).toFixed(1)}px)`;
   });
 
-  if (vipList) {
-    const vipWinners = (players || []).filter(p => p.weekly_volume >= 15000).slice(0, 5);
-    if (vipWinners.length === 0) {
-      vipList.innerHTML = '<span style="color:var(--text-muted); font-size:0.75rem; font-style:italic;">No racers have reached $15,000 VIP yet this week. Be the first to claim your $25 share!</span>';
+  stage.addEventListener('mouseleave', () => {
+    stage.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+    if (sky) sky.style.transform = 'translateZ(-30px) scale(1.06)';
+    if (doll) doll.style.transform = 'translateZ(5px)';
+    if (foreground) foreground.style.transform = 'translateZ(20px)';
+  });
+}
+
+function renderStoreSquidGameTracker(players, userProgression) {
+  lastStoreWeeklyPlayersList = players || [];
+  if (userProgression !== undefined) lastStoreUserProgression = userProgression;
+  initStoreSquidParallax();
+
+  const stepsContainer = document.getElementById('sg-3d-steps-container');
+  const hNodesContainer = document.getElementById('sg-h-nodes-container');
+  const hRailFill = document.getElementById('sg-h-rail-fill');
+  const mpTableList = document.getElementById('sg-mp-table-list');
+  const mpBarsList = document.getElementById('sg-mp-bars-list');
+
+  const topRacers = (players || []).slice(0, 10);
+
+  // Determine active user wager
+  let activeWager = 0;
+  let activeUsername = null;
+  let isOwnAccount = false;
+  const currentTokenUser = window.authUser;
+
+  if (selectedStoreSquidPlayer) {
+    const matchedSelected = (players || []).find(p => p.username && p.username.toLowerCase() === selectedStoreSquidPlayer.toLowerCase());
+    if (matchedSelected) {
+      activeWager = Number(matchedSelected.weekly_volume) || 0;
+      activeUsername = matchedSelected.username;
+      isOwnAccount = currentTokenUser && currentTokenUser.username && (currentTokenUser.username.toLowerCase() === matchedSelected.username.toLowerCase());
+    }
+  } else if (userProgression && userProgression.weekly_wager !== undefined) {
+    activeWager = Number(userProgression.weekly_wager || userProgression.weekly_slots_wager || 0);
+    activeUsername = userProgression.username || (currentTokenUser && currentTokenUser.username) || 'You';
+    isOwnAccount = true;
+  } else if (currentTokenUser && currentTokenUser.username) {
+    const matched = (players || []).find(p => p.username && p.username.toLowerCase() === currentTokenUser.username.toLowerCase());
+    if (matched) {
+      activeWager = Number(matched.weekly_volume) || 0;
+      activeUsername = matched.username;
+      isOwnAccount = true;
     } else {
-      vipList.innerHTML = vipWinners.map((w, i) => `
-        <span class="vip-leader-tag">
-          <span>${i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : '🎖️'))} ${escHtml(w.username)}</span>
-          <span class="vip-leader-prize">$25 Airdrop</span>
-        </span>
-      `).join('');
+      activeWager = Number(currentTokenUser.weekly_volume || currentTokenUser.weekly_wager || 0);
+      activeUsername = currentTokenUser.username;
+      isOwnAccount = true;
+    }
+  }
+
+  const milestones = [
+    { target: 0, label: 'Start', name: 'Starting Zone' },
+    { target: 2500, label: 'Stage 1', name: 'Green Light Zone ($2.5k)' },
+    { target: 5000, label: 'Stage 2', name: 'Checkpoint Alpha ($5k)' },
+    { target: 7500, label: 'Stage 3', name: 'Overpass Rally ($7.5k)' },
+    { target: 10000, label: 'Stage 4', name: 'Velocity Run ($10k)' },
+    { target: 12500, label: 'Stage 5', name: 'Gauntlet Apex ($12.5k)' },
+    { target: 15000, label: 'VIP Goal', name: 'VIP Grand Finale ($15k VIP)' }
+  ];
+
+  let activeStepIdx = 0;
+  for (let i = 0; i < milestones.length; i++) {
+    if (activeWager >= milestones[i].target) {
+      activeStepIdx = i;
+    }
+  }
+
+  const totalGoal = 15000;
+  const overallPct = Math.min(100, Math.max(0, (activeWager / totalGoal) * 100));
+
+  const nextMilestone = milestones.find(m => m.target > activeWager) || milestones[milestones.length - 1];
+  const prevTarget = activeStepIdx > 0 ? milestones[activeStepIdx].target : 0;
+  const remToNext = Math.max(0, nextMilestone.target - activeWager);
+
+  // 1. UPDATE RLGL HEADER DISPLAY
+  const d3Wager = document.getElementById('sg-3d-wager-display');
+  const d3Pct = document.getElementById('sg-3d-pct-display');
+  if (d3Wager) {
+    if (activeUsername) {
+      d3Wager.textContent = '$' + activeWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } else {
+      d3Wager.textContent = '$0.00';
+    }
+  }
+  if (d3Pct) {
+    if (activeUsername) {
+      d3Pct.textContent = `${overallPct.toFixed(1)}% complete (${activeUsername})`;
+    } else {
+      d3Pct.textContent = 'Guest Preview — Select a player';
+    }
+  }
+
+  const rlglFill = document.getElementById('sg-rlgl-fill');
+  if (rlglFill) {
+    rlglFill.style.width = activeUsername ? `${overallPct}%` : '0%';
+  }
+
+  // 2. RENDER RLGL NODES WITH SPOTLIGHTS, PLAYER PINS & ACTIVE "YOU'RE HERE" SPEECH BUBBLE
+  const avatarIcons = ['🦑', '👑', '⚡', '💎', '🔥', '🎲', '🚀', '⭐', '🎯', '🕹️'];
+  if (stepsContainer) {
+    stepsContainer.innerHTML = milestones.map((m, idx) => {
+      let statusClass = 'locked';
+      if (activeUsername) {
+        if (idx < activeStepIdx) statusClass = 'passed';
+        else if (idx === activeStepIdx) statusClass = 'active';
+      }
+
+      const isVip = (idx === milestones.length - 1);
+      if (isVip) statusClass += ' vip';
+
+      const isUserActiveNode = Boolean(activeUsername && idx === activeStepIdx);
+      const nextTarget = idx < milestones.length - 1 ? milestones[idx + 1].target : 999999999;
+
+      // Find players currently on this step interval
+      const playersOnStep = topRacers.filter(p => {
+        const pVol = Number(p.weekly_volume) || 0;
+        if (idx === milestones.length - 1) return pVol >= m.target;
+        return pVol >= m.target && pVol < nextTarget;
+      });
+
+      const pinsHtml = playersOnStep.slice(0, 4).map((p, pIdx) => {
+        const pVol = Number(p.weekly_volume) || 0;
+        const icon = avatarIcons[topRacers.indexOf(p) % avatarIcons.length] || '🦑';
+        const isWinner = pVol >= 15000 && (topRacers.indexOf(p) < 5);
+        const pPct = Math.min(100, Math.max(0, (pVol / 15000) * 100));
+        const isSelected = selectedStoreSquidPlayer && (selectedStoreSquidPlayer.toLowerCase() === (p.username || '').toLowerCase());
+
+        return `
+          <div class="sg-step-pin ${isWinner ? 'is-winner' : ''} ${isSelected ? 'is-selected' : ''}" onclick="selectStoreSquidPlayer('${escHtml(p.username || '')}')" style="position:relative;">
+            <div class="sg-step-pin-avatar">${icon}</div>
+            <div class="sg-step-pin-tooltip">
+              <strong>${escHtml(p.username || 'Player')}</strong> (${pPct.toFixed(1)}%)<br/>
+              Wager: $${pVol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              ${isWinner ? '<br/><span style="color:#ffd700;">👑 Top 5 VIP Winner</span>' : ''}
+              <br/><span style="color:#00ffe5; font-size:0.65rem;">Click to track</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const labelText = m.target === 0 ? '$0' : (m.target >= 1000 ? (m.target % 1000 === 0 ? `$${m.target / 1000}k` : `$${(m.target / 1000).toFixed(1)}k`) : `$${m.target}`);
+      const displayLabel = isVip ? `${labelText} VIP` : labelText;
+
+      let bubbleText = 'Tracked Player';
+      if (isOwnAccount) {
+        bubbleText = "You're here";
+      } else if (activeUsername) {
+        bubbleText = `${activeUsername}`;
+      }
+
+      return `
+        <div class="sg-rlgl-node ${statusClass}">
+          ${isUserActiveNode ? `
+            <div class="sg-rlgl-speech-bubble">
+              <strong>$${activeWager.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</strong>
+              <span>${bubbleText}</span>
+            </div>
+          ` : ''}
+          ${isVip ? `<div class="sg-rlgl-trophy">🏆</div>` : ''}
+          ${pinsHtml ? `<div class="sg-rlgl-players-stack" style="${isUserActiveNode ? 'top:-68px;' : ''}">${pinsHtml}</div>` : ''}
+          <div class="sg-node-spotlight"></div>
+          <div class="sg-rlgl-amount">${displayLabel}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 2. RENDER ENHANCED HORIZONTAL TRACK
+  const dHWager = document.getElementById('sg-h-wager-display');
+  const dHPct = document.getElementById('sg-h-pct-display');
+  if (dHWager) dHWager.textContent = '$' + activeWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (dHPct) dHPct.textContent = activeUsername ? `${overallPct.toFixed(1)}% complete` : '0% (Select player)';
+
+  if (hRailFill) hRailFill.style.width = activeUsername ? `${overallPct}%` : '0%';
+
+  if (hNodesContainer) {
+    hNodesContainer.innerHTML = milestones.map((m, idx) => {
+      let nodeClass = '';
+      if (activeUsername) {
+        if (idx < activeStepIdx) nodeClass = 'completed';
+        else if (idx === activeStepIdx) nodeClass = 'active';
+      }
+      if (idx === milestones.length - 1) nodeClass += ' vip';
+
+      const icon = activeUsername && idx < activeStepIdx ? '✓' : (activeUsername && idx === activeStepIdx ? '●' : (idx === milestones.length - 1 ? '👑' : '🔒'));
+
+      return `
+        <div class="sg-h-node ${nodeClass}">
+          <div class="sg-h-dot">${icon}</div>
+          <div class="sg-h-label">$${(m.target >= 1000 ? (m.target / 1000) + 'k' : m.target)}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  const tcTargetVal = document.getElementById('sg-tc-target-val');
+  const tcTargetSub = document.getElementById('sg-tc-target-sub');
+  const tcProgVal = document.getElementById('sg-tc-prog-val');
+  const tcProgSub = document.getElementById('sg-tc-prog-sub');
+
+  if (tcTargetVal) tcTargetVal.textContent = '$' + nextMilestone.target.toLocaleString();
+  if (tcTargetSub) {
+    tcTargetSub.textContent = activeWager >= 15000
+      ? 'VIP Airdrop Zone ($125 Weekly Pool)'
+      : `$${remToNext.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} to ${nextMilestone.name}`;
+  }
+  if (tcProgVal) tcProgVal.textContent = `$${activeWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / $15,000`;
+  if (tcProgSub) tcProgSub.textContent = `${overallPct.toFixed(1)}% complete toward VIP`;
+
+  // 3. RENDER MULTIPLAYER RACER VIEW
+  if (mpTableList) {
+    if (topRacers.length === 0) {
+      mpTableList.innerHTML = '<div style="color:var(--text-muted); font-size:0.82rem; padding:16px;">No racers logged yet this week.</div>';
+    } else {
+      mpTableList.innerHTML = topRacers.map((p, idx) => {
+        const isSelf = Boolean(activeUsername && p.username && p.username.toLowerCase() === activeUsername.toLowerCase());
+        const vol = Number(p.weekly_volume) || 0;
+        const isVip = vol >= 15000;
+        const rankIcon = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+
+        return `
+          <div class="sg-mp-row ${isSelf ? 'is-user' : ''}" onclick="selectStoreSquidPlayer('${escHtml(p.username || '')}')" style="cursor:pointer;" title="Click to track in RLGL stage">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span>${rankIcon}</span>
+              <strong style="color:${isSelf ? '#00ffe5' : '#ffffff'};">${escHtml(p.username || 'Player')}</strong>
+              ${isVip ? '<span style="color:#ffd700; font-size:0.7rem; font-weight:800;">👑 VIP</span>' : ''}
+              ${isSelf ? '<span style="font-size:0.65rem; background:rgba(0,255,229,0.2); color:#00ffe5; padding:1px 5px; border-radius:4px;">ACTIVE</span>' : ''}
+            </div>
+            <div style="font-weight:800; color:#ffd700;">$${vol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  if (mpBarsList) {
+    if (topRacers.length === 0) {
+      mpBarsList.innerHTML = '<div style="color:var(--text-muted); font-size:0.82rem; padding:16px;">No racing bars available yet.</div>';
+    } else {
+      mpBarsList.innerHTML = topRacers.map((p) => {
+        const isSelf = Boolean(activeUsername && p.username && p.username.toLowerCase() === activeUsername.toLowerCase());
+        const vol = Number(p.weekly_volume) || 0;
+        const pct = Math.min(100, Math.max(0, (vol / 15000) * 100));
+        const isVip = vol >= 15000;
+
+        return `
+          <div class="sg-mp-bar-row" onclick="selectStoreSquidPlayer('${escHtml(p.username || '')}')" style="cursor:pointer;" title="Click to track in RLGL stage">
+            <div class="sg-mp-bar-user" style="color:${isSelf ? '#00ffe5' : '#ffffff'}; font-weight:${isSelf ? '900' : '700'};" title="${escHtml(p.username || 'Player')}">${escHtml(p.username || 'Player')}</div>
+            <div class="sg-mp-track">
+              <div class="sg-mp-fill" style="width: ${pct}%;"></div>
+            </div>
+            ${isVip ? '<span class="sg-mp-crown">👑</span>' : `<span style="font-family:var(--font-ui); font-size:0.75rem; font-weight:800; color:${isSelf ? '#00ffe5' : '#a49bc2'}; min-width:48px; text-align:right;">${pct.toFixed(0)}%</span>`}
+          </div>
+        `;
+      }).join('');
     }
   }
 }
@@ -2425,10 +2771,12 @@ async function loadWeeklyRewards(token) {
       fetch("/api/leaderboard?period=weekly&partner=yeet&code=all", { cache: "no-store" })
     ]);
 
+    let lbRacers = [];
     if (resLb.ok) {
       const lbData = await resLb.json();
       if (lbData && lbData.data) {
-        renderStoreSquidGameTracker(lbData.data);
+        lbRacers = lbData.data;
+        renderStoreSquidGameTracker(lbRacers, null);
       }
     }
 
@@ -2437,6 +2785,9 @@ async function loadWeeklyRewards(token) {
 
     // 1. User progression HUD & VIP stats
     const prog = data.user_progression;
+    if (lbRacers.length > 0 || prog) {
+      renderStoreSquidGameTracker(lbRacers, prog);
+    }
     const hudWeekly = document.getElementById("hud-weekly-wager");
     const hudVipDist = document.getElementById("hud-vip-distance");
     const hudVipStatusNote = document.getElementById("hud-vip-status-note");
