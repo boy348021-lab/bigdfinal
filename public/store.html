@@ -2035,6 +2035,7 @@ footer a:hover { color: var(--purple-200); }
             <div class="sg-rlgl-track-wrap">
               <div class="sg-rlgl-asphalt-rail"></div>
               <div class="sg-rlgl-green-fill" id="sg-rlgl-fill" style="width: 0%;"></div>
+              <div class="sg-rlgl-runners-layer" id="sg-rlgl-runners-layer"></div>
               <div class="sg-rlgl-nodes" id="sg-3d-steps-container">
                 <!-- Dynamically populated ($0, $2.5k, $5k, $7.5k, $10k, $12.5k, $15k VIP) -->
               </div>
@@ -2616,8 +2617,81 @@ function renderStoreSquidGameTracker(players, userProgression) {
     rlglFill.style.width = `${arenaCombinedPct}%`;
   }
 
-  // 2. RENDER RLGL NODES WITH ALL RACER PINS DISTRIBUTED ACROSS THE TRACK
+  // 2. RENDER CONTINUOUS RUNNER PINS ALONG TRACK & MILESTONE NODES
+  const runnersLayer = document.getElementById('sg-rlgl-runners-layer');
   const avatarIcons = ['🦑', '👑', '⚡', '💎', '🔥', '🎲', '🚀', '⭐', '🎯', '🕹️'];
+
+  if (runnersLayer) {
+    const sortedRacers = (players || []).slice(0, 10);
+    runnersLayer.innerHTML = sortedRacers.map((p, pIdx) => {
+      const pVol = Number(p.weekly_volume) || 0;
+      const rawName = (p.username || 'Player').trim();
+      const rankIdx = (players || []).indexOf(p) + 1;
+      const isLeader = (rankIdx === 1) && (pVol > 0);
+      const isWinner = pVol >= 15000 && (rankIdx <= 5);
+      const isSelected = selectedStoreSquidPlayer && (selectedStoreSquidPlayer.toLowerCase() === rawName.toLowerCase());
+      const isUserSelf = Boolean(currentTokenUser && currentTokenUser.username && (currentTokenUser.username.toLowerCase() === rawName.toLowerCase()));
+      const icon = avatarIcons[(players || []).indexOf(p) % avatarIcons.length] || '🦑';
+
+      // Calculate continuous track rail position (0% - 100%)
+      let exactPct = Math.min(96, Math.max(1.5, (pVol / 15000) * 100));
+
+      // Visual anti-collision stagger for low/tied wagers so all pins are visible & clickable
+      let visualTop = (pIdx % 2 === 0) ? -2 : 12;
+      if (pVol === 0) {
+        exactPct = 1.5 + (pIdx * 2.8);
+      } else if (pVol < 500 && !isLeader) {
+        exactPct = Math.max(2, exactPct + (pIdx * 1.5));
+      }
+
+      // Display name inside circle: prioritize readable 4-5 letter acronym or EDDIE for bettyeddy
+      let displayName = rawName;
+      if (rawName.toLowerCase().includes('eddy') || rawName.toLowerCase().includes('eddie')) {
+        displayName = 'EDDIE';
+      } else if (displayName.length > 5) {
+        displayName = displayName.slice(0, 4);
+      }
+
+      // Compact formatted wager inside circle
+      const compactAmt = pVol >= 1000 ? `$${(pVol / 1000).toFixed(pVol >= 10000 ? 0 : 1)}k` : `$${Math.round(pVol)}`;
+      const pPct = Math.min(100, Math.max(0, (pVol / 15000) * 100));
+      const zIndex = isLeader ? 65 : (isUserSelf ? 60 : (isSelected ? 55 : (30 - pIdx)));
+
+      return `
+        <div class="sg-track-runner-pin ${isLeader ? 'is-leader' : ''} ${isWinner ? 'is-winner' : ''} ${isUserSelf ? 'is-self' : ''} ${isSelected ? 'is-selected' : ''}" 
+             style="left: ${exactPct}%; top: ${visualTop}px; z-index: ${zIndex};"
+             onclick="selectStoreSquidPlayer('${escHtml(rawName)}')"
+             title="${escHtml(rawName)}: $${pVol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}">
+          ${isLeader ? '<div class="pin-crown-badge">👑</div>' : ''}
+          <div class="sg-step-pin-avatar">
+            <span class="pin-uname">${escHtml(displayName)}</span>
+            <span class="pin-amt">${compactAmt}</span>
+          </div>
+          <div class="sg-step-pin-tooltip">
+            <div class="pin-tt-header">
+              <div class="pin-tt-name">${icon} ${escHtml(rawName)} ${isUserSelf ? '<span style="color:#00ff80; font-size:0.68rem;">(You)</span>' : ''}</div>
+              <div class="pin-tt-rank">#${rankIdx}</div>
+            </div>
+            <div class="pin-tt-wager-row">
+              <span class="pin-tt-lbl">Weekly Wager</span>
+              <span class="pin-tt-val">$${pVol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+            <div class="pin-tt-wager-row">
+              <span class="pin-tt-lbl">VIP Progress</span>
+              <span style="font-family:var(--font-display); font-size:0.8rem; font-weight:800; color:#00ffe5;">${pPct.toFixed(1)}%</span>
+            </div>
+            <div class="pin-tt-bar-wrap">
+              <div class="pin-tt-bar-fill" style="width: ${pPct}%;"></div>
+            </div>
+            ${isLeader ? '<div style="color:#ffd700; font-size:0.68rem; font-weight:800; margin-top:3px;">👑 #1 Weekly Leader</div>' : ''}
+            ${isWinner ? '<div style="color:#00ff80; font-size:0.68rem; font-weight:800; margin-top:2px;">✨ Top 5 VIP Qualified</div>' : ''}
+            <div class="pin-tt-footer">Click to inspect in Milestone HUD ➜</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
   if (stepsContainer) {
     stepsContainer.innerHTML = milestones.map((m, idx) => {
       let statusClass = 'locked';
@@ -2630,65 +2704,12 @@ function renderStoreSquidGameTracker(players, userProgression) {
       const isVip = (idx === milestones.length - 1);
       if (isVip) statusClass += ' vip';
 
-      const nextTarget = idx < milestones.length - 1 ? milestones[idx + 1].target : 999999999;
-
-      // Find all racers currently on this step interval
-      const playersOnStep = (players || []).filter(p => {
-        const pVol = Number(p.weekly_volume) || 0;
-        if (idx === milestones.length - 1) return pVol >= m.target;
-        return pVol >= m.target && pVol < nextTarget;
-      });
-
-      const pinsHtml = playersOnStep.slice(0, 6).map((p, pIdx) => {
-        const pVol = Number(p.weekly_volume) || 0;
-        const rawName = (p.username || 'Player').trim();
-        const shortName = rawName.length > 3 ? rawName.slice(0, 3) : rawName;
-        const icon = avatarIcons[(players || []).indexOf(p) % avatarIcons.length] || '🦑';
-        const rankIdx = (players || []).indexOf(p) + 1;
-        const isWinner = pVol >= 15000 && (rankIdx <= 5);
-        const pPct = Math.min(100, Math.max(0, (pVol / 15000) * 100));
-        const isSelected = selectedStoreSquidPlayer && (selectedStoreSquidPlayer.toLowerCase() === rawName.toLowerCase());
-        const isUserSelf = Boolean(currentTokenUser && currentTokenUser.username && (currentTokenUser.username.toLowerCase() === rawName.toLowerCase()));
-
-        // Compact formatted wager for inside circle (e.g. $2k, $500, $12k)
-        const compactAmt = pVol >= 1000 ? `$${(pVol / 1000).toFixed(pVol >= 10000 ? 0 : 1)}k` : `$${Math.round(pVol)}`;
-
-        return `
-          <div class="sg-step-pin ${isWinner ? 'is-winner' : ''} ${isUserSelf ? 'is-self' : ''} ${isSelected ? 'is-selected' : ''}" onclick="selectStoreSquidPlayer('${escHtml(rawName)}')" title="${escHtml(rawName)}">
-            <div class="sg-step-pin-avatar">
-              <span class="pin-uname">${escHtml(shortName)}</span>
-              <span class="pin-amt">${compactAmt}</span>
-            </div>
-            <div class="sg-step-pin-tooltip">
-              <div class="pin-tt-header">
-                <div class="pin-tt-name">${icon} ${escHtml(rawName)} ${isUserSelf ? '<span style="color:#00ff80; font-size:0.68rem;">(You)</span>' : ''}</div>
-                <div class="pin-tt-rank">#${rankIdx}</div>
-              </div>
-              <div class="pin-tt-wager-row">
-                <span class="pin-tt-lbl">Weekly Wager</span>
-                <span class="pin-tt-val">$${pVol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
-              <div class="pin-tt-wager-row">
-                <span class="pin-tt-lbl">VIP Progress</span>
-                <span style="font-family:var(--font-display); font-size:0.8rem; font-weight:800; color:#00ffe5;">${pPct.toFixed(1)}%</span>
-              </div>
-              <div class="pin-tt-bar-wrap">
-                <div class="pin-tt-bar-fill" style="width: ${pPct}%;"></div>
-              </div>
-              ${isWinner ? '<div style="color:#ffd700; font-size:0.68rem; font-weight:800; margin-top:2px;">👑 Top 5 VIP Qualified</div>' : ''}
-              <div class="pin-tt-footer">Click to inspect player details ➜</div>
-            </div>
-          </div>
-        `;
-      }).join('');
-
       const labelText = m.target === 0 ? '$0' : (m.target >= 1000 ? (m.target % 1000 === 0 ? `$${m.target / 1000}k` : `$${(m.target / 1000).toFixed(1)}k`) : `$${m.target}`);
       const displayLabel = isVip ? `${labelText} VIP` : labelText;
 
       return `
         <div class="sg-rlgl-node ${statusClass}">
           ${isVip ? `<div class="sg-rlgl-trophy">🏆</div>` : ''}
-          ${pinsHtml ? `<div class="sg-rlgl-players-stack">${pinsHtml}</div>` : ''}
           <div class="sg-node-spotlight"></div>
           <div class="sg-rlgl-amount">${displayLabel}</div>
         </div>

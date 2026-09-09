@@ -739,38 +739,60 @@
   border-top: 6px solid #ff2a7a;
 }
 
-/* Multi-Player Pins Stacked on RLGL Nodes */
-.sg-rlgl-players-stack {
+/* Multi-Player Runners Layer directly along the Asphalt Track */
+.sg-rlgl-runners-layer {
   position: absolute;
-  top: -46px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  z-index: 20;
-  left: 50%;
-  transform: translateX(-50%);
-  flex-wrap: nowrap;
+  top: -6px;
+  left: 20px;
+  right: 20px;
+  height: 52px;
+  pointer-events: none;
+  z-index: 25;
 }
-.sg-step-pin {
-  position: relative;
+
+.sg-track-runner-pin {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  pointer-events: auto;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), z-index 0.2s;
+  transition: left 0.8s cubic-bezier(0.16, 1, 0.3, 1), top 0.3s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.sg-step-pin:hover {
-  z-index: 50;
-  transform: translateY(-3px) scale(1.1);
+
+.sg-track-runner-pin:hover {
+  z-index: 80 !important;
+  transform: translateX(-50%) translateY(-6px) scale(1.15);
 }
+
+.sg-track-runner-pin.is-leader .sg-step-pin-avatar {
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 4px 14px rgba(0, 0, 0, 0.9);
+  background: linear-gradient(135deg, rgba(50, 32, 10, 0.98) 0%, rgba(20, 12, 4, 0.98) 100%);
+}
+
+.sg-track-runner-pin.is-leader .pin-crown-badge {
+  position: absolute;
+  top: -14px;
+  font-size: 1rem;
+  filter: drop-shadow(0 0 8px #ffd700);
+  animation: leader-crown-bob 1.8s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes leader-crown-bob {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-3px) scale(1.15); }
+}
+
 .sg-step-pin-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(30, 16, 52, 0.95) 0%, rgba(14, 8, 28, 0.98) 100%);
-  border: 1.5px solid rgba(0, 255, 229, 0.6);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 255, 229, 0.3);
+  background: linear-gradient(135deg, rgba(28, 16, 48, 0.96) 0%, rgba(12, 6, 24, 0.98) 100%);
+  border: 1.5px solid rgba(0, 255, 229, 0.7);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8), 0 0 12px rgba(0, 255, 229, 0.35);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -781,30 +803,32 @@
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
   user-select: none;
+  box-sizing: border-box;
+  padding: 2px 1px;
 }
 .sg-step-pin-avatar .pin-uname {
   font-family: var(--font-ui);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 900;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: #00ffe5;
   text-transform: uppercase;
-  line-height: 1;
+  line-height: 1.1;
+  max-width: 32px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .sg-step-pin-avatar .pin-amt {
   font-family: var(--font-display);
   font-size: 0.52rem;
   font-weight: 800;
   color: #ffd700;
-  line-height: 1;
-  margin-top: 2px;
+  line-height: 1.1;
+  margin-top: 1px;
 }
-.sg-step-pin:hover .sg-step-pin-avatar {
-  border-color: #00ffe5;
-  box-shadow: 0 0 18px rgba(0, 255, 229, 0.8), 0 6px 16px rgba(0, 0, 0, 0.9);
-  background: linear-gradient(135deg, rgba(45, 25, 80, 0.98) 0%, rgba(20, 10, 40, 1) 100%);
-}
-.sg-step-pin.is-winner .sg-step-pin-avatar {
+
+.sg-track-runner-pin.is-winner .sg-step-pin-avatar {
   border-color: #ffd700;
   box-shadow: 0 0 14px rgba(255, 215, 0, 0.6);
 }
