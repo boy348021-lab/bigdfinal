@@ -5482,7 +5482,7 @@ footer a:hover { color: var(--purple-300); }
             <div class="sg-3d-layer sg-3d-layer-doll" id="sg-3d-doll">
               <div class="sg-doll-silhouette" title="Young-hee Robot Doll">
                 <div class="sg-doll-img-wrap">
-                  <img src="/squid_doll_center.png" alt="Squid Game Doll" class="sg-doll-img" />
+                  <img src="/squid_doll_transparent.png" alt="Airdrop Gauntlet Overseer" class="sg-doll-img" />
                   <div class="sg-doll-eye-lasers">
                     <span class="sg-doll-laser-beam left"></span>
                     <span class="sg-doll-laser-beam right"></span>
@@ -7277,67 +7277,83 @@ function renderSquidGameTracker(players) {
   const stepSpan = (nextMilestone.target - prevTarget) || 1;
   const remToNext = Math.max(0, nextMilestone.target - activeWager);
 
-  // 1. UPDATE RLGL HEADER DISPLAY
+  // Calculate combined all-player stats for Page 1 (3D Gauntlet Arena)
+  const totalRacersCount = (players || []).length;
+  const totalCombinedWager = (players || []).reduce((acc, p) => acc + (Number(p.weekly_volume) || 0), 0);
+  const topRacerWager = topRacers.length > 0 ? Math.max(...topRacers.map(p => Number(p.weekly_volume) || 0)) : 0;
+  const highestMilestoneTarget = 15000;
+  const arenaCombinedPct = Math.min(100, Math.max(0, (topRacerWager / highestMilestoneTarget) * 100));
+
+  // Determine highest milestone reached across ALL players
+  let collectiveStepIdx = 0;
+  for (let i = 0; i < milestones.length; i++) {
+    if (topRacerWager >= milestones[i].target) {
+      collectiveStepIdx = i;
+    }
+  }
+
+  // 1. UPDATE PAGE 1: 3D GAUNTLET ARENA (Combined all-players progress)
   const d3Wager = document.getElementById('sg-3d-wager-display');
   const d3Pct = document.getElementById('sg-3d-pct-display');
   if (d3Wager) {
-    if (activeUsername) {
-      d3Wager.textContent = '$' + activeWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (topRacerWager > 0) {
+      d3Wager.textContent = '$' + topRacerWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     } else {
       d3Wager.textContent = '$0.00';
     }
   }
   if (d3Pct) {
-    if (activeUsername) {
-      d3Pct.textContent = `${overallPct.toFixed(1)}% complete (${activeUsername})`;
+    if (totalRacersCount > 0) {
+      d3Pct.textContent = `${totalRacersCount} Racers Active • $${totalCombinedWager.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} Total Wagered`;
     } else {
-      d3Pct.textContent = 'Guest Preview — Select a player';
+      d3Pct.textContent = 'All Racers Tracking Active';
     }
   }
 
   const rlglFill = document.getElementById('sg-rlgl-fill');
   if (rlglFill) {
-    rlglFill.style.width = activeUsername ? `${overallPct}%` : '0%';
+    rlglFill.style.width = `${arenaCombinedPct}%`;
   }
 
-  // 2. RENDER RLGL NODES WITH SPOTLIGHTS, PLAYER PINS & ACTIVE "YOU'RE HERE" SPEECH BUBBLE
+  // 2. RENDER RLGL NODES WITH ALL RACER PINS DISTRIBUTED ACROSS THE TRACK
   const avatarIcons = ['🦑', '👑', '⚡', '💎', '🔥', '🎲', '🚀', '⭐', '🎯', '🕹️'];
   if (stepsContainer) {
     stepsContainer.innerHTML = milestones.map((m, idx) => {
       let statusClass = 'locked';
-      if (activeUsername) {
-        if (idx < activeStepIdx) statusClass = 'passed';
-        else if (idx === activeStepIdx) statusClass = 'active';
+      if (idx < collectiveStepIdx) {
+        statusClass = 'passed';
+      } else if (idx === collectiveStepIdx && topRacerWager > 0) {
+        statusClass = 'active';
       }
 
       const isVip = (idx === milestones.length - 1);
       if (isVip) statusClass += ' vip';
 
-      const isUserActiveNode = Boolean(activeUsername && idx === activeStepIdx);
       const nextTarget = idx < milestones.length - 1 ? milestones[idx + 1].target : 999999999;
 
-      // Find players currently on this step interval
-      const playersOnStep = topRacers.filter(p => {
+      // Find all racers currently on this step interval
+      const playersOnStep = (players || []).filter(p => {
         const pVol = Number(p.weekly_volume) || 0;
         if (idx === milestones.length - 1) return pVol >= m.target;
         return pVol >= m.target && pVol < nextTarget;
       });
 
-      const pinsHtml = playersOnStep.slice(0, 4).map((p, pIdx) => {
+      const pinsHtml = playersOnStep.slice(0, 6).map((p, pIdx) => {
         const pVol = Number(p.weekly_volume) || 0;
-        const icon = avatarIcons[topRacers.indexOf(p) % avatarIcons.length] || '🦑';
-        const isWinner = pVol >= 15000 && (topRacers.indexOf(p) < 5);
+        const icon = avatarIcons[(players || []).indexOf(p) % avatarIcons.length] || '🦑';
+        const isWinner = pVol >= 15000 && ((players || []).indexOf(p) < 5);
         const pPct = Math.min(100, Math.max(0, (pVol / 15000) * 100));
         const isSelected = selectedSquidPlayer && (selectedSquidPlayer.toLowerCase() === (p.username || '').toLowerCase());
+        const isUserSelf = Boolean(currentTokenUser && currentTokenUser.username && p.username && (p.username.toLowerCase() === currentTokenUser.username.toLowerCase()));
 
         return `
-          <div class="sg-step-pin ${isWinner ? 'is-winner' : ''} ${isSelected ? 'is-selected' : ''}" onclick="selectSquidPlayer('${escHtml(p.username || '')}')" style="position:relative;">
-            <div class="sg-step-pin-avatar">${icon}</div>
+          <div class="sg-step-pin ${isWinner ? 'is-winner' : ''} ${isSelected ? 'is-selected' : ''}" onclick="selectSquidPlayer('${escHtml(p.username || '')}')" style="position:relative;" title="${escHtml(p.username || 'Player')}">
+            <div class="sg-step-pin-avatar" style="${isUserSelf ? 'border-color:#00ffe5; box-shadow:0 0 14px #00ffe5;' : ''}">${icon}</div>
             <div class="sg-step-pin-tooltip">
-              <strong>${escHtml(p.username || 'Player')}</strong> (${pPct.toFixed(1)}%)<br/>
+              <strong>${escHtml(p.username || 'Player')}</strong> ${isUserSelf ? '<span style="color:#00ffe5;">(You)</span>' : ''} (${pPct.toFixed(1)}%)<br/>
               Wager: $${pVol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               ${isWinner ? '<br/><span style="color:#ffd700;">👑 Top 5 VIP Winner</span>' : ''}
-              <br/><span style="color:#00ffe5; font-size:0.65rem;">Click to track</span>
+              <br/><span style="color:#00ffe5; font-size:0.65rem;">Click to inspect</span>
             </div>
           </div>
         `;
@@ -7346,23 +7362,10 @@ function renderSquidGameTracker(players) {
       const labelText = m.target === 0 ? '$0' : (m.target >= 1000 ? (m.target % 1000 === 0 ? `$${m.target / 1000}k` : `$${(m.target / 1000).toFixed(1)}k`) : `$${m.target}`);
       const displayLabel = isVip ? `${labelText} VIP` : labelText;
 
-      let bubbleText = 'Tracked Player';
-      if (isOwnAccount) {
-        bubbleText = "You're here";
-      } else if (activeUsername) {
-        bubbleText = `${activeUsername}`;
-      }
-
       return `
         <div class="sg-rlgl-node ${statusClass}">
-          ${isUserActiveNode ? `
-            <div class="sg-rlgl-speech-bubble">
-              <strong>$${activeWager.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</strong>
-              <span>${bubbleText}</span>
-            </div>
-          ` : ''}
           ${isVip ? `<div class="sg-rlgl-trophy">🏆</div>` : ''}
-          ${pinsHtml ? `<div class="sg-rlgl-players-stack" style="${isUserActiveNode ? 'top:-68px;' : ''}">${pinsHtml}</div>` : ''}
+          ${pinsHtml ? `<div class="sg-rlgl-players-stack">${pinsHtml}</div>` : ''}
           <div class="sg-node-spotlight"></div>
           <div class="sg-rlgl-amount">${displayLabel}</div>
         </div>
@@ -7370,11 +7373,17 @@ function renderSquidGameTracker(players) {
     }).join('');
   }
 
-  // 3. RENDER ENHANCED HORIZONTAL TRACK & 3-CARD TELEMETRY
+  // 3. RENDER ENHANCED HORIZONTAL TRACK & 3-CARD TELEMETRY (Page 2: Milestone HUD - Individual Progress)
   const dHWager = document.getElementById('sg-h-wager-display');
   const dHPct = document.getElementById('sg-h-pct-display');
   if (dHWager) dHWager.textContent = '$' + activeWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  if (dHPct) dHPct.textContent = activeUsername ? `${overallPct.toFixed(1)}% complete` : '0% (Select player)';
+  if (dHPct) {
+    if (activeUsername) {
+      dHPct.textContent = `${overallPct.toFixed(1)}% complete (${activeUsername}${isOwnAccount ? ' - You' : ''})`;
+    } else {
+      dHPct.textContent = 'Login or select player to view individual progress';
+    }
+  }
 
   if (hRailFill) hRailFill.style.width = activeUsername ? `${overallPct}%` : '0%';
 
@@ -7410,7 +7419,11 @@ function renderSquidGameTracker(players) {
       : `$${remToNext.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} to ${nextMilestone.name}`;
   }
   if (tcProgVal) tcProgVal.textContent = `$${activeWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / $15,000`;
-  if (tcProgSub) tcProgSub.textContent = `${overallPct.toFixed(1)}% complete toward VIP`;
+  if (tcProgSub) {
+    tcProgSub.textContent = activeUsername
+      ? `${overallPct.toFixed(1)}% complete toward VIP (${activeUsername})`
+      : 'Connect account to track progress';
+  }
 
   // 4. RENDER MULTIPLAYER COMPARISON VIEW
   if (mpTableList) {
