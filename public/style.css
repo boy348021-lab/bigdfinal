@@ -576,30 +576,49 @@
 /* Asphalt Track Strip & Glowing Step Nodes */
 .sg-rlgl-track-wrap {
   position: relative;
-  z-index: 15;
-  margin-top: 100px;
+  z-index: 20;
+  margin-top: 50px;
   width: 100%;
+  padding-top: 40px;
+  padding-bottom: 10px;
 }
 .sg-rlgl-asphalt-rail {
   position: absolute;
-  top: 36px;
+  top: 50px;
   left: 20px;
   right: 20px;
-  height: 12px;
-  background: #15111e;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9);
+  height: 14px;
+  background: #130e1d;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.95);
 }
 .sg-rlgl-green-fill {
   position: absolute;
-  top: 36px;
+  top: 50px;
   left: 20px;
-  height: 12px;
-  border-radius: 6px;
-  background: linear-gradient(90deg, #00ff80, #00ffe5);
-  box-shadow: 0 0 18px #00ff80;
+  height: 14px;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #00ff80 0%, #00ffe5 100%);
+  box-shadow: 0 0 20px #00ff80, 0 0 35px rgba(0, 255, 229, 0.5);
   transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.sg-fill-head-glow {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 16px #00ffe5, 0 0 25px #00ff80;
+  margin-right: -9px;
+  flex-shrink: 0;
+  animation: head-pulse 1.2s ease-in-out infinite alternate;
+}
+@keyframes head-pulse {
+  0% { transform: scale(0.85); box-shadow: 0 0 10px #00ffe5; }
+  100% { transform: scale(1.3); box-shadow: 0 0 24px #00ffe5, 0 0 35px #00ff80; }
 }
 
 .sg-rlgl-nodes {
@@ -607,10 +626,11 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  z-index: 5;
+  z-index: 10;
   width: 100%;
-  padding: 0 10px;
+  padding: 0 8px;
   box-sizing: border-box;
+  margin-top: 36px;
 }
 
 .sg-rlgl-node {
@@ -619,13 +639,13 @@
   align-items: center;
   position: relative;
   cursor: pointer;
-  min-width: 60px;
+  min-width: 50px;
 }
 
 /* Round Spotlights on Track */
 .sg-node-spotlight {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -638,14 +658,14 @@
 .sg-rlgl-node.passed .sg-node-spotlight {
   background: radial-gradient(circle at 35% 35%, #00ff80 0%, #008f48 100%);
   border: 2px solid #ffffff;
-  box-shadow: 0 0 22px #00ff80, 0 6px 14px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 20px #00ff80, 0 4px 10px rgba(0, 0, 0, 0.8);
 }
 .sg-rlgl-node.passed .sg-node-spotlight::after {
   content: '';
   position: absolute;
-  top: -24px;
-  width: 38px;
-  height: 24px;
+  top: -20px;
+  width: 32px;
+  height: 20px;
   background: linear-gradient(180deg, transparent 0%, rgba(0, 255, 128, 0.35) 100%);
   clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%);
   pointer-events: none;
@@ -655,20 +675,20 @@
 .sg-rlgl-node.active .sg-node-spotlight {
   background: radial-gradient(circle at 35% 35%, #ff2a7a 0%, #a00045 100%);
   border: 2px solid #ffffff;
-  box-shadow: 0 0 26px #ff2a7a, 0 0 45px rgba(255, 42, 122, 0.6), 0 6px 16px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 0 24px #ff2a7a, 0 0 40px rgba(255, 42, 122, 0.6), 0 4px 14px rgba(0, 0, 0, 0.9);
   animation: active-spotlight-pulse 1.8s ease-in-out infinite alternate;
 }
 @keyframes active-spotlight-pulse {
-  0% { transform: scale(1); box-shadow: 0 0 20px #ff2a7a; }
-  100% { transform: scale(1.15); box-shadow: 0 0 35px #ff2a7a, 0 0 60px rgba(255, 42, 122, 0.8); }
+  0% { transform: scale(1); box-shadow: 0 0 18px #ff2a7a; }
+  100% { transform: scale(1.15); box-shadow: 0 0 32px #ff2a7a, 0 0 50px rgba(255, 42, 122, 0.8); }
 }
 
 /* Locked / Red Light Nodes */
 .sg-rlgl-node.locked .sg-node-spotlight {
   background: radial-gradient(circle at 35% 35%, #e11d48 0%, #60051b 100%);
   border: 1.5px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 0 14px rgba(225, 29, 72, 0.4), 0 4px 10px rgba(0, 0, 0, 0.7);
-  opacity: 0.7;
+  box-shadow: 0 0 12px rgba(225, 29, 72, 0.4), 0 3px 8px rgba(0, 0, 0, 0.7);
+  opacity: 0.65;
 }
 
 /* VIP Finish Zone ($15k VIP Trophy) */
@@ -679,8 +699,8 @@
 }
 .sg-rlgl-trophy {
   position: absolute;
-  top: -34px;
-  font-size: 1.7rem;
+  top: -30px;
+  font-size: 1.5rem;
   filter: drop-shadow(0 0 12px #ffd700);
   animation: trophy-bounce 2s ease-in-out infinite alternate;
 }
@@ -691,10 +711,10 @@
 
 .sg-rlgl-amount {
   font-family: var(--font-display);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 800;
   color: #ffffff;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 .sg-rlgl-node.vip .sg-rlgl-amount {
   color: #ffd700;
@@ -702,52 +722,15 @@
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
 }
 
-/* Active Player Speech Bubble "You're Here" */
-.sg-rlgl-speech-bubble {
-  position: absolute;
-  top: -54px;
-  background: rgba(16, 8, 28, 0.95);
-  border: 1.5px solid #ff2a7a;
-  border-radius: 8px;
-  padding: 4px 10px;
-  text-align: center;
-  white-space: nowrap;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.9), 0 0 16px rgba(255, 42, 122, 0.5);
-  z-index: 25;
-  pointer-events: none;
-}
-.sg-rlgl-speech-bubble strong {
-  color: #ff3388;
-  font-family: var(--font-display);
-  font-size: 0.78rem;
-  display: block;
-}
-.sg-rlgl-speech-bubble span {
-  font-family: var(--font-ui);
-  font-size: 0.65rem;
-  color: #e4e2ed;
-  font-weight: 700;
-}
-.sg-rlgl-speech-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 6px solid #ff2a7a;
-}
-
 /* Multi-Player Runners Layer directly along the Asphalt Track */
 .sg-rlgl-runners-layer {
   position: absolute;
-  top: -6px;
+  top: -12px;
   left: 20px;
   right: 20px;
-  height: 52px;
+  height: 60px;
   pointer-events: none;
-  z-index: 25;
+  z-index: 40;
 }
 
 .sg-track-runner-pin {
@@ -763,42 +746,52 @@
 }
 
 .sg-track-runner-pin:hover {
-  z-index: 80 !important;
+  z-index: 90 !important;
   transform: translateX(-50%) translateY(-6px) scale(1.15);
 }
 
-.sg-track-runner-pin.is-leader .sg-step-pin-avatar {
-  border: 2px solid #ffd700;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 4px 14px rgba(0, 0, 0, 0.9);
-  background: linear-gradient(135deg, rgba(50, 32, 10, 0.98) 0%, rgba(20, 12, 4, 0.98) 100%);
-}
-
-.sg-track-runner-pin.is-leader .pin-crown-badge {
+.pin-leader-callout {
   position: absolute;
-  top: -14px;
-  font-size: 1rem;
-  filter: drop-shadow(0 0 8px #ffd700);
-  animation: leader-crown-bob 1.8s ease-in-out infinite alternate;
+  top: -24px;
+  background: linear-gradient(90deg, #ffd700 0%, #ff8800 100%);
+  color: #0c0614;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.85);
+  letter-spacing: 0.04em;
+  animation: callout-bob 1.8s infinite alternate ease-in-out;
   pointer-events: none;
 }
-@keyframes leader-crown-bob {
-  0% { transform: translateY(0) scale(1); }
-  100% { transform: translateY(-3px) scale(1.15); }
+@keyframes callout-bob {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-3px); }
+}
+
+.pin-pointer-arrow {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #ffd700;
+  margin-top: 1px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
 }
 
 .sg-step-pin-avatar {
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(28, 16, 48, 0.96) 0%, rgba(12, 6, 24, 0.98) 100%);
-  border: 1.5px solid rgba(0, 255, 229, 0.7);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8), 0 0 12px rgba(0, 255, 229, 0.35);
+  background: linear-gradient(135deg, rgba(28, 16, 48, 0.98) 0%, rgba(12, 6, 24, 1) 100%);
+  border: 2px solid rgba(0, 255, 229, 0.8);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.9), 0 0 14px rgba(0, 255, 229, 0.4);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 800;
   color: #ffffff;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
@@ -808,29 +801,62 @@
 }
 .sg-step-pin-avatar .pin-uname {
   font-family: var(--font-ui);
-  font-size: 0.6rem;
+  font-size: 0.66rem;
   font-weight: 900;
   letter-spacing: 0.02em;
   color: #00ffe5;
   text-transform: uppercase;
   line-height: 1.1;
-  max-width: 32px;
+  max-width: 38px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .sg-step-pin-avatar .pin-amt {
   font-family: var(--font-display);
-  font-size: 0.52rem;
+  font-size: 0.56rem;
   font-weight: 800;
   color: #ffd700;
   line-height: 1.1;
   margin-top: 1px;
 }
 
+.sg-track-runner-pin.is-leader .sg-step-pin-avatar {
+  width: 46px;
+  height: 46px;
+  border: 2.5px solid #ffd700;
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.9), 0 6px 18px rgba(0, 0, 0, 0.95);
+  background: linear-gradient(135deg, rgba(60, 40, 10, 0.98) 0%, rgba(24, 14, 4, 1) 100%);
+  animation: leader-circle-pulse 2s ease-in-out infinite alternate;
+}
+@keyframes leader-circle-pulse {
+  0% { box-shadow: 0 0 16px rgba(255, 215, 0, 0.8); }
+  100% { box-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 0 45px rgba(255, 170, 0, 0.5); }
+}
+
+.sg-track-runner-pin.is-leader .pin-uname {
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+.sg-track-runner-pin.is-leader .pin-amt {
+  color: #ffd700;
+  font-size: 0.62rem;
+  font-weight: 900;
+}
+
 .sg-track-runner-pin.is-winner .sg-step-pin-avatar {
   border-color: #ffd700;
   box-shadow: 0 0 14px rgba(255, 215, 0, 0.6);
+}
+.sg-track-runner-pin.is-self .sg-step-pin-avatar {
+  border-color: #00ff80;
+  box-shadow: 0 0 16px rgba(0, 255, 128, 0.7);
+}
+.sg-track-runner-pin.is-selected .sg-step-pin-avatar {
+  border-color: #ff2a7a;
+  box-shadow: 0 0 20px rgba(255, 42, 122, 0.9);
+  transform: scale(1.08);
 }
 .sg-step-pin.is-winner .sg-step-pin-avatar .pin-uname {
   color: #ffd700;
@@ -962,26 +988,41 @@
 }
 .sg-h-track-wrap {
   position: relative;
-  padding: 55px 20px 25px;
+  padding: 65px 20px 25px;
   overflow-x: auto;
 }
 .sg-h-rail {
   position: absolute;
-  top: 66px;
+  top: 76px;
   left: 30px; right: 30px;
-  height: 6px;
+  height: 8px;
   background: rgba(255, 255, 255, 0.08);
-  border-radius: 3px;
+  border-radius: 4px;
 }
 .sg-h-rail-active {
   position: absolute;
-  top: 66px;
+  top: 76px;
   left: 30px;
-  height: 6px;
+  height: 8px;
   background: linear-gradient(90deg, #00ffe5, #ff2a7a);
-  border-radius: 3px;
-  box-shadow: 0 0 14px #00ffe5;
+  border-radius: 4px;
+  box-shadow: 0 0 16px #00ffe5;
   transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.sg-h-runners-layer {
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  right: 30px;
+  height: 58px;
+  pointer-events: none;
+  z-index: 10;
+}
+.sg-h-runners-layer .sg-track-runner-pin {
+  pointer-events: auto;
 }
 .sg-h-nodes {
   position: relative;

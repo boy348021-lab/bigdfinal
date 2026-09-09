@@ -5541,6 +5541,7 @@ footer a:hover { color: var(--purple-300); }
           <div class="sg-h-track-wrap">
             <div class="sg-h-rail"></div>
             <div class="sg-h-rail-active" id="sg-h-rail-fill" style="width: 0%;"></div>
+            <div class="sg-h-runners-layer" id="sg-h-runners-layer"></div>
             <div class="sg-h-nodes" id="sg-h-nodes-container">
               <!-- Rendered horizontally -->
             </div>
@@ -7225,7 +7226,7 @@ function renderSquidGameTracker(players) {
 
   const topRacers = (players || []).slice(0, 10);
 
-  // Determine current active player based on logged in user or explicitly selected player
+  // Determine current active player based on logged in user, explicit selection, or default to leader Eddie
   let activeWager = 0;
   let activeUsername = null;
   let isOwnAccount = false;
@@ -7249,6 +7250,12 @@ function renderSquidGameTracker(players) {
       activeUsername = currentTokenUser.username;
       isOwnAccount = true;
     }
+  } else if (topRacers.length > 0) {
+    // Default to leader (Eddie / bettyeddy)
+    const leader = topRacers[0];
+    activeWager = Number(leader.weekly_volume) || 0;
+    activeUsername = leader.username || 'bettyeddy';
+    isOwnAccount = false;
   }
 
   const milestones = [
@@ -7313,7 +7320,8 @@ function renderSquidGameTracker(players) {
 
   const rlglFill = document.getElementById('sg-rlgl-fill');
   if (rlglFill) {
-    rlglFill.style.width = `${arenaCombinedPct}%`;
+    rlglFill.style.width = `${Math.max(arenaCombinedPct, 3)}%`;
+    rlglFill.innerHTML = `<div class="sg-fill-head-glow"></div>`;
   }
 
   // 2. RENDER CONTINUOUS RUNNER PINS ALONG TRACK & MILESTONE NODES
@@ -7322,8 +7330,6 @@ function renderSquidGameTracker(players) {
 
   if (runnersLayer) {
     const sortedRacers = (players || []).slice(0, 10);
-    // Sort so top players are processed with clear distinct positions
-    let usedPctSlots = [];
 
     runnersLayer.innerHTML = sortedRacers.map((p, pIdx) => {
       const pVol = Number(p.weekly_volume) || 0;
@@ -7336,18 +7342,17 @@ function renderSquidGameTracker(players) {
       const icon = avatarIcons[(players || []).indexOf(p) % avatarIcons.length] || '🦑';
 
       // Calculate continuous track rail position (0% - 100%)
-      let exactPct = Math.min(96, Math.max(1.5, (pVol / 15000) * 100));
+      let exactPct = Math.min(96, Math.max(2, (pVol / 15000) * 100));
 
       // Visual anti-collision stagger for low/tied wagers so all pins are visible & clickable
-      let visualTop = (pIdx % 2 === 0) ? -2 : 12;
+      let visualTop = (pIdx % 2 === 0) ? -2 : 14;
       if (pVol === 0) {
-        exactPct = 1.5 + (pIdx * 2.8);
+        exactPct = 2 + (pIdx * 2.8);
       } else if (pVol < 500 && !isLeader) {
-        // Stagger small wager racers slightly behind the leader
-        exactPct = Math.max(2, exactPct + (pIdx * 1.5));
+        exactPct = Math.max(3, exactPct + (pIdx * 1.5));
       }
 
-      // Display name inside circle: prioritize readable 4-5 letter acronym or EDDIE for bettyeddy
+      // Display name inside circle: prioritize readable acronym or EDDIE for bettyeddy
       let displayName = rawName;
       if (rawName.toLowerCase().includes('eddy') || rawName.toLowerCase().includes('eddie')) {
         displayName = 'EDDIE';
@@ -7358,18 +7363,19 @@ function renderSquidGameTracker(players) {
       // Compact formatted wager inside circle
       const compactAmt = pVol >= 1000 ? `$${(pVol / 1000).toFixed(pVol >= 10000 ? 0 : 1)}k` : `$${Math.round(pVol)}`;
       const pPct = Math.min(100, Math.max(0, (pVol / 15000) * 100));
-      const zIndex = isLeader ? 65 : (isUserSelf ? 60 : (isSelected ? 55 : (30 - pIdx)));
+      const zIndex = isLeader ? 75 : (isUserSelf ? 70 : (isSelected ? 65 : (40 - pIdx)));
 
       return `
         <div class="sg-track-runner-pin ${isLeader ? 'is-leader' : ''} ${isWinner ? 'is-winner' : ''} ${isUserSelf ? 'is-self' : ''} ${isSelected ? 'is-selected' : ''}" 
              style="left: ${exactPct}%; top: ${visualTop}px; z-index: ${zIndex};"
              onclick="selectSquidPlayer('${escHtml(rawName)}')"
              title="${escHtml(rawName)}: $${pVol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}">
-          ${isLeader ? '<div class="pin-crown-badge">👑</div>' : ''}
+          ${isLeader ? '<div class="pin-leader-callout">👑 EDDIE (#1)</div>' : ''}
           <div class="sg-step-pin-avatar">
             <span class="pin-uname">${escHtml(displayName)}</span>
             <span class="pin-amt">${compactAmt}</span>
           </div>
+          <div class="pin-pointer-arrow"></div>
           <div class="sg-step-pin-tooltip">
             <div class="pin-tt-header">
               <div class="pin-tt-name">${icon} ${escHtml(rawName)} ${isUserSelf ? '<span style="color:#00ff80; font-size:0.68rem;">(You)</span>' : ''}</div>
@@ -7426,13 +7432,40 @@ function renderSquidGameTracker(players) {
   if (dHWager) dHWager.textContent = '$' + activeWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if (dHPct) {
     if (activeUsername) {
-      dHPct.textContent = `${overallPct.toFixed(1)}% complete (${activeUsername}${isOwnAccount ? ' - You' : ''})`;
+      const isEddyLeader = activeUsername.toLowerCase().includes('eddy') || activeUsername.toLowerCase().includes('eddie');
+      dHPct.textContent = `${overallPct.toFixed(1)}% complete (${isEddyLeader ? '👑 EDDIE' : activeUsername}${isOwnAccount ? ' - You' : ''})`;
     } else {
       dHPct.textContent = 'Login or select player to view individual progress';
     }
   }
 
-  if (hRailFill) hRailFill.style.width = activeUsername ? `${overallPct}%` : '0%';
+  if (hRailFill) {
+    hRailFill.style.width = activeUsername ? `${Math.max(overallPct, 3)}%` : '0%';
+    hRailFill.innerHTML = `<div class="sg-fill-head-glow"></div>`;
+  }
+
+  // Render active runner on horizontal track
+  const hRunnersLayer = document.getElementById('sg-h-runners-layer');
+  if (hRunnersLayer) {
+    if (activeUsername) {
+      let isEddyLeader = activeUsername.toLowerCase().includes('eddy') || activeUsername.toLowerCase().includes('eddie');
+      let dispName = isEddyLeader ? 'EDDIE' : (activeUsername.length > 5 ? activeUsername.slice(0, 4) : activeUsername);
+      let compactAmt = activeWager >= 1000 ? `$${(activeWager / 1000).toFixed(activeWager >= 10000 ? 0 : 1)}k` : `$${Math.round(activeWager)}`;
+
+      hRunnersLayer.innerHTML = `
+        <div class="sg-track-runner-pin ${isEddyLeader ? 'is-leader' : ''} is-selected" style="left: ${Math.min(96, Math.max(3, overallPct))}%; top: 0px; z-index: 50;">
+          ${isEddyLeader ? '<div class="pin-leader-callout">👑 EDDIE</div>' : ''}
+          <div class="sg-step-pin-avatar">
+            <span class="pin-uname">${escHtml(dispName)}</span>
+            <span class="pin-amt">${compactAmt}</span>
+          </div>
+          <div class="pin-pointer-arrow"></div>
+        </div>
+      `;
+    } else {
+      hRunnersLayer.innerHTML = '';
+    }
+  }
 
   if (hNodesContainer) {
     hNodesContainer.innerHTML = milestones.map((m, idx) => {
