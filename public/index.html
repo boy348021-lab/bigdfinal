@@ -6465,8 +6465,9 @@ window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('tabs-section')?.scrollIntoView({ behavior: 'smooth' });
     }, 150);
   } else {
-    // Fetch initial leaderboard
+    // Fetch initial leaderboard and weekly rankings
     fetchLeaderboard();
+    fetchWeeklyLeaderboard();
   }
 });
 
@@ -7326,6 +7327,10 @@ function renderSquidGameTracker(players) {
     rlglFill.style.width = `${Math.max(arenaCombinedPct, 3)}%`;
     rlglFill.innerHTML = `<div class="sg-fill-head-glow"></div>`;
   }
+
+  // 2. RENDER CONTINUOUS RUNNER PINS ALONG TRACK & MILESTONE NODES
+  const runnersLayer = document.getElementById('sg-rlgl-runners-layer');
+  const avatarIcons = ['🦑', '👑', '⚡', '💎', '🔥', '🎲', '🚀', '⭐', '🎯', '🕹️'];
 
   if (runnersLayer) {
     const sortedRacers = (players || []).slice(0, 10);
