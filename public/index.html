@@ -7448,14 +7448,6 @@ function renderWeeklyLeaderboard(data) {
           <span style="display:block; font-size:0.65rem; color:#ffd700; opacity:0.8; font-family:var(--font-ui); font-weight:700;">YEET PTS</span>
         </td>
         <td class="${amtClass}" style="color:#ffffff; font-weight:800; font-size:0.95rem;">${fmt(p.weekly_volume)}</td>
-        <td style="color:#00ff80; font-weight:800; font-size:0.95rem;">
-          ${fmt(p.weekly_slots_volume)}
-          <span style="display:block; font-size:0.65rem; color:var(--cyan-400); font-weight:700;">Qualifying</span>
-        </td>
-        <td style="color:#a49bc2; font-size:0.88rem; font-weight:600;">
-          ${fmt(p.weekly_house_volume)}
-          ${p.sportsbook_points > 0 ? `<span style="display:block; font-size:0.65rem; color:#ffd700;">+${p.sportsbook_points} sports</span>` : ''}
-        </td>
         <td>${vipStatusHtml}</td>
         <td>
           <a href="https://yeet.com" target="_blank" rel="noopener" class="tc-claim-btn unlocked" style="display:inline-block; font-size:0.72rem; padding:5px 10px; text-decoration:none; border-radius:6px; background:linear-gradient(135deg, #ff2a7a, #9d00ff); border:none; color:#fff; font-weight:700;">
@@ -7493,8 +7485,6 @@ function renderWeeklyLeaderboard(data) {
             <th>Player</th>
             <th>Points (Score) ⚡</th>
             <th>Total Wager ($)</th>
-            <th>Slots (Qualifying) 🎰</th>
-            <th>House / Sports 🎲</th>
             <th>VIP Status ($15k) 🦑</th>
             <th>Action</th>
           </tr>
