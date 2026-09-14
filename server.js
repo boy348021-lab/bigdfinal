@@ -732,7 +732,7 @@ app.get("/api/leaderboard", async (req, res) => {
   // ─── 2. ACTIVE YEET AFFILIATE API & COMBINED LEADERBOARD ($3,000 POOL) ───
   try {
     const codeFilter = String(req.query.code || 'all').toLowerCase();
-    const COMBINED_PRIZE_POOL = [1000, 500, 350, 250, 200, 175, 150, 125, 125, 125];
+    const COMBINED_PRIZE_POOL = [1000, 500, 350, 275, 225, 175, 150, 125, 100, 100];
     const monthBounds = getMonthlyTimeBounds();
     const weekBounds = getWeeklyTimeBounds();
 
