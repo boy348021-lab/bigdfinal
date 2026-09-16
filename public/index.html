@@ -918,42 +918,33 @@ body::after {
 .hero-logo-container {
   position: relative;
   width: 320px;
-  height: 180px;
-  margin: 10px auto 28px;
+  height: 160px;
+  margin: 0 auto 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 5;
 }
 
-.hero-logo-img {
-  width: 280px;
-  max-width: 85vw;
-  height: auto;
-  max-height: 170px;
+.hero-logo-img,
+.hero-logo-video {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.hero-logo-img {
   filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.8)) drop-shadow(0 0 50px rgba(136, 0, 255, 0.5));
   z-index: 2;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   animation: hero-logo-pulse 3s ease-in-out infinite alternate;
 }
 
 .hero-logo-video {
-  width: 280px;
-  max-width: 85vw;
-  height: auto;
-  max-height: 170px;
-  object-fit: contain;
-  mix-blend-mode: screen;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   z-index: 3;
-  pointer-events: none;
   transition: opacity 0.8s ease;
 }
 
@@ -4791,9 +4782,7 @@ footer a:hover { color: var(--purple-300); }
 
   <!-- Animated Glowing Aura Logo (Hero Centerpiece with Seamless Video Launch Reveal) -->
   <div class="hero-logo-container" id="hero-parallax-logo">
-    <video id="hero-reveal-video" class="hero-logo-video" autoplay muted playsinline preload="auto">
-      <source src="/bigd_launch_reveal.mp4" type="video/mp4"/>
-    </video>
+    <img src="/bigd_launch_reveal.webp" alt="BigD Launch Reveal" id="hero-reveal-anim" class="hero-logo-video" />
     <img src="/bigd_logo_transparent.png" alt="BigDGamesTV" class="hero-logo-img" id="hero-static-logo" style="opacity:0; transition:opacity 0.8s ease;"/>
   </div>
 
@@ -6224,29 +6213,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { threshold: 0.12 });
 
   elementsToReveal.forEach(el => observer.observe(el));
-  // Hero Video Launch Reveal -> Seamless Transparent Static Logo Transition
-  const revealVideo = document.getElementById('hero-reveal-video');
-  const staticLogo  = document.getElementById('hero-static-logo');
-  if (revealVideo && staticLogo) {
-    const transitionToStatic = () => {
-      revealVideo.style.opacity = '0';
-      staticLogo.style.opacity  = '1';
-      setTimeout(() => { revealVideo.style.display = 'none'; }, 850);
-    };
-
-    revealVideo.addEventListener('ended', transitionToStatic);
-
-    // Fallback timer if autoplay fails or ends prematurely
+  // Hero WebP Launch Reveal -> Seamless Transparent Static Logo Transition
+  const revealAnim = document.getElementById('hero-reveal-anim');
+  const staticLogo = document.getElementById('hero-static-logo');
+  if (revealAnim && staticLogo) {
     setTimeout(() => {
-      if (revealVideo.style.opacity !== '0') {
-        transitionToStatic();
-      }
-    }, 4200);
-
-    // Trigger video playback explicitly
-    revealVideo.play().catch(() => {
-      transitionToStatic();
-    });
+      revealAnim.style.opacity = '0';
+      staticLogo.style.opacity = '1';
+      setTimeout(() => { revealAnim.style.display = 'none'; }, 850);
+    }, 3960);
   }
 });
 
