@@ -932,7 +932,25 @@ body::after {
   object-fit: contain;
   filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.8)) drop-shadow(0 0 45px rgba(136, 0, 255, 0.5));
   z-index: 2;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   animation: hero-logo-pulse 3s ease-in-out infinite alternate;
+}
+
+.hero-logo-video {
+  width: 130px;
+  height: 130px;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
 }
 
 @keyframes hero-logo-pulse {
@@ -4708,7 +4726,7 @@ footer a:hover { color: var(--purple-300); }
      ================================================================ -->
 
 <nav id="nav">
-  <div class="nav-logo"><img src="/logo.png" alt="BigDGamesTV" style="height:44px;width:44px;object-fit:contain;border-radius:4px;"/><span class="nav-logo-text">BIG<em>D</em>TV</span></div>
+  <div class="nav-logo"><img src="/bigd_logo_transparent.png" alt="BigDGamesTV" style="height:44px;width:44px;object-fit:contain;border-radius:4px;"/><span class="nav-logo-text">BIG<em>D</em>TV</span></div>
   <ul class="nav-links">
     <li><a href="#tabs-section" class="active" data-tab="leaderboard">Leaderboards</a></li>
     <li><a href="#tabs-section" data-tab="challenges">Challenges</a></li>
@@ -4774,12 +4792,15 @@ footer a:hover { color: var(--purple-300); }
     <img src="/cyber-dice.png" alt="Futuristic 3D Cyber Dice" draggable="false" />
   </div>
 
-  <!-- Animated Glowing Aura Logo (Hero Centerpiece) -->
+  <!-- Animated Glowing Aura Logo (Hero Centerpiece with Seamless Video Launch Reveal) -->
   <div class="hero-logo-container" id="hero-parallax-logo">
     <div class="logo-aura-ring ring-outer"></div>
     <div class="logo-aura-ring ring-inner"></div>
     <div class="logo-halo-glow"></div>
-    <img src="/logo.png" alt="BigDGamesTV" class="hero-logo-img"/>
+    <video id="hero-reveal-video" class="hero-logo-video" autoplay muted playsinline preload="auto">
+      <source src="/bigd_launch_reveal.mp4" type="video/mp4"/>
+    </video>
+    <img src="/bigd_logo_transparent.png" alt="BigDGamesTV" class="hero-logo-img" id="hero-static-logo" style="opacity:0; transition:opacity 0.8s ease;"/>
   </div>
 
   <div class="hero-eyebrow">
@@ -6209,6 +6230,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { threshold: 0.12 });
 
   elementsToReveal.forEach(el => observer.observe(el));
+  // Hero Video Launch Reveal -> Seamless Transparent Static Logo Transition
+  const revealVideo = document.getElementById('hero-reveal-video');
+  const staticLogo  = document.getElementById('hero-static-logo');
+  if (revealVideo && staticLogo) {
+    const transitionToStatic = () => {
+      revealVideo.style.opacity = '0';
+      staticLogo.style.opacity  = '1';
+      setTimeout(() => { revealVideo.style.display = 'none'; }, 850);
+    };
+
+    revealVideo.addEventListener('ended', transitionToStatic);
+
+    // Fallback timer if autoplay fails or ends prematurely
+    setTimeout(() => {
+      if (revealVideo.style.opacity !== '0') {
+        transitionToStatic();
+      }
+    }, 4200);
+
+    // Trigger video playback explicitly
+    revealVideo.play().catch(() => {
+      transitionToStatic();
+    });
+  }
 });
 
 /* ──────────────────────────────────────────
