@@ -917,13 +917,30 @@ body::after {
    ============================================================ */
 .hero-logo-container {
   position: relative;
-  width: 320px;
-  height: 160px;
-  margin: 0 auto 24px;
+  width: 480px;
+  max-width: 92vw;
+  height: 230px;
+  margin: 0 auto 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 5;
+}
+
+@media (max-width: 768px) {
+  .hero-logo-container {
+    width: 380px;
+    height: 180px;
+    margin: 0 auto 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-logo-container {
+    width: 310px;
+    height: 150px;
+    margin: 0 auto 16px;
+  }
 }
 
 .hero-logo-img,
@@ -938,7 +955,7 @@ body::after {
 }
 
 .hero-logo-img {
-  filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.8)) drop-shadow(0 0 50px rgba(136, 0, 255, 0.5));
+  filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.85)) drop-shadow(0 0 60px rgba(136, 0, 255, 0.55));
   z-index: 2;
   animation: hero-logo-pulse 3s ease-in-out infinite alternate;
 }
