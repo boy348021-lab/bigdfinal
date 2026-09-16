@@ -917,9 +917,9 @@ body::after {
    ============================================================ */
 .hero-logo-container {
   position: relative;
-  width: 140px;
-  height: 140px;
-  margin: 0 auto 20px;
+  width: 420px;
+  height: 280px;
+  margin: 0 auto 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -927,10 +927,12 @@ body::after {
 }
 
 .hero-logo-img {
-  width: 110px;
-  height: 110px;
+  width: 400px;
+  max-width: 90vw;
+  height: auto;
+  max-height: 260px;
   object-fit: contain;
-  filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.8)) drop-shadow(0 0 45px rgba(136, 0, 255, 0.5));
+  filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.8)) drop-shadow(0 0 50px rgba(136, 0, 255, 0.5));
   z-index: 2;
   position: absolute;
   top: 50%;
@@ -940,8 +942,10 @@ body::after {
 }
 
 .hero-logo-video {
-  width: 130px;
-  height: 130px;
+  width: 400px;
+  max-width: 90vw;
+  height: auto;
+  max-height: 260px;
   object-fit: contain;
   mix-blend-mode: screen;
   position: absolute;
@@ -4767,13 +4771,6 @@ footer a:hover { color: var(--purple-300); }
   <!-- Layer 1 & 2: Cosmic Starfield & Ambient Nebula Canvas -->
   <canvas id="hero-cosmos-canvas" class="hero-cosmos-canvas"></canvas>
   <div class="hero-grid-3d"></div>
-  <div class="hero-floor-portal">
-    <div class="portal-disc portal-disc-outer"></div>
-    <div class="portal-disc portal-disc-inner"></div>
-    <div class="portal-core-glow"></div>
-  </div>
-  <div class="hero-orbital-ring ring-1"></div>
-  <div class="hero-orbital-ring ring-2"></div>
   <div class="hero-light-beams"></div>
   <div class="hero-particles" id="hero-particles"></div>
 
@@ -4794,9 +4791,6 @@ footer a:hover { color: var(--purple-300); }
 
   <!-- Animated Glowing Aura Logo (Hero Centerpiece with Seamless Video Launch Reveal) -->
   <div class="hero-logo-container" id="hero-parallax-logo">
-    <div class="logo-aura-ring ring-outer"></div>
-    <div class="logo-aura-ring ring-inner"></div>
-    <div class="logo-halo-glow"></div>
     <video id="hero-reveal-video" class="hero-logo-video" autoplay muted playsinline preload="auto">
       <source src="/bigd_launch_reveal.mp4" type="video/mp4"/>
     </video>
