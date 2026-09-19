@@ -1005,10 +1005,11 @@ const COMMUNITY_CHALLENGES = [
     id: "big_bass",
     title: "Big Bass Reel Repeat",
     prize: "$10 CASH",
-    desc: "First person to hit 300x on Yeet with code BIGD wins $10 Cash! Spin in, Reel Repeat & cash out big.",
+    desc: "First person to hit 300x on Yeet with code BIGDTV won $10 Cash! Claimed by reversed on Discord.",
     img: "/challenges/bigbass.png",
-    status: "active",
-    reused: true,
+    status: "completed",
+    claimed_by: "reversed",
+    claimed_date: "September 2026",
     campaign: "yeet"
   },
   {
