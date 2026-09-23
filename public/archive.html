@@ -356,6 +356,13 @@ async function loadArchivedLeaderboard() {
       return;
     }
 
+    function maskUsername(str) {
+      if (!str || typeof str !== 'string') return '***';
+      const name = str.trim();
+      if (name.length <= 2) return name[0] + '****' + (name[1] || '');
+      return name.slice(0, 2) + '****' + name.slice(-1);
+    }
+
     const fmt = n => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const fmtShort = n => '$' + (n >= 1000 ? (n/1000).toFixed(1) + 'k' : Number(n || 0).toFixed(2));
 
@@ -363,7 +370,7 @@ async function loadArchivedLeaderboard() {
       const rank = i + 1;
       const rankClass = rank <= 3 ? 'rank-' + rank : 'rank-n';
       const isHidden = p.user_id === -1 || p.is_hidden;
-      const name = isHidden ? '🔒 Hidden User' : (p.username || 'Player');
+      const name = isHidden ? '🔒 Hidden User' : maskUsername(p.username || 'Player');
       const total = Number(p.volume) || (p.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0);
 
       return `
