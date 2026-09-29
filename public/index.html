@@ -4743,7 +4743,7 @@ footer a:hover { color: var(--purple-300); }
     <li><a href="#tabs-section" class="active" data-tab="leaderboard">Leaderboards</a></li>
     <li><a href="#tabs-section" data-tab="challenges">Challenges</a></li>
     <li><a href="#tabs-section" data-tab="milestones">Milestones</a></li>
-    <li><a href="blackjack.html">Blackjack ♠️</a></li>
+    <li><a href="blackjack.html">Blackjack & More 🃏</a></li>
     <li><a href="verify.html">Code Check</a></li>
     <li><a href="store.html">Store 🪙</a></li>
     <li style="display:flex;align-items:center;margin-left:8px;"><button id="nav-auth-btn" class="nav-btn-auth">Login</button></li>
@@ -4766,7 +4766,7 @@ footer a:hover { color: var(--purple-300); }
   <a href="#tabs-section" class="active" data-tab="leaderboard">Leaderboards</a>
   <a href="#tabs-section" data-tab="challenges">Challenges</a>
   <a href="#tabs-section" data-tab="milestones">Milestones</a>
-  <a href="blackjack.html">Blackjack ♠️</a>
+  <a href="blackjack.html">Blackjack & More 🃏</a>
   <a href="verify.html">Code Check</a>
   <a href="store.html">Store 🪙</a>
   <a href="#" id="mobile-nav-auth-btn" class="mobile-auth-btn">Login</a>
@@ -4995,112 +4995,7 @@ footer a:hover { color: var(--purple-300); }
   </div>
 </div>
 
-<!-- ================================================================
-     DAILY BIGD FIT MATRIX (FIRST SCROLL SHOWCASE)
-     ================================================================ -->
-<section class="fit-matrix-section" id="fit-matrix-section">
-  <div class="fit-matrix-container">
-    <div class="fit-matrix-header">
-      <div class="section-eyebrow">
-        <span class="cyber-dot"></span>
-        <span>DAILY STREAM IDENTITY</span>
-      </div>
-      <h2 class="section-title">
-        TODAY'S <span style="background:linear-gradient(135deg, var(--purple-400), var(--cyan-400)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">BIGD FIT</span> MATRIX
-      </h2>
-      <p class="section-desc">
-        Interact with the 3D rotating dial to select BigD's official stream look for today. Lock your fit or reselect anytime.
-      </p>
-    </div>
 
-    <!-- Interactive BigD Watch -->
-    <div class="bigd-watch-wrapper" id="bigd-watch-wrapper">
-      <div class="bigd-watch-device" id="bigd-watch-device" title="BigD Daily Fit Selector — Drag or Scroll to Rotate">
-        <!-- Outer Chassis Ring & Markings -->
-        <div class="watch-outer-chassis"></div>
-
-        <!-- Top Engraved Insignia Badge -->
-        <div class="watch-insignia-top">
-          <span class="insignia-crown">👑</span>
-          <span>BIGD TV</span>
-          <span style="color:var(--cyan-400); font-size:0.6rem;">• FIT MATRIX</span>
-        </div>
-
-        <!-- Left & Right Step Chevrons -->
-        <button class="watch-step-btn btn-prev" id="fit-prev-btn" title="Previous BigD Fit" aria-label="Previous Look">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <button class="watch-step-btn btn-next" id="fit-next-btn" title="Next BigD Fit" aria-label="Next Look">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-
-        <!-- Rotating Dial Track (Populated dynamically with the 7 Orbiting Fit Pods) -->
-        <div class="watch-dial-track" id="watch-dial-track"></div>
-
-        <!-- Inner Holographic Crystal Chamber -->
-        <div class="watch-hologram-core" id="watch-hologram-core">
-          <div class="core-energy-disc"></div>
-          <div class="core-character-wrap" id="core-character-wrap">
-            <img src="/bigd-gamer.png" alt="BigD Fit Preview" class="core-character-img" id="core-character-img" draggable="false" />
-          </div>
-          <div class="core-look-nameplate">
-            <span class="core-day-tag" id="core-day-tag">MONDAY FIT</span>
-            <span class="core-look-title" id="core-look-title">GAMER BIGD</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Watch Action & Selection Deck -->
-      <div class="watch-action-deck" id="watch-action-deck">
-        <div class="watch-hint-text" id="watch-hint-text">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M2 12h20"/></svg>
-          <span>DRAG DIAL • SCROLL TO ROTATE</span>
-        </div>
-        <button class="watch-lock-btn" id="watch-lock-btn" onclick="openFitLockModal()">
-          <span>⚡ LOCK TODAY'S FIT</span>
-        </button>
-        <div class="watch-locked-group" id="watch-locked-group" style="display:none;">
-          <div class="watch-locked-status-badge" id="watch-locked-status-badge">
-            <span>🔒 TODAY'S FIT LOCKED</span>
-          </div>
-          <button type="button" class="watch-reselect-btn" id="watch-reselect-btn" onclick="unlockFitForReselection()" title="Choose another BigD look">
-            <span>🔄 Change / Reselect Fit</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- BigD Fit Selection Confirmation Modal -->
-<div id="fit-lock-modal" class="modal-overlay">
-  <div class="modal-card fit-modal-card">
-    <button class="modal-close" onclick="closeFitLockModal()">×</button>
-    <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:0.06em;">
-      LOCK YOUR <span style="color:var(--cyan-400);">BIGD FIT</span>
-    </div>
-    <div class="fit-modal-char-preview">
-      <img src="/bigd-gamer.png" id="modal-char-preview-img" alt="Selected BigD Look" />
-    </div>
-    <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#ffd700; margin-bottom:4px;" id="modal-fit-title">
-      GAMER BIGD
-    </div>
-    <div style="font-family:var(--font-ui); font-size:0.8rem; font-weight:800; color:var(--cyan-400); text-transform:uppercase; margin-bottom:12px;" id="modal-fit-day">
-      MONDAY FIT
-    </div>
-    <p style="font-family:var(--font-ui); font-size:0.88rem; color:var(--text-secondary); line-height:1.5; margin-bottom:22px;">
-      Lock this as your official BigD look for today? You can reselect or change your fit anytime.
-    </p>
-    <div style="display:flex; justify-content:center; gap:12px;">
-      <button onclick="closeFitLockModal()" style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-family:var(--font-ui); font-size:0.85rem; font-weight:800; padding:10px 22px; border-radius:20px; cursor:pointer;">
-        CANCEL
-      </button>
-      <button onclick="confirmAndLockFit()" style="background:linear-gradient(135deg, #8800ff, #00ffe5); border:none; color:#fff; font-family:var(--font-display); font-size:0.88rem; font-weight:900; padding:10px 26px; border-radius:20px; cursor:pointer; box-shadow:0 0 20px rgba(0,255,229,0.5);">
-        ⚡ CONFIRM & LOCK
-      </button>
-    </div>
-  </div>
-</div>
 
 <!-- ================================================================
      STATS STRIP (3D TACTILE KEYS)
@@ -7291,7 +7186,7 @@ function renderSquidGameTracker(players) {
         <div class="sg-track-runner-pin ${isNearLeft ? 'near-left' : ''} ${isLeader ? 'is-leader' : ''} ${isWinner ? 'is-winner' : ''} ${isUserSelf ? 'is-self' : ''} ${isSelected ? 'is-selected' : ''}" 
              style="left: ${exactPct}%; top: ${visualTop}px; z-index: ${zIndex};"
              onclick="selectSquidPlayer('${escHtml(rawName)}')"
-             title="${escHtml(rawName)}: $${pVol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}">
+             title="${escHtml(maskUsername(rawName))}: $${pVol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}">
           ${isLeader ? '<div class="pin-leader-callout">👑 EDDIE (#1)</div>' : ''}
           <div class="sg-step-pin-avatar">
             <span class="pin-uname">${escHtml(displayName)}</span>
@@ -7300,7 +7195,7 @@ function renderSquidGameTracker(players) {
           <div class="pin-pointer-arrow"></div>
           <div class="sg-step-pin-tooltip">
             <div class="pin-tt-header">
-              <div class="pin-tt-name">${icon} ${escHtml(rawName)} ${isUserSelf ? '<span style="color:#00ff80; font-size:0.68rem;">(You)</span>' : ''}</div>
+              <div class="pin-tt-name">${icon} ${escHtml(maskUsername(rawName))} ${isUserSelf ? '<span style="color:#00ff80; font-size:0.68rem;">(You)</span>' : ''}</div>
               <div class="pin-tt-rank">#${rankIdx}</div>
             </div>
             <div class="pin-tt-wager-row">
@@ -7355,7 +7250,8 @@ function renderSquidGameTracker(players) {
   if (dHPct) {
     if (activeUsername) {
       const isEddyLeader = activeUsername.toLowerCase().includes('eddy') || activeUsername.toLowerCase().includes('eddie');
-      dHPct.textContent = `${overallPct.toFixed(1)}% complete (${isEddyLeader ? '👑 EDDIE' : activeUsername}${isOwnAccount ? ' - You' : ''})`;
+      const displayActive = isOwnAccount ? activeUsername : maskUsername(activeUsername);
+      dHPct.textContent = `${overallPct.toFixed(1)}% complete (${isEddyLeader ? '👑 EDDIE' : displayActive}${isOwnAccount ? ' - You' : ''})`;
     } else {
       dHPct.textContent = 'Login or select player to view individual progress';
     }
@@ -8461,5 +8357,6 @@ document.addEventListener('click', (e) => {
     <!-- <script src="/blackjack/blackjack-engine.js"></script> -->
     <!-- <script src="/blackjack/blackjack-ui.js"></script> -->
     <script src="/app.js"></script>
+    <script src="/mascot-widget.js"></script>
 </body>
 </html>
