@@ -537,10 +537,10 @@ async function fetchCombinedYeetReferrals({ startDate = null, endDate = null, so
     // Group by normalized username if available, else by unique userId + sourceCode
     const normUser = (p.username && !isHidden && p.username.trim()) ? p.username.trim().toLowerCase() : null;
 
-    // Special adjustment for Louisfaux (+800 points advance only)
+    // Special adjustment for Louisfaux (+1600 points advance only)
     if (normUser === "louisfaux") {
-      points += 800;
-      casinoPts += 800;
+      points += 1600;
+      casinoPts += 1600;
     }
 
     const key = normUser ? normUser : `id_${p.userId}_${sourceCode}`;
