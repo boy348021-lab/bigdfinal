@@ -1,379 +1,429 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>BigDGamesTV — Historical Archives (DegenCity)</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Rajdhani:wght@600;700;800;900&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="/style.css"/>
-<style>
-:root {
-  --bg-void: #030208;
-  --bg-deep: #060412;
-  --bg-card: rgba(14, 10, 32, 0.72);
-  --purple-500: #9d00ff;
-  --purple-400: #be4dff;
-  --gold-400: #ffd700;
-  --cyan-400: #00ffe5;
-  --font-display: 'Rajdhani', 'Syne', sans-serif;
-  --font-ui: 'Rajdhani', sans-serif;
-}
-body {
-  background: var(--bg-void);
-  color: #f4efff;
-  font-family: var(--font-ui);
-  min-height: 100vh;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-.archive-container {
-  max-width: 1200px;
-  margin: 90px auto 40px;
-  padding: 0 20px;
-  width: 100%;
-  box-sizing: border-box;
-}
-.archive-header {
-  background: linear-gradient(135deg, rgba(35, 20, 60, 0.8) 0%, rgba(18, 10, 35, 0.95) 100%);
-  border: 1px solid rgba(255, 215, 0, 0.35);
-  border-radius: 16px;
-  padding: 30px;
-  margin-bottom: 28px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-.archive-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  background: rgba(255, 215, 0, 0.15);
-  border: 1px solid rgba(255, 215, 0, 0.4);
-  color: #ffd700;
-  font-size: 0.8rem;
-  font-weight: 800;
-  border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.archive-title {
-  font-family: var(--font-display);
-  font-size: 2.2rem;
-  font-weight: 900;
-  color: #ffffff;
-  margin: 10px 0 6px;
-  letter-spacing: 0.04em;
-}
-.archive-sub {
-  color: #a49bc2;
-  font-size: 0.95rem;
-  max-width: 600px;
-  line-height: 1.5;
-}
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, #8800ff, #5500aa);
-  border: 1px solid rgba(190, 77, 255, 0.4);
-  color: #fff;
-  font-weight: 800;
-  padding: 10px 22px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: all 0.25s ease;
-}
-.back-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 20px rgba(136, 0, 255, 0.5);
-}
-.stats-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
-  margin-bottom: 28px;
-}
-.stat-box {
-  background: rgba(14, 10, 32, 0.8);
-  border: 1px solid rgba(157, 0, 255, 0.3);
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-}
-.stat-box-num {
-  font-family: var(--font-display);
-  font-size: 1.8rem;
-  font-weight: 900;
-  color: #ffd700;
-}
-.stat-box-lbl {
-  font-size: 0.8rem;
-  color: #a49bc2;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-top: 4px;
-}
-.archive-card {
-  background: rgba(14, 10, 32, 0.85);
-  border: 1px solid rgba(157, 0, 255, 0.3);
-  border-radius: 16px;
-  padding: 26px;
-  margin-bottom: 28px;
-}
-.archive-card-title {
-  font-family: var(--font-display);
-  font-size: 1.3rem;
-  font-weight: 900;
-  color: #ffffff;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.month-badge {
-  background: rgba(255, 215, 0, 0.1);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  color: #ffd700;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BigDGamesTV — Historical Archives (DegenCity)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Rajdhani:wght@600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    :root {
+      --bg-void: #030208;
+      --bg-deep: #060412;
+      --bg-card: rgba(14, 10, 32, 0.72);
+      --purple-500: #9d00ff;
+      --purple-400: #be4dff;
+      --gold-400: #ffd700;
+      --cyan-400: #00ffe5;
+      --font-display: 'Rajdhani', 'Syne', sans-serif;
+      --font-ui: 'Rajdhani', sans-serif;
+    }
+
+    body {
+      background: var(--bg-void);
+      color: #f4efff;
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .archive-container {
+      max-width: 1200px;
+      margin: 90px auto 40px;
+      padding: 0 20px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .archive-header {
+      background: linear-gradient(135deg, rgba(35, 20, 60, 0.8) 0%, rgba(18, 10, 35, 0.95) 100%);
+      border: 1px solid rgba(255, 215, 0, 0.35);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .archive-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: rgba(255, 215, 0, 0.15);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      color: #ffd700;
+      font-size: 0.8rem;
+      font-weight: 800;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .archive-title {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #ffffff;
+      margin: 10px 0 6px;
+      letter-spacing: 0.04em;
+    }
+
+    .archive-sub {
+      color: #a49bc2;
+      font-size: 0.95rem;
+      max-width: 600px;
+      line-height: 1.5;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #8800ff, #5500aa);
+      border: 1px solid rgba(190, 77, 255, 0.4);
+      color: #fff;
+      font-weight: 800;
+      padding: 10px 22px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.25s ease;
+    }
+
+    .back-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(136, 0, 255, 0.5);
+    }
+
+    .stats-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-box {
+      background: rgba(14, 10, 32, 0.8);
+      border: 1px solid rgba(157, 0, 255, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .stat-box-num {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #ffd700;
+    }
+
+    .stat-box-lbl {
+      font-size: 0.8rem;
+      color: #a49bc2;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    .archive-card {
+      background: rgba(14, 10, 32, 0.85);
+      border: 1px solid rgba(157, 0, 255, 0.3);
+      border-radius: 16px;
+      padding: 26px;
+      margin-bottom: 28px;
+    }
+
+    .archive-card-title {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .month-badge {
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      color: #ffd700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- TOP NAV -->
-<nav id="nav">
-  <div class="nav-logo">
-    <a href="/index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
-      <img src="/bigd_logo_transparent.png" alt="BigDGamesTV" style="width:36px;height:36px;border-radius:50%;"/>
-      <span style="font-family:var(--font-display);font-size:1.15rem;font-weight:900;color:#fff;letter-spacing:0.06em;">BIGD<span style="color:#00ffe5;">TV</span></span>
-    </a>
-  </div>
-  <ul class="nav-links">
-    <li><a href="/index.html#tabs-section">Live Leaderboards ⚡</a></li>
-    <li><a href="/blackjack.html">Blackjack & More 🃏</a></li>
-    <li><a href="/verify.html">Code Check</a></li>
-    <li><a href="/store.html">Store 🪙</a></li>
-    <li><a href="/archive.html" class="active" style="color:#ffd700;">Archives 📁</a></li>
-  </ul>
-  <div class="nav-right">
-    <a class="kick-live-badge" id="kick-live-badge" href="https://kick.com/BigDgamesTV" target="_blank" rel="noopener">
-      <span class="status-dot"></span>
-      <span id="kick-live-text">OFFLINE</span>
-    </a>
-  </div>
-</nav>
-
-<div class="archive-container">
-  
-  <div class="archive-header">
-    <div>
-      <span class="archive-badge">📁 Historical Records Vault</span>
-      <h1 class="archive-title">DegenCity Partner Archive</h1>
-      <p class="archive-sub">
-        Complete historical ledger, verified monthly rankings, and milestone achievements from our previous casino partner campaign (August 2026).
-      </p>
-    </div>
-    <div>
-      <a href="/index.html" class="back-btn">
-        <span>⚡ Return to Live Yeet Hub</span>
+  <!-- TOP NAV -->
+  <nav id="nav">
+    <div class="nav-logo">
+      <a href="/index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <img src="/bigd_logo_transparent.png" alt="BigDGamesTV" style="width:36px;height:36px;border-radius:50%;" />
+        <span
+          style="font-family:var(--font-display);font-size:1.15rem;font-weight:900;color:#fff;letter-spacing:0.06em;">BIGD<span
+            style="color:#00ffe5;">TV</span></span>
       </a>
     </div>
-  </div>
+    <ul class="nav-links">
+      <li><a href="/index.html#tabs-section">Live Leaderboards ⚡</a></li>
+      <li><a href="/blackjack.html">Blackjack & More 🃏</a></li>
+      <li><a href="/verify.html">Code Check</a></li>
+      <li><a href="/store.html">Store 🪙</a></li>
+      <li><a href="/archive.html" class="active" style="color:#ffd700;">Archives 📁</a></li>
+    </ul>
+    <div class="nav-right">
+      <a class="kick-live-badge" id="kick-live-badge" href="https://kick.com/BigDgamesTV" target="_blank"
+        rel="noopener">
+        <span class="status-dot"></span>
+        <span id="kick-live-text">OFFLINE</span>
+      </a>
+    </div>
+  </nav>
 
-  <div class="stats-summary-grid">
-    <div class="stat-box">
-      <div class="stat-box-num">$102,968.05</div>
-      <div class="stat-box-lbl">Total Community Wagered</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-box-num">42 Members</div>
-      <div class="stat-box-lbl">Referred Players</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-box-num">$2,500 Cash</div>
-      <div class="stat-box-lbl">Total Prizes Awarded</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-box-num" style="color:#00ff80;">✓ $50,000 Smashed</div>
-      <div class="stat-box-lbl">Community Milestone</div>
-    </div>
-  </div>
+  <div class="archive-container">
 
-  <div class="archive-card">
-    <div class="archive-card-title">
-      <span>🏆 August 2026 Final Leaderboard Standings</span>
-      <span class="month-badge">August 1 – August 31, 2026</span>
-    </div>
-    
-    <div id="archive-lb-content">
-      <div class="lb-loading"><div class="spinner"></div>Loading archived records…</div>
-    </div>
-  </div>
-
-  <!-- HISTORICAL MILESTONES (AUGUST 2026 ARCHIVE) -->
-  <div class="archive-card">
-    <div class="archive-card-title">
-      <span>🎯 DegenCity Historical Milestones</span>
-      <span class="month-badge">August 2026 Campaign</span>
-    </div>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; margin-top:12px;">
-      <!-- $50K Smashed -->
-      <div style="background: linear-gradient(145deg, rgba(20,25,18,0.85) 0%, rgba(10,14,10,0.95) 100%); border: 1px solid rgba(0, 255, 128, 0.4); border-radius: 12px; padding: 24px; text-align: left;">
-        <div style="display:inline-block; background: rgba(0, 255, 128, 0.15); border: 1px solid rgba(0, 255, 128, 0.5); color: #00ff80; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; margin-bottom:10px;">
-          ✓ UNLOCKED & ACHIEVED
-        </div>
-        <div style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 900; text-transform: uppercase; color: #ffffff; margin-bottom: 6px;">
-          $50,000 <span style="color: #00ff80;">MILESTONE</span>
-        </div>
-        <div style="display: inline-block; background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.3); color: #ffd700; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 800; margin-bottom: 12px;">
-          🎁 REWARD: 10 BONUS BUYS (2x $40 + 8x $20)
-        </div>
-        <p style="font-size: 0.88rem; color: #a49bc2; line-height: 1.5; margin: 0 0 12px 0;">
-          The community officially smashed the $50,000 milestone! 10 lucky participants were selected live on stream and awarded Bonus Buys.
+    <div class="archive-header">
+      <div>
+        <span class="archive-badge">📁 Historical Records Vault</span>
+        <h1 class="archive-title">DegenCity Partner Archive</h1>
+        <p class="archive-sub">
+          Complete historical ledger, verified monthly rankings, and milestone achievements from our previous casino
+          partner campaign (August 2026).
         </p>
-        <div style="font-size: 0.78rem; font-weight: 700; color: #00ff80;">
-          ★ Status: Completed Live on Stream
-        </div>
+      </div>
+      <div>
+        <a href="/index.html" class="back-btn">
+          <span>⚡ Return to Live Yeet Hub</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="stats-summary-grid">
+      <div class="stat-box">
+        <div class="stat-box-num">$102,968.05</div>
+        <div class="stat-box-lbl">Total Community Wagered</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-num">42 Members</div>
+        <div class="stat-box-lbl">Referred Players</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-num">$2,500 Cash</div>
+        <div class="stat-box-lbl">Total Prizes Awarded</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-num" style="color:#00ff80;">✓ $50,000 Smashed</div>
+        <div class="stat-box-lbl">Community Milestone</div>
+      </div>
+    </div>
+
+    <div class="archive-card">
+      <div class="archive-card-title">
+        <span>🏆 August 2026 Final Leaderboard Standings</span>
+        <span class="month-badge">August 1 – August 31, 2026</span>
       </div>
 
-      <!-- $100K DegenCity Milestone -->
-      <div style="background: linear-gradient(145deg, rgba(25,18,35,0.85) 0%, rgba(12,8,20,0.95) 100%); border: 1px solid rgba(0, 255, 229, 0.4); border-radius: 12px; padding: 24px; text-align: left;">
-        <div style="display:inline-block; background: rgba(0, 255, 229, 0.15); border: 1px solid rgba(0, 255, 229, 0.4); color: var(--cyan-400); padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; margin-bottom:10px;">
-          ✓ FINAL TOTAL: $102.9K+
-        </div>
-        <div style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 900; text-transform: uppercase; color: #ffffff; margin-bottom: 6px;">
-          $100,000 <span style="color: var(--cyan-400);">MILESTONE</span>
-        </div>
-        <div style="display: inline-block; background: rgba(136, 0, 255, 0.2); border: 1px solid rgba(136, 0, 255, 0.4); color: var(--purple-300); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 800; margin-bottom: 12px;">
-          🎁 REWARD: 3x $100 BONUS BUYS
-        </div>
-        <p style="font-size: 0.88rem; color: #a49bc2; line-height: 1.5; margin: 0 0 12px 0;">
-          Community exceeded $100,000 reaching a record <strong>$102,968.05</strong> total community wager on DegenCity.
-        </p>
-        <div style="font-size: 0.78rem; font-weight: 700; color: var(--cyan-400);">
-          ● Status: Archived Campaign Record
+      <div id="archive-lb-content">
+        <div class="lb-loading">
+          <div class="spinner"></div>Loading archived records…
         </div>
       </div>
     </div>
+
+    <!-- HISTORICAL MILESTONES (AUGUST 2026 ARCHIVE) -->
+    <div class="archive-card">
+      <div class="archive-card-title">
+        <span>🎯 DegenCity Historical Milestones</span>
+        <span class="month-badge">August 2026 Campaign</span>
+      </div>
+      <div
+        style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; margin-top:12px;">
+        <!-- $50K Smashed -->
+        <div
+          style="background: linear-gradient(145deg, rgba(20,25,18,0.85) 0%, rgba(10,14,10,0.95) 100%); border: 1px solid rgba(0, 255, 128, 0.4); border-radius: 12px; padding: 24px; text-align: left;">
+          <div
+            style="display:inline-block; background: rgba(0, 255, 128, 0.15); border: 1px solid rgba(0, 255, 128, 0.5); color: #00ff80; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; margin-bottom:10px;">
+            ✓ UNLOCKED & ACHIEVED
+          </div>
+          <div
+            style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 900; text-transform: uppercase; color: #ffffff; margin-bottom: 6px;">
+            $50,000 <span style="color: #00ff80;">MILESTONE</span>
+          </div>
+          <div
+            style="display: inline-block; background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.3); color: #ffd700; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 800; margin-bottom: 12px;">
+            🎁 REWARD: 10 BONUS BUYS (2x $40 + 8x $20)
+          </div>
+          <p style="font-size: 0.88rem; color: #a49bc2; line-height: 1.5; margin: 0 0 12px 0;">
+            The community officially smashed the $50,000 milestone! 10 lucky participants were selected live on stream
+            and awarded Bonus Buys.
+          </p>
+          <div style="font-size: 0.78rem; font-weight: 700; color: #00ff80;">
+            ★ Status: Completed Live on Stream
+          </div>
+        </div>
+
+        <!-- $100K DegenCity Milestone -->
+        <div
+          style="background: linear-gradient(145deg, rgba(25,18,35,0.85) 0%, rgba(12,8,20,0.95) 100%); border: 1px solid rgba(0, 255, 229, 0.4); border-radius: 12px; padding: 24px; text-align: left;">
+          <div
+            style="display:inline-block; background: rgba(0, 255, 229, 0.15); border: 1px solid rgba(0, 255, 229, 0.4); color: var(--cyan-400); padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; margin-bottom:10px;">
+            ✓ FINAL TOTAL: $102.9K+
+          </div>
+          <div
+            style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 900; text-transform: uppercase; color: #ffffff; margin-bottom: 6px;">
+            $100,000 <span style="color: var(--cyan-400);">MILESTONE</span>
+          </div>
+          <div
+            style="display: inline-block; background: rgba(136, 0, 255, 0.2); border: 1px solid rgba(136, 0, 255, 0.4); color: var(--purple-300); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 800; margin-bottom: 12px;">
+            🎁 REWARD: 3x $100 BONUS BUYS
+          </div>
+          <p style="font-size: 0.88rem; color: #a49bc2; line-height: 1.5; margin: 0 0 12px 0;">
+            Community exceeded $100,000 reaching a record <strong>$102,968.05</strong> total community wager on
+            DegenCity.
+          </p>
+          <div style="font-size: 0.78rem; font-weight: 700; color: var(--cyan-400);">
+            ● Status: Archived Campaign Record
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORICAL HALL OF FAME RECORDS -->
+    <div class="archive-card">
+      <div class="archive-card-title">
+        <span>👑 Historical Hall of Champions</span>
+        <span class="month-badge">Past Seasons</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:18px; margin-top:12px;">
+        <!-- August 2026 -->
+        <div
+          style="background:rgba(10,8,22,0.7); border:1px solid rgba(255,215,0,0.25); border-radius:10px; padding:18px;">
+          <div
+            style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,215,0,0.15); padding-bottom:8px; margin-bottom:10px;">
+            <strong style="color:#fff; font-size:1.05rem;">August 2026</strong>
+            <span
+              style="color:#ffd700; font-size:0.72rem; font-weight:800; background:rgba(255,215,0,0.15); padding:2px 8px; border-radius:4px;">DegenCity</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
+            <div
+              style="display:flex; justify-content:space-between; background:rgba(255,215,0,0.08); padding:5px 8px; border-radius:4px;">
+              <span>🥇 <strong>reversed</strong></span><strong style="color:#ffd700;">$11,116.42</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:4px 8px;">
+              <span>🥈 <strong>armedupmused</strong></span><strong style="color:#fff;">$9,314.12</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:4px 8px;">
+              <span>🥉 <strong>thatonet</strong></span><strong style="color:#fff;">$922.76</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- July 2026 -->
+        <div
+          style="background:rgba(10,8,22,0.7); border:1px solid rgba(136,0,255,0.25); border-radius:10px; padding:18px;">
+          <div
+            style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(136,0,255,0.15); padding-bottom:8px; margin-bottom:10px;">
+            <strong style="color:#fff; font-size:1.05rem;">July 2026</strong>
+            <span
+              style="color:var(--purple-300); font-size:0.72rem; font-weight:800; background:rgba(136,0,255,0.15); padding:2px 8px; border-radius:4px;">DegenCity</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
+            <div
+              style="display:flex; justify-content:space-between; background:rgba(136,0,255,0.1); padding:5px 8px; border-radius:4px;">
+              <span>🥇 <strong>wisthechad</strong></span><strong style="color:var(--purple-300);">$10,253.60</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:4px 8px;">
+              <span>🥈 <strong>bigballszs34</strong></span><strong style="color:#fff;">$8,093.47</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:4px 8px;">
+              <span>🥉 <strong>maaars</strong></span><strong style="color:#fff;">$7,466.70</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- All-Time Legends -->
+        <div
+          style="background:rgba(10,8,22,0.7); border:1px solid rgba(0,255,229,0.25); border-radius:10px; padding:18px;">
+          <div
+            style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(0,255,229,0.15); padding-bottom:8px; margin-bottom:10px;">
+            <strong style="color:#fff; font-size:1.05rem;">All-Time Champions</strong>
+            <span
+              style="color:var(--cyan-400); font-size:0.72rem; font-weight:800; background:rgba(0,255,229,0.15); padding:2px 8px; border-radius:4px;">DegenCity</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
+            <div
+              style="display:flex; justify-content:space-between; background:rgba(0,255,229,0.08); padding:5px 8px; border-radius:4px;">
+              <span>🥇 <strong>reversed</strong></span><strong style="color:var(--cyan-400);">$11,116.42</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:4px 8px;">
+              <span>🥈 <strong>armedupmused</strong></span><strong style="color:#fff;">$10,906.21</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:4px 8px;">
+              <span>🥉 <strong>wisthechad</strong></span><strong style="color:#fff;">$10,253.60</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- HISTORICAL HALL OF FAME RECORDS -->
-  <div class="archive-card">
-    <div class="archive-card-title">
-      <span>👑 Historical Hall of Champions</span>
-      <span class="month-badge">Past Seasons</span>
-    </div>
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:18px; margin-top:12px;">
-      <!-- August 2026 -->
-      <div style="background:rgba(10,8,22,0.7); border:1px solid rgba(255,215,0,0.25); border-radius:10px; padding:18px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,215,0,0.15); padding-bottom:8px; margin-bottom:10px;">
-          <strong style="color:#fff; font-size:1.05rem;">August 2026</strong>
-          <span style="color:#ffd700; font-size:0.72rem; font-weight:800; background:rgba(255,215,0,0.15); padding:2px 8px; border-radius:4px;">DegenCity</span>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
-          <div style="display:flex; justify-content:space-between; background:rgba(255,215,0,0.08); padding:5px 8px; border-radius:4px;">
-            <span>🥇 <strong>reversed</strong></span><strong style="color:#ffd700;">$11,116.42</strong>
-          </div>
-          <div style="display:flex; justify-content:space-between; padding:4px 8px;">
-            <span>🥈 <strong>armedupmused</strong></span><strong style="color:#fff;">$9,314.12</strong>
-          </div>
-          <div style="display:flex; justify-content:space-between; padding:4px 8px;">
-            <span>🥉 <strong>thatonet</strong></span><strong style="color:#fff;">$922.76</strong>
-          </div>
-        </div>
-      </div>
+  <footer
+    style="margin-top:auto; padding:30px; text-align:center; border-top:1px solid rgba(136,0,255,0.2); background:rgba(8,5,18,0.95); font-size:0.85rem; color:#a49bc2;">
+    <p>&copy; 2026 BigDGamesTV. All rights reserved. &nbsp;|&nbsp; <a href="/index.html">Live Leaderboard</a>
+      &nbsp;|&nbsp; Powered by Yeet</p>
+  </footer>
 
-      <!-- July 2026 -->
-      <div style="background:rgba(10,8,22,0.7); border:1px solid rgba(136,0,255,0.25); border-radius:10px; padding:18px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(136,0,255,0.15); padding-bottom:8px; margin-bottom:10px;">
-          <strong style="color:#fff; font-size:1.05rem;">July 2026</strong>
-          <span style="color:var(--purple-300); font-size:0.72rem; font-weight:800; background:rgba(136,0,255,0.15); padding:2px 8px; border-radius:4px;">DegenCity</span>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
-          <div style="display:flex; justify-content:space-between; background:rgba(136,0,255,0.1); padding:5px 8px; border-radius:4px;">
-            <span>🥇 <strong>wisthechad</strong></span><strong style="color:var(--purple-300);">$10,253.60</strong>
-          </div>
-          <div style="display:flex; justify-content:space-between; padding:4px 8px;">
-            <span>🥈 <strong>bigballszs34</strong></span><strong style="color:#fff;">$8,093.47</strong>
-          </div>
-          <div style="display:flex; justify-content:space-between; padding:4px 8px;">
-            <span>🥉 <strong>maaars</strong></span><strong style="color:#fff;">$7,466.70</strong>
-          </div>
-        </div>
-      </div>
+  <script src="/auth-helper.js"></script>
+  <script>
+    async function loadArchivedLeaderboard() {
+      const container = document.getElementById('archive-lb-content');
+      try {
+        const res = await fetch('/api/leaderboard?partner=degencity&after=2026-08-01&before=2026-09-01');
+        if (!res.ok) throw new Error('Archive API returned ' + res.status);
+        const json = await res.json();
+        const data = json.data || [];
 
-      <!-- All-Time Legends -->
-      <div style="background:rgba(10,8,22,0.7); border:1px solid rgba(0,255,229,0.25); border-radius:10px; padding:18px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(0,255,229,0.15); padding-bottom:8px; margin-bottom:10px;">
-          <strong style="color:#fff; font-size:1.05rem;">All-Time Champions</strong>
-          <span style="color:var(--cyan-400); font-size:0.72rem; font-weight:800; background:rgba(0,255,229,0.15); padding:2px 8px; border-radius:4px;">DegenCity</span>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
-          <div style="display:flex; justify-content:space-between; background:rgba(0,255,229,0.08); padding:5px 8px; border-radius:4px;">
-            <span>🥇 <strong>reversed</strong></span><strong style="color:var(--cyan-400);">$11,116.42</strong>
-          </div>
-          <div style="display:flex; justify-content:space-between; padding:4px 8px;">
-            <span>🥈 <strong>armedupmused</strong></span><strong style="color:#fff;">$10,906.21</strong>
-          </div>
-          <div style="display:flex; justify-content:space-between; padding:4px 8px;">
-            <span>🥉 <strong>wisthechad</strong></span><strong style="color:#fff;">$10,253.60</strong>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+        if (!data.length) {
+          container.innerHTML = '<div style="text-align:center; padding:30px; color:#a49bc2;">No records available.</div>';
+          return;
+        }
 
-</div>
+        function maskUsername(str) {
+          if (!str || typeof str !== 'string') return '***';
+          const name = str.trim();
+          if (name.length <= 2) return name[0] + '****' + (name[1] || '');
+          return name.slice(0, 2) + '****' + name.slice(-1);
+        }
 
-<footer style="margin-top:auto; padding:30px; text-align:center; border-top:1px solid rgba(136,0,255,0.2); background:rgba(8,5,18,0.95); font-size:0.85rem; color:#a49bc2;">
-  <p>&copy; 2026 BigDGamesTV. All rights reserved. &nbsp;|&nbsp; <a href="/index.html">Live Leaderboard</a> &nbsp;|&nbsp; Powered by Yeet</p>
-</footer>
+        const fmt = n => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const fmtShort = n => '$' + (n >= 1000 ? (n / 1000).toFixed(1) + 'k' : Number(n || 0).toFixed(2));
 
-<script src="/auth-helper.js"></script>
-<script>
-async function loadArchivedLeaderboard() {
-  const container = document.getElementById('archive-lb-content');
-  try {
-    const res = await fetch('/api/leaderboard?partner=degencity&after=2026-08-01&before=2026-09-01');
-    if (!res.ok) throw new Error('Archive API returned ' + res.status);
-    const json = await res.json();
-    const data = json.data || [];
+        const rows = data.map((p, i) => {
+          const rank = i + 1;
+          const rankClass = rank <= 3 ? 'rank-' + rank : 'rank-n';
+          const isHidden = p.user_id === -1 || p.is_hidden;
+          const name = isHidden ? '🔒 Hidden User' : maskUsername(p.username || 'Player');
+          const total = Number(p.volume) || (p.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0);
 
-    if (!data.length) {
-      container.innerHTML = '<div style="text-align:center; padding:30px; color:#a49bc2;">No records available.</div>';
-      return;
-    }
-
-    function maskUsername(str) {
-      if (!str || typeof str !== 'string') return '***';
-      const name = str.trim();
-      if (name.length <= 2) return name[0] + '****' + (name[1] || '');
-      return name.slice(0, 2) + '****' + name.slice(-1);
-    }
-
-    const fmt = n => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const fmtShort = n => '$' + (n >= 1000 ? (n/1000).toFixed(1) + 'k' : Number(n || 0).toFixed(2));
-
-    const rows = data.map((p, i) => {
-      const rank = i + 1;
-      const rankClass = rank <= 3 ? 'rank-' + rank : 'rank-n';
-      const isHidden = p.user_id === -1 || p.is_hidden;
-      const name = isHidden ? '🔒 Hidden User' : maskUsername(p.username || 'Player');
-      const total = Number(p.volume) || (p.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0);
-
-      return `
+          return `
         <tr class="lb-main-row">
           <td><span class="rank-badge ${rankClass}">${rank}</span></td>
           <td class="lb-player-cell"><strong>${name}</strong></td>
@@ -381,9 +431,9 @@ async function loadArchivedLeaderboard() {
           <td style="color:#ffd700; font-weight:900; font-size:1.05rem; font-family:var(--font-display);">${fmt(total)}</td>
         </tr>
       `;
-    }).join('');
+        }).join('');
 
-    container.innerHTML = `
+        container.innerHTML = `
       <div class="lb-table-wrap">
         <table class="lb-table">
           <thead>
@@ -398,13 +448,14 @@ async function loadArchivedLeaderboard() {
         </table>
       </div>
     `;
-  } catch (err) {
-    container.innerHTML = `<div style="text-align:center; padding:30px; color:#ef4444;">Failed to load archive data: ${err.message}</div>`;
-  }
-}
+      } catch (err) {
+        container.innerHTML = `<div style="text-align:center; padding:30px; color:#ef4444;">Failed to load archive data: ${err.message}</div>`;
+      }
+    }
 
-document.addEventListener('DOMContentLoaded', loadArchivedLeaderboard);
-</script>
-<script src="/mascot-widget.js"></script>
+    document.addEventListener('DOMContentLoaded', loadArchivedLeaderboard);
+  </script>
+  <script src="/mascot-widget.js"></script>
 </body>
+
 </html>
