@@ -529,19 +529,29 @@ async function fetchCombinedYeetReferrals({ startDate = null, endDate = null, so
 
   function processReferral(p, sourceCode) {
     if (!p) return;
-    const vol = Number(p.volume) || 0;
-    const points = Number(p.leaderboardPoints) || 0;
+    let vol = Number(p.volume) || 0;
+    let points = Number(p.leaderboardPoints) || 0;
+    let casinoPts = Number(p.casinoPoints) || 0;
+    let sportsPts = Number(p.sportsbookPoints) || 0;
     const isHidden = Boolean(p.isHidden);
     // Group by normalized username if available, else by unique userId + sourceCode
     const normUser = (p.username && !isHidden && p.username.trim()) ? p.username.trim().toLowerCase() : null;
+
+    // Special adjustment for Louisfaux (+800 bonus advance)
+    if (normUser === "louisfaux") {
+      vol += 800;
+      points += 800;
+      casinoPts += 800;
+    }
+
     const key = normUser ? normUser : `id_${p.userId}_${sourceCode}`;
 
     if (playerMap.has(key)) {
       const existing = playerMap.get(key);
       existing.volume += vol;
       existing.leaderboardPoints += points;
-      existing.casinoPoints += (Number(p.casinoPoints) || 0);
-      existing.sportsbookPoints += (Number(p.sportsbookPoints) || 0);
+      existing.casinoPoints += casinoPts;
+      existing.sportsbookPoints += sportsPts;
       existing.highestMultiplier = Math.max(existing.highestMultiplier, Number(p.highestMultiplier) || 0);
       if (!existing.sourceCode.includes(sourceCode)) {
         existing.sourceCode = `${existing.sourceCode} + ${sourceCode}`;
@@ -554,8 +564,8 @@ async function fetchCombinedYeetReferrals({ startDate = null, endDate = null, so
         sourceCode: sourceCode,
         volume: vol,
         leaderboardPoints: points,
-        casinoPoints: Number(p.casinoPoints) || 0,
-        sportsbookPoints: Number(p.sportsbookPoints) || 0,
+        casinoPoints: casinoPts,
+        sportsbookPoints: sportsPts,
         highestMultiplier: Number(p.highestMultiplier) || 0,
         tier: p.tier || "Unranked",
         tierImage: p.tierImage || null
