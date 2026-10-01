@@ -5174,13 +5174,13 @@ footer a:hover { color: var(--purple-300); }
         </p>
       </div>
 
-      <!-- Col 2: API Sync Telemetry -->
+      <!-- Col 2: Live Sync Telemetry -->
       <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,255,229,0.25); border-radius:10px; padding:16px;">
         <div style="font-family:var(--font-ui); font-size:0.72rem; font-weight:800; color:var(--cyan-400); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">
           2. Tracking Source & Telemetry
         </div>
         <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#fff; margin-bottom:8px;">
-          Yeet Concierge Affiliate API
+          Live Yeet Affiliate Sync
         </div>
         <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.5; margin:0;">
           Synced directly every 60 seconds across both affiliate codes:
@@ -6576,7 +6576,7 @@ async function fetchLeaderboard(after, before, rangeLabel) {
     const res = await fetch(url, { cache: 'no-store' });
 
     if (res.status === 401) {
-      lbContent.innerHTML = `<div class="lb-error">⚠️ API key invalid or revoked. Contact your superadmin.</div>`;
+      lbContent.innerHTML = `<div class="lb-error">⚠️ Authentication error. Please try again or refresh the page.</div>`;
       return;
     }
     if (res.status === 400) {
