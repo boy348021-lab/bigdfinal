@@ -5190,11 +5190,11 @@ footer a:hover { color: var(--purple-300); }
     <div class="tab-panel active" id="panel-leaderboard">
 
       <div class="leaderboard-header">
-        <div class="section-title">Top <span>Wagerers</span></div>
+        <div class="section-title">Lifetime <span>Wager Standings (All-Time)</span></div>
         <div class="date-filters">
           <input type="date" class="date-input" id="lb-after" placeholder="From"/>
           <input type="date" class="date-input" id="lb-before" placeholder="To"/>
-          <button class="btn-filter" id="lb-fetch-btn">Load Data</button>
+          <button class="btn-filter" id="lb-fetch-btn">Filter Range</button>
         </div>
       </div>
 
@@ -6528,12 +6528,13 @@ function switchCampaign(campaign) {
 
 async function fetchLeaderboard(after, before, rangeLabel) {
   const lbContent = document.getElementById('lb-content');
-  lbContent.innerHTML = `<div class="lb-loading"><div class="spinner"></div>Fetching live leaderboard data…</div>`;
+  lbContent.innerHTML = `<div class="lb-loading"><div class="spinner"></div>Fetching live lifetime leaderboard data…</div>`;
 
   try {
     let url = API_BASE;
     const params = [];
     params.push(`partner=${encodeURIComponent(currentCampaign)}`);
+    params.push('period=all');
     if (after)  params.push(`after=${encodeURIComponent(after)}`);
     if (before) params.push(`before=${encodeURIComponent(before)}`);
     url += '?' + params.join('&');
@@ -6692,7 +6693,7 @@ function renderLeaderboard(data, rangeLabel) {
   const fmt = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtShort = (n) => '$' + (n >= 1000 ? (n/1000).toFixed(1) + 'k' : Number(n || 0).toFixed(2));
 
-  // flatten and sort by points descending if Yeet, else by total wager
+  // flatten and sort by total lifetime wager descending
   const players = data.map(u => ({
     user_id: u.user_id,
     username: u.username,
@@ -6704,12 +6705,7 @@ function renderLeaderboard(data, rangeLabel) {
     weekly_volume: Number(u.weekly_volume) || 0,
     total: Number(u.volume) || (u.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0),
     months: (u.wager_data || []).slice().sort((a, b) => b.month.localeCompare(a.month))
-  })).sort((a, b) => {
-    if (isYeet) {
-      return (b.points - a.points) || (b.total - a.total);
-    }
-    return b.total - a.total;
-  });
+  })).sort((a, b) => (b.total - a.total) || (b.points - a.points));
 
   let rows = players.map((p, i) => {
     const rank = i + 1;
@@ -6822,7 +6818,7 @@ document.getElementById('lb-fetch-btn').addEventListener('click', () => {
   const beforeRaw = document.getElementById('lb-before').value;
 
   if (!afterRaw) {
-    fetchLeaderboard('', '');
+    fetchLeaderboard('', '', 'All-Time Lifetime Totals');
     return;
   }
 
@@ -6853,18 +6849,14 @@ document.getElementById('lb-fetch-btn').addEventListener('click', () => {
   fetchLeaderboard(afterNorm, beforeNorm, rangeLabel);
 });
 
-// Pre-fill date inputs with current month defaults
+// Leave date inputs empty by default so Lifetime Wager shows true All-Time totals
 (function prefillDates() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
-  document.getElementById('lb-after').value  = `${y}-${m}-01`;
-  document.getElementById('lb-before').value = `${y}-${m}-${String(lastDay).padStart(2, '0')}`;
+  document.getElementById('lb-after').value  = '';
+  document.getElementById('lb-before').value = '';
 })();
 
 // auto-load on page open
-fetchLeaderboard('', '');
+fetchLeaderboard('', '', 'All-Time Lifetime Totals');
 
 /* ──────────────────────────────────────────
    14-DAY (SEMI-MONTHLY) LEADERBOARD
