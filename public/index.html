@@ -6108,13 +6108,14 @@ body::after {
 }
 .ladder-beam-line {
   position: absolute;
-  left: 36px;
-  top: 18px;
-  bottom: 18px;
+  left: 31px;
+  top: 22px;
+  bottom: 22px;
   width: 2px;
-  background: linear-gradient(180deg, #ffd700 0%, #00ffe5 45%, #be4dff 80%, rgba(255,255,255,0.1) 100%);
-  box-shadow: 0 0 10px rgba(0,255,229,0.5);
-  z-index: 1;
+  background: linear-gradient(180deg, rgba(255,215,0,0.5) 0%, rgba(0,255,229,0.35) 45%, rgba(190,77,255,0.25) 75%, rgba(255,255,255,0.08) 100%);
+  box-shadow: 0 0 8px rgba(0,255,229,0.25);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .ladder-step {
@@ -6131,14 +6132,22 @@ body::after {
   flex: 1;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 3px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   padding: 7px 12px;
-  transition: transform 0.2s, border-color 0.2s, background 0.2s;
+  transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
 }
+.step-1 .ladder-step-info { border-left-color: #ffd700; background: rgba(255, 215, 0, 0.04); }
+.step-2 .ladder-step-info { border-left-color: #e0e0e0; background: rgba(255, 255, 255, 0.04); }
+.step-3 .ladder-step-info { border-left-color: #cd7f32; background: rgba(205, 127, 50, 0.04); }
+.step-n:nth-child(5) .ladder-step-info { border-left-color: var(--cyan-400); }
+.step-n:nth-child(6) .ladder-step-info { border-left-color: var(--purple-400); }
+
 .ladder-step:hover .ladder-step-info {
   background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(0, 255, 229, 0.3);
-  transform: translateX(3px);
+  border-color: rgba(0, 255, 229, 0.35);
+  transform: translateX(4px);
+  box-shadow: 0 0 12px rgba(0, 255, 229, 0.15);
 }
 .ladder-step-left {
   display: flex;
