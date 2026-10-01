@@ -5480,90 +5480,188 @@ footer a:hover { color: var(--purple-300); }
       </div>
     </div>
 
-    <!-- MONTHLY LEADERBOARD PANEL -->
+    <!-- MONTHLY LEADERBOARD PANEL (CREATIVE PRIZE LADDER LAYOUT) -->
     <div class="tab-panel" id="panel-biweekly">
 
-      <!-- Period Header -->
-      <div class="bw-period-header">
-        <div class="bw-period-info">
-          <div class="bw-period-label">ACTIVE MONTHLY PERIOD</div>
-          <div class="bw-period-dates" id="bw-period-dates">Loading period…</div>
-        </div>
-        <div class="bw-period-countdown">
-          <span class="bw-days-left" id="bw-days-left">—</span>
-          <span class="bw-days-label">days remaining</span>
-        </div>
-      </div>
+      <div class="monthly-lb-grid">
+        <!-- LEFT COLUMN: CREATIVE PRIZE LADDER -->
+        <div class="prize-ladder-card">
+          <div class="ladder-header">
+            <div class="ladder-prize-total">$3,000</div>
+            <div class="ladder-prize-label">TOTAL PRIZE POOL</div>
+            <div class="ladder-race-badge">⚡ COMBINED RACE</div>
+          </div>
 
-      <!-- Thunder Progress Bar -->
-      <div class="bw-progress-wrap">
-        <div class="bw-progress-labels">
-          <span id="bw-prog-start">—</span>
-          <span id="bw-prog-pct">0% complete</span>
-          <span id="bw-prog-end">—</span>
-        </div>
-        <div class="bw-progress-track">
-          <div class="bw-progress-fill" id="bw-progress-fill" style="width:0%">
-            <div class="bw-progress-head">
-              <div class="bw-thunder-icon" id="bw-thunder-icon">
-                <svg viewBox="0 0 12 20" fill="currentColor" width="14" height="22"><path d="M6.5 0L0 11h5.5L4 20l8-11H7.5z"/></svg>
+          <!-- Stepped Prize Ladder -->
+          <div class="prize-ladder-stepper">
+            <!-- Vertical Beam Line -->
+            <div class="ladder-beam-line"></div>
+
+            <!-- Rank 1 -->
+            <div class="ladder-step step-1">
+              <div class="ladder-pedestal pedestal-gold">
+                <span class="ladder-icon">🏆</span>
+                <span class="ladder-platform-glow"></span>
               </div>
-              <div class="bw-progress-pulse"></div>
+              <div class="ladder-step-info">
+                <span class="ladder-amount">$1,000</span>
+                <span class="ladder-rank">1st</span>
+              </div>
+            </div>
+
+            <!-- Rank 2 -->
+            <div class="ladder-step step-2">
+              <div class="ladder-pedestal pedestal-silver">
+                <span class="ladder-icon">🥈</span>
+                <span class="ladder-platform-glow"></span>
+              </div>
+              <div class="ladder-step-info">
+                <span class="ladder-amount">$500</span>
+                <span class="ladder-rank">2nd</span>
+              </div>
+            </div>
+
+            <!-- Rank 3 -->
+            <div class="ladder-step step-3">
+              <div class="ladder-pedestal pedestal-bronze">
+                <span class="ladder-icon">🥉</span>
+                <span class="ladder-platform-glow"></span>
+              </div>
+              <div class="ladder-step-info">
+                <span class="ladder-amount">$350</span>
+                <span class="ladder-rank">3rd</span>
+              </div>
+            </div>
+
+            <!-- Rank 4 -->
+            <div class="ladder-step step-n">
+              <div class="ladder-node node-cyan"></div>
+              <div class="ladder-step-info">
+                <span class="ladder-amount">$275</span>
+                <span class="ladder-rank">4th</span>
+              </div>
+            </div>
+
+            <!-- Rank 5 -->
+            <div class="ladder-step step-n">
+              <div class="ladder-node node-purple"></div>
+              <div class="ladder-step-info">
+                <span class="ladder-amount">$225</span>
+                <span class="ladder-rank">5th</span>
+              </div>
+            </div>
+
+            <!-- Rank 6 -->
+            <div class="ladder-step step-n">
+              <div class="ladder-node node-default"></div>
+              <div class="ladder-step-info">
+                <span class="ladder-amount">$175</span>
+                <span class="ladder-rank">6th</span>
+              </div>
+            </div>
+
+            <!-- Rank 7 -->
+            <div class="ladder-step step-n">
+              <div class="ladder-node node-default"></div>
+              <div class="ladder-step-info">
+                <span class="ladder-amount">$150</span>
+                <span class="ladder-rank">7th</span>
+              </div>
+            </div>
+
+            <!-- Rank 8 -->
+            <div class="ladder-step step-n">
+              <div class="ladder-node node-default"></div>
+              <div class="ladder-step-info">
+                <span class="ladder-amount">$125</span>
+                <span class="ladder-rank">8th</span>
+              </div>
+            </div>
+
+            <!-- Rank 9 -->
+            <div class="ladder-step step-n">
+              <div class="ladder-node node-default"></div>
+              <div class="ladder-step-info">
+                <span class="ladder-amount">$100</span>
+                <span class="ladder-rank">9th</span>
+              </div>
+            </div>
+
+            <!-- Rank 10 -->
+            <div class="ladder-step step-n">
+              <div class="ladder-node node-default"></div>
+              <div class="ladder-step-info">
+                <span class="ladder-amount">$100</span>
+                <span class="ladder-rank">10th</span>
+              </div>
             </div>
           </div>
         </div>
-        <div class="bw-progress-nodes">
-          <div class="bw-prog-node active"></div>
-          <div class="bw-prog-node" id="bw-node-mid"></div>
-          <div class="bw-prog-node" id="bw-node-end"></div>
-        </div>
-        <div class="bw-countdown-hud">
-          <span class="bw-countdown-label">Time Remaining (ET):</span>
-          <span class="bw-countdown-timer" id="bw-countdown-timer">--d --h --m --s</span>
-        </div>
-      </div>
 
-      <!-- Prize Pool ($3,000 Combined Leaderboard with BigBallz) -->
-      <div class="prize-pool-banner" style="margin-bottom:24px">
-        <div>
-          <div class="prize-pool-label">Combined Prize Pool (BIGDTV + BigBallz)</div>
-          <div class="prize-pool-total" style="color:#ffd700;">$3,000</div>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-          <span class="prize-badge prize-badge-1">🥇 $1,000</span>
-          <span class="prize-badge prize-badge-2">🥈 $500</span>
-          <span class="prize-badge prize-badge-3">🥉 $350</span>
-          <span class="prize-badge prize-badge-n">4th $275</span>
-          <span class="prize-badge prize-badge-n">5th $225</span>
-          <span class="prize-badge prize-badge-n">6th $175</span>
-          <span class="prize-badge prize-badge-n">7th $150</span>
-          <span class="prize-badge prize-badge-n">8th $125</span>
-          <span class="prize-badge prize-badge-n">9th $100</span>
-          <span class="prize-badge prize-badge-n">10th $100</span>
-        </div>
-        <span class="prize-pool-cadence" style="color:var(--cyan-400);">⚡ Combined Race</span>
-      </div>
+        <!-- RIGHT COLUMN: MONTHLY RACE STATUS & RANKINGS -->
+        <div class="monthly-main-column">
+          <!-- Period Header -->
+          <div class="bw-period-header" style="margin-bottom:20px;">
+            <div class="bw-period-info">
+              <div class="bw-period-label">ACTIVE MONTHLY RACE</div>
+              <div class="bw-period-dates" id="bw-period-dates">Loading period…</div>
+            </div>
+            <div class="bw-period-countdown">
+              <span class="bw-days-left" id="bw-days-left">—</span>
+              <span class="bw-days-label">days remaining</span>
+            </div>
+          </div>
 
-      <!-- Combined Code Filter (Phase 9) -->
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
-        <div class="leaderboard-header" style="margin:0;">
-          <div class="section-title">Monthly <span>Rankings</span></div>
-        </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="campaign-toggle-btn active" id="code-btn-all" onclick="setCodeFilter('all')" style="font-size:0.75rem; padding:5px 12px;">
-            🌐 All Codes ($3,000 Combined)
-          </button>
-          <button class="campaign-toggle-btn" id="code-btn-bigd" onclick="setCodeFilter('bigd')" style="font-size:0.75rem; padding:5px 12px;">
-            ⚡ Code BIGDTV
-          </button>
-          <button class="campaign-toggle-btn" id="code-btn-bigballz" onclick="setCodeFilter('bigballz')" style="font-size:0.75rem; padding:5px 12px;">
-            💎 Code BigBallz
-          </button>
-        </div>
-      </div>
+          <!-- Thunder Progress Bar -->
+          <div class="bw-progress-wrap" style="margin-bottom:24px;">
+            <div class="bw-progress-labels">
+              <span id="bw-prog-start">—</span>
+              <span id="bw-prog-pct">0% complete</span>
+              <span id="bw-prog-end">—</span>
+            </div>
+            <div class="bw-progress-track">
+              <div class="bw-progress-fill" id="bw-progress-fill" style="width:0%">
+                <div class="bw-progress-head">
+                  <div class="bw-thunder-icon" id="bw-thunder-icon">
+                    <svg viewBox="0 0 12 20" fill="currentColor" width="14" height="22"><path d="M6.5 0L0 11h5.5L4 20l8-11H7.5z"/></svg>
+                  </div>
+                  <div class="bw-progress-pulse"></div>
+                </div>
+              </div>
+            </div>
+            <div class="bw-progress-nodes">
+              <div class="bw-prog-node active"></div>
+              <div class="bw-prog-node" id="bw-node-mid"></div>
+              <div class="bw-prog-node" id="bw-node-end"></div>
+            </div>
+            <div class="bw-countdown-hud">
+              <span class="bw-countdown-label">Time Remaining (ET):</span>
+              <span class="bw-countdown-timer" id="bw-countdown-timer">--d --h --m --s</span>
+            </div>
+          </div>
 
-      <div id="bw-lb-content">
-        <div class="lb-loading"><div class="spinner"></div>Loading period data…</div>
+          <!-- Combined Code Filter (Phase 9) -->
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
+            <div class="leaderboard-header" style="margin:0;">
+              <div class="section-title">Monthly <span>Rankings</span></div>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="campaign-toggle-btn active" id="code-btn-all" onclick="setCodeFilter('all')" style="font-size:0.75rem; padding:5px 12px;">
+                🌐 All Codes ($3,000 Combined)
+              </button>
+              <button class="campaign-toggle-btn" id="code-btn-bigd" onclick="setCodeFilter('bigd')" style="font-size:0.75rem; padding:5px 12px;">
+                ⚡ Code BIGDTV
+              </button>
+              <button class="campaign-toggle-btn" id="code-btn-bigballz" onclick="setCodeFilter('bigballz')" style="font-size:0.75rem; padding:5px 12px;">
+                💎 Code BigBallz
+              </button>
+            </div>
+          </div>
+
+          <div id="bw-lb-content">
+            <div class="lb-loading"><div class="spinner"></div>Loading period data…</div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -5897,9 +5995,200 @@ body::after {
 .bw-bar-fill {
   height: 100%;
   background: linear-gradient(90deg, rgba(0,200,180,0.4), var(--cyan-500));
-  border-radius: 2px;
-  box-shadow: 0 0 6px rgba(0,255,229,0.4);
-  transition: width 0.6s ease;
+}
+
+/* ── PRIZE LADDER (CREATIVE LAYOUT) ─────────────────── */
+.monthly-lb-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 992px) {
+  .monthly-lb-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.prize-ladder-card {
+  background: linear-gradient(180deg, rgba(14, 10, 28, 0.95) 0%, rgba(8, 5, 18, 0.98) 100%);
+  border: 1px solid rgba(136, 0, 255, 0.35);
+  border-radius: var(--radius-md);
+  padding: 22px 18px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 35px rgba(136, 0, 255, 0.12);
+}
+.prize-ladder-card::before {
+  content: '';
+  position: absolute;
+  top: -20px; left: 50%; transform: translateX(-50%);
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  filter: blur(15px);
+}
+.ladder-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  z-index: 2;
+}
+.ladder-prize-total {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #ffd700;
+  text-shadow: 0 0 16px rgba(255, 215, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.2);
+  line-height: 1;
+}
+.ladder-prize-label {
+  font-family: var(--font-ui);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.ladder-race-badge {
+  display: inline-block;
+  background: rgba(0, 255, 229, 0.12);
+  border: 1px solid rgba(0, 255, 229, 0.35);
+  color: var(--cyan-400);
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 3px 12px;
+  border-radius: 20px;
+  margin-top: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.prize-ladder-stepper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 6px;
+  z-index: 2;
+}
+.ladder-beam-line {
+  position: absolute;
+  left: 36px;
+  top: 18px;
+  bottom: 18px;
+  width: 2px;
+  background: linear-gradient(180deg, #ffd700 0%, #00ffe5 45%, #be4dff 80%, rgba(255,255,255,0.1) 100%);
+  box-shadow: 0 0 10px rgba(0,255,229,0.5);
+  z-index: 1;
+}
+
+.ladder-step {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ladder-step-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 7px 12px;
+  transition: transform 0.2s, border-color 0.2s, background 0.2s;
+}
+.ladder-step:hover .ladder-step-info {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(0, 255, 229, 0.3);
+  transform: translateX(3px);
+}
+.ladder-amount {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 900;
+  color: #ffffff;
+}
+.step-1 .ladder-amount { color: #ffd700; font-size: 1.2rem; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+.step-2 .ladder-amount { color: #e0e0e0; font-size: 1.1rem; }
+.step-3 .ladder-amount { color: #cd7f32; font-size: 1.05rem; }
+
+.ladder-rank {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+.step-1 .ladder-rank { color: #ffd700; }
+.step-2 .ladder-rank { color: var(--text-primary); }
+.step-3 .ladder-rank { color: #cd7f32; }
+
+.ladder-pedestal {
+  width: 50px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+.ladder-icon {
+  font-size: 1.35rem;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 0 8px rgba(255,215,0,0.6));
+}
+.ladder-platform-glow {
+  position: absolute;
+  bottom: 0;
+  width: 42px;
+  height: 10px;
+  border-radius: 50%;
+  z-index: 1;
+}
+.pedestal-gold .ladder-platform-glow {
+  background: radial-gradient(ellipse, rgba(255, 215, 0, 0.9) 0%, rgba(255, 215, 0, 0.15) 70%, transparent 100%);
+  border: 1px solid rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+}
+.pedestal-silver .ladder-platform-glow {
+  background: radial-gradient(ellipse, rgba(220, 220, 220, 0.9) 0%, rgba(220, 220, 220, 0.15) 70%, transparent 100%);
+  border: 1px solid rgba(220, 220, 220, 0.6);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+.pedestal-bronze .ladder-platform-glow {
+  background: radial-gradient(ellipse, rgba(205, 127, 50, 0.9) 0%, rgba(205, 127, 50, 0.15) 70%, transparent 100%);
+  border: 1px solid rgba(205, 127, 50, 0.6);
+  box-shadow: 0 0 10px rgba(205, 127, 50, 0.6);
+}
+
+.ladder-node {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin: 0 19px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+.node-cyan {
+  background: var(--cyan-400);
+  box-shadow: 0 0 8px var(--cyan-400);
+}
+.node-purple {
+  background: var(--purple-400);
+  box-shadow: 0 0 8px var(--purple-400);
+}
+.node-default {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 </style>
 <!-- ================================================================
