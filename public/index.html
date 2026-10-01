@@ -636,10 +636,10 @@ body::after {
    ============================================================ */
 .hero-hud-stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
   width: 100%;
-  max-width: 960px;
+  max-width: 1140px;
   margin: 36px auto 28px;
   position: relative;
   z-index: 2;
@@ -893,13 +893,19 @@ body::after {
   gap: 8px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .hero-hud-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
   }
 }
-@media (max-width: 520px) {
+@media (max-width: 768px) {
+  .hero-hud-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+@media (max-width: 480px) {
   .hero-hud-stats-grid {
     grid-template-columns: 1fr;
   }
@@ -4833,7 +4839,7 @@ footer a:hover { color: var(--purple-300); }
     </a>
   </div>
 
-  <!-- FUTURISTIC 4-CARD HERO STATS HUD -->
+  <!-- FUTURISTIC 5-CARD HERO STATS HUD -->
   <div class="hero-hud-stats-grid">
     <!-- Stat 1: Community Wager -->
     <div class="hero-hud-stat-card">
@@ -4841,40 +4847,51 @@ footer a:hover { color: var(--purple-300); }
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
       </div>
       <div class="hud-stat-info">
-        <div class="hud-stat-value">$<span class="stat-total-live-val">102.9k</span><span class="val-sup">+</span></div>
+        <div class="hud-stat-value">$<span class="stat-total-live-val">0</span><span class="val-sup">+</span></div>
         <div class="hud-stat-label">Community Wager</div>
       </div>
     </div>
 
-    <!-- Stat 2: Active Period -->
+    <!-- Stat 2: Yeet Points Card (New Dedicated Card) -->
+    <div class="hero-hud-stat-card" style="border-color:rgba(0, 255, 229, 0.3); background:rgba(0, 255, 229, 0.03);">
+      <div class="hud-stat-icon-wrap" style="color:var(--cyan-400);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+      </div>
+      <div class="hud-stat-info">
+        <div class="hud-stat-value" style="color:var(--cyan-400);"><span id="stat-total-points-val">0</span><span class="val-sup">⚡</span></div>
+        <div class="hud-stat-label">Yeet Points</div>
+      </div>
+    </div>
+
+    <!-- Stat 3: Active Period (October 2026) -->
     <div class="hero-hud-stat-card">
       <div class="hud-stat-icon-wrap" style="color:var(--purple-300);">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
       <div class="hud-stat-info">
-        <div class="hud-stat-value" id="hud-season-period-val">September 2026</div>
+        <div class="hud-stat-value" id="hud-season-period-val">October 2026</div>
         <div class="hud-stat-label">Monthly Leaderboard</div>
       </div>
     </div>
 
-    <!-- Stat 3: Referred Members -->
+    <!-- Stat 4: Referred Players (Total Referred Members across campaign) -->
     <div class="hero-hud-stat-card">
       <div class="hud-stat-icon-wrap" style="color:var(--gold-400);">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       </div>
       <div class="hud-stat-info">
         <div class="hud-stat-value"><span class="stat-players-val">42</span></div>
-        <div class="hud-stat-label">Active Members</div>
+        <div class="hud-stat-label">Referred Players</div>
       </div>
     </div>
 
-    <!-- Stat 4: Rewards Given -->
+    <!-- Stat 5: Rewards Given ($10,000+) -->
     <div class="hero-hud-stat-card">
       <div class="hud-stat-icon-wrap" style="color:var(--magenta-400);">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
       </div>
       <div class="hud-stat-info">
-        <div class="hud-stat-value">$<span id="hud-rewards-given-val">5,000</span><span class="val-sup">+</span></div>
+        <div class="hud-stat-value">$<span id="hud-rewards-given-val">10,000</span><span class="val-sup">+</span></div>
         <div class="hud-stat-label">Rewards Given</div>
       </div>
     </div>
@@ -6549,6 +6566,7 @@ async function fetchLeaderboard(after, before, rangeLabel) {
     const uniqueUsers = allUsers.filter(u => u.user_id !== -1).length;
     const totalWager = allUsers.reduce((sum, u) =>
       sum + (u.wager_data || []).reduce((s, m) => s + (Number(m.total_wager_usd) || 0), 0), 0);
+    const totalPoints = allUsers.reduce((sum, u) => sum + (Number(u.leaderboard_points) || 0), 0);
 
     const formattedWager = totalWager >= 1_000_000
       ? (totalWager / 1_000_000).toFixed(1) + 'M'
@@ -6556,16 +6574,24 @@ async function fetchLeaderboard(after, before, rangeLabel) {
         ? (totalWager / 1_000).toFixed(1) + 'k'
         : totalWager.toFixed(0);
 
+    const formattedPoints = totalPoints >= 1_000_000
+      ? (totalPoints / 1_000_000).toFixed(1) + 'M'
+      : totalPoints >= 1_000
+        ? (totalPoints / 1_000).toFixed(1) + 'k'
+        : totalPoints.toFixed(0);
+
     if (currentCampaign === 'yeet') {
       document.querySelectorAll('.stat-players-val').forEach(el => {
-        el.textContent = uniqueUsers.toLocaleString();
+        el.textContent = '42'; // Total Referred Members across campaign
       });
       document.querySelectorAll('.stat-total-live-val').forEach(el => {
         el.textContent = formattedWager;
       });
+      const ptsEl = document.getElementById('stat-total-points-val');
+      if (ptsEl) ptsEl.textContent = formattedPoints;
 
       const oldPlayersEl = document.getElementById('stat-players');
-      if (oldPlayersEl) oldPlayersEl.innerHTML = `<span>${uniqueUsers.toLocaleString()}</span>`;
+      if (oldPlayersEl) oldPlayersEl.innerHTML = `<span>42</span>`;
       const oldTotalEl = document.getElementById('stat-total-live');
       if (oldTotalEl) oldTotalEl.textContent = formattedWager;
 
