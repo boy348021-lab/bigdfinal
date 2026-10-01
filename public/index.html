@@ -5504,7 +5504,10 @@ footer a:hover { color: var(--purple-300); }
                 <span class="ladder-platform-glow"></span>
               </div>
               <div class="ladder-step-info">
-                <span class="ladder-amount">$1,000</span>
+                <div class="ladder-step-left">
+                  <span class="ladder-amount">$1,000</span>
+                  <span class="ladder-player-name" id="ladder-player-1">—</span>
+                </div>
                 <span class="ladder-rank">1st</span>
               </div>
             </div>
@@ -5516,7 +5519,10 @@ footer a:hover { color: var(--purple-300); }
                 <span class="ladder-platform-glow"></span>
               </div>
               <div class="ladder-step-info">
-                <span class="ladder-amount">$500</span>
+                <div class="ladder-step-left">
+                  <span class="ladder-amount">$500</span>
+                  <span class="ladder-player-name" id="ladder-player-2">—</span>
+                </div>
                 <span class="ladder-rank">2nd</span>
               </div>
             </div>
@@ -5528,7 +5534,10 @@ footer a:hover { color: var(--purple-300); }
                 <span class="ladder-platform-glow"></span>
               </div>
               <div class="ladder-step-info">
-                <span class="ladder-amount">$350</span>
+                <div class="ladder-step-left">
+                  <span class="ladder-amount">$350</span>
+                  <span class="ladder-player-name" id="ladder-player-3">—</span>
+                </div>
                 <span class="ladder-rank">3rd</span>
               </div>
             </div>
@@ -5537,7 +5546,10 @@ footer a:hover { color: var(--purple-300); }
             <div class="ladder-step step-n">
               <div class="ladder-node node-cyan"></div>
               <div class="ladder-step-info">
-                <span class="ladder-amount">$275</span>
+                <div class="ladder-step-left">
+                  <span class="ladder-amount">$275</span>
+                  <span class="ladder-player-name" id="ladder-player-4">—</span>
+                </div>
                 <span class="ladder-rank">4th</span>
               </div>
             </div>
@@ -5546,7 +5558,10 @@ footer a:hover { color: var(--purple-300); }
             <div class="ladder-step step-n">
               <div class="ladder-node node-purple"></div>
               <div class="ladder-step-info">
-                <span class="ladder-amount">$225</span>
+                <div class="ladder-step-left">
+                  <span class="ladder-amount">$225</span>
+                  <span class="ladder-player-name" id="ladder-player-5">—</span>
+                </div>
                 <span class="ladder-rank">5th</span>
               </div>
             </div>
@@ -5555,7 +5570,10 @@ footer a:hover { color: var(--purple-300); }
             <div class="ladder-step step-n">
               <div class="ladder-node node-default"></div>
               <div class="ladder-step-info">
-                <span class="ladder-amount">$175</span>
+                <div class="ladder-step-left">
+                  <span class="ladder-amount">$175</span>
+                  <span class="ladder-player-name" id="ladder-player-6">—</span>
+                </div>
                 <span class="ladder-rank">6th</span>
               </div>
             </div>
@@ -5564,7 +5582,10 @@ footer a:hover { color: var(--purple-300); }
             <div class="ladder-step step-n">
               <div class="ladder-node node-default"></div>
               <div class="ladder-step-info">
-                <span class="ladder-amount">$150</span>
+                <div class="ladder-step-left">
+                  <span class="ladder-amount">$150</span>
+                  <span class="ladder-player-name" id="ladder-player-7">—</span>
+                </div>
                 <span class="ladder-rank">7th</span>
               </div>
             </div>
@@ -5573,7 +5594,10 @@ footer a:hover { color: var(--purple-300); }
             <div class="ladder-step step-n">
               <div class="ladder-node node-default"></div>
               <div class="ladder-step-info">
-                <span class="ladder-amount">$125</span>
+                <div class="ladder-step-left">
+                  <span class="ladder-amount">$125</span>
+                  <span class="ladder-player-name" id="ladder-player-8">—</span>
+                </div>
                 <span class="ladder-rank">8th</span>
               </div>
             </div>
@@ -5582,7 +5606,10 @@ footer a:hover { color: var(--purple-300); }
             <div class="ladder-step step-n">
               <div class="ladder-node node-default"></div>
               <div class="ladder-step-info">
-                <span class="ladder-amount">$100</span>
+                <div class="ladder-step-left">
+                  <span class="ladder-amount">$100</span>
+                  <span class="ladder-player-name" id="ladder-player-9">—</span>
+                </div>
                 <span class="ladder-rank">9th</span>
               </div>
             </div>
@@ -5591,7 +5618,10 @@ footer a:hover { color: var(--purple-300); }
             <div class="ladder-step step-n">
               <div class="ladder-node node-default"></div>
               <div class="ladder-step-info">
-                <span class="ladder-amount">$100</span>
+                <div class="ladder-step-left">
+                  <span class="ladder-amount">$100</span>
+                  <span class="ladder-player-name" id="ladder-player-10">—</span>
+                </div>
                 <span class="ladder-rank">10th</span>
               </div>
             </div>
@@ -6000,7 +6030,7 @@ body::after {
 /* ── PRIZE LADDER (CREATIVE LAYOUT) ─────────────────── */
 .monthly-lb-grid {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 340px 1fr;
   gap: 24px;
   align-items: start;
 }
@@ -6110,15 +6140,35 @@ body::after {
   border-color: rgba(0, 255, 229, 0.3);
   transform: translateX(3px);
 }
+.ladder-step-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+.ladder-player-name {
+  font-family: var(--font-ui);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--cyan-400);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.step-1 .ladder-player-name { color: #ffd700; font-weight: 800; }
+.step-2 .ladder-player-name { color: #ffffff; }
+.step-3 .ladder-player-name { color: #cd7f32; }
+
 .ladder-amount {
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 900;
   color: #ffffff;
 }
-.step-1 .ladder-amount { color: #ffd700; font-size: 1.2rem; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-.step-2 .ladder-amount { color: #e0e0e0; font-size: 1.1rem; }
-.step-3 .ladder-amount { color: #cd7f32; font-size: 1.05rem; }
+.step-1 .ladder-amount { color: #ffd700; font-size: 1.15rem; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+.step-2 .ladder-amount { color: #e0e0e0; font-size: 1.05rem; }
+.step-3 .ladder-amount { color: #cd7f32; font-size: 1rem; }
 
 .ladder-rank {
   font-family: var(--font-ui);
@@ -6997,6 +7047,20 @@ function renderBiweeklyLeaderboard(data) {
   const fmt = n => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const top = players[0].points || players[0].total;
 
+  // Update Prize Ladder top player names dynamically
+  for (let i = 1; i <= 10; i++) {
+    const el = document.getElementById('ladder-player-' + i);
+    if (el) {
+      if (players[i - 1]) {
+        const p = players[i - 1];
+        const name = p.is_hidden || p.user_id === -1 ? '🔒 Hidden' : maskUsername(p.username);
+        el.textContent = name;
+      } else {
+        el.textContent = '—';
+      }
+    }
+  }
+
   const rows = players.map((p, i) => {
     const rank      = i + 1;
     const rankClass = rank <= 3 ? 'rank-' + rank : 'rank-n';
@@ -7010,16 +7074,10 @@ function renderBiweeklyLeaderboard(data) {
     const maskedName = maskUsername(p.username);
     const nameHtml  = isHidden ? '<span class="hidden-user">🔒 Hidden User</span>' : '<span>' + escHtml(maskedName) + tierBadge + codeBadge + '</span>';
     const amtClass  = rank === 1 ? 'wager-amount gold' : 'wager-amount';
-    const barPct    = top > 0 ? Math.min(100, Math.round(((p.points || p.total) / top) * 100)) : 0;
 
-    const prizeHtml = rank <= BW_PRIZE_POOL.length
-      ? '<span class="prize-badge prize-badge-' + (rank <= 3 ? rank : 'n') + '">$' + BW_PRIZE_POOL[rank - 1] + '</span>'
-      : '<span style="color:var(--text-muted);font-family:var(--font-ui);font-size:0.75rem;">—</span>';
     return '<tr class="lb-main-row"><td><span class="rank-badge ' + rankClass + '">' + rank + '</span></td>'
       + '<td class="lb-player-cell">' + nameHtml + '</td>'
-      + '<td>' + prizeHtml + '</td>'
       + '<td style="color:#ffd700; font-weight:900; font-size:1.05rem; font-family:var(--font-display);">' + fmtPts(p.points) + '</td>'
-      + '<td><div class="bw-bar-wrap"><div class="bw-bar-fill" style="width:' + barPct + '%"></div></div></td>'
       + '<td class="' + amtClass + '">' + fmt(p.total) + '</td></tr>';
   }).join('');
 
@@ -7034,7 +7092,7 @@ function renderBiweeklyLeaderboard(data) {
       </div>
     </div>
     <div class="lb-table-wrap"><table class="lb-table"><thead><tr>
-      <th>Rank</th><th>Player</th><th>Prize</th><th>Yeet Points ⚡</th><th>Activity</th><th>Monthly Wager (USD)</th>
+      <th>Rank</th><th>Player</th><th>Yeet Points ⚡</th><th>Monthly Wager (USD)</th>
     </tr></thead><tbody>${rows}</tbody></table></div>
   `;
 }
