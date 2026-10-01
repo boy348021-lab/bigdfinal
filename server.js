@@ -435,16 +435,35 @@ function parseToISODate(dateStr) {
 }
 
 /**
- * Returns current calendar month UTC bounds (1st 00:00:00 UTC to last day 23:59:59 UTC)
+ * Returns current calendar month UTC bounds (1st 00:00:00 ET to last day 23:59:59 ET converted to UTC)
  */
 function getMonthlyTimeBounds() {
   const now = new Date();
-  const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
-  const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999));
-  
-  const monthName = startOfMonth.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
-  const periodLabel = `${monthName} ${startOfMonth.getUTCFullYear()} (Live)`;
-  const monthKey = `${startOfMonth.getUTCFullYear()}-${String(startOfMonth.getUTCMonth() + 1).padStart(2, '0')}`;
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour12: false
+  });
+  const parts = formatter.formatToParts(now);
+  const map = {};
+  parts.forEach(p => map[p.type] = p.value);
+
+  const y = parseInt(map.year, 10);
+  const m = parseInt(map.month, 10);
+  const lastDay = new Date(y, m, 0).getDate();
+
+  const startStr = `${y}-${String(m).padStart(2, '0')}-01`;
+  const endStr   = `${y}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+  const startOfMonth = etDateStringToUTC(startStr, '00:00:00');
+  const endOfMonth   = new Date(etDateStringToUTC(endStr, '23:59:59').getTime() + 999);
+
+  const monthDateET = new Date(Date.UTC(y, m - 1, 1));
+  const monthName = monthDateET.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
+  const periodLabel = `${monthName} ${y} (Live)`;
+  const monthKey = `${y}-${String(m).padStart(2, '0')}`;
 
   return {
     startOfMonth: startOfMonth.toISOString(),
