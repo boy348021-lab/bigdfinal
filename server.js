@@ -2943,6 +2943,240 @@ async function loadRegisteredUsers() {
   }
 }
 
+// ─── MILESTONE POOL SYSTEM ────────────────────────────────────────────────────
+// Wager thresholds for each milestone (individual user's personal wager required)
+const MILESTONE_THRESHOLDS = {
+  1: 3000,   // $3,000 personal wager → eligible for $50K community milestone pool
+  2: 5000,   // $5,000 → $100K pool
+  3: 10000   // $10,000 → $150K pool
+};
+
+/**
+ * Helper: Look up a user's personal monthly wager from the Yeet API
+ * Returns the combined wager volume across BIGD + BIGBALLZ codes
+ */
+async function getUserMonthlyWager(yeetUsername) {
+  if (!yeetUsername) return 0;
+  const normalizedName = yeetUsername.trim().toLowerCase();
+
+  try {
+    const combined = await fetchCombinedYeetReferrals({ cacheKey: 'monthly' });
+    const match = (combined || []).find(p =>
+      p.username && p.username.trim().toLowerCase() === normalizedName
+    );
+    return match ? (Number(match.volume) || 0) : 0;
+  } catch (err) {
+    console.error("getUserMonthlyWager error:", err.message);
+    return 0;
+  }
+}
+
+/**
+ * GET /api/milestones/pool-status
+ * Returns pool sizes and user-specific eligibility for each milestone
+ */
+app.get("/api/milestones/pool-status", optionalAuth, async (req, res) => {
+  try {
+    const now = new Date();
+    const campaignMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    // Get pool counts for each milestone
+    let poolCounts = { 1: 0, 2: 0, 3: 0 };
+    if (supabase) {
+      for (const milestoneId of [1, 2, 3]) {
+        const { count } = await supabase
+          .from("milestone_pool_entries")
+          .select("*", { count: "exact", head: true })
+          .eq("milestone_id", milestoneId)
+          .eq("campaign_month", campaignMonth);
+        poolCounts[milestoneId] = count || 0;
+      }
+    }
+
+    // Build response
+    const pools = [1, 2, 3].map(id => ({
+      milestoneId: id,
+      threshold: MILESTONE_THRESHOLDS[id],
+      totalEntries: poolCounts[id],
+      userJoined: false,
+      userEligible: false
+    }));
+
+    let userWager = null;
+    let yeetUsername = null;
+
+    // If user is logged in, check their personal status
+    if (req.user && supabase) {
+      yeetUsername = req.user.degencity_username || null;
+
+      if (yeetUsername) {
+        userWager = await getUserMonthlyWager(yeetUsername);
+
+        // Check which pools user has already joined
+        const { data: userEntries } = await supabase
+          .from("milestone_pool_entries")
+          .select("milestone_id")
+          .eq("user_id", req.user.id)
+          .eq("campaign_month", campaignMonth);
+
+        const joinedSet = new Set((userEntries || []).map(e => e.milestone_id));
+
+        for (const pool of pools) {
+          pool.userJoined = joinedSet.has(pool.milestoneId);
+          pool.userEligible = userWager >= pool.threshold;
+        }
+      }
+    }
+
+    res.json({
+      pools,
+      userWager,
+      yeetUsername,
+      campaignMonth,
+      loggedIn: !!req.user
+    });
+  } catch (err) {
+    console.error("Pool status error:", err.message);
+    res.status(500).json({ error: "Failed to fetch pool status" });
+  }
+});
+
+/**
+ * POST /api/milestones/join-pool
+ * Enters the authenticated user into a milestone draw pool
+ * Server-side wager verification prevents spoofing
+ */
+app.post("/api/milestones/join-pool", requireAuth, async (req, res) => {
+  try {
+    if (!supabase) {
+      return res.status(503).json({ error: "Database not configured" });
+    }
+
+    const { milestoneId } = req.body;
+
+    // Validate milestone ID
+    if (!milestoneId || ![1, 2, 3].includes(Number(milestoneId))) {
+      return res.status(400).json({ error: "Invalid milestone ID. Must be 1, 2, or 3." });
+    }
+
+    const msId = Number(milestoneId);
+    const threshold = MILESTONE_THRESHOLDS[msId];
+
+    // Check user has linked Yeet account
+    const yeetUsername = req.user?.degencity_username;
+    if (!yeetUsername) {
+      return res.status(400).json({
+        error: "No Yeet account linked. Visit the Code Check page to link your Yeet username first.",
+        code: "NO_YEET_LINKED"
+      });
+    }
+
+    // Server-side wager verification — fetch LIVE from Yeet API
+    const userWager = await getUserMonthlyWager(yeetUsername);
+
+    if (userWager < threshold) {
+      const remaining = threshold - userWager;
+      return res.status(403).json({
+        error: `Your wager ($${userWager.toLocaleString('en-US', { minimumFractionDigits: 2 })}) is below the $${threshold.toLocaleString()} threshold. You need $${remaining.toLocaleString('en-US', { minimumFractionDigits: 2 })} more.`,
+        code: "WAGER_TOO_LOW",
+        currentWager: userWager,
+        threshold: threshold,
+        remaining: remaining
+      });
+    }
+
+    // Check for existing entry this month
+    const now = new Date();
+    const campaignMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const { data: existing } = await supabase
+      .from("milestone_pool_entries")
+      .select("id")
+      .eq("user_id", req.user.id)
+      .eq("milestone_id", msId)
+      .eq("campaign_month", campaignMonth)
+      .maybeSingle();
+
+    if (existing) {
+      return res.status(409).json({
+        error: "You're already in this draw pool for this month!",
+        code: "ALREADY_JOINED"
+      });
+    }
+
+    // Insert entry
+    const { data: entry, error: insertErr } = await supabase
+      .from("milestone_pool_entries")
+      .insert({
+        user_id: req.user.id,
+        milestone_id: msId,
+        yeet_username: yeetUsername,
+        wager_at_entry: userWager,
+        campaign_month: campaignMonth
+      })
+      .select()
+      .single();
+
+    if (insertErr) throw insertErr;
+
+    // Get updated pool count
+    const { count: poolSize } = await supabase
+      .from("milestone_pool_entries")
+      .select("*", { count: "exact", head: true })
+      .eq("milestone_id", msId)
+      .eq("campaign_month", campaignMonth);
+
+    console.log(`🎲 MILESTONE POOL: ${yeetUsername} joined Milestone ${msId} pool (wager: $${userWager.toFixed(2)}, pool size: ${poolSize})`);
+
+    res.json({
+      success: true,
+      milestoneId: msId,
+      poolSize: poolSize || 1,
+      message: `You're in the draw! ${poolSize} player${poolSize > 1 ? 's' : ''} in the pool.`,
+      entryId: entry.id
+    });
+  } catch (err) {
+    console.error("Join pool error:", err.message);
+    res.status(500).json({ error: "Failed to join pool. Please try again." });
+  }
+});
+
+/**
+ * GET /api/milestones/pool-entries
+ * Admin endpoint — returns all entries for a given milestone + month
+ * Used for the live stream draw
+ */
+app.get("/api/milestones/pool-entries", requireAdmin, async (req, res) => {
+  try {
+    if (!supabase) {
+      return res.status(503).json({ error: "Database not configured" });
+    }
+
+    const milestoneId = Number(req.query.milestoneId) || 1;
+    const now = new Date();
+    const campaignMonth = req.query.month || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const { data: entries, error } = await supabase
+      .from("milestone_pool_entries")
+      .select("id, yeet_username, wager_at_entry, entered_at, drawn, won")
+      .eq("milestone_id", milestoneId)
+      .eq("campaign_month", campaignMonth)
+      .order("entered_at", { ascending: true });
+
+    if (error) throw error;
+
+    res.json({
+      milestoneId,
+      campaignMonth,
+      totalEntries: (entries || []).length,
+      entries: entries || []
+    });
+  } catch (err) {
+    console.error("Pool entries error:", err.message);
+    res.status(500).json({ error: "Failed to fetch pool entries" });
+  }
+});
+
 // ─── Fallback → index.html ────────────────────────────────────────────────────
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));

@@ -2811,6 +2811,198 @@ body::after {
 .milestone-item.locked .milestone-name,
 .milestone-item.locked .milestone-reward { opacity: 0.5; }
 
+/* ── MILESTONE POOL JOIN BUTTON SYSTEM ────────────────────── */
+.ms-pool-divider {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+}
+.ms-pool-divider-label {
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.ms-pool-divider-label::before,
+.ms-pool-divider-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  max-width: 60px;
+}
+
+.ms-pool-requirement {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.ms-pool-requirement strong {
+  color: #fff;
+}
+
+.btn-join-pool {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Eligible state — glowing CTA */
+.btn-join-pool.eligible {
+  background: linear-gradient(135deg, rgba(0,255,229,0.15) 0%, rgba(136,0,255,0.15) 100%);
+  border-color: rgba(0,255,229,0.5);
+  color: var(--cyan-400);
+  box-shadow: 0 0 20px rgba(0,255,229,0.15), inset 0 1px 1px rgba(255,255,255,0.05);
+}
+.btn-join-pool.eligible:hover {
+  background: linear-gradient(135deg, rgba(0,255,229,0.25) 0%, rgba(136,0,255,0.25) 100%);
+  border-color: rgba(0,255,229,0.7);
+  box-shadow: 0 0 30px rgba(0,255,229,0.3);
+  transform: translateY(-2px);
+}
+.btn-join-pool.eligible:active {
+  transform: translateY(0);
+}
+
+/* Pulsing animation for eligible buttons */
+@keyframes pool-pulse {
+  0%, 100% { box-shadow: 0 0 15px rgba(0,255,229,0.15); }
+  50% { box-shadow: 0 0 25px rgba(0,255,229,0.35), 0 0 50px rgba(0,255,229,0.1); }
+}
+.btn-join-pool.eligible.pulse {
+  animation: pool-pulse 2s ease-in-out infinite;
+}
+
+/* Joined state — confirmed green */
+.btn-join-pool.joined {
+  background: rgba(0,255,128,0.08);
+  border-color: rgba(0,255,128,0.35);
+  color: #00ff80;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Locked state — not enough wager */
+.btn-join-pool.locked {
+  background: rgba(255,255,255,0.03);
+  border-color: rgba(255,255,255,0.1);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Not logged in */
+.btn-join-pool.no-auth {
+  background: rgba(136,0,255,0.08);
+  border-color: rgba(136,0,255,0.3);
+  color: var(--purple-300);
+  cursor: pointer;
+}
+.btn-join-pool.no-auth:hover {
+  background: rgba(136,0,255,0.15);
+  border-color: rgba(136,0,255,0.5);
+  box-shadow: 0 0 15px rgba(136,0,255,0.2);
+}
+
+/* No Yeet linked */
+.btn-join-pool.no-yeet {
+  background: rgba(255,165,0,0.08);
+  border-color: rgba(255,165,0,0.3);
+  color: #ffa500;
+  cursor: pointer;
+}
+.btn-join-pool.no-yeet:hover {
+  background: rgba(255,165,0,0.15);
+  border-color: rgba(255,165,0,0.5);
+  box-shadow: 0 0 15px rgba(255,165,0,0.2);
+}
+
+/* Loading state */
+.btn-join-pool.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.ms-pool-counter {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.ms-pool-counter .pool-count {
+  color: var(--cyan-400);
+  font-weight: 800;
+}
+
+/* Milestone 2 purple theme overrides */
+.ms-pool-m2 .btn-join-pool.eligible {
+  background: linear-gradient(135deg, rgba(136,0,255,0.2) 0%, rgba(190,77,255,0.15) 100%);
+  border-color: rgba(136,0,255,0.5);
+  color: var(--purple-300);
+  box-shadow: 0 0 20px rgba(136,0,255,0.15);
+}
+.ms-pool-m2 .btn-join-pool.eligible:hover {
+  border-color: rgba(136,0,255,0.7);
+  box-shadow: 0 0 30px rgba(136,0,255,0.3);
+}
+@keyframes pool-pulse-purple {
+  0%, 100% { box-shadow: 0 0 15px rgba(136,0,255,0.15); }
+  50% { box-shadow: 0 0 25px rgba(136,0,255,0.35), 0 0 50px rgba(136,0,255,0.1); }
+}
+.ms-pool-m2 .btn-join-pool.eligible.pulse {
+  animation: pool-pulse-purple 2s ease-in-out infinite;
+}
+.ms-pool-m2 .ms-pool-counter .pool-count { color: var(--purple-300); }
+
+/* Milestone 3 gold theme overrides */
+.ms-pool-m3 .btn-join-pool.eligible {
+  background: linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,170,0,0.12) 100%);
+  border-color: rgba(255,215,0,0.5);
+  color: #ffd700;
+  box-shadow: 0 0 20px rgba(255,215,0,0.15);
+}
+.ms-pool-m3 .btn-join-pool.eligible:hover {
+  border-color: rgba(255,215,0,0.7);
+  box-shadow: 0 0 30px rgba(255,215,0,0.3);
+}
+@keyframes pool-pulse-gold {
+  0%, 100% { box-shadow: 0 0 15px rgba(255,215,0,0.15); }
+  50% { box-shadow: 0 0 25px rgba(255,215,0,0.35), 0 0 50px rgba(255,215,0,0.1); }
+}
+.ms-pool-m3 .btn-join-pool.eligible.pulse {
+  animation: pool-pulse-gold 2s ease-in-out infinite;
+}
+.ms-pool-m3 .ms-pool-counter .pool-count { color: #ffd700; }
+
 /* ============================================================
    STORE
    ============================================================ */
@@ -5463,6 +5655,19 @@ footer a:hover { color: var(--purple-300); }
             <div id="ms-status-1" style="font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; color: var(--cyan-400); display: flex; align-items: center; gap: 6px;">
               <span>●</span> Status: Active Target Progress
             </div>
+
+            <!-- POOL JOIN SECTION -->
+            <div class="ms-pool-divider ms-pool-m1" id="ms-pool-section-1">
+              <div class="ms-pool-divider-label">🎟️ Enter the Draw</div>
+              <div class="ms-pool-requirement" id="ms-pool-req-1">Wager <strong>$3,000+</strong> this month to enter the pool</div>
+              <button class="btn-join-pool locked" id="ms-pool-btn-1" data-milestone="1" onclick="joinMilestonePool(1)">
+                <span>🔒</span>
+                <span id="ms-pool-btn-text-1">Loading...</span>
+              </button>
+              <div class="ms-pool-counter" id="ms-pool-counter-1">
+                <span>👥</span> <span class="pool-count" id="ms-pool-count-1">0</span> <span>players in the pool</span>
+              </div>
+            </div>
           </div>
 
           <!-- Milestone 2: $100K Target -->
@@ -5494,6 +5699,19 @@ footer a:hover { color: var(--purple-300); }
             <div id="ms-status-2" style="font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
               <span>●</span> Status: Unlocks after $50K Goal
             </div>
+
+            <!-- POOL JOIN SECTION -->
+            <div class="ms-pool-divider ms-pool-m2" id="ms-pool-section-2">
+              <div class="ms-pool-divider-label">🎟️ Enter the Draw</div>
+              <div class="ms-pool-requirement" id="ms-pool-req-2">Wager <strong>$5,000+</strong> this month to enter the pool</div>
+              <button class="btn-join-pool locked" id="ms-pool-btn-2" data-milestone="2" onclick="joinMilestonePool(2)">
+                <span>🔒</span>
+                <span id="ms-pool-btn-text-2">Loading...</span>
+              </button>
+              <div class="ms-pool-counter" id="ms-pool-counter-2">
+                <span>👥</span> <span class="pool-count" id="ms-pool-count-2">0</span> <span>players in the pool</span>
+              </div>
+            </div>
           </div>
 
           <!-- Milestone 3: $150K Target -->
@@ -5524,6 +5742,19 @@ footer a:hover { color: var(--purple-300); }
 
             <div id="ms-status-3" style="font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
               <span>●</span> Status: Unlocks after $100K Goal
+            </div>
+
+            <!-- POOL JOIN SECTION -->
+            <div class="ms-pool-divider ms-pool-m3" id="ms-pool-section-3">
+              <div class="ms-pool-divider-label">🎟️ Enter the Draw</div>
+              <div class="ms-pool-requirement" id="ms-pool-req-3">Wager <strong>$10,000+</strong> this month to enter the pool</div>
+              <button class="btn-join-pool locked" id="ms-pool-btn-3" data-milestone="3" onclick="joinMilestonePool(3)">
+                <span>🔒</span>
+                <span id="ms-pool-btn-text-3">Loading...</span>
+              </button>
+              <div class="ms-pool-counter" id="ms-pool-counter-3">
+                <span>👥</span> <span class="pool-count" id="ms-pool-count-3">0</span> <span>players in the pool</span>
+              </div>
             </div>
           </div>
 
@@ -6707,6 +6938,236 @@ function updateMilestonesProgress(totalWager) {
     const rem = m3Target - current;
     if (m3Status) m3Status.innerHTML = `<span>●</span> Status: <strong>$${rem.toLocaleString(undefined, {maximumFractionDigits:0})}</strong> to target (Unlocks after $100K)`;
   }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   MILESTONE POOL — "JOIN THE DRAW" SYSTEM
+   ══════════════════════════════════════════════════════════════ */
+
+// Pool state cached after fetch
+let _poolStatusCache = null;
+
+/**
+ * Fetch pool status from server and update all 3 milestone card buttons
+ */
+async function loadMilestonePoolStatus() {
+  try {
+    const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+    const res = await fetch('/api/milestones/pool-status', { headers, cache: 'no-store' });
+    if (!res.ok) {
+      console.warn('Pool status fetch failed:', res.status);
+      return;
+    }
+
+    const data = await res.json();
+    _poolStatusCache = data;
+
+    // Update each milestone button
+    for (const pool of data.pools) {
+      renderPoolButton(pool, data);
+    }
+  } catch (err) {
+    console.error('loadMilestonePoolStatus error:', err);
+  }
+}
+
+/**
+ * Render a single milestone pool button based on state
+ */
+function renderPoolButton(pool, statusData) {
+  const btn = document.getElementById(`ms-pool-btn-${pool.milestoneId}`);
+  const btnText = document.getElementById(`ms-pool-btn-text-${pool.milestoneId}`);
+  const countEl = document.getElementById(`ms-pool-count-${pool.milestoneId}`);
+  const reqEl = document.getElementById(`ms-pool-req-${pool.milestoneId}`);
+
+  if (!btn || !btnText) return;
+
+  // Update pool counter
+  if (countEl) countEl.textContent = pool.totalEntries;
+
+  const isLoggedIn = statusData.loggedIn;
+  const hasYeet = !!statusData.yeetUsername;
+  const userWager = statusData.userWager || 0;
+
+  // Reset classes
+  btn.className = 'btn-join-pool';
+  btn.disabled = false;
+  btn.onclick = () => joinMilestonePool(pool.milestoneId);
+
+  if (pool.userJoined) {
+    // Already joined
+    btn.classList.add('joined');
+    btn.disabled = true;
+    btn.innerHTML = `<span>✓</span><span>You're In the Draw!</span>`;
+    if (reqEl) reqEl.innerHTML = `Your wager: <strong>$${userWager.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong> ✓`;
+  } else if (!isLoggedIn) {
+    // Not logged in
+    btn.classList.add('no-auth');
+    btn.innerHTML = `<span>🔐</span><span>Log in to Enter Draw</span>`;
+    btn.onclick = () => { if (typeof loginWithDiscord === 'function') loginWithDiscord(); };
+  } else if (!hasYeet) {
+    // No Yeet account linked
+    btn.classList.add('no-yeet');
+    btn.innerHTML = `<span>⚠️</span><span>Link Yeet Account First</span>`;
+    btn.onclick = () => { window.location.href = '/verify.html'; };
+  } else if (userWager < pool.threshold) {
+    // Wager too low
+    const remaining = pool.threshold - userWager;
+    btn.classList.add('locked');
+    btn.disabled = true;
+    btn.innerHTML = `<span>🔒</span><span>Need $${remaining.toLocaleString('en-US', { minimumFractionDigits: 0 })} More</span>`;
+    if (reqEl) {
+      reqEl.innerHTML = `Your wager: <strong>$${userWager.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong> / $${pool.threshold.toLocaleString()} required`;
+    }
+  } else {
+    // Eligible — can join!
+    btn.classList.add('eligible', 'pulse');
+    btn.innerHTML = `<span>🎲</span><span>Join the Draw</span>`;
+    if (reqEl) {
+      reqEl.innerHTML = `Your wager: <strong>$${userWager.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong> — You're eligible! 🎉`;
+    }
+  }
+}
+
+/**
+ * Join a milestone pool — called when user clicks the button
+ */
+async function joinMilestonePool(milestoneId) {
+  const btn = document.getElementById(`ms-pool-btn-${milestoneId}`);
+  const btnText = document.getElementById(`ms-pool-btn-text-${milestoneId}`);
+
+  if (!btn) return;
+
+  // Prevent double-click
+  btn.classList.add('loading');
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = `<span class="spinner-cyan" style="width:18px;height:18px;border-width:2px;"></span><span>Joining...</span>`;
+
+  try {
+    const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
+    if (!token) {
+      showPoolToast('Please log in first!', 'error');
+      btn.classList.remove('loading');
+      btn.innerHTML = originalHTML;
+      return;
+    }
+
+    const res = await fetch('/api/milestones/join-pool', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ milestoneId })
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      // Success! Update button to "joined" state
+      btn.classList.remove('loading', 'eligible', 'pulse');
+      btn.classList.add('joined');
+      btn.disabled = true;
+      btn.innerHTML = `<span>✓</span><span>You're In the Draw!</span>`;
+
+      // Update pool counter
+      const countEl = document.getElementById(`ms-pool-count-${milestoneId}`);
+      if (countEl) countEl.textContent = data.poolSize;
+
+      showPoolToast(`🎉 You've entered the Milestone ${milestoneId} draw! ${data.poolSize} player${data.poolSize > 1 ? 's' : ''} in the pool.`, 'success');
+
+      // Update req text
+      const reqEl = document.getElementById(`ms-pool-req-${milestoneId}`);
+      if (reqEl && _poolStatusCache) {
+        reqEl.innerHTML = `Your wager: <strong>$${(_poolStatusCache.userWager || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong> ✓`;
+      }
+    } else {
+      // Error from server
+      btn.classList.remove('loading');
+      btn.innerHTML = originalHTML;
+
+      if (data.code === 'ALREADY_JOINED') {
+        // They're already in — update UI
+        btn.classList.remove('eligible', 'pulse');
+        btn.classList.add('joined');
+        btn.disabled = true;
+        btn.innerHTML = `<span>✓</span><span>You're In the Draw!</span>`;
+        showPoolToast("You're already in this draw pool!", 'info');
+      } else if (data.code === 'WAGER_TOO_LOW') {
+        showPoolToast(data.error, 'error');
+      } else if (data.code === 'NO_YEET_LINKED') {
+        showPoolToast('Link your Yeet account on the Code Check page first.', 'error');
+      } else {
+        showPoolToast(data.error || 'Failed to join pool.', 'error');
+      }
+    }
+  } catch (err) {
+    console.error('joinMilestonePool error:', err);
+    btn.classList.remove('loading');
+    btn.innerHTML = originalHTML;
+    showPoolToast('Network error. Please try again.', 'error');
+  }
+}
+
+/**
+ * Toast notification for pool actions
+ */
+function showPoolToast(message, type = 'info') {
+  // Re-use existing toast element or create one
+  let toast = document.getElementById('pool-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'pool-toast';
+    toast.style.cssText = `
+      position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%) translateY(20px);
+      padding: 12px 24px; border-radius: 10px; z-index: 99999; pointer-events: none;
+      font-family: var(--font-ui); font-size: 0.88rem; font-weight: 700; letter-spacing: 0.04em;
+      opacity: 0; transition: all 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      max-width: 480px; text-align: center; line-height: 1.4;
+    `;
+    document.body.appendChild(toast);
+  }
+
+  // Set colors based on type
+  if (type === 'success') {
+    toast.style.background = 'rgba(0,20,10,0.95)';
+    toast.style.border = '1px solid rgba(0,255,128,0.5)';
+    toast.style.color = '#00ff80';
+    toast.style.boxShadow = '0 0 25px rgba(0,255,128,0.25)';
+  } else if (type === 'error') {
+    toast.style.background = 'rgba(20,5,5,0.95)';
+    toast.style.border = '1px solid rgba(255,80,80,0.5)';
+    toast.style.color = '#ff5050';
+    toast.style.boxShadow = '0 0 25px rgba(255,80,80,0.25)';
+  } else {
+    toast.style.background = 'rgba(8,8,16,0.95)';
+    toast.style.border = '1px solid rgba(0,255,229,0.5)';
+    toast.style.color = 'var(--cyan-400)';
+    toast.style.boxShadow = '0 0 25px rgba(0,255,229,0.25)';
+  }
+
+  toast.textContent = message;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 4000);
+}
+
+// Load pool status on page load (after auth is ready)
+if (typeof onAuthReady === 'function') {
+  onAuthReady(() => {
+    loadMilestonePoolStatus();
+  });
+} else {
+  // Fallback: load after a short delay if auth-helper isn't ready
+  setTimeout(loadMilestonePoolStatus, 2000);
 }
 
 
