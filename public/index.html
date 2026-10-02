@@ -7201,7 +7201,7 @@ function renderLeaderboard(data, rangeLabel) {
     weekly_volume: Number(u.weekly_volume) || 0,
     total: Number(u.volume) || (u.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0),
     months: (u.wager_data || []).slice().sort((a, b) => b.month.localeCompare(a.month))
-  })).sort((a, b) => (b.total - a.total) || (b.points - a.points));
+  })).sort((a, b) => (b.points - a.points) || (b.total - a.total));
 
   let rows = players.map((p, i) => {
     const rank = i + 1;
