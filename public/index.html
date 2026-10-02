@@ -636,7 +636,7 @@ body::after {
    ============================================================ */
 .hero-hud-stats-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   width: 100%;
   max-width: 1140px;
@@ -5055,16 +5055,7 @@ footer a:hover { color: var(--purple-300); }
       </div>
     </div>
 
-    <!-- Stat 3: Active Period (October 2026) -->
-    <div class="hero-hud-stat-card">
-      <div class="hud-stat-icon-wrap" style="color:var(--purple-300);">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      </div>
-      <div class="hud-stat-info">
-        <div class="hud-stat-value" id="hud-season-period-val">October 2026</div>
-        <div class="hud-stat-label">Monthly Leaderboard</div>
-      </div>
-    </div>
+
 
     <!-- Stat 4: Referred Players (Total Referred Members across campaign) -->
     <div class="hero-hud-stat-card">
@@ -5178,7 +5169,7 @@ footer a:hover { color: var(--purple-300); }
     <div class="season-card-inner">
       <span class="live-pulse-dot" id="season-pulse-dot"></span>
       <span class="season-card-label">ACTIVE SEASON:</span>
-      <span class="season-card-value" id="season-card-value">SEPTEMBER 2026</span>
+      <span class="season-card-value" id="season-card-value">OCTOBER 2026</span>
       <span class="season-card-badge" id="season-card-badge">YEET CASINO</span>
     </div>
   </div>
@@ -5217,10 +5208,10 @@ footer a:hover { color: var(--purple-300); }
         <div class="stat-label">Total Wagered</div>
       </div>
     </div>
-    <div class="stat-item stat-key-3d">
+    <div class="stat-item stat-key-3d" style="border-color:rgba(0, 255, 229, 0.3);">
       <div class="stat-key-inner">
-        <div class="stat-value"><span class="stat-players-val">42</span></div>
-        <div class="stat-label">Referred Players</div>
+        <div class="stat-value" style="color:var(--cyan-400);"><span id="strip-total-points-val">0</span><span style="font-size:0.8em; margin-left:2px;">⚡</span></div>
+        <div class="stat-label">Yeet Points</div>
       </div>
     </div>
     <div class="stat-item stat-key-3d">
@@ -6857,6 +6848,8 @@ async function fetchLeaderboard(after, before, rangeLabel) {
       });
       const ptsEl = document.getElementById('stat-total-points-val');
       if (ptsEl) ptsEl.textContent = formattedPoints;
+      const stripPtsEl = document.getElementById('strip-total-points-val');
+      if (stripPtsEl) stripPtsEl.textContent = formattedPoints;
 
       const oldPlayersEl = document.getElementById('stat-players');
       if (oldPlayersEl) oldPlayersEl.innerHTML = `<span>42</span>`;
