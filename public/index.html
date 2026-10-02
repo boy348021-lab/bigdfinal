@@ -5039,8 +5039,8 @@ footer a:hover { color: var(--purple-300); }
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
       </div>
       <div class="hud-stat-info">
-        <div class="hud-stat-value">$<span class="stat-total-live-val">0</span><span class="val-sup">+</span></div>
-        <div class="hud-stat-label">Community Wager</div>
+        <div class="hud-stat-value">$<span id="stat-monthly-wager-val">0</span><span class="val-sup">+</span></div>
+        <div class="hud-stat-label">October Wager</div>
       </div>
     </div>
 
@@ -7534,9 +7534,19 @@ async function fetchBiweeklyLeaderboard() {
     const monthlyList = json.data || [];
     renderBiweeklyLeaderboard(monthlyList);
 
-    // Calculate total monthly wager volume to update community milestone progress bars
+    // Calculate total monthly wager volume to update HUD card & community milestone progress bars
     const totalMonthlyWager = monthlyList.reduce((sum, u) =>
       sum + (u.wager_data || []).reduce((s, m) => s + (Number(m.total_wager_usd) || 0), 0), 0);
+
+    const formattedMonthlyWager = totalMonthlyWager >= 1_000_000
+      ? (totalMonthlyWager / 1_000_000).toFixed(1) + 'M'
+      : totalMonthlyWager >= 1_000
+        ? (totalMonthlyWager / 1_000).toFixed(1) + 'k'
+        : totalMonthlyWager.toFixed(0);
+
+    const monthlyWagerEl = document.getElementById('stat-monthly-wager-val');
+    if (monthlyWagerEl) monthlyWagerEl.textContent = formattedMonthlyWager;
+
     updateMilestonesProgress(totalMonthlyWager);
   } catch (err) {
     console.error('Monthly leaderboard error:', err);
