@@ -6754,6 +6754,9 @@ document.querySelectorAll('.nav-links a[data-tab]').forEach(a => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
+  // Always fetch monthly data on page load so milestone progress is up to date
+  fetchBiweeklyLeaderboard();
+
   const hash = window.location.hash;
   const params = new URLSearchParams(window.location.search);
   const tab = params.get('tab') || (hash.includes('milestones') ? 'milestones' : (hash.includes('challenges') ? 'challenges' : null));
@@ -6763,7 +6766,6 @@ window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('tabs-section')?.scrollIntoView({ behavior: 'smooth' });
     }, 150);
   } else {
-    // Fetch initial leaderboard and weekly rankings
     fetchLeaderboard();
     fetchWeeklyLeaderboard();
   }
@@ -6861,8 +6863,7 @@ async function fetchLeaderboard(after, before, rangeLabel) {
       const oldTotalEl = document.getElementById('stat-total-live');
       if (oldTotalEl) oldTotalEl.textContent = formattedWager;
 
-      // Update fresh reset milestone goals dynamically
-      updateMilestonesProgress(totalWager);
+      // Milestones progress is driven by monthly volume via fetchBiweeklyLeaderboard()
     }
 
   } catch (err) {
@@ -7530,7 +7531,13 @@ async function fetchBiweeklyLeaderboard() {
       return;
     }
     const json = await res.json();
-    renderBiweeklyLeaderboard(json.data || []);
+    const monthlyList = json.data || [];
+    renderBiweeklyLeaderboard(monthlyList);
+
+    // Calculate total monthly wager volume to update community milestone progress bars
+    const totalMonthlyWager = monthlyList.reduce((sum, u) =>
+      sum + (u.wager_data || []).reduce((s, m) => s + (Number(m.total_wager_usd) || 0), 0), 0);
+    updateMilestonesProgress(totalMonthlyWager);
   } catch (err) {
     console.error('Monthly leaderboard error:', err);
     bwContent.innerHTML = '<div class="lb-error">⚠️ Network error. Check your connection.</div>';
