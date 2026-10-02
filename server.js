@@ -2960,7 +2960,12 @@ async function getUserMonthlyWager(yeetUsername) {
   const normalizedName = yeetUsername.trim().toLowerCase();
 
   try {
-    const combined = await fetchCombinedYeetReferrals({ cacheKey: 'monthly' });
+    const monthBounds = getMonthlyTimeBounds();
+    const combined = await fetchCombinedYeetReferrals({
+      startDate: monthBounds.startOfMonth,
+      endDate: monthBounds.endOfMonth,
+      cacheKey: `monthly_${monthBounds.periodLabel.replace(/\s+/g, '_')}`
+    });
     const match = (combined || []).find(p =>
       p.username && p.username.trim().toLowerCase() === normalizedName
     );
