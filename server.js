@@ -1004,10 +1004,43 @@ app.get("/api/store-items", (req, res) => {
 // ─── Community Challenges Configuration & API (Phases 13, 14, 15, 18) ────────
 const COMMUNITY_CHALLENGES = [
   {
+    id: "le_vampire",
+    title: "Le Vampire",
+    prize: "$25 CASH",
+    desc: "First person to hit 500x on Le Vampire on Yeet using code BIGDTV wins $25 Cash! Min bet $0.20. Base spins only (no bonus buys).",
+    img: "/challenges/le-vampire-challenge.jpg",
+    status: "active",
+    min_bet: "$0.20",
+    target: "500X",
+    campaign: "yeet"
+  },
+  {
+    id: "outsourced",
+    title: "Outsourced",
+    prize: "$25 CASH",
+    desc: "First person to hit 500x on Outsourced on Yeet using code BIGDTV wins $25 Cash! Min bet $0.20. Base spins only (no bonus buys).",
+    img: "/challenges/outsourced-challenge.jpg",
+    status: "active",
+    min_bet: "$0.20",
+    target: "500X",
+    campaign: "yeet"
+  },
+  {
+    id: "wanted_dead_or_wild",
+    title: "Wanted Dead or a Wild",
+    prize: "$40 CASH",
+    desc: "First person to hit 1000x on Wanted Dead or a Wild on Yeet using code BIGDTV wins $40 Cash! Min bet $0.40. Base spins only (no bonus buys).",
+    img: "/challenges/wanted-dead-or-a-wild-challenge.jpg",
+    status: "active",
+    min_bet: "$0.40",
+    target: "1000X",
+    campaign: "yeet"
+  },
+  {
     id: "sweet_bonanza",
     title: "Sweet Bonanza 2500",
     prize: "$20 CASH",
-    desc: "First person to hit the 1000x Bomb on Yeet using code BIGD wins $20 Cash! Min bet $0.20. No bonus buys.",
+    desc: "First person to hit the 1000x Bomb on Yeet using code BIGDTV wins $20 Cash! Min bet $0.20. No bonus buys.",
     img: "/challenges/sweet-bonanza-challenge.jpg",
     status: "active",
     reused: true,
@@ -1017,7 +1050,7 @@ const COMMUNITY_CHALLENGES = [
     id: "out_of_woods",
     title: "Out of the Woods",
     prize: "$20 CASH",
-    desc: "First person to hit 1000x on Yeet using code BIGD wins $20 Cash! Min bet $0.25. No bonus buys.",
+    desc: "First person to hit 1000x on Yeet using code BIGDTV wins $20 Cash! Min bet $0.25. No bonus buys.",
     img: "/challenges/out-of-the-woods-challenge.jpg",
     status: "active",
     reused: true,
@@ -1038,7 +1071,7 @@ const COMMUNITY_CHALLENGES = [
     id: "sixsixsix",
     title: "SixSixSix",
     prize: "$25 CASH",
-    desc: "First person to hit 500x on Yeet using code BIGD wins $25 Cash! Min bet $0.10 USD. Spin into darkness.",
+    desc: "First person to hit 500x on Yeet using code BIGDTV wins $25 Cash! Min bet $0.10 USD. Spin into darkness.",
     img: "/challenges/sixsixsix.png",
     status: "active",
     reused: true,
