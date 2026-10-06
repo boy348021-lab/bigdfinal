@@ -1890,13 +1890,13 @@ footer a:hover { color: var(--purple-200); }
   <!-- ── PAGE HEADING ─────────────────────────────────────────── -->
   <div style="width:100%; max-width:900px; margin-bottom:32px; text-align:center;">
     <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(255,215,0,0.12); border:1px solid rgba(255,215,0,0.35); padding:4px 14px; border-radius:20px; font-family:var(--font-ui); font-size:0.75rem; font-weight:800; color:#ffd700; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:14px; box-shadow:0 0 16px rgba(255,215,0,0.2);">
-      <span>⚡ LIVE WEEKLY VAULT</span> &bull; <span>$100 VIP PAYOUT ACTIVE</span>
+      <span>⚡ LIVE WEEKLY VAULT</span> &bull; <span>$125 VIP PAYOUT ACTIVE</span>
     </div>
     <div style="font-family:var(--font-display); font-size:clamp(2.4rem, 5vw, 3.4rem); font-weight:900; letter-spacing:0.02em; color:#fff; text-transform:uppercase; line-height:1.05;">
       BIGD <span style="background:linear-gradient(135deg, #00ffe5, #be4dff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; filter:drop-shadow(0 0 20px rgba(0,255,229,0.4));">VIP STORE & ARENA</span>
     </div>
     <div style="font-family:var(--font-ui); font-size:0.92rem; color:var(--text-secondary); letter-spacing:0.04em; margin-top:8px; max-width:600px; margin-left:auto; margin-right:auto;">
-      Wager on Yeet with code <strong style="color:#fff;">BIGDTV</strong>, conquer The Airdrop Gauntlet to $5k VIP, and dominate the weekly $100 payout pool.
+      Wager on Yeet with code <strong style="color:#fff;">BIGDTV</strong>, conquer The Airdrop Gauntlet to $5k VIP, and dominate the weekly $125 payout pool.
     </div>
   </div>
 
@@ -1985,7 +1985,7 @@ footer a:hover { color: var(--purple-200); }
               Keep moving. <span>Don't stop until you reach the VIP zone.</span>
             </div>
             <div class="sg-arena-subtitle">
-              Wager on Yeet with code <strong style="color:#fff;">BIGDTV</strong> to sprint forward. Reach $5,000 Wager to unlock permanent VIP and split the $100 weekly payout (60-30-10 split for Top 3)!
+              Wager on Yeet with code <strong style="color:#fff;">BIGDTV</strong> to sprint forward. Reach $5,000 Wager to unlock permanent VIP and split the $125 weekly payout (60-40-25 split for Top 3)!
             </div>
           </div>
           <div class="sg-wager-pill">
@@ -2088,7 +2088,7 @@ footer a:hover { color: var(--purple-200); }
           <div class="sg-telemetry-card" style="border-color:rgba(255,215,0,0.35); background:rgba(255,215,0,0.04);">
             <div class="sg-tc-header" style="color:#ffd700;">👑 VIP REWARD</div>
             <div class="sg-tc-value" style="color:#ffd700;">$5,000 Wager</div>
-            <div class="sg-tc-sub">VIP Payout Zone ($100 Weekly Pool &bull; 60/30/10 Split)</div>
+            <div class="sg-tc-sub">VIP Payout Zone ($125 Weekly Pool &bull; 60/40/25 Split)</div>
           </div>
         </div>
       </div>
@@ -2105,8 +2105,8 @@ footer a:hover { color: var(--purple-200); }
             </div>
           </div>
           <div class="sg-wager-pill">
-            <span>$100 PAYOUT</span>
-            <span class="sg-wager-pct">Top 3 VIPs Split 60% / 30% / 10%</span>
+            <span>$125 PAYOUT</span>
+            <span class="sg-wager-pct">Top 3 VIPs Split $60 / $40 / $25</span>
           </div>
         </div>
 
@@ -2176,7 +2176,7 @@ footer a:hover { color: var(--purple-200); }
       </div>
       <ul style="margin-left:18px; margin-top:4px;">
         <li><strong>Lifetime Wager & VIP Status:</strong> Crossing $5k locks you into VIP for life.</li>
-        <li><strong>Weekly Payout:</strong> Resets every Sunday at 23:59:59 ET. Top 3 active VIPs of the week split the $100 payout (1st: $60, 2nd: $30, 3rd: $10).</li>
+        <li><strong>Weekly Payout:</strong> Resets every Sunday at 23:59:59 ET. Top 3 active VIPs of the week split the $125 payout (1st: $60, 2nd: $40, 3rd: $25).</li>
         <li><strong>BigD Coins & Points:</strong> Virtual balances remain distinct and never alter live-wagering reward eligibility.</li>
       </ul>
     </div>
@@ -2700,7 +2700,7 @@ function renderStoreSquidGameTracker(players, userProgression) {
               <div class="pin-tt-bar-fill" style="width: ${pPct}%;"></div>
             </div>
             ${isLeader ? '<div style="color:#ffd700; font-size:0.68rem; font-weight:800; margin-top:3px;">👑 #1 Weekly Leader</div>' : ''}
-            ${isWinner ? `<div style="color:#00ff80; font-size:0.68rem; font-weight:800; margin-top:2px;">✨ Top 3 VIP Qualified ($${rankIdx === 1 ? 60 : (rankIdx === 2 ? 30 : 10)} Prize)</div>` : ''}
+            ${isWinner ? `<div style="color:#00ff80; font-size:0.68rem; font-weight:800; margin-top:2px;">✨ Top 3 VIP Qualified ($${rankIdx === 1 ? 60 : (rankIdx === 2 ? 40 : 25)} Prize)</div>` : ''}
             <div class="pin-tt-footer">Click to inspect in Milestone HUD ➜</div>
           </div>
         </div>
@@ -2803,7 +2803,7 @@ function renderStoreSquidGameTracker(players, userProgression) {
   if (tcTargetVal) tcTargetVal.textContent = '$' + nextMilestone.target.toLocaleString();
   if (tcTargetSub) {
     tcTargetSub.textContent = activeWager >= 5000
-      ? 'VIP Payout Zone ($100 Weekly Pool)'
+      ? 'VIP Payout Zone ($125 Weekly Pool)'
       : `$${remToNext.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} to ${nextMilestone.name}`;
   }
   if (tcProgVal) tcProgVal.textContent = `$${activeWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / $5,000`;

@@ -1150,12 +1150,12 @@ const REWARD_MULTIPLIERS = {
   HOUSE_LIVE: 0.25     // $1 spent on house/live games = 0.25 coins
 };
 
-// ─── WEEKLY $100 AIRDROP & $5K VIP REWARDS CONFIG (BIGD UPDATE) ─────────────
+// ─── WEEKLY AIRDROP & $5K VIP REWARDS CONFIG (BIGD UPDATE) ─────────────
 const WEEKLY_AIRDROP_CONFIG = {
-  prize_pool_usd: 100,
+  prize_pool_usd: 125,
   vip_threshold_usd: 5000,
   top_winners_count: 3,
-  payout_split_usd: [60, 30, 10],
+  payout_split_usd: [60, 40, 25],
   theme: "squid_game"
 };
 
