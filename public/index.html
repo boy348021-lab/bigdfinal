@@ -7902,12 +7902,11 @@ function renderSquidGameTracker(players) {
 
   const milestones = [
     { target: 0, label: 'Start', name: 'Starting Zone' },
-    { target: 2500, label: 'Stage 1', name: 'Green Light Zone ($2.5k)' },
-    { target: 5000, label: 'Stage 2', name: 'Checkpoint Alpha ($5k)' },
-    { target: 7500, label: 'Stage 3', name: 'Overpass Rally ($7.5k)' },
-    { target: 10000, label: 'Stage 4', name: 'Velocity Run ($10k)' },
-    { target: 12500, label: 'Stage 5', name: 'Gauntlet Apex ($12.5k)' },
-    { target: 15000, label: 'VIP Goal', name: 'VIP Grand Finale ($15k VIP)' }
+    { target: 1000, label: 'Stage 1', name: 'Green Light Zone ($1k)' },
+    { target: 2000, label: 'Stage 2', name: 'Checkpoint Alpha ($2k)' },
+    { target: 3000, label: 'Stage 3', name: 'Overpass Rally ($3k)' },
+    { target: 4000, label: 'Stage 4', name: 'Velocity Run ($4k)' },
+    { target: 5000, label: 'VIP Goal', name: 'VIP Grand Finale ($5k VIP)' }
   ];
 
   // Calculate current active milestone step index
@@ -7918,7 +7917,7 @@ function renderSquidGameTracker(players) {
     }
   }
 
-  const totalGoal = 15000;
+  const totalGoal = 5000;
   const overallPct = Math.min(100, Math.max(0, (activeWager / totalGoal) * 100));
 
   // Determine next milestone target & step progress
@@ -7931,7 +7930,7 @@ function renderSquidGameTracker(players) {
   const totalRacersCount = (players || []).length;
   const totalCombinedWager = (players || []).reduce((acc, p) => acc + (Number(p.weekly_volume) || 0), 0);
   const topRacerWager = topRacers.length > 0 ? Math.max(...topRacers.map(p => Number(p.weekly_volume) || 0)) : 0;
-  const highestMilestoneTarget = 15000;
+  const highestMilestoneTarget = 5000;
   const arenaCombinedPct = Math.min(100, Math.max(0, (topRacerWager / highestMilestoneTarget) * 100));
 
   // Determine highest milestone reached across ALL players
@@ -7978,14 +7977,14 @@ function renderSquidGameTracker(players) {
       const rawName = (p.username || 'Player').trim();
       const rankIdx = (players || []).indexOf(p) + 1;
       const isLeader = (rankIdx === 1) && (pVol > 0);
-      const isWinner = pVol >= 15000 && (rankIdx <= 5);
+      const isWinner = pVol >= 5000 && (rankIdx <= 5);
       const isSelected = selectedSquidPlayer && (selectedSquidPlayer.toLowerCase() === rawName.toLowerCase());
       const isUserSelf = Boolean(currentTokenUser && currentTokenUser.username && (currentTokenUser.username.toLowerCase() === rawName.toLowerCase()));
       const icon = avatarIcons[(players || []).indexOf(p) % avatarIcons.length] || '🦑';
 
       // Calculate continuous track rail position (0% - 100%)
       let exactPct = isLeader
-        ? Math.min(96, Math.max(14, (pVol / 15000) * 100))
+        ? Math.min(96, Math.max(14, (pVol / 5000) * 100))
         : Math.min(11.5, Math.max(2.5, 2.5 + (pIdx - 1) * 1.5));
 
       // Dual-lane vertical stagger to prevent overlap
@@ -8002,7 +8001,7 @@ function renderSquidGameTracker(players) {
 
       // Compact formatted wager inside circle
       const compactAmt = pVol >= 1000 ? `$${(pVol / 1000).toFixed(pVol >= 10000 ? 0 : 1)}k` : `$${Math.round(pVol)}`;
-      const pPct = Math.min(100, Math.max(0, (pVol / 15000) * 100));
+      const pPct = Math.min(100, Math.max(0, (pVol / 5000) * 100));
       const zIndex = isLeader ? 75 : (isUserSelf ? 70 : (isSelected ? 65 : (40 - pIdx)));
 
       return `
@@ -8135,11 +8134,11 @@ function renderSquidGameTracker(players) {
 
   if (tcTargetVal) tcTargetVal.textContent = '$' + nextMilestone.target.toLocaleString();
   if (tcTargetSub) {
-    tcTargetSub.textContent = activeWager >= 15000
+    tcTargetSub.textContent = activeWager >= 5000
       ? 'VIP Airdrop Zone ($125 Weekly Pool)'
       : `$${remToNext.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} to ${nextMilestone.name}`;
   }
-  if (tcProgVal) tcProgVal.textContent = `$${activeWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / $15,000`;
+  if (tcProgVal) tcProgVal.textContent = `$${activeWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / $5,000`;
   if (tcProgSub) {
     tcProgSub.textContent = activeUsername
       ? `${overallPct.toFixed(1)}% complete toward VIP (${activeUsername})`
@@ -8154,7 +8153,7 @@ function renderSquidGameTracker(players) {
       mpTableList.innerHTML = topRacers.map((p, idx) => {
         const isSelf = Boolean(activeUsername && p.username && p.username.toLowerCase() === activeUsername.toLowerCase());
         const vol = Number(p.weekly_volume) || 0;
-        const isVip = vol >= 15000;
+        const isVip = vol >= 5000;
         const rankIcon = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
 
         return `
@@ -8179,8 +8178,8 @@ function renderSquidGameTracker(players) {
       mpBarsList.innerHTML = topRacers.map((p) => {
         const isSelf = Boolean(activeUsername && p.username && p.username.toLowerCase() === activeUsername.toLowerCase());
         const vol = Number(p.weekly_volume) || 0;
-        const pct = Math.min(100, Math.max(0, (vol / 15000) * 100));
-        const isVip = vol >= 15000;
+        const pct = Math.min(100, Math.max(0, (vol / 5000) * 100));
+        const isVip = vol >= 5000;
 
         return `
           <div class="sg-mp-bar-row" onclick="selectSquidPlayer('${escHtml(p.username || '')}')" style="cursor:pointer;" title="Click to track in RLGL stage">
@@ -8246,12 +8245,12 @@ function renderWeeklyLeaderboard(data) {
 
     // VIP Status & Airdrop Qualification
     let vipStatusHtml = '';
-    if (p.weekly_volume >= 15000 && rank <= 5) {
+    if (p.weekly_volume >= 5000 && rank <= 5) {
       vipStatusHtml = `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,215,0,0.18); border:1px solid rgba(255,215,0,0.6); color:#ffd700; font-weight:800; font-size:0.75rem; padding:4px 8px; border-radius:6px; box-shadow:0 0 10px rgba(255,215,0,0.3);">👑 WINNER: $25 Split</span>`;
-    } else if (p.weekly_volume >= 15000) {
+    } else if (p.weekly_volume >= 5000) {
       vipStatusHtml = `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(0,255,229,0.15); border:1px solid rgba(0,255,229,0.4); color:var(--cyan-400); font-weight:800; font-size:0.75rem; padding:4px 8px; border-radius:6px;">⭐ VIP QUALIFIED</span>`;
     } else {
-      const diff = Math.max(0, 15000 - p.weekly_volume);
+      const diff = Math.max(0, 5000 - p.weekly_volume);
       vipStatusHtml = `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.72rem; padding:3px 8px; border-radius:6px;">🔒 Need ${fmt(diff)} to VIP</span>`;
     }
 
@@ -8301,7 +8300,7 @@ function renderWeeklyLeaderboard(data) {
             <th>Player</th>
             <th>Points (Score) ⚡</th>
             <th>Total Wager ($)</th>
-            <th>VIP Status ($15k) 🦑</th>
+            <th>VIP Status ($5k) 🦑</th>
             <th>Action</th>
           </tr>
         </thead>
