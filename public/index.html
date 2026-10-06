@@ -1497,7 +1497,7 @@ body::after {
 .card-hof:hover .social-icon-wrapper { background: rgba(255, 215, 0, 0.25); border-color: #ffd700; color: #ffd700; transform: scale(1.1); }
 
 /* Hall of Fame Modal */
-#hof-modal {
+#hof-modal, #referral-modal {
   display: none;
   position: fixed;
   inset: 0;
@@ -1509,7 +1509,19 @@ body::after {
   justify-content: center;
   padding: 24px;
 }
-#hof-modal.open { display: flex; }
+#hof-modal.open, #referral-modal.open { display: flex; }
+
+.ref-modal-card {
+  background: radial-gradient(circle at 50% 0%, rgba(20, 14, 45, 0.98), rgba(9, 6, 20, 0.99));
+  border: 1px solid rgba(0, 255, 229, 0.35);
+  border-radius: var(--radius-xl);
+  padding: 36px 32px;
+  max-width: 680px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 0 40px rgba(0, 255, 229, 0.2), 0 24px 60px rgba(0, 0, 0, 0.85);
+  animation: modalPop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
 .hof-modal-card {
   background: rgba(13, 8, 32, 0.95);
@@ -5208,10 +5220,12 @@ footer a:hover { color: var(--purple-300); }
         <div class="stat-label">Total Wagered</div>
       </div>
     </div>
-    <div class="stat-item stat-key-3d" style="border-color:rgba(157, 0, 255, 0.3);">
+    <div class="stat-item stat-key-3d" style="border-color:rgba(0, 255, 229, 0.45); cursor:pointer;" onclick="openReferralModal()" title="Click to view Referral Program rules & claim details">
       <div class="stat-key-inner">
-        <div class="stat-value" style="font-size:1.05rem; color:#ffffff;">October 2026</div>
-        <div class="stat-label">Monthly Leaderboard</div>
+        <div class="stat-value" style="color:var(--cyan-400); font-size:clamp(1.5rem, 2.2vw, 1.95rem); display:flex; align-items:center; justify-content:center; gap:6px;">
+          <span>$5</span> <span style="font-size:0.72em; color:#ffd700; font-weight:800; background:rgba(255,215,0,0.12); padding:2px 8px; border-radius:6px; border:1px solid rgba(255,215,0,0.3);">+$10 BONUS</span>
+        </div>
+        <div class="stat-label" style="color:#ffffff;">Referral Rewards <span style="font-size:0.8em; color:var(--cyan-400);">ⓘ</span></div>
       </div>
     </div>
     <div class="stat-item stat-key-3d">
@@ -6059,6 +6073,91 @@ footer a:hover { color: var(--purple-300); }
 </section>
 
 <!-- ================================================================
+     REFERRAL PROGRAM MODAL OVERLAY ($5 / $10 REWARD SYSTEM)
+     ================================================================ -->
+<div id="referral-modal" class="modal-overlay">
+  <div class="modal-card ref-modal-card" style="max-width:720px; max-height:88vh; overflow-y:auto;">
+    <button class="modal-close" onclick="closeReferralModal()">×</button>
+    <div style="text-align:center; margin-bottom:24px;">
+      <div style="font-size:2.4rem; margin-bottom:6px; filter:drop-shadow(0 0 16px rgba(0,255,229,0.7));">🤝</div>
+      <h2 style="font-family:var(--font-display); font-size:1.75rem; font-weight:900; letter-spacing:0.04em; color:#ffffff; margin:0 0 6px 0;">
+        BIG D <span style="color:var(--cyan-400); text-shadow:0 0 16px rgba(0,255,229,0.5);">REFERRAL PROGRAM</span>
+      </h2>
+      <p style="font-family:var(--font-body); font-size:0.9rem; color:var(--text-secondary); margin:0;">
+        Bring players to the community, hit the performance benchmark, and earn cash payouts confirmed via Discord.
+      </p>
+    </div>
+
+    <!-- Referral Benchmark Card -->
+    <div style="background:rgba(0, 255, 229, 0.05); border:1px solid rgba(0, 255, 229, 0.3); border-radius:var(--radius-lg); padding:20px; margin-bottom:20px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+        <span style="font-family:var(--font-ui); font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.12em; color:var(--cyan-400);">
+          🎯 Player Qualification Benchmark
+        </span>
+        <span style="background:rgba(0,255,229,0.15); border:1px solid rgba(0,255,229,0.4); color:var(--cyan-400); font-family:var(--font-ui); font-weight:800; font-size:0.72rem; padding:3px 10px; border-radius:20px;">
+          $5 CASH PER QUALIFIED PLAYER
+        </span>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:14px;">
+        <div style="background:rgba(6,4,18,0.75); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;">
+          <div style="font-size:0.72rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Min Deposit</div>
+          <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#ffffff;">$25+</div>
+        </div>
+        <div style="background:rgba(6,4,18,0.75); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;">
+          <div style="font-size:0.72rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Min Wager</div>
+          <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:var(--cyan-400);">$5,000+</div>
+        </div>
+        <div style="background:rgba(6,4,18,0.75); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;">
+          <div style="font-size:0.72rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; margin-bottom:4px;">Yeet Points</div>
+          <div style="font-family:var(--font-display); font-size:1.3rem; font-weight:900; color:#ffd700;">10,000+ ⚡</div>
+        </div>
+      </div>
+
+      <p style="font-size:0.84rem; color:var(--text-secondary); margin:0; line-height:1.5;">
+        When your referred player meets all 3 criteria above, you unlock an immediate <strong>$5 Reward</strong>. Furthermore, you will get <strong>$5 every single time</strong> your referrals hit this stat milestone again!
+      </p>
+    </div>
+
+    <!-- Tier Milestone & Confirmation Grid -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;">
+      <!-- 5 Referrals Milestone Box -->
+      <div style="background:rgba(255, 215, 0, 0.05); border:1px solid rgba(255, 215, 0, 0.3); border-radius:var(--radius-md); padding:16px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+          <span style="font-size:1.2rem;">🌟</span>
+          <span style="font-family:var(--font-display); font-size:0.95rem; font-weight:900; color:#ffd700; text-transform:uppercase;">+$10 Bonus at 5 Referrals</span>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-secondary); margin:0; line-height:1.4;">
+          Hit our benchmark with <strong>5 referrals</strong> and receive an extra <strong>+$10 cash reward</strong> on top of your normal $5 payouts!
+        </p>
+      </div>
+
+      <!-- Discord Confirmation Box -->
+      <div style="background:rgba(88, 101, 242, 0.08); border:1px solid rgba(88, 101, 242, 0.35); border-radius:var(--radius-md); padding:16px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+          <span style="font-size:1.2rem;">💬</span>
+          <span style="font-family:var(--font-display); font-size:0.95rem; font-weight:900; color:#7289da; text-transform:uppercase;">Discord Confirmation</span>
+        </div>
+        <p style="font-size:0.8rem; color:var(--text-secondary); margin:0; line-height:1.4;">
+          All referral verifications and reward claims are reviewed and confirmed directly inside the official Big D Discord server.
+        </p>
+      </div>
+    </div>
+
+    <!-- Discord CTA Link -->
+    <div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap;">
+      <a href="https://discord.gg/aHSVMX4DCr" target="_blank" rel="noopener" class="hero-btn hero-btn-discord" style="padding:12px 28px; font-size:0.88rem; text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle; margin-right:6px;"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.893.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+        Confirm Referral in Discord
+      </a>
+      <button onclick="closeReferralModal()" class="campaign-toggle-btn" style="padding:11px 20px; font-size:0.85rem; cursor:pointer;">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
      HALL OF FAME MODAL OVERLAY (COMING SOON & SITE DETAILS)
      ================================================================ -->
 <div id="hof-modal" class="modal-overlay">
@@ -6663,8 +6762,16 @@ setInterval(refreshKickLiveStatus, 25000);
 
 
 /* ──────────────────────────────────────────
-   HALL OF FAME MODAL HANDLERS
+   HALL OF FAME & REFERRAL MODAL HANDLERS
    ────────────────────────────────────────── */
+function openReferralModal() {
+  const modal = document.getElementById('referral-modal');
+  if (modal) modal.classList.add('open');
+}
+function closeReferralModal() {
+  const modal = document.getElementById('referral-modal');
+  if (modal) modal.classList.remove('open');
+}
 function openHallOfFameModal() {
   const modal = document.getElementById('hof-modal');
   if (modal) modal.classList.add('open');
@@ -6674,9 +6781,13 @@ function closeHallOfFameModal() {
   if (modal) modal.classList.remove('open');
 }
 window.addEventListener('click', (e) => {
-  const modal = document.getElementById('hof-modal');
-  if (modal && e.target === modal) {
-    modal.classList.remove('open');
+  const hofModal = document.getElementById('hof-modal');
+  if (hofModal && e.target === hofModal) {
+    hofModal.classList.remove('open');
+  }
+  const refModal = document.getElementById('referral-modal');
+  if (refModal && e.target === refModal) {
+    refModal.classList.remove('open');
   }
 });
 
