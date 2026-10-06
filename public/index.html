@@ -5003,7 +5003,7 @@ footer a:hover { color: var(--purple-300); }
 
   <div class="hero-eyebrow">
     <span class="cyber-dot"></span>
-    <span>BigDGamesTV Official Hub &bull; $3,000 Monthly &bull; $125 Weekly VIP Airdrops</span>
+    <span>BigDGamesTV Official Hub &bull; $3,000 Monthly &bull; $100 Weekly VIP Airdrops</span>
   </div>
 
   <h1 class="hero-headline">
@@ -7977,7 +7977,7 @@ function renderSquidGameTracker(players) {
       const rawName = (p.username || 'Player').trim();
       const rankIdx = (players || []).indexOf(p) + 1;
       const isLeader = (rankIdx === 1) && (pVol > 0);
-      const isWinner = pVol >= 5000 && (rankIdx <= 5);
+      const isWinner = pVol >= 5000 && (rankIdx <= 3);
       const isSelected = selectedSquidPlayer && (selectedSquidPlayer.toLowerCase() === rawName.toLowerCase());
       const isUserSelf = Boolean(currentTokenUser && currentTokenUser.username && (currentTokenUser.username.toLowerCase() === rawName.toLowerCase()));
       const icon = avatarIcons[(players || []).indexOf(p) % avatarIcons.length] || '🦑';
@@ -8032,7 +8032,7 @@ function renderSquidGameTracker(players) {
               <div class="pin-tt-bar-fill" style="width: ${pPct}%;"></div>
             </div>
             ${isLeader ? '<div style="color:#ffd700; font-size:0.68rem; font-weight:800; margin-top:3px;">👑 #1 Weekly Leader</div>' : ''}
-            ${isWinner ? '<div style="color:#00ff80; font-size:0.68rem; font-weight:800; margin-top:2px;">✨ Top 5 VIP Qualified</div>' : ''}
+            ${isWinner ? `<div style="color:#00ff80; font-size:0.68rem; font-weight:800; margin-top:2px;">✨ Top 3 VIP Qualified ($${rankIdx === 1 ? 60 : (rankIdx === 2 ? 30 : 10)} Prize)</div>` : ''}
             <div class="pin-tt-footer">Click to inspect in Milestone HUD ➜</div>
           </div>
         </div>
@@ -8135,7 +8135,7 @@ function renderSquidGameTracker(players) {
   if (tcTargetVal) tcTargetVal.textContent = '$' + nextMilestone.target.toLocaleString();
   if (tcTargetSub) {
     tcTargetSub.textContent = activeWager >= 5000
-      ? 'VIP Airdrop Zone ($125 Weekly Pool)'
+      ? 'VIP Payout Zone ($100 Weekly Pool)'
       : `$${remToNext.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} to ${nextMilestone.name}`;
   }
   if (tcProgVal) tcProgVal.textContent = `$${activeWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / $5,000`;
@@ -8243,10 +8243,12 @@ function renderWeeklyLeaderboard(data) {
       : `<span>${escHtml(maskedName)}${tierBadge}${codeBadge}</span>`;
     const amtClass = rank === 1 ? 'wager-amount gold' : 'wager-amount';
 
-    // VIP Status & Airdrop Qualification
+    // VIP Status & Airdrop Qualification (Top 3 split: $60 / $30 / $10)
     let vipStatusHtml = '';
-    if (p.weekly_volume >= 5000 && rank <= 5) {
-      vipStatusHtml = `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,215,0,0.18); border:1px solid rgba(255,215,0,0.6); color:#ffd700; font-weight:800; font-size:0.75rem; padding:4px 8px; border-radius:6px; box-shadow:0 0 10px rgba(255,215,0,0.3);">👑 WINNER: $25 Split</span>`;
+    const weeklyPrizes = [60, 30, 10];
+    if (p.weekly_volume >= 5000 && rank <= 3) {
+      const prize = weeklyPrizes[rank - 1];
+      vipStatusHtml = `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,215,0,0.18); border:1px solid rgba(255,215,0,0.6); color:#ffd700; font-weight:800; font-size:0.75rem; padding:4px 8px; border-radius:6px; box-shadow:0 0 10px rgba(255,215,0,0.3);">👑 WINNER: $${prize} Payout</span>`;
     } else if (p.weekly_volume >= 5000) {
       vipStatusHtml = `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(0,255,229,0.15); border:1px solid rgba(0,255,229,0.4); color:var(--cyan-400); font-weight:800; font-size:0.75rem; padding:4px 8px; border-radius:6px;">⭐ VIP QUALIFIED</span>`;
     } else {
