@@ -507,43 +507,45 @@ body::after {
 .hero-poker-chip.chip-left-top {
   left: 6%;
   top: 14%;
-  width: 125px;
-  opacity: 0.85;
+  width: 90px;
+  opacity: 0.45;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 15px rgba(139, 92, 246, 0.25));
   animation: float-chip-1 7s ease-in-out infinite alternate;
 }
 .hero-poker-chip.chip-left-bottom {
   left: 4%;
   bottom: 22%;
-  width: 150px;
-  opacity: 0.82;
+  width: 105px;
+  opacity: 0.42;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 15px rgba(139, 92, 246, 0.25));
   animation: float-chip-2 8.5s ease-in-out infinite alternate;
 }
 
-/* 2 New Background Visuals on Right Side (Subtle, Atmospheric Opacity) */
+/* 2 Subtle Background Visuals on Right Side */
 .hero-poker-chip.chip-right-top {
   right: 7%;
   top: 16%;
-  width: 115px;
-  opacity: 0.78;
-  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 20px rgba(245, 196, 81, 0.35));
+  width: 80px;
+  opacity: 0.4;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 15px rgba(245, 196, 81, 0.2));
   animation: float-chip-3 9s ease-in-out infinite alternate;
 }
 .hero-poker-chip.chip-right-top:hover {
-  opacity: 1;
-  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 35px rgba(245, 196, 81, 0.7));
+  opacity: 0.8;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 25px rgba(245, 196, 81, 0.5));
 }
 
 .hero-poker-chip.chip-right-mid {
   right: 5%;
   bottom: 26%;
-  width: 135px;
-  opacity: 0.75;
-  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 20px rgba(0, 255, 229, 0.3));
+  width: 95px;
+  opacity: 0.38;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 15px rgba(0, 255, 229, 0.2));
   animation: float-chip-4 8s ease-in-out infinite alternate;
 }
 .hero-poker-chip.chip-right-mid:hover {
-  opacity: 1;
-  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 35px rgba(0, 255, 229, 0.65));
+  opacity: 0.8;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 25px rgba(0, 255, 229, 0.5));
 }
 
 @keyframes float-chip-1 {
@@ -568,17 +570,17 @@ body::after {
 }
 
 @media (max-width: 1024px) {
-  .hero-poker-chip.chip-left-top { width: 85px; left: 2%; top: 10%; }
-  .hero-poker-chip.chip-left-bottom { width: 105px; left: 1%; bottom: 15%; }
-  .hero-poker-chip.chip-right-top { width: 80px; right: 2%; top: 12%; }
-  .hero-poker-chip.chip-right-mid { width: 95px; right: 1%; bottom: 18%; }
+  .hero-poker-chip.chip-left-top { width: 65px; left: 2%; top: 10%; }
+  .hero-poker-chip.chip-left-bottom { width: 75px; left: 1%; bottom: 15%; }
+  .hero-poker-chip.chip-right-top { width: 60px; right: 2%; top: 12%; }
+  .hero-poker-chip.chip-right-mid { width: 70px; right: 1%; bottom: 18%; }
 }
 @media (max-width: 768px) {
-  .hero-poker-chip { opacity: 0.55; pointer-events: none; }
-  .hero-poker-chip.chip-left-top { width: 60px; left: 1%; top: 8%; }
-  .hero-poker-chip.chip-left-bottom { width: 75px; left: 1%; bottom: 8%; }
-  .hero-poker-chip.chip-right-top { width: 55px; right: 1%; top: 10%; }
-  .hero-poker-chip.chip-right-mid { width: 65px; right: 1%; bottom: 10%; }
+  .hero-poker-chip { opacity: 0.3; pointer-events: none; }
+  .hero-poker-chip.chip-left-top { width: 45px; left: 1%; top: 8%; }
+  .hero-poker-chip.chip-left-bottom { width: 55px; left: 1%; bottom: 8%; }
+  .hero-poker-chip.chip-right-top { width: 40px; right: 1%; top: 10%; }
+  .hero-poker-chip.chip-right-mid { width: 48px; right: 1%; bottom: 10%; }
 }
 
 /* Cosmic Floor Energy Portal / Radiant Disc */
@@ -639,24 +641,24 @@ body::after {
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   width: 100%;
-  max-width: 1140px;
-  margin: 36px auto 28px;
+  max-width: 980px;
+  margin: 28px auto 20px;
   position: relative;
   z-index: 2;
 }
 .hero-hud-stat-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-subtle);
+  background: rgba(18, 12, 34, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
-  padding: 16px 20px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   text-align: left;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
   position: relative;
   overflow: hidden;
 }
@@ -665,16 +667,16 @@ body::after {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.45), transparent);
+  background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3), transparent);
 }
 .hero-hud-stat-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--purple-400);
-  box-shadow: 0 0 25px rgba(168, 85, 247, 0.25), 0 12px 30px rgba(0, 0, 0, 0.6);
+  transform: translateY(-2px);
+  border-color: rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.2), 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 .hud-stat-icon-wrap {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
   background: rgba(139, 92, 246, 0.12);
   border: 1px solid rgba(139, 92, 246, 0.2);
@@ -1339,73 +1341,68 @@ body::after {
 .socials-eyebrow::after { left: 100%; margin-left: 14px; }
 
 .hero-socials-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
   width: 100%;
-}
-@media (max-width: 992px) {
-  .hero-socials-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-@media (max-width: 580px) {
-  .hero-socials-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 .social-cyber-card {
-  background: rgba(13, 8, 32, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(157, 0, 255, 0.22);
-  border-radius: var(--radius-md);
-  padding: 14px 16px;
+  background: rgba(18, 12, 36, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 30px;
+  padding: 8px 18px;
   position: relative;
   overflow: hidden;
   text-decoration: none;
   color: var(--text-primary);
-  display: block;
+  display: inline-flex;
+  align-items: center;
   cursor: pointer;
-  transition: all 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
 .social-card-inner {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   position: relative;
   z-index: 2;
 }
 
 .social-icon-wrapper {
-  width: 38px; height: 38px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.32s ease;
+  transition: all 0.25s ease;
   flex-shrink: 0;
+}
+.social-icon-wrapper svg {
+  width: 18px;
+  height: 18px;
 }
 
 .social-card-content {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .social-title {
-  font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
   font-weight: 800;
-  color: #ffffff;
-  letter-spacing: 0.03em;
-  transition: color 0.3s ease;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  transition: color 0.25s ease;
   white-space: nowrap;
 }
 
@@ -5449,7 +5446,183 @@ footer a:hover { color: var(--purple-300); }
         </div>
       </div>
 
+      <!-- THE AIRDROP GAUNTLET VIP SUITE (Unified Weekly Feature) -->
+      <div class="sg-suite-container" style="margin-bottom: 28px;">
+        
+        <!-- Interactive View Switcher (Switch between 3D Gauntlet Track, Milestone HUD, and Multiplayer Race) -->
+        <div class="sg-mode-switcher">
+          <div class="sg-mode-label">
+            <span>⚡</span> THE AIRDROP GAUNTLET
+          </div>
+          <div class="sg-mode-pills">
+            <button type="button" class="sg-mode-btn active" id="btn-mode-3d" onclick="switchSgView('3d')">
+              <span>🔥</span> 3D Gauntlet Arena
+            </button>
+            <button type="button" class="sg-mode-btn" id="btn-mode-horizontal" onclick="switchSgView('horizontal')">
+              <span>📊</span> Milestone HUD
+            </button>
+            <button type="button" class="sg-mode-btn" id="btn-mode-multiplayer" onclick="switchSgView('multiplayer')">
+              <span>👥</span> Multiplayer Race
+            </button>
+          </div>
+        </div>
 
+        <!-- VIEW 1: 3D GAUNTLET TRACK -->
+        <div class="sg-glass-arena" id="sg-view-3d">
+          <div class="sg-arena-header">
+            <div class="sg-arena-title-group">
+              <div class="sg-arena-badge">
+                <span>◯ △ ▢</span> 1. THE AIRDROP GAUNTLET (3D ARENA)
+              </div>
+              <div class="sg-arena-title">
+                Keep moving. <span>Don't stop until you reach the VIP zone.</span>
+              </div>
+              <div class="sg-arena-subtitle">
+                Wager on Yeet with code <strong style="color:#fff;">BIGDTV</strong> to sprint forward. Reach $5,000 Wager to unlock permanent VIP and split the $125 weekly payout (60-40-25 split for Top 3)!
+              </div>
+            </div>
+            <div class="sg-wager-pill">
+              <span id="sg-3d-wager-display">$0.00</span> / $5,000
+              <span class="sg-wager-pct" id="sg-3d-pct-display">0.0% complete</span>
+            </div>
+          </div>
+
+          <!-- Red Light Green Light Arena Stage with Clean Background & 3D Center Doll -->
+          <div class="sg-rlgl-stage" id="sg-rlgl-3d-stage">
+            <!-- 3D Layer 1: Atmospheric Sunset Scenery Plate (Clean Arena Background) -->
+            <div class="sg-3d-layer sg-3d-layer-sky">
+              <div class="sg-3d-sun-glow"></div>
+            </div>
+
+            <!-- 3D Layer 2: Giant Robotic Doll (Young-hee) with Laser Scanning Eyes & Status Beacon -->
+            <div class="sg-3d-layer sg-3d-layer-doll" id="sg-3d-doll">
+              <div class="sg-doll-silhouette" title="Airdrop Overseer">
+                <div class="sg-doll-img-wrap">
+                  <img src="/squid_doll_transparent.png" alt="Airdrop Gauntlet Overseer" class="sg-doll-img" />
+                  <div class="sg-doll-eye-lasers">
+                    <span class="sg-doll-laser-beam left"></span>
+                    <span class="sg-doll-laser-beam right"></span>
+                  </div>
+                </div>
+                <div class="sg-doll-status-beacon" id="sg-doll-status-beacon">
+                  <span class="sg-beacon-glow"></span>
+                  <span class="sg-beacon-text">SCANNING VIP TRACK</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3D Layer 3: Foreground Track & Status Callouts -->
+            <div class="sg-3d-layer sg-3d-layer-foreground">
+              <div class="sg-rlgl-callouts">
+                <div class="sg-callout-green">
+                  <span class="sg-co-tag">🟢 GREEN LIGHT</span>
+                  <span class="sg-co-sub">Keep wagering!</span>
+                </div>
+                <div class="sg-callout-red">
+                  <span class="sg-co-tag">🔴 RED LIGHT</span>
+                  <span class="sg-co-sub">VIP awaits…</span>
+                </div>
+              </div>
+
+              <!-- Asphalt Progression Strip with Spotlights & Runner -->
+              <div class="sg-rlgl-track-wrap">
+                <div class="sg-rlgl-asphalt-rail"></div>
+                <div class="sg-rlgl-green-fill" id="sg-rlgl-fill" style="width: 0%;"></div>
+                <div class="sg-rlgl-runners-layer" id="sg-rlgl-runners-layer"></div>
+                <div class="sg-rlgl-nodes" id="sg-3d-steps-container">
+                  <!-- Dynamically populated ($0, $1k, $2k, $3k, $4k, $5k VIP) -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 2: ENHANCED HORIZONTAL TRACK & 3-CARD TELEMETRY STRIP -->
+        <div class="sg-horizontal-arena" id="sg-view-horizontal" style="display: none;">
+          <div class="sg-arena-header">
+            <div class="sg-arena-title-group">
+              <div class="sg-arena-badge">
+                <span>◯ △ ▢</span> 2. MILESTONE HUD
+              </div>
+              <div class="sg-arena-title">
+                Track your sprint. <span>Unlock every stage to claim the VIP prize.</span>
+              </div>
+              <div class="sg-arena-subtitle">
+                Real-time milestone telemetry tracking your individual progress, active checkpoints, and distance to the next reward tier.
+              </div>
+            </div>
+            <div class="sg-wager-pill">
+              <span id="sg-h-wager-display">$0.00</span> / $5,000
+              <span class="sg-wager-pct" id="sg-h-pct-display">0.0% complete</span>
+            </div>
+          </div>
+
+          <div class="sg-h-track-wrap">
+            <div class="sg-h-rail"></div>
+            <div class="sg-h-rail-active" id="sg-h-rail-fill" style="width: 0%;"></div>
+            <div class="sg-h-runners-layer" id="sg-h-runners-layer"></div>
+            <div class="sg-h-nodes" id="sg-h-nodes-container">
+              <!-- Rendered horizontally -->
+            </div>
+          </div>
+
+          <!-- 3-Card Summary Strip -->
+          <div class="sg-3card-telemetry">
+            <div class="sg-telemetry-card">
+              <div class="sg-tc-header">🎯 NEXT TARGET</div>
+              <div class="sg-tc-value" id="sg-tc-target-val">$2,500</div>
+              <div class="sg-tc-sub" id="sg-tc-target-sub">$2,500 remaining to Stage 1</div>
+            </div>
+            <div class="sg-telemetry-card">
+              <div class="sg-tc-header">⚡ YOUR PROGRESS</div>
+              <div class="sg-tc-value" id="sg-tc-prog-val">$0.00 / $5,000</div>
+              <div class="sg-tc-sub" id="sg-tc-prog-sub">0.0% complete toward VIP</div>
+            </div>
+            <div class="sg-telemetry-card" style="border-color:rgba(255,215,0,0.35); background:rgba(255,215,0,0.04);">
+              <div class="sg-tc-header" style="color:#ffd700;">👑 VIP REWARD</div>
+              <div class="sg-tc-value" style="color:#ffd700;">$5,000 Wager</div>
+              <div class="sg-tc-sub">VIP Payout Zone ($125 Weekly Pool &bull; 60/40/25 Split)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 3: MULTIPLAYER LIVE COMPARISON RACER -->
+        <div class="sg-multiplayer-arena" id="sg-view-multiplayer" style="display: none;">
+          <div class="sg-arena-header">
+            <div class="sg-arena-title-group">
+              <div class="sg-arena-badge">
+                <span>◯ △ ▢</span> 3. MULTIPLAYER RACE (LIVE COMPARISON)
+              </div>
+              <div class="sg-arena-title">
+                See how you <span>stack up against other racers.</span>
+              </div>
+            </div>
+            <div class="sg-wager-pill">
+              <span>$125 PAYOUT</span>
+              <span class="sg-wager-pct">Top 3 VIPs Split $60 / $40 / $25</span>
+            </div>
+          </div>
+
+          <div class="sg-multiplayer-grid">
+            <!-- Left Column: Top Players Table -->
+            <div>
+              <div class="sg-mp-col-title">TOP RACERS THIS WEEK</div>
+              <div id="sg-mp-table-list">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Right Column: Parallel Progression Tracks -->
+            <div>
+              <div class="sg-mp-col-title">LIVE PROGRESSION TRACK ($0 → $5k VIP)</div>
+              <div id="sg-mp-bars-list">
+                <!-- Dynamically populated racing bars -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
 
       <!-- Weekly Filter Tabs -->
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
