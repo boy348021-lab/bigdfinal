@@ -5033,7 +5033,7 @@ footer a:hover { color: var(--purple-300); }
     </a>
 
     <!-- Button 2: Watch Live (Dynamic Status Button) -->
-    <a href="https://kick.com/BigDgamesTV" target="_blank" rel="noopener" class="hero-btn hero-btn-watch-live is-offline">
+    <a href="https://kick.com/BigDgamesTV" target="_blank" rel="noopener" class="hero-btn hero-btn-watch-live is-offline" id="hero-watch-live-btn">
       <svg class="hero-btn-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       <span>Watch Live</span>
       <span class="btn-status-tag" id="watch-live-status-tag">OFFLINE</span>
@@ -5453,6 +5453,7 @@ footer a:hover { color: var(--purple-300); }
         <div class="sg-mode-switcher">
           <div class="sg-mode-label">
             <span>⚡</span> THE AIRDROP GAUNTLET
+            <span style="font-size:0.7rem; font-weight:800; background:rgba(0,255,229,0.12); border:1px solid rgba(0,255,229,0.3); color:var(--cyan-400); padding:2px 8px; border-radius:12px; margin-left:8px; letter-spacing:0.04em;">🤝 BIGD + BIGBALLZ COMBINED</span>
           </div>
           <div class="sg-mode-pills">
             <button type="button" class="sg-mode-btn active" id="btn-mode-3d" onclick="switchSgView('3d')">
@@ -5472,13 +5473,13 @@ footer a:hover { color: var(--purple-300); }
           <div class="sg-arena-header">
             <div class="sg-arena-title-group">
               <div class="sg-arena-badge">
-                <span>◯ △ ▢</span> 1. THE AIRDROP GAUNTLET (3D ARENA)
+                <span>◯ △ ▢</span> 1. THE AIRDROP GAUNTLET (3D ARENA) • JOINT POOL
               </div>
               <div class="sg-arena-title">
                 Keep moving. <span>Don't stop until you reach the VIP zone.</span>
               </div>
               <div class="sg-arena-subtitle">
-                Wager on Yeet with code <strong style="color:#fff;">BIGDTV</strong> to sprint forward. Reach $5,000 Wager to unlock permanent VIP and split the $125 weekly payout (60-40-25 split for Top 3)!
+                Wager on Yeet using code <strong style="color:var(--cyan-400);">BIGDTV</strong> or <strong style="color:#ffd700;">BIGBALLZ</strong> to sprint forward! Combined player pool & shared airdrop rewards. Reach $5,000 Wager to unlock permanent VIP and split the $125 weekly payout (60-40-25 split for Top 3 VIPs)!
               </div>
             </div>
             <div class="sg-wager-pill">
@@ -5542,13 +5543,13 @@ footer a:hover { color: var(--purple-300); }
           <div class="sg-arena-header">
             <div class="sg-arena-title-group">
               <div class="sg-arena-badge">
-                <span>◯ △ ▢</span> 2. MILESTONE HUD
+                <span>◯ △ ▢</span> 2. MILESTONE HUD • COMBINED RACE
               </div>
               <div class="sg-arena-title">
                 Track your sprint. <span>Unlock every stage to claim the VIP prize.</span>
               </div>
               <div class="sg-arena-subtitle">
-                Real-time milestone telemetry tracking your individual progress, active checkpoints, and distance to the next reward tier.
+                Real-time milestone telemetry tracking your individual progress, active checkpoints, and distance to the next reward tier across the shared BIGDTV + BIGBALLZ race pool.
               </div>
             </div>
             <div class="sg-wager-pill">
@@ -5581,7 +5582,7 @@ footer a:hover { color: var(--purple-300); }
             <div class="sg-telemetry-card" style="border-color:rgba(255,215,0,0.35); background:rgba(255,215,0,0.04);">
               <div class="sg-tc-header" style="color:#ffd700;">👑 VIP REWARD</div>
               <div class="sg-tc-value" style="color:#ffd700;">$5,000 Wager</div>
-              <div class="sg-tc-sub">VIP Payout Zone ($125 Weekly Pool &bull; 60/40/25 Split)</div>
+              <div class="sg-tc-sub">Joint VIP Payout Zone ($125 Weekly Pool &bull; 60/40/25 Split)</div>
             </div>
           </div>
         </div>
@@ -5591,10 +5592,10 @@ footer a:hover { color: var(--purple-300); }
           <div class="sg-arena-header">
             <div class="sg-arena-title-group">
               <div class="sg-arena-badge">
-                <span>◯ △ ▢</span> 3. MULTIPLAYER RACE (LIVE COMPARISON)
+                <span>◯ △ ▢</span> 3. MULTIPLAYER RACE (BIGD + BIGBALLZ POOL)
               </div>
               <div class="sg-arena-title">
-                See how you <span>stack up against other racers.</span>
+                See how you <span>stack up against other racers across both codes.</span>
               </div>
             </div>
             <div class="sg-wager-pill">
@@ -5631,13 +5632,13 @@ footer a:hover { color: var(--purple-300); }
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button class="campaign-toggle-btn active" id="code-btn-weekly-all" onclick="setWeeklyCodeFilter('all')" style="font-size:0.75rem; padding:5px 12px;">
-            🌐 All Codes
+            🌐 Combined Race (BIGD + BigBallz)
           </button>
           <button class="campaign-toggle-btn" id="code-btn-weekly-bigd" onclick="setWeeklyCodeFilter('bigd')" style="font-size:0.75rem; padding:5px 12px;">
-            ⚡ Code BIGDTV
+            ⚡ Code BIGDTV Only
           </button>
           <button class="campaign-toggle-btn" id="code-btn-weekly-bigballz" onclick="setWeeklyCodeFilter('bigballz')" style="font-size:0.75rem; padding:5px 12px;">
-            💎 Code BigBallz
+            💎 Code BigBallz Only
           </button>
         </div>
       </div>

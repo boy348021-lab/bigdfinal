@@ -283,39 +283,24 @@ function fetchKickViaPython() {
 }
 
 async function getKickLiveStatus() {
-  if (process.env.KICK_OVERRIDE_LIVE === 'true' || process.env.KICK_OVERRIDE_LIVE === '1') {
-    return { live: true, channel: process.env.KICK_CHANNEL || "bigdgamestv", checkedAt: Date.now(), ok: true, override: true };
-  }
-
-  const now = Date.now();
   const channel = process.env.KICK_CHANNEL || "bigdgamestv";
+  const now = Date.now();
 
-  // Check explicit override mode first
-  if (kickOverrideMode === "live") {
-    kickCache = { live: true, channel, checkedAt: now, ok: true, mode: "live" };
-    return kickCache;
-  }
-  if (kickOverrideMode === "offline") {
-    kickCache = { live: false, channel, checkedAt: now, ok: true, mode: "offline" };
-    return kickCache;
+  if (process.env.KICK_OVERRIDE_LIVE === 'true' || process.env.KICK_OVERRIDE_LIVE === '1') {
+    kickOverrideMode = 'live';
   }
 
-  if (kickCache.checkedAt && (now - kickCache.checkedAt < KICK_CACHE_TTL)) {
+  // Return fresh cache if within TTL
+  if (kickCache && kickCache.checkedAt && (now - kickCache.checkedAt < KICK_CACHE_TTL)) {
     return kickCache;
   }
-  
-  let isLive = false;
-  let success = false;
 
-  // Primary Method: Python scraper helper (bypasses Cloudflare using impersonated TLS)
+  // Primary Method: Python scraper helper (bypasses Cloudflare using modern headers / curl_cffi)
   const pyResult = await fetchKickViaPython();
-  if (pyResult && pyResult.ok) {
-    isLive = Boolean(pyResult.live);
-    success = true;
-  }
+  let baseData = (pyResult && pyResult.ok) ? pyResult : null;
 
   // Fallback Method: Direct fetch if Python helper had an issue
-  if (!success || !isLive) {
+  if (!baseData) {
     try {
       const res = await fetch(`https://kick.com/api/v2/channels/${channel}`, {
         headers: {
@@ -324,30 +309,60 @@ async function getKickLiveStatus() {
         }
       });
       if (res.ok) {
-        const data = await res.json();
-        success = true;
-        if (data.livestream && data.livestream.is_live !== false) {
-          isLive = true;
-        } else if (data.livestream !== null && data.livestream !== undefined) {
-          isLive = true;
-        }
+        const d = await res.json();
+        const user = d.user || {};
+        const categories = d.recent_categories || [];
+        const recentCat = categories[0] || {};
+        const livestream = d.livestream;
+        baseData = {
+          live: Boolean(livestream && livestream.is_live !== false),
+          ok: true,
+          channel,
+          username: user.username || "BigDgamesTV",
+          bio: user.bio || "Turning Dreams into reality",
+          profile_pic: user.profile_pic,
+          banner_image: d.banner_image && d.banner_image.url,
+          followers_count: d.followers_count || 1328,
+          category: recentCat.name || "Slots & Casino",
+          category_icon: recentCat.category && recentCat.category.icon || "🎰",
+          playback_url: d.playback_url,
+          stream: livestream ? {
+            session_title: livestream.session_title,
+            viewer_count: livestream.viewer_count || 0,
+            category: (livestream.categories && livestream.categories[0] && livestream.categories[0].name) || recentCat.name || "Slots & Casino",
+            thumbnail: livestream.thumbnail && livestream.thumbnail.url,
+            created_at: livestream.created_at
+          } : null
+        };
       }
     } catch (e) {}
   }
 
-  // If automated detection was inconclusive, safely default to false (offline)
-  if (!success) {
-    isLive = false;
-    success = false;
+  if (!baseData) {
+    baseData = {
+      live: false,
+      ok: false,
+      channel,
+      username: "BigDgamesTV",
+      bio: "Turning Dreams into reality",
+      profile_pic: "https://files.kick.com/images/user/51172020/profile_image/conversion/e7e16f19-c72d-4fe3-a289-76d7f58a1873-fullsize.webp",
+      followers_count: 1328,
+      category: "Slots & Casino"
+    };
   }
 
-  kickCache = {
-    live: isLive,
-    channel: channel,
-    checkedAt: now,
-    ok: success,
-    mode: kickOverrideMode
-  };
+  // Apply explicit override mode if set
+  if (kickOverrideMode === "live") {
+    baseData.live = true;
+    baseData.override = true;
+  } else if (kickOverrideMode === "offline") {
+    baseData.live = false;
+    baseData.override = true;
+  }
+
+  baseData.checkedAt = now;
+  baseData.mode = kickOverrideMode;
+  kickCache = baseData;
   return kickCache;
 }
 

@@ -206,61 +206,182 @@
       border: none;
     }
 
-    /* Offline Card Container */
+    /* Offline Card Container — Rich Big D Kick Channel Card */
     .bkw-offline-card {
-      text-align: center;
-      background: #0f121d;
-      justify-content: center;
-      align-items: center;
-      padding: 22px 16px;
-      display: flex;
+      background: #0d081e;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
       box-sizing: border-box;
-      width: 100%;
-    }
-
-    .bkw-offline-content {
-      align-items: center;
-      flex-direction: column;
-      gap: 10px;
       display: flex;
+      flex-direction: column;
+    }
+
+    .bkw-banner-wrap {
       width: 100%;
+      height: 72px;
+      position: relative;
+      background: linear-gradient(135deg, #1f103d 0%, #0d081e 100%);
+      overflow: hidden;
     }
 
-    .bkw-offline-icon {
-      font-size: 1.8rem;
-      line-height: 1;
+    .bkw-banner-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.85;
+      display: block;
     }
 
-    .bkw-offline-title {
-      color: #94a3b8;
+    .bkw-banner-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(13,8,30,0.95) 100%);
+    }
+
+    .bkw-profile-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      padding: 0 14px;
+      margin-top: -26px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .bkw-avatar-img {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 2px solid #53fc18;
+      box-shadow: 0 0 14px rgba(83, 252, 24, 0.45);
+      background: #140b28;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .bkw-user-meta {
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 2px;
+      overflow: hidden;
+    }
+
+    .bkw-display-name {
+      font-family: var(--font-display, 'Orbitron', sans-serif);
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .bkw-verified-check {
+      color: #53fc18;
+      font-size: 0.8rem;
+    }
+
+    .bkw-stats-pill-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      color: #a79fc2;
+      margin-top: 2px;
+    }
+
+    .bkw-followers-stat {
+      color: #ffd700;
+      font-weight: 700;
+    }
+
+    .bkw-bio-text {
+      font-family: var(--font-ui, 'Rajdhani', sans-serif);
+      font-size: 0.78rem;
+      color: #b8b0d4;
+      line-height: 1.35;
+      padding: 8px 14px 10px;
       margin: 0;
-      font-size: 0.85rem;
-      font-weight: 600;
-      letter-spacing: 0.01em;
+      text-align: left;
+    }
+
+    .bkw-footer-action-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    .bkw-category-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #00ffe5;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      letter-spacing: 0.04em;
     }
 
     /* Visit Channel Button */
     .bkw-visit-btn {
-      color: #53fc18;
+      color: #000000;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      background: rgba(83, 252, 24, 0.12);
-      border: 1px solid rgba(83, 252, 24, 0.4);
+      letter-spacing: 0.06em;
+      background: #53fc18;
+      border: 1px solid #53fc18;
       border-radius: 6px;
-      margin-top: 6px;
-      padding: 6px 14px;
-      font-size: 0.76rem;
-      font-weight: 800;
+      padding: 5px 12px;
+      font-size: 0.72rem;
+      font-weight: 900;
       text-decoration: none;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 0 12px rgba(83, 252, 24, 0.35);
     }
 
     .bkw-visit-btn:hover, .bkw-visit-btn:active {
       color: #000000;
-      background: #53fc18;
-      box-shadow: 0 0 16px rgba(83, 252, 24, 0.6);
-      transform: translateY(-1px);
+      background: #66ff33;
+      box-shadow: 0 0 20px rgba(83, 252, 24, 0.8);
+      transform: translateY(-1px) scale(1.02);
+    }
+
+    /* Live Stream Info Strip in Widget */
+    .bkw-live-info-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 12px;
+      background: rgba(0, 0, 0, 0.75);
+      border-top: 1px solid rgba(0, 231, 1, 0.3);
+      font-size: 0.72rem;
+      color: #fff;
+    }
+
+    .bkw-live-title-trunc {
+      font-weight: 800;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 170px;
+    }
+
+    .bkw-live-viewers-tag {
+      color: #00e701;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     /* Minimized Compact Mode */
@@ -282,7 +403,7 @@
     /* Mobile Phones (Compact & Perfectly Scaled) */
     @media (max-width: 600px) {
       #bigd-kick-floating-widget {
-        width: 220px;
+        width: 250px;
         border-radius: 12px;
       }
       .bkw-header {
@@ -300,17 +421,25 @@
         height: 26px;
         font-size: 0.95rem;
       }
-      .bkw-offline-card {
-        padding: 14px 10px;
+      .bkw-banner-wrap {
+        height: 55px;
       }
-      .bkw-offline-icon {
-        font-size: 1.4rem;
+      .bkw-avatar-img {
+        width: 44px;
+        height: 44px;
       }
-      .bkw-offline-title {
+      .bkw-display-name {
+        font-size: 0.82rem;
+      }
+      .bkw-bio-text {
         font-size: 0.72rem;
+        padding: 6px 10px 8px;
+      }
+      .bkw-footer-action-row {
+        padding: 6px 10px 10px;
       }
       .bkw-visit-btn {
-        padding: 5px 12px;
+        padding: 4px 10px;
         font-size: 0.68rem;
       }
     }
@@ -338,7 +467,7 @@
       </div>
     </div>
     <div class="bkw-body" id="bkw-body">
-      <!-- Injected dynamically based on live status -->
+      <!-- Injected dynamically based on live status & channel data -->
     </div>
   `;
 
@@ -348,7 +477,7 @@
   function clampPosition(left, top) {
     const rect = widget.getBoundingClientRect();
     const width = rect.width || 280;
-    const height = rect.height || 180;
+    const height = rect.height || 220;
     const margin = 12;
 
     const maxLeft = Math.max(margin, window.innerWidth - width - margin);
@@ -387,9 +516,9 @@
       }
     } catch (e) {}
 
-    // Default position: Bottom-Right
+    // Default position: Bottom-Right with safe clearance
     const defaultLeft = window.innerWidth - 300;
-    const defaultTop = window.innerHeight - 220;
+    const defaultTop = window.innerHeight - 250;
     applyPosition(defaultLeft, defaultTop);
   }
 
@@ -476,13 +605,12 @@
   header.addEventListener('pointerdown', onPointerDown);
   header.addEventListener('touchstart', onPointerDown, { passive: true });
 
-  // ─── 5. Update UI for Live vs Offline (Matching Fraez.co Logic) ─────────────
-  let previousLiveState = null;
+  // ─── 5. Update UI for Live vs Offline (Full Rich Profile & Sync) ────────────
+  let lastDataChecksum = null;
 
-  function updateWidgetUI(liveState) {
-    const isNowLive = Boolean(liveState);
-    if (previousLiveState === isNowLive) return;
-    previousLiveState = isNowLive;
+  function updateWidgetUI(data) {
+    if (!data) return;
+    const isNowLive = Boolean(data.live);
     isLive = isNowLive;
 
     const pill = document.getElementById('bkw-status-pill');
@@ -491,22 +619,46 @@
 
     if (!pill || !body) return;
 
-    // Sync hero header Watch Live button status tag
+    // Sync all live badges & hero buttons across the entire page
     const heroWatchTag = document.getElementById('watch-live-status-tag');
-    const heroWatchBtn = document.querySelector('.hero-btn-watch-live');
+    const heroWatchBtn = document.getElementById('hero-watch-live-btn') || document.querySelector('.hero-btn-watch-live');
+    const navKickBadge = document.getElementById('kick-live-badge');
+    const navKickText = document.getElementById('kick-live-text');
+
+    if (navKickBadge) {
+      navKickBadge.classList.toggle('is-live', isLive);
+      navKickBadge.classList.toggle('is-offline', !isLive);
+    }
+    if (navKickText) {
+      navKickText.textContent = isLive ? 'LIVE' : 'OFFLINE';
+    }
+
+    if (heroWatchTag) {
+      heroWatchTag.textContent = isLive ? 'LIVE' : 'OFFLINE';
+    }
+    if (heroWatchBtn) {
+      heroWatchBtn.classList.toggle('is-live', isLive);
+      heroWatchBtn.classList.toggle('is-offline', !isLive);
+    }
+
+    // Default metadata values
+    const profilePic = data.profile_pic || 'https://files.kick.com/images/user/51172020/profile_image/conversion/e7e16f19-c72d-4fe3-a289-76d7f58a1873-fullsize.webp';
+    const bannerImg = data.banner_image || 'https://files.kick.com/images/channel/50054368/banner_image/8825687f-117a-447c-8a9a-7fd1af07ae2f';
+    const username = data.username || 'BigDgamesTV';
+    const bio = data.bio || 'Turning Dreams into reality';
+    const followers = (data.followers_count || 1328).toLocaleString();
+    const category = data.category || 'Slots & Casino';
+    const categoryIcon = data.category_icon || '🎰';
 
     if (isLive) {
       widget.classList.add('is-live-mode');
       pill.className = 'bkw-status-pill live';
       statusText.textContent = 'LIVE';
 
-      if (heroWatchTag) heroWatchTag.textContent = 'LIVE';
-      if (heroWatchBtn) {
-        heroWatchBtn.classList.remove('is-offline');
-        heroWatchBtn.classList.add('is-live');
-      }
+      const streamInfo = data.stream || {};
+      const streamTitle = streamInfo.session_title || 'Big D Live Stream';
+      const viewers = streamInfo.viewer_count ? streamInfo.viewer_count.toLocaleString() : null;
 
-      // Inject 16:9 Kick live stream iframe
       body.innerHTML = `
         <div class="bkw-iframe-wrap">
           <iframe 
@@ -517,25 +669,43 @@
             allow="autoplay; fullscreen"
           ></iframe>
         </div>
+        <div class="bkw-live-info-strip">
+          <div class="bkw-live-title-trunc" title="${streamTitle}">🔴 ${streamTitle}</div>
+          <div class="bkw-live-viewers-tag">
+            <span>👥</span> ${viewers ? viewers + ' viewers' : 'Streaming now'}
+          </div>
+        </div>
       `;
     } else {
       widget.classList.remove('is-live-mode');
       pill.className = 'bkw-status-pill offline';
       statusText.textContent = 'OFFLINE';
 
-      if (heroWatchTag) heroWatchTag.textContent = 'OFFLINE';
-      if (heroWatchBtn) {
-        heroWatchBtn.classList.remove('is-live');
-        heroWatchBtn.classList.add('is-offline');
-      }
-
-      // Inject offline card matching fraez.co layout
       body.innerHTML = `
         <div class="bkw-offline-card">
-          <div class="bkw-offline-content">
-            <span class="bkw-offline-icon">📺</span>
-            <p class="bkw-offline-title">Big D is currently offline</p>
-            <a href="${KICK_URL}" target="_blank" rel="noopener" class="bkw-visit-btn">Visit Channel</a>
+          <div class="bkw-banner-wrap">
+            <img src="${bannerImg}" alt="${username} Kick Banner" class="bkw-banner-img" />
+            <div class="bkw-banner-overlay"></div>
+          </div>
+          <div class="bkw-profile-row">
+            <img src="${profilePic}" alt="${username}" class="bkw-avatar-img" />
+            <div class="bkw-user-meta">
+              <div class="bkw-display-name">
+                ${username} <span class="bkw-verified-check" title="Verified Creator">✓</span>
+              </div>
+              <div class="bkw-stats-pill-row">
+                <span class="bkw-followers-stat">${followers}</span> followers
+              </div>
+            </div>
+          </div>
+          <p class="bkw-bio-text">"${bio}"</p>
+          <div class="bkw-footer-action-row">
+            <div class="bkw-category-tag">
+              <span>${categoryIcon}</span> ${category}
+            </div>
+            <a href="${KICK_URL}" target="_blank" rel="noopener" class="bkw-visit-btn">
+              Watch on Kick ➜
+            </a>
           </div>
         </div>
       `;
@@ -545,37 +715,42 @@
   // ─── 6. Fetch & Poll Live Status (Multiple Fallbacks) ──────────────────────
   async function checkKickLive() {
     try {
-      // 1. Check our primary server endpoint
+      // 1. Check primary server endpoint with rich metadata
       const res = await fetch('/api/kick-live', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
-        if (typeof data.live === 'boolean') {
-          updateWidgetUI(data.live);
-          return;
-        }
+        updateWidgetUI(data);
+        return;
       }
     } catch (e) {}
 
     try {
-      // 2. Direct client fallback to Kick public channel endpoint if server is unreachable
+      // 2. Direct client fallback to Kick public channel endpoint
       const res = await fetch(`https://kick.com/api/v2/channels/${KICK_CHANNEL}`, {
         headers: { 'Accept': 'application/json' },
         cache: 'no-store'
       });
       if (res.ok) {
-        const data = await res.json();
-        const live = Boolean(data && data.livestream !== null && data.livestream !== undefined && data.livestream.is_live !== false);
-        updateWidgetUI(live);
+        const d = await res.json();
+        const live = Boolean(d && d.livestream !== null && d.livestream !== undefined && d.livestream.is_live !== false);
+        updateWidgetUI({
+          live,
+          username: d.user && d.user.username,
+          bio: d.user && d.user.bio,
+          profile_pic: d.user && d.user.profile_pic,
+          banner_image: d.banner_image && d.banner_image.url,
+          followers_count: d.followers_count,
+          category: d.recent_categories && d.recent_categories[0] && d.recent_categories[0].name
+        });
         return;
       }
     } catch (e) {}
 
-    updateWidgetUI(false);
+    updateWidgetUI({ live: false });
   }
 
   // ─── 7. First-Screen-Only Visibility (Hide on Scroll) ──────────────────────
   function handleScrollVisibility() {
-    // Determine the hero section boundary so the widget stays visible on the landing screen
     const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
     const heroEl = document.getElementById('hero') || document.querySelector('.hero');
     const threshold = heroEl ? (heroEl.offsetTop + heroEl.offsetHeight - 120) : (window.innerHeight * 0.85);
