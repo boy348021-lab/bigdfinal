@@ -1493,6 +1493,38 @@ body::after {
 }
 .card-hof:hover .social-icon-wrapper { background: rgba(255, 215, 0, 0.25); border-color: #ffd700; color: #ffd700; transform: scale(1.1); }
 
+.card-monthly-race {
+  border-color: rgba(255, 215, 0, 0.35);
+  background: rgba(255, 215, 0, 0.06);
+}
+.card-monthly-race:hover {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.14);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.35), 0 16px 40px rgba(0, 0, 0, 0.6);
+  transform: translateY(-6px);
+}
+.card-monthly-race:hover .social-icon-wrapper {
+  background: rgba(255, 215, 0, 0.25);
+  border-color: #ffd700;
+  color: #ffd700;
+  transform: scale(1.1);
+}
+
+.kpi-chip-card.kpi-chip-gold {
+  border-color: rgba(255, 215, 0, 0.3);
+  background: rgba(255, 215, 0, 0.035);
+  box-shadow: inset 0 0 14px rgba(255, 215, 0, 0.05);
+}
+.kpi-chip-card.kpi-chip-gold:hover {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.1);
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.3), 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+.kpi-chip-card.kpi-chip-gold .kpi-chip-icon {
+  background: rgba(255, 215, 0, 0.15);
+  border-color: rgba(255, 215, 0, 0.35);
+}
+
 /* Hall of Fame Modal */
 #hof-modal, #referral-modal {
   display: none;
@@ -2088,27 +2120,34 @@ body::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 0 40px;
+  gap: 8px;
+  padding: 0 20px 8px;
   margin-bottom: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.tabs-nav::-webkit-scrollbar {
+  display: none;
 }
 .tab-btn {
   font-family: var(--font-ui);
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 12px 28px;
-  border: 1px solid transparent;
-  border-bottom: none;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  padding: 12px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px 12px 0 0;
   color: var(--text-muted);
-  background: transparent;
+  background: rgba(13, 8, 30, 0.5);
   transition: all 0.25s ease;
   display: flex;
   align-items: center;
   gap: 8px;
   position: relative;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .tab-btn:hover {
   color: var(--purple-300);
@@ -2314,6 +2353,65 @@ body::after {
   letter-spacing: 0.04em;
 }
 .lb-period-banner strong { color: var(--purple-300); }
+
+/* Show More / Show Less Leaderboard Pagination Controls */
+.lb-show-more-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 18px 0 6px;
+  width: 100%;
+}
+.btn-show-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(26, 16, 48, 0.95) 0%, rgba(13, 8, 26, 0.98) 100%);
+  border: 1px solid rgba(136, 0, 255, 0.45);
+  border-radius: 24px;
+  color: #ffffff;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 24px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(136, 0, 255, 0.15);
+}
+.btn-show-more:hover {
+  background: linear-gradient(135deg, rgba(136, 0, 255, 0.25) 0%, rgba(0, 255, 229, 0.12) 100%);
+  border-color: var(--cyan-400);
+  color: var(--cyan-400);
+  box-shadow: 0 0 20px rgba(0, 255, 229, 0.35);
+  transform: translateY(-2px);
+}
+.btn-show-more .toggle-icon {
+  display: inline-block;
+  font-size: 0.95rem;
+  transition: transform 0.25s ease;
+}
+
+/* Monthly Tab Button Glow Enhancement */
+.tab-btn#tab-btn-monthly {
+  border-color: rgba(255, 215, 0, 0.35);
+  background: rgba(255, 215, 0, 0.06);
+  color: #ffd700;
+}
+.tab-btn#tab-btn-monthly:hover {
+  border-color: #ffd700;
+  color: #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), inset 0 0 12px rgba(255, 215, 0, 0.1);
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+}
+.tab-btn#tab-btn-monthly.active {
+  background: rgba(255, 215, 0, 0.16);
+  border-color: #ffd700;
+  color: #ffd700;
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.25);
+}
 
 /* ============================================================
    BONUSES SECTION
@@ -2654,6 +2752,249 @@ body::after {
   border-color: rgba(0, 255, 229, 0.7);
   box-shadow: 0 0 14px rgba(0, 255, 229, 0.4);
   transform: scale(1.06);
+}
+
+/* ============================================================
+   STREAMLINED LANDING PAGE: UNIFIED KPI DOCK & INTEL HUB
+   ============================================================ */
+.hero-kpi-dock {
+  position: relative;
+  z-index: 10;
+  max-width: 1180px;
+  margin: -10px auto 36px;
+  padding: 0 16px;
+}
+
+.kpi-dock-inner {
+  background: rgba(13, 8, 30, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(157, 0, 255, 0.3);
+  border-radius: 20px;
+  padding: 16px 24px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55), 0 0 30px rgba(157, 0, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.kpi-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 1240px) {
+  .kpi-chips-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 860px) {
+  .kpi-chips-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 520px) {
+  .kpi-chips-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.kpi-chip-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.kpi-chip-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 255, 229, 0.4);
+  background: rgba(0, 255, 229, 0.04);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+.kpi-chip-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(157, 0, 255, 0.12);
+  border: 1px solid rgba(157, 0, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.kpi-chip-data {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.kpi-chip-val {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.kpi-chip-label {
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kpi-dock-ticker {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
+}
+
+.kpi-ticker-badge {
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--cyan-400);
+  background: #0f0a1c;
+  border: 1px solid rgba(0, 255, 229, 0.45);
+  padding: 5px 12px;
+  border-radius: 8px;
+  margin-right: 18px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 0 16px rgba(0, 255, 229, 0.25), 4px 0 16px rgba(15, 10, 28, 0.9);
+}
+
+.kpi-ticker-track {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  white-space: nowrap;
+  animation: tickerScroll 40s linear infinite;
+  flex-grow: 1;
+}
+
+/* COMMUNITY INTEL HUB (3-TAB CARD: HOW TO PLAY | SCORING MATH | HALL OF FAME) */
+.intel-hub-section {
+  position: relative;
+  z-index: 5;
+  max-width: 1180px;
+  margin: 40px auto 48px;
+  padding: 0 16px;
+}
+
+.intel-hub-card {
+  background: radial-gradient(circle at 50% 0%, rgba(20, 14, 42, 0.94), rgba(9, 6, 22, 0.98));
+  border: 1px solid rgba(157, 0, 255, 0.32);
+  border-radius: 24px;
+  padding: 32px 30px;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.6), 0 0 35px rgba(157, 0, 255, 0.12);
+}
+
+.intel-hub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 18px;
+}
+
+.intel-hub-title-group h2 {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.intel-hub-title-group p {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: var(--cyan-400);
+  margin: 4px 0 0;
+}
+
+.intel-tab-switches {
+  display: flex;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.intel-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.intel-tab-btn:hover {
+  color: #ffffff;
+}
+
+.intel-tab-btn.active {
+  background: linear-gradient(135deg, rgba(157, 0, 255, 0.3), rgba(0, 255, 229, 0.2));
+  color: #ffffff;
+  border: 1px solid rgba(0, 255, 229, 0.35);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.intel-panel {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.intel-panel.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ============================================================
@@ -5040,55 +5381,6 @@ footer a:hover { color: var(--purple-300); }
     </a>
   </div>
 
-  <!-- FUTURISTIC 5-CARD HERO STATS HUD -->
-  <div class="hero-hud-stats-grid">
-    <!-- Stat 1: Community Wager -->
-    <div class="hero-hud-stat-card">
-      <div class="hud-stat-icon-wrap" style="color:var(--purple-400);">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-      </div>
-      <div class="hud-stat-info">
-        <div class="hud-stat-value">$<span id="stat-monthly-wager-val">0</span><span class="val-sup">+</span></div>
-        <div class="hud-stat-label">October Wager</div>
-      </div>
-    </div>
-
-    <!-- Stat 2: Partnered Streamer -->
-    <div class="hero-hud-stat-card" style="border-color:rgba(255, 215, 0, 0.3); background:rgba(255, 215, 0, 0.03);">
-      <div class="hud-stat-icon-wrap" style="color:#ffd700;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-      </div>
-      <div class="hud-stat-info">
-        <div class="hud-stat-value" style="color:#ffd700; font-size:1.15rem; font-weight:800;">BigBallz</div>
-        <div class="hud-stat-label">Partnered Streamer</div>
-      </div>
-    </div>
-
-
-
-    <!-- Stat 4: Referred Players (Total Referred Members across campaign) -->
-    <div class="hero-hud-stat-card">
-      <div class="hud-stat-icon-wrap" style="color:var(--gold-400);">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      </div>
-      <div class="hud-stat-info">
-        <div class="hud-stat-value"><span class="stat-players-val">42</span></div>
-        <div class="hud-stat-label">Referred Players</div>
-      </div>
-    </div>
-
-    <!-- Stat 5: Rewards Given ($10,000+) -->
-    <div class="hero-hud-stat-card">
-      <div class="hud-stat-icon-wrap" style="color:var(--magenta-400);">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-      </div>
-      <div class="hud-stat-info">
-        <div class="hud-stat-value">$<span id="hud-rewards-given-val">10,000</span><span class="val-sup">+</span></div>
-        <div class="hud-stat-label">Rewards Given</div>
-      </div>
-    </div>
-  </div>
-
   <!-- OFFICIAL PARTNERED SITE DOCK (Yeet Primary Partner) -->
   <div class="hero-partner-dock">
     <div class="partner-dock-label">OFFICIAL CASINO PARTNER</div>
@@ -5107,15 +5399,14 @@ footer a:hover { color: var(--purple-300); }
     </div>
   </div>
 
-  <!-- STAY CONNECTED SOCIALS (5 CARDS: YouTube, X, Instagram, Telegram, Hall of Fame) -->
+  <!-- STAY CONNECTED SOCIALS (5 COMPACT PILLS: YouTube, X, Instagram, Telegram, Hall of Fame) -->
   <div class="hero-socials-wrapper">
-    <div class="socials-eyebrow">STAY CONNECTED</div>
     <div class="hero-socials-grid">
       <!-- 1. YouTube -->
       <a href="https://www.youtube.com/@BigDgamesTV" target="_blank" rel="noopener" class="social-cyber-card card-youtube">
         <div class="social-card-inner">
           <div class="social-icon-wrapper" style="color:#ff0000;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
           </div>
           <div class="social-card-content">
             <div class="social-title">YouTube</div>
@@ -5127,7 +5418,7 @@ footer a:hover { color: var(--purple-300); }
       <a href="https://x.com/BIGDGAMESTV" target="_blank" rel="noopener" class="social-cyber-card card-twitter">
         <div class="social-card-inner">
           <div class="social-icon-wrapper" style="color:#ffffff;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
           </div>
           <div class="social-card-content">
             <div class="social-title">X (Twitter)</div>
@@ -5139,7 +5430,7 @@ footer a:hover { color: var(--purple-300); }
       <a href="https://www.instagram.com/bigdgamestv/" target="_blank" rel="noopener" class="social-cyber-card card-instagram">
         <div class="social-card-inner">
           <div class="social-icon-wrapper" style="color:#e1306c;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
           </div>
           <div class="social-card-content">
             <div class="social-title">Instagram</div>
@@ -5151,7 +5442,7 @@ footer a:hover { color: var(--purple-300); }
       <a href="https://t.me/DBIGTV" target="_blank" rel="noopener" class="social-cyber-card card-telegram">
         <div class="social-card-inner">
           <div class="social-icon-wrapper" style="color:#24a1de;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
           </div>
           <div class="social-card-content">
             <div class="social-title">Telegram</div>
@@ -5159,11 +5450,29 @@ footer a:hover { color: var(--purple-300); }
         </div>
       </a>
 
-      <!-- 5. Hall of Fame (Top 5 Wagerers Trigger Card) -->
+
+
+      <!-- 5. Combined Wager Card (Both Codes: BIGDTV + BIGBALLZ) -->
+      <div class="social-cyber-card card-combined-wager" onclick="activateTab('biweekly'); document.getElementById('tabs-section')?.scrollIntoView({behavior:'smooth'});" style="cursor:pointer;" title="Combined Monthly Wager Across All Players (BIGDTV + BIGBALLZ)">
+        <div class="social-card-inner">
+          <div class="social-icon-wrapper" style="color:#ffd700;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <div class="social-card-content">
+            <div class="social-title" style="display:flex; align-items:center; gap:6px;">
+              <span>Combined Wager:</span>
+              <span id="hero-combined-wager-pill" style="color:#ffd700; font-weight:900;">$27.0k+</span>
+              <span style="font-size:0.65rem; color:var(--cyan-400); background:rgba(0,255,229,0.12); padding:1px 5px; border-radius:4px; border:1px solid rgba(0,255,229,0.3); font-weight:800;">BOTH CODES</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Hall of Fame (Top 5 Wagerers Trigger Card) -->
       <div class="social-cyber-card card-hof" onclick="openHallOfFameModal()">
         <div class="social-card-inner">
           <div class="social-icon-wrapper" style="color:var(--gold-400);">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
           </div>
           <div class="social-card-content">
             <div class="social-title text-gold">Hall of Fame</div>
@@ -5172,230 +5481,83 @@ footer a:hover { color: var(--purple-300); }
       </div>
     </div>
   </div>
-
-  <!-- Standalone Premium Active Season Glass Card -->
-  <div class="active-season-card">
-    <div class="season-card-inner">
-      <span class="live-pulse-dot" id="season-pulse-dot"></span>
-      <span class="season-card-label">ACTIVE SEASON:</span>
-      <span class="season-card-value" id="season-card-value">OCTOBER 2026</span>
-      <span class="season-card-badge" id="season-card-badge">YEET CASINO</span>
-    </div>
-  </div>
 </section>
 
 <!-- ================================================================
-     LIVE MARQUEE ACTIVITY TICKER
+     UNIFIED HERO KPI COMMAND DOCK & ACTIVITY BAR
      ================================================================ -->
-<div class="ticker-bar-wrap">
-  <div class="ticker-track">
-    <div class="ticker-item"><span class="ticker-tag tag-reward">PRIZE POOL</span> 💰 <strong>$3,000 Combined Leaderboard</strong> (BIGDTV + BigBallz) Active!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>reversed</strong> holds all-time record with $11,116.42 wagered!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>thatonet</strong> linked Kick account under code <strong>BIGDTV</strong>!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-live">LIVE NOW</span> 🟢 <strong>BigDgamesTV</strong> is streaming live on Kick!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-reward">WEEKLY REWARDS</span> ⚡ <strong>10 Coins / $1</strong> on Slots & <strong>0.25 Coins / $1</strong> on House/Live!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #2</span> ⚡ <strong>armedupmused</strong> holding 2nd with $10,906.21!</div>
-    <!-- Loop repeat for smooth marquee -->
-    <div class="ticker-item"><span class="ticker-tag tag-reward">PRIZE POOL</span> 💰 <strong>$3,000 Combined Leaderboard</strong> (BIGDTV + BigBallz) Active!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>reversed</strong> holds all-time record with $11,116.42 wagered!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>thatonet</strong> linked Kick account under code <strong>BIGDTV</strong>!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-live">LIVE NOW</span> 🟢 <strong>BigDgamesTV</strong> is streaming live on Kick!</div>
-    <div class="ticker-item"><span class="ticker-tag tag-reward">WEEKLY REWARDS</span> ⚡ <strong>10 Coins / $1</strong> on Slots & <strong>0.25 Coins / $1</strong> on House/Live!</div>
+<div class="hero-kpi-dock" id="hero-kpi-dock">
+  <div class="kpi-dock-inner">
+    <div class="kpi-chips-grid">
+      <!-- 1. Total Lifetime Wagered -->
+      <div class="kpi-chip-card">
+        <div class="kpi-chip-icon" style="color:var(--gold-400);">💰</div>
+        <div class="kpi-chip-data">
+          <div class="kpi-chip-val">$<span class="stat-total-live-val">102.9k</span><span style="color:var(--gold-400)">+</span></div>
+          <div class="kpi-chip-label">Lifetime Wagered</div>
+        </div>
+      </div>
+
+      <!-- 2. Monthly Wagered Amount (Live telemetry) -->
+      <div class="kpi-chip-card kpi-chip-gold" style="cursor:pointer;" onclick="activateTab('biweekly'); document.getElementById('tabs-section')?.scrollIntoView({behavior:'smooth'});" title="Click to view Monthly Wager Standings">
+        <div class="kpi-chip-icon" style="color:#ffd700;">⚡</div>
+        <div class="kpi-chip-data">
+          <div class="kpi-chip-val" style="color:#ffd700;">$<span id="stat-monthly-wager-val">0</span><span style="color:#ffd700;">+</span></div>
+          <div class="kpi-chip-label" style="color:#ffd700; font-weight:800;">Monthly Wagered</div>
+        </div>
+      </div>
+
+      <!-- 3. Monthly Race ($3,000 Pool) -->
+      <div class="kpi-chip-card" style="cursor:pointer;" onclick="activateTab('biweekly'); document.getElementById('tabs-section')?.scrollIntoView({behavior:'smooth'});" title="Click to view Live Monthly Wager Race ($3,000 Pool)">
+        <div class="kpi-chip-icon" style="color:var(--cyan-400);">🏆</div>
+        <div class="kpi-chip-data">
+          <div class="kpi-chip-val" style="color:var(--cyan-400);">$<span id="stat-pool-val">3,000</span></div>
+          <div class="kpi-chip-label">Monthly Prize Pool</div>
+        </div>
+      </div>
+
+      <!-- 4. Referral Rewards -->
+      <div class="kpi-chip-card" style="cursor:pointer;" onclick="openReferralModal()" title="Click to view Referral Program rules & claim details">
+        <div class="kpi-chip-icon" style="color:#00ff80;">🎁</div>
+        <div class="kpi-chip-data">
+          <div class="kpi-chip-val" style="color:var(--cyan-400); font-size:1.15rem;">
+            $5 <span style="font-size:0.75rem; color:#ffd700; background:rgba(255,215,0,0.15); padding:2px 6px; border-radius:6px; border:1px solid rgba(255,215,0,0.35);">+$10 BONUS</span>
+          </div>
+          <div class="kpi-chip-label">Referral Program <span style="font-size:0.8em; color:var(--cyan-400);">ⓘ</span></div>
+        </div>
+      </div>
+
+      <!-- 5. Total Yeet Points -->
+      <div class="kpi-chip-card">
+        <div class="kpi-chip-icon" style="color:var(--purple-300);">🎰</div>
+        <div class="kpi-chip-data">
+          <div class="kpi-chip-val" style="color:var(--cyan-400);"><span id="strip-total-points-val">0</span><span style="font-size:0.75em; margin-left:2px;">⚡</span></div>
+          <div class="kpi-chip-label">Yeet Points Live</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Integrated Activity Feed -->
+    <div class="kpi-dock-ticker">
+      <span class="kpi-ticker-badge">⚡ LIVE COMMUNITY TELEMETRY</span>
+      <div class="kpi-ticker-track">
+        <div class="ticker-item"><span class="ticker-tag tag-reward">PRIZE POOL</span> 💰 <strong>$3,000 Combined Leaderboard</strong> (BIGDTV + BigBallz) Active!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>reversed</strong> holds all-time record with $11,116.42 wagered!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>thatonet</strong> linked Kick account under code <strong>BIGDTV</strong>!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-live">LIVE NOW</span> 🟢 <strong>BigDgamesTV</strong> is streaming live on Kick!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-reward">WEEKLY REWARDS</span> ⚡ <strong>10 Coins / $1</strong> on Slots & <strong>0.25 Coins / $1</strong> on House/Live!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #2</span> ⚡ <strong>armedupmused</strong> holding 2nd with $10,906.21!</div>
+        <!-- Duplicated track for endless marquee -->
+        <div class="ticker-item"><span class="ticker-tag tag-reward">PRIZE POOL</span> 💰 <strong>$3,000 Combined Leaderboard</strong> (BIGDTV + BigBallz) Active!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>reversed</strong> holds all-time record with $11,116.42 wagered!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>thatonet</strong> linked Kick account under code <strong>BIGDTV</strong>!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-live">LIVE NOW</span> 🟢 <strong>BigDgamesTV</strong> is streaming live on Kick!</div>
+      </div>
+    </div>
   </div>
 </div>
 
 
-
-<!-- ================================================================
-     STATS STRIP (3D TACTILE KEYS)
-     ================================================================ -->
-<section id="stats-strip">
-  <div class="stats-grid">
-    <div class="stat-item stat-key-3d">
-      <div class="stat-key-inner">
-        <div class="stat-value">$<span class="stat-total-live-val">102.9k</span><span style="color:var(--gold-400)">+</span></div>
-        <div class="stat-label">Total Wagered</div>
-      </div>
-    </div>
-    <div class="stat-item stat-key-3d" style="border-color:rgba(0, 255, 229, 0.45); cursor:pointer;" onclick="openReferralModal()" title="Click to view Referral Program rules & claim details">
-      <div class="stat-key-inner">
-        <div class="stat-value" style="color:var(--cyan-400); font-size:clamp(1.5rem, 2.2vw, 1.95rem); display:flex; align-items:center; justify-content:center; gap:6px;">
-          <span>$5</span> <span style="font-size:0.72em; color:#ffd700; font-weight:800; background:rgba(255,215,0,0.12); padding:2px 8px; border-radius:6px; border:1px solid rgba(255,215,0,0.3);">+$10 BONUS</span>
-        </div>
-        <div class="stat-label" style="color:#ffffff;">Referral Rewards <span style="font-size:0.8em; color:var(--cyan-400);">ⓘ</span></div>
-      </div>
-    </div>
-    <div class="stat-item stat-key-3d">
-      <div class="stat-key-inner">
-        <div class="stat-value">$<span id="stat-pool-val">3,000</span></div>
-        <div class="stat-label">Monthly Pool</div>
-      </div>
-    </div>
-    <div class="stat-item stat-key-3d" style="border-color:rgba(0, 255, 229, 0.3);">
-      <div class="stat-key-inner">
-        <div class="stat-value" style="color:var(--cyan-400);"><span id="strip-total-points-val">0</span><span style="font-size:0.8em; margin-left:2px;">⚡</span></div>
-        <div class="stat-label">Total Yeet Points</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-
-<!-- ================================================================
-     LAST WINNERS & COMMUNITY PAYOUTS
-     ================================================================ -->
-<section id="latest-winners" class="story-section">
-  <div class="story-section-header">
-    <span class="story-eyebrow">RECENT PAYOUTS</span>
-    <h2 class="story-title">Last Month's <span>Winners</span></h2>
-    <p class="story-sub">Live cash rewards transferred to players across Yeet & Kick challenges.</p>
-  </div>
-
-  <div class="winners-carousel-grid" id="winners-container">
-    <!-- Winner 1 -->
-    <div class="winner-card" style="border-color:rgba(255,215,0,0.5); background:rgba(255,215,0,0.06);">
-      <div class="winner-avatar" style="background:linear-gradient(135deg, #ffd700, #ffaa00); color:#000;">🥇</div>
-      <div class="winner-info">
-        <div class="winner-name">oliseburner <span style="font-size:0.65rem; color:#ffd700; background:rgba(255,215,0,0.15); padding:1px 5px; border-radius:4px;">BIGBALLZ</span></div>
-        <div class="winner-prize">$1,000 CASH</div>
-        <div class="winner-time">Sept 2026 Champion • 93.3k Pts</div>
-      </div>
-    </div>
-
-    <!-- Winner 2 -->
-    <div class="winner-card" style="border-color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.04);">
-      <div class="winner-avatar" style="background:linear-gradient(135deg, #e0e0e0, #9e9e9e); color:#000;">🥈</div>
-      <div class="winner-info">
-        <div class="winner-name">bettyeddy <span style="font-size:0.65rem; color:var(--cyan-400); background:rgba(0,255,229,0.15); padding:1px 5px; border-radius:4px;">BIGD</span></div>
-        <div class="winner-prize" style="color:#e0e0e0;">$500 CASH</div>
-        <div class="winner-time">2nd Place • $41.2k Wagered</div>
-      </div>
-    </div>
-
-    <!-- Winner 3 -->
-    <div class="winner-card" style="border-color:rgba(205,127,50,0.4); background:rgba(205,127,50,0.05);">
-      <div class="winner-avatar" style="background:linear-gradient(135deg, #cd7f32, #8b4513); color:#fff;">🥉</div>
-      <div class="winner-info">
-        <div class="winner-name">YakuZahh <span style="font-size:0.65rem; color:#ffd700; background:rgba(255,215,0,0.15); padding:1px 5px; border-radius:4px;">BIGBALLZ</span></div>
-        <div class="winner-prize" style="color:#cd7f32;">$350 CASH</div>
-        <div class="winner-time">3rd Place • 33.3k Pts</div>
-      </div>
-    </div>
-
-    <!-- Winner 4 -->
-    <div class="winner-card">
-      <div class="winner-avatar" style="background:rgba(0,255,229,0.15); color:var(--cyan-400); border-color:rgba(0,255,229,0.4);">4th</div>
-      <div class="winner-info">
-        <div class="winner-name">PinkMynx222 <span style="font-size:0.65rem; color:#ffd700; background:rgba(255,215,0,0.15); padding:1px 5px; border-radius:4px;">BIGBALLZ</span></div>
-        <div class="winner-prize" style="color:var(--cyan-400);">$275 CASH</div>
-        <div class="winner-time">4th Place • 27.2k Pts</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ================================================================
-     HOW IT WORKS
-     ================================================================ -->
-<section id="how-it-works" class="story-section">
-  <div class="story-section-header">
-    <span class="story-eyebrow">SIMPLE 3-STEP FLOW</span>
-    <h2 class="story-title">How <span>BigDTV Works</span></h2>
-    <p class="story-sub">Join the community, rack up wagers under affiliate code BIGDTV, and claim cash payouts.</p>
-  </div>
-
-  <div class="how-grid">
-    <div class="how-card">
-      <div class="how-step-num">01</div>
-      <h3 class="how-title">Link Account</h3>
-      <p class="how-desc">Sign up on Yeet using code <strong class="text-cyan">BIGDTV</strong> and verify your account in seconds.</p>
-    </div>
-    <div class="how-card">
-      <div class="how-step-num">02</div>
-      <h3 class="how-title">Play & Compete</h3>
-      <p class="how-desc">Wager on your favorite casino games. Every dollar wagered automatically tracks on live leaderboards.</p>
-    </div>
-    <div class="how-card">
-      <div class="how-step-num">03</div>
-      <h3 class="how-title">Claim Cash Prizes</h3>
-      <p class="how-desc">Finish in top leaderboard ranks or complete slot challenges to receive instant cash payouts in Discord.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ================================================================
-     HOW NUMBERS ARE TRACKED & SCORED (TELEMETRY EXPLAINER)
-     ================================================================ -->
-<div class="tracking-explainer-wrapper" style="max-width:1150px; margin:0 auto 28px; padding:0 16px;">
-  <div style="background:linear-gradient(135deg, rgba(20,12,38,0.92) 0%, rgba(10,6,22,0.96) 100%); border:1px solid rgba(0,255,229,0.35); border-radius:var(--radius-lg); padding:24px 28px; box-shadow:0 10px 30px rgba(0,0,0,0.5), 0 0 25px rgba(0,255,229,0.08);">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:12px;">
-      <div style="display:flex; align-items:center; gap:12px;">
-        <span style="font-size:1.8rem;">⚡</span>
-        <div>
-          <div style="font-family:var(--font-display); font-size:1.25rem; font-weight:900; color:#ffffff; letter-spacing:0.04em; text-transform:uppercase;">
-            How Numbers Are Tracked & Scored
-          </div>
-          <div style="font-family:var(--font-ui); font-size:0.8rem; color:var(--cyan-400); font-weight:700;">
-            100% Real-Time Affiliate Telemetry & Parity with BigBallz Partner Pool
-          </div>
-        </div>
-      </div>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <span style="background:rgba(0,255,128,0.15); border:1px solid rgba(0,255,128,0.4); color:#00ff80; font-family:var(--font-ui); font-size:0.72rem; font-weight:800; padding:4px 10px; border-radius:20px; letter-spacing:0.08em; text-transform:uppercase;">
-          ● Live Tracking Parity
-        </span>
-      </div>
-    </div>
-
-    <!-- 3 Telemetry Columns -->
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:18px;">
-      <!-- Col 1: Point Formula -->
-      <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,215,0,0.25); border-radius:10px; padding:16px;">
-        <div style="font-family:var(--font-ui); font-size:0.72rem; font-weight:800; color:#ffd700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">
-          1. Point Calculation Formula
-        </div>
-        <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#fff; margin-bottom:8px;">
-          Points = Wager ($) × House Edge
-        </div>
-        <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.5; margin:0;">
-          Points scale directly with game variance and house edge:
-          <br/>• <strong>$1.00 Blackjack</strong> (0.6% edge) = <span style="color:#be4dff; font-weight:700;">0.6 pts</span>
-          <br/>• <strong>$100.00 Slot</strong> (3.67% edge) = <span style="color:var(--cyan-400); font-weight:700;">367 pts</span>
-        </p>
-      </div>
-
-      <!-- Col 2: Live Sync Telemetry -->
-      <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,255,229,0.25); border-radius:10px; padding:16px;">
-        <div style="font-family:var(--font-ui); font-size:0.72rem; font-weight:800; color:var(--cyan-400); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">
-          2. Tracking Source & Telemetry
-        </div>
-        <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#fff; margin-bottom:8px;">
-          Live Yeet Affiliate Sync
-        </div>
-        <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.5; margin:0;">
-          Synced directly every 60 seconds across both affiliate codes:
-          <br/>• Code <strong style="color:var(--cyan-400);">BIGDTV</strong> (BigDTV Primary)
-          <br/>• Code <strong style="color:#ffd700;">BIGBALLZ</strong> (Combined Partner Pool)
-          <br/>Ensures identical, zero-lag rank order across both communities.
-        </p>
-      </div>
-
-      <!-- Col 3: Cash Store Eligibility -->
-      <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(190,77,255,0.25); border-radius:10px; padding:16px;">
-        <div style="font-family:var(--font-ui); font-size:0.72rem; font-weight:800; color:var(--purple-300); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">
-          3. Weekly Cash Rewards Eligibility
-        </div>
-        <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#fff; margin-bottom:8px;">
-          Slots Wagers Only ($120 Max)
-        </div>
-        <p style="font-size:0.82rem; color:var(--text-secondary); line-height:1.5; margin:0;">
-          Weekly cash claim vouchers in the Store require qualifying wagers on <strong style="color:#00ff80;">Slots</strong> ($250 to $10k wagers for $5 to $40 instant cash claims). House games are tracked separately.
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- ================================================================
      TABS
@@ -5403,11 +5565,11 @@ footer a:hover { color: var(--purple-300); }
 <section id="tabs-section">
 
   <div class="tabs-nav">
-    <button class="tab-btn active" data-panel="leaderboard">Lifetime Wager</button>
-    <button class="tab-btn" data-panel="weekly">Weekly Performance</button>
-    <button class="tab-btn" data-panel="biweekly">Monthly Leaderboard</button>
-    <button class="tab-btn" data-panel="challenges">Challenges</button>
-    <button class="tab-btn" data-panel="milestones">Milestones</button>
+    <button class="tab-btn active" data-panel="leaderboard">🏆 Lifetime Wager</button>
+    <button class="tab-btn" data-panel="biweekly" id="tab-btn-monthly">💰 Monthly Wager Race</button>
+    <button class="tab-btn" data-panel="weekly">⚡ Weekly Airdrop Gauntlet</button>
+    <button class="tab-btn" data-panel="challenges">🎯 Challenges</button>
+    <button class="tab-btn" data-panel="milestones">⭐ Milestones</button>
   </div>
   <div class="tabs-body">
 
@@ -6180,9 +6342,15 @@ footer a:hover { color: var(--purple-300); }
               <div class="bw-period-label">ACTIVE MONTHLY RACE</div>
               <div class="bw-period-dates" id="bw-period-dates">Loading period…</div>
             </div>
-            <div class="bw-period-countdown">
-              <span class="bw-days-left" id="bw-days-left">—</span>
-              <span class="bw-days-label">days remaining</span>
+            <div style="display:flex; align-items:center; gap:16px;">
+              <div class="bw-period-countdown" style="border-color:rgba(255,215,0,0.3); background:rgba(255,215,0,0.06);">
+                <span class="bw-days-left" style="color:#ffd700;">$<span id="bw-header-wager-val">0</span>+</span>
+                <span class="bw-days-label" style="color:#ffd700;">Monthly Wagered</span>
+              </div>
+              <div class="bw-period-countdown">
+                <span class="bw-days-left" id="bw-days-left">—</span>
+                <span class="bw-days-label">days remaining</span>
+              </div>
             </div>
           </div>
 
@@ -6243,6 +6411,136 @@ footer a:hover { color: var(--purple-300); }
 
     </div>
 
+</section>
+
+<!-- ================================================================
+     COMMUNITY INTEL & GUIDELINES HUB (3-TAB DOCK)
+     ================================================================ -->
+<section class="intel-hub-section" id="intel-hub">
+  <div class="intel-hub-card">
+    <div class="intel-hub-header">
+      <div class="intel-hub-title-group">
+        <h2>⚡ Community Intel & Guide Hub</h2>
+        <p>100% Real-Time Affiliate Telemetry & Shared Partner Pool Guide</p>
+      </div>
+      <div class="intel-tab-switches">
+        <button class="intel-tab-btn active" onclick="switchIntelTab('rules', this)">3-Step Guide</button>
+        <button class="intel-tab-btn" onclick="switchIntelTab('telemetry', this)">Scoring Math</button>
+        <button class="intel-tab-btn" onclick="switchIntelTab('winners', this)">Hall of Fame</button>
+      </div>
+    </div>
+
+    <!-- Panel 1: 3-Step Guide -->
+    <div class="intel-panel active" id="intel-panel-rules">
+      <div class="how-grid">
+        <div class="how-card">
+          <div class="how-step-num">01</div>
+          <h3 class="how-title">Link Account</h3>
+          <p class="how-desc">Sign up on Yeet using code <strong class="text-cyan">BIGDTV</strong> and verify your account in seconds.</p>
+        </div>
+        <div class="how-card">
+          <div class="how-step-num">02</div>
+          <h3 class="how-title">Play & Compete</h3>
+          <p class="how-desc">Wager on your favorite casino games. Every dollar wagered automatically tracks on live leaderboards.</p>
+        </div>
+        <div class="how-card">
+          <div class="how-step-num">03</div>
+          <h3 class="how-title">Claim Cash Prizes</h3>
+          <p class="how-desc">Finish in top leaderboard ranks or complete slot challenges to receive instant cash payouts in Discord.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Telemetry & Scoring Math -->
+    <div class="intel-panel" id="intel-panel-telemetry">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:18px;">
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,215,0,0.25); border-radius:12px; padding:18px;">
+          <div style="font-family:var(--font-ui); font-size:0.72rem; font-weight:800; color:#ffd700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">
+            1. Point Calculation Formula
+          </div>
+          <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#fff; margin-bottom:8px;">
+            Points = Wager ($) × House Edge
+          </div>
+          <p style="font-size:0.84rem; color:var(--text-secondary); line-height:1.5; margin:0;">
+            Points scale directly with game variance and house edge:
+            <br/>• <strong>$1.00 Blackjack</strong> (0.6% edge) = <span style="color:#be4dff; font-weight:700;">0.6 pts</span>
+            <br/>• <strong>$100.00 Slot</strong> (3.67% edge) = <span style="color:var(--cyan-400); font-weight:700;">367 pts</span>
+          </p>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,255,229,0.25); border-radius:12px; padding:18px;">
+          <div style="font-family:var(--font-ui); font-size:0.72rem; font-weight:800; color:var(--cyan-400); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">
+            2. Live Sync Telemetry
+          </div>
+          <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#fff; margin-bottom:8px;">
+            Live Yeet Affiliate Sync
+          </div>
+          <p style="font-size:0.84rem; color:var(--text-secondary); line-height:1.5; margin:0;">
+            Synced directly every 60 seconds across both affiliate codes:
+            <br/>• Code <strong style="color:var(--cyan-400);">BIGDTV</strong> (BigDTV Primary)
+            <br/>• Code <strong style="color:#ffd700;">BIGBALLZ</strong> (Combined Partner Pool)
+            <br/>Ensures identical, zero-lag rank order across both communities.
+          </p>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(190,77,255,0.25); border-radius:12px; padding:18px;">
+          <div style="font-family:var(--font-ui); font-size:0.72rem; font-weight:800; color:var(--purple-300); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">
+            3. Weekly Cash Rewards Eligibility
+          </div>
+          <div style="font-family:var(--font-display); font-size:1.15rem; font-weight:900; color:#fff; margin-bottom:8px;">
+            Slots Wagers Only ($120 Max)
+          </div>
+          <p style="font-size:0.84rem; color:var(--text-secondary); line-height:1.5; margin:0;">
+            Weekly cash claim vouchers in the Store require qualifying wagers on <strong style="color:#00ff80;">Slots</strong> ($250 to $10k wagers for $5 to $40 instant cash claims). House games are tracked separately.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 3: Hall of Fame (Last Month Winners) -->
+    <div class="intel-panel" id="intel-panel-winners">
+      <div class="winners-carousel-grid" id="winners-container">
+        <!-- Winner 1 -->
+        <div class="winner-card" style="border-color:rgba(255,215,0,0.5); background:rgba(255,215,0,0.06);">
+          <div class="winner-avatar" style="background:linear-gradient(135deg, #ffd700, #ffaa00); color:#000;">🥇</div>
+          <div class="winner-info">
+            <div class="winner-name">oliseburner <span style="font-size:0.65rem; color:#ffd700; background:rgba(255,215,0,0.15); padding:1px 5px; border-radius:4px;">BIGBALLZ</span></div>
+            <div class="winner-prize">$1,000 CASH</div>
+            <div class="winner-time">Sept 2026 Champion • 93.3k Pts</div>
+          </div>
+        </div>
+
+        <!-- Winner 2 -->
+        <div class="winner-card" style="border-color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.04);">
+          <div class="winner-avatar" style="background:linear-gradient(135deg, #e0e0e0, #9e9e9e); color:#000;">🥈</div>
+          <div class="winner-info">
+            <div class="winner-name">bettyeddy <span style="font-size:0.65rem; color:var(--cyan-400); background:rgba(0,255,229,0.15); padding:1px 5px; border-radius:4px;">BIGD</span></div>
+            <div class="winner-prize" style="color:#e0e0e0;">$500 CASH</div>
+            <div class="winner-time">2nd Place • $41.2k Wagered</div>
+          </div>
+        </div>
+
+        <!-- Winner 3 -->
+        <div class="winner-card" style="border-color:rgba(205,127,50,0.4); background:rgba(205,127,50,0.05);">
+          <div class="winner-avatar" style="background:linear-gradient(135deg, #cd7f32, #8b4513); color:#fff;">🥉</div>
+          <div class="winner-info">
+            <div class="winner-name">YakuZahh <span style="font-size:0.65rem; color:#ffd700; background:rgba(255,215,0,0.15); padding:1px 5px; border-radius:4px;">BIGBALLZ</span></div>
+            <div class="winner-prize" style="color:#cd7f32;">$350 CASH</div>
+            <div class="winner-time">3rd Place • 33.3k Pts</div>
+          </div>
+        </div>
+
+        <!-- Winner 4 -->
+        <div class="winner-card">
+          <div class="winner-avatar" style="background:rgba(0,255,229,0.15); color:var(--cyan-400); border-color:rgba(0,255,229,0.4);">4th</div>
+          <div class="winner-info">
+            <div class="winner-name">PinkMynx222 <span style="font-size:0.65rem; color:#ffd700; background:rgba(255,215,0,0.15); padding:1px 5px; border-radius:4px;">BIGBALLZ</span></div>
+            <div class="winner-prize" style="color:var(--cyan-400);">$275 CASH</div>
+            <div class="winner-time">4th Place • 27.2k Pts</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -6933,6 +7231,18 @@ async function refreshKickLiveStatus() {
 refreshKickLiveStatus();
 setInterval(refreshKickLiveStatus, 25000);
 
+/* ──────────────────────────────────────────
+   COMMUNITY INTEL HUB TAB SWITCHER
+   ────────────────────────────────────────── */
+function switchIntelTab(tabName, btnEl) {
+  document.querySelectorAll('.intel-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.intel-panel').forEach(p => p.classList.remove('active'));
+  
+  if (btnEl) btnEl.classList.add('active');
+  const targetPanel = document.getElementById(`intel-panel-${tabName}`);
+  if (targetPanel) targetPanel.classList.add('active');
+}
+
 
 
 /* ──────────────────────────────────────────
@@ -7081,7 +7391,7 @@ function activateTab(panelId) {
   });
 
   // Keep navigation active states dynamically updated
-  const activeTabName = (panelId === 'weekly' || panelId === 'biweekly' || panelId === 'leaderboard') ? 'leaderboard' : panelId;
+  const activeTabName = (panelId === 'biweekly') ? 'biweekly' : ((panelId === 'weekly' || panelId === 'leaderboard') ? 'leaderboard' : panelId);
   document.querySelectorAll('.nav-links a[data-tab]').forEach(a => {
     a.classList.toggle('active', a.dataset.tab === activeTabName);
   });
@@ -7537,9 +7847,23 @@ if (typeof onAuthReady === 'function') {
 const PRIZE_POOL = [800, 250, 150, 90, 60, 45, 35, 30, 20, 20]; // monthly $1,500
 const PRIZE_TOTAL = 1500;
 
+let lbShowAll = false;
+let lastLbData = null;
+let lastLbRangeLabel = null;
+
+function toggleLbShowMore() {
+  lbShowAll = !lbShowAll;
+  if (lastLbData) {
+    renderLeaderboard(lastLbData, lastLbRangeLabel);
+  }
+}
+
 function renderLeaderboard(data, rangeLabel) {
   const lbContent = document.getElementById('lb-content');
   if (!lbContent) return;
+
+  lastLbData = data;
+  lastLbRangeLabel = rangeLabel;
 
   if (!data || data.length === 0) {
     lbContent.innerHTML = `<div class="lb-empty">No wager data found for the selected period.</div>`;
@@ -7564,7 +7888,10 @@ function renderLeaderboard(data, rangeLabel) {
     months: (u.wager_data || []).slice().sort((a, b) => b.month.localeCompare(a.month))
   })).sort((a, b) => (b.points - a.points) || (b.total - a.total));
 
-  let rows = players.map((p, i) => {
+  const totalPlayersCount = players.length;
+  const displayedPlayers = players.slice(0, 10);
+
+  let rows = displayedPlayers.map((p, i) => {
     const rank = i + 1;
     const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-n';
     const isHidden = p.user_id === -1 || p.is_hidden;
@@ -7907,6 +8234,10 @@ async function fetchBiweeklyLeaderboard() {
 
     const monthlyWagerEl = document.getElementById('stat-monthly-wager-val');
     if (monthlyWagerEl) monthlyWagerEl.textContent = formattedMonthlyWager;
+    const headerMonthlyWagerEl = document.getElementById('bw-header-wager-val');
+    if (headerMonthlyWagerEl) headerMonthlyWagerEl.textContent = formattedMonthlyWager;
+    const pillCombinedWagerEl = document.getElementById('hero-combined-wager-pill');
+    if (pillCombinedWagerEl) pillCombinedWagerEl.textContent = '$' + formattedMonthlyWager + '+';
 
     updateMilestonesProgress(totalMonthlyWager);
   } catch (err) {
@@ -7915,9 +8246,21 @@ async function fetchBiweeklyLeaderboard() {
   }
 }
 
+let bwLbShowAll = false;
+let lastBwLbData = null;
+
+function toggleBwLbShowMore() {
+  bwLbShowAll = !bwLbShowAll;
+  if (lastBwLbData) {
+    renderBiweeklyLeaderboard(lastBwLbData);
+  }
+}
+
 function renderBiweeklyLeaderboard(data) {
   const bwContent = document.getElementById('bw-lb-content');
   if (!bwContent) return;
+
+  lastBwLbData = data;
 
   if (!data || data.length === 0) {
     bwContent.innerHTML = '<div class="lb-empty">No wager data found for this period.</div>';
@@ -7964,7 +8307,9 @@ function renderBiweeklyLeaderboard(data) {
     }
   }
 
-  const rows = players.map((p, i) => {
+  const displayedPlayers = players.slice(0, 10);
+
+  const rows = displayedPlayers.map((p, i) => {
     const rank      = i + 1;
     const rankClass = rank <= 3 ? 'rank-' + rank : 'rank-n';
     const isHidden  = p.user_id === -1 || p.is_hidden;
@@ -8480,9 +8825,21 @@ function renderSquidGameTracker(players) {
   }
 }
 
+let weeklyLbShowAll = false;
+let lastWeeklyLbData = null;
+
+function toggleWeeklyLbShowMore() {
+  weeklyLbShowAll = !weeklyLbShowAll;
+  if (lastWeeklyLbData) {
+    renderWeeklyLeaderboard(lastWeeklyLbData);
+  }
+}
+
 function renderWeeklyLeaderboard(data) {
   const content = document.getElementById('weekly-lb-content');
   if (!content) return;
+
+  lastWeeklyLbData = data;
 
   if (!data || data.length === 0) {
     content.innerHTML = '<div class="lb-empty">No wager activity logged yet this week (Monday 00:01 → Sunday 11:59 PM ET).</div>';
@@ -8512,7 +8869,11 @@ function renderWeeklyLeaderboard(data) {
   // Render Squid Game Tracker with active players
   renderSquidGameTracker(players);
 
-  const rows = players.map((p, i) => {
+  const totalPlayersCount = players.length;
+  const initialLimit = 10;
+  const displayedPlayers = weeklyLbShowAll ? players : players.slice(0, initialLimit);
+
+  const rows = displayedPlayers.map((p, i) => {
     const rank = i + 1;
     const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-n';
     const isHidden = p.user_id === -1 || p.is_hidden;
@@ -8560,6 +8921,15 @@ function renderWeeklyLeaderboard(data) {
     `;
   }).join('');
 
+  const showMoreBtnHtml = totalPlayersCount > initialLimit
+    ? `<div class="lb-show-more-wrap">
+        <button class="btn-show-more" onclick="toggleWeeklyLbShowMore()">
+          <span>${weeklyLbShowAll ? `Show Top 10 Only` : `Show All Standings (${totalPlayersCount} Players)`}</span>
+          <span class="toggle-icon">${weeklyLbShowAll ? '▴' : '▾'}</span>
+        </button>
+      </div>`
+    : '';
+
   content.innerHTML = `
     <!-- SCORING FORMULA BANNER (Matching BigBallz) -->
     <div style="background:linear-gradient(135deg, rgba(26,16,48,0.9) 0%, rgba(13,8,26,0.95) 100%); border:1px solid rgba(136,0,255,0.4); border-radius:12px; padding:14px 20px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; box-shadow:0 8px 24px rgba(0,0,0,0.4);">
@@ -8594,6 +8964,7 @@ function renderWeeklyLeaderboard(data) {
         <tbody>${rows}</tbody>
       </table>
     </div>
+    ${showMoreBtnHtml}
   `;
 }
 
