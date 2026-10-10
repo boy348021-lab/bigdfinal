@@ -7889,7 +7889,8 @@ function renderLeaderboard(data, rangeLabel) {
   })).sort((a, b) => (b.points - a.points) || (b.total - a.total));
 
   const totalPlayersCount = players.length;
-  const displayedPlayers = players.slice(0, 10);
+  const initialLimit = 10;
+  const displayedPlayers = lbShowAll ? players : players.slice(0, initialLimit);
 
   let rows = displayedPlayers.map((p, i) => {
     const rank = i + 1;
@@ -7959,6 +7960,15 @@ function renderLeaderboard(data, rangeLabel) {
     ? `<div class="lb-period-banner">📅 Showing data for: <strong>${rangeLabel}</strong></div>`
     : '';
 
+  const showMoreBtnHtml = totalPlayersCount > initialLimit
+    ? `<div class="lb-show-more-wrap">
+        <button class="btn-show-more" onclick="toggleLbShowMore()">
+          <span>${lbShowAll ? `Show Top 10 Only` : `Load Full Leaderboard (${totalPlayersCount} Players)`}</span>
+          <span class="toggle-icon">${lbShowAll ? '▴' : '▾'}</span>
+        </button>
+      </div>`
+    : '';
+
   lbContent.innerHTML = `
     ${labelBanner}
     <div class="lb-table-wrap">
@@ -7974,6 +7984,7 @@ function renderLeaderboard(data, rangeLabel) {
         <tbody>${rows}</tbody>
       </table>
     </div>
+    ${showMoreBtnHtml}
   `;
 }
 
@@ -8307,7 +8318,9 @@ function renderBiweeklyLeaderboard(data) {
     }
   }
 
-  const displayedPlayers = players.slice(0, 10);
+  const totalPlayersCount = players.length;
+  const initialLimit = 10;
+  const displayedPlayers = bwLbShowAll ? players : players.slice(0, initialLimit);
 
   const rows = displayedPlayers.map((p, i) => {
     const rank      = i + 1;
@@ -8329,6 +8342,15 @@ function renderBiweeklyLeaderboard(data) {
       + '<td class="' + amtClass + '">' + fmt(p.total) + '</td></tr>';
   }).join('');
 
+  const showMoreBtnHtml = totalPlayersCount > initialLimit
+    ? `<div class="lb-show-more-wrap">
+        <button class="btn-show-more" onclick="toggleBwLbShowMore()">
+          <span>${bwLbShowAll ? `Show Top 10 Only` : `Load Full Leaderboard (${totalPlayersCount} Players)`}</span>
+          <span class="toggle-icon">${bwLbShowAll ? '▴' : '▾'}</span>
+        </button>
+      </div>`
+    : '';
+
   bwContent.innerHTML = `
     <!-- SCORING BANNER -->
     <div style="background:linear-gradient(135deg, rgba(26,16,48,0.9) 0%, rgba(13,8,26,0.95) 100%); border:1px solid rgba(136,0,255,0.4); border-radius:12px; padding:12px 18px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
@@ -8342,6 +8364,7 @@ function renderBiweeklyLeaderboard(data) {
     <div class="lb-table-wrap"><table class="lb-table"><thead><tr>
       <th>Rank</th><th>Player</th><th>Yeet Points ⚡</th><th>Monthly Wager (USD)</th>
     </tr></thead><tbody>${rows}</tbody></table></div>
+    ${showMoreBtnHtml}
   `;
 }
 
@@ -8924,7 +8947,7 @@ function renderWeeklyLeaderboard(data) {
   const showMoreBtnHtml = totalPlayersCount > initialLimit
     ? `<div class="lb-show-more-wrap">
         <button class="btn-show-more" onclick="toggleWeeklyLbShowMore()">
-          <span>${weeklyLbShowAll ? `Show Top 10 Only` : `Show All Standings (${totalPlayersCount} Players)`}</span>
+          <span>${weeklyLbShowAll ? `Show Top 10 Only` : `Load Full Leaderboard (${totalPlayersCount} Players)`}</span>
           <span class="toggle-icon">${weeklyLbShowAll ? '▴' : '▾'}</span>
         </button>
       </div>`
