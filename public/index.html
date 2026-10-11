@@ -2276,6 +2276,19 @@ body::after {
   background: rgba(139, 92, 246, 0.08);
   transform: translateX(4px);
 }
+.lb-table tbody tr.lb-main-row.is-self {
+  background: linear-gradient(90deg, rgba(0, 255, 128, 0.12) 0%, rgba(0, 255, 229, 0.06) 100%) !important;
+  border-left: 3px solid #00ff80 !important;
+  box-shadow: inset 0 0 20px rgba(0, 255, 128, 0.08);
+}
+.lb-table tbody tr.lb-main-row.is-self:hover {
+  background: linear-gradient(90deg, rgba(0, 255, 128, 0.18) 0%, rgba(0, 255, 229, 0.1) 100%) !important;
+  transform: translateX(4px);
+}
+.lb-table tbody tr.lb-main-row.is-selected:not(.is-self) {
+  background: linear-gradient(90deg, rgba(255, 42, 122, 0.12) 0%, rgba(157, 0, 255, 0.06) 100%) !important;
+  border-left: 3px solid #ff2a7a !important;
+}
 .lb-table tbody tr.lb-expand-row:hover { background: transparent; }
 .lb-table tbody tr:last-child { border-bottom: none; }
 .lb-table td {
@@ -7892,10 +7905,24 @@ function renderLeaderboard(data, rangeLabel) {
   const initialLimit = 10;
   const displayedPlayers = lbShowAll ? players : players.slice(0, initialLimit);
 
+  // Self names resolution for table row highlighting
+  const currentTokenUser = window.authUser;
+  const selfNames = [];
+  if (currentTokenUser) {
+    if (currentTokenUser.username) selfNames.push(currentTokenUser.username.toLowerCase());
+    if (currentTokenUser.yeetUsername) selfNames.push(currentTokenUser.yeetUsername.toLowerCase());
+    if (currentTokenUser.degencityUsername) selfNames.push(currentTokenUser.degencityUsername.toLowerCase());
+  }
+  const storedYeet = localStorage.getItem('verified_yeet_username');
+  if (storedYeet) selfNames.push(storedYeet.toLowerCase());
+  const storedDegen = localStorage.getItem('verified_degencity_username');
+  if (storedDegen) selfNames.push(storedDegen.toLowerCase());
+
   let rows = displayedPlayers.map((p, i) => {
     const rank = i + 1;
     const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-n';
     const isHidden = p.user_id === -1 || p.is_hidden;
+    const isSelf = !isHidden && p.username && selfNames.includes(p.username.toLowerCase().trim());
     const rowId = `lb-expand-${i}`;
     const tierBadge = p.tier && p.tier !== 'Unranked'
       ? `<span style="display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:800; color:var(--cyan-400); background:rgba(0,255,229,0.1); border:1px solid rgba(0,255,229,0.25); padding:2px 6px; border-radius:12px; margin-left:6px;">${p.tier_image ? `<img src="${p.tier_image}" style="width:12px;height:12px;" alt="${p.tier}"/>` : ''}${escHtml(p.tier)}</span>`
@@ -7903,10 +7930,12 @@ function renderLeaderboard(data, rangeLabel) {
     const codeBadge = p.source_code
       ? `<span style="display:inline-flex; align-items:center; font-size:0.65rem; font-weight:800; color:${p.source_code.includes('BIGBALLZ') ? '#ffd700' : 'var(--cyan-400)'}; background:${p.source_code.includes('BIGBALLZ') ? 'rgba(255,215,0,0.1)' : 'rgba(0,255,229,0.08)'}; border:1px solid ${p.source_code.includes('BIGBALLZ') ? 'rgba(255,215,0,0.25)' : 'rgba(0,255,229,0.2)'}; padding:1px 6px; border-radius:10px; margin-left:6px; letter-spacing:0.04em;">${escHtml(p.source_code)}</span>`
       : '';
-    const maskedName = maskUsername(p.username);
-    const nameHtml = isHidden
-      ? `<span class="hidden-user">🔒 Hidden User</span>`
-      : `<span>${escHtml(maskedName)}${tierBadge}${codeBadge}</span>`;
+    const selfBadge = isSelf
+      ? `<span style="display:inline-flex; align-items:center; font-size:0.65rem; font-weight:900; color:#00ff80; background:rgba(0,255,128,0.18); border:1px solid rgba(0,255,128,0.45); padding:1px 6px; border-radius:10px; margin-left:6px; letter-spacing:0.04em;">YOU</span>`
+      : '';
+    const maskedName = isSelf ? p.username : maskUsername(p.username);
+    const hiddenIcon = isHidden ? '<span title="Hidden profile" style="margin-right:2px; font-size:0.85em; opacity:0.85;">🔒</span>' : '';
+    const nameHtml = `<span style="display:inline-flex; align-items:center; flex-wrap:wrap; gap:4px;">${hiddenIcon}<span style="${isHidden ? 'font-style:italic; opacity:0.9;' : ''}">${escHtml(maskedName)}</span>${selfBadge}${tierBadge}${codeBadge}</span>`;
     const amtClass = rank === 1 ? 'wager-amount gold' : 'wager-amount';
     const monthCount = p.months.length;
     const hasMonths = !isYeet && monthCount > 0;
@@ -7922,7 +7951,7 @@ function renderLeaderboard(data, rangeLabel) {
 
     if (isYeet) {
       return `
-        <tr class="lb-main-row">
+        <tr class="lb-main-row ${isSelf ? 'is-self' : ''}">
           <td><span class="rank-badge ${rankClass}">${rank}</span></td>
           <td class="lb-player-cell">${nameHtml}</td>
           <td style="color:#ffd700; font-weight:900; font-size:1.05rem; font-family:var(--font-display);">
@@ -7934,7 +7963,7 @@ function renderLeaderboard(data, rangeLabel) {
     }
 
     return `
-      <tr class="lb-main-row ${hasMonths ? 'expandable' : ''}" onclick="${hasMonths ? `toggleExpand('${rowId}', this)` : ''}">
+      <tr class="lb-main-row ${isSelf ? 'is-self' : ''} ${hasMonths ? 'expandable' : ''}" onclick="${hasMonths ? `toggleExpand('${rowId}', this)` : ''}">
         <td><span class="rank-badge ${rankClass}">${rank}</span></td>
         <td class="lb-player-cell">
           ${nameHtml}
@@ -8004,6 +8033,7 @@ function escHtml(str) {
 function maskUsername(str) {
   if (!str || typeof str !== 'string') return '***';
   const name = str.trim();
+  if (name.includes('*')) return name; // Already masked from source (e.g. Yeet API hidden user)
   if (name.length <= 2) return name[0] + '****' + (name[1] || '');
   return name.slice(0, 2) + '****' + name.slice(-1);
 }
@@ -8310,7 +8340,8 @@ function renderBiweeklyLeaderboard(data) {
     if (el) {
       if (players[i - 1]) {
         const p = players[i - 1];
-        const name = p.is_hidden || p.user_id === -1 ? '🔒 Hidden' : maskUsername(p.username);
+        const isHidden = p.is_hidden || p.user_id === -1;
+        const name = (isHidden ? '🔒 ' : '') + maskUsername(p.username);
         el.textContent = name;
       } else {
         el.textContent = '—';
@@ -8333,7 +8364,8 @@ function renderBiweeklyLeaderboard(data) {
       ? `<span style="display:inline-flex; align-items:center; font-size:0.65rem; font-weight:800; color:${p.source_code.includes('BIGBALLZ') ? '#ffd700' : 'var(--cyan-400)'}; background:${p.source_code.includes('BIGBALLZ') ? 'rgba(255,215,0,0.1)' : 'rgba(0,255,229,0.08)'}; border:1px solid ${p.source_code.includes('BIGBALLZ') ? 'rgba(255,215,0,0.25)' : 'rgba(0,255,229,0.2)'}; padding:1px 6px; border-radius:10px; margin-left:6px; letter-spacing:0.04em;">${escHtml(p.source_code)}</span>`
       : '';
     const maskedName = maskUsername(p.username);
-    const nameHtml  = isHidden ? '<span class="hidden-user">🔒 Hidden User</span>' : '<span>' + escHtml(maskedName) + tierBadge + codeBadge + '</span>';
+    const hiddenIcon = isHidden ? '<span title="Hidden profile" style="margin-right:2px; font-size:0.85em; opacity:0.85;">🔒</span>' : '';
+    const nameHtml  = '<span style="display:inline-flex; align-items:center; flex-wrap:wrap; gap:4px;">' + hiddenIcon + '<span style="' + (isHidden ? 'font-style:italic; opacity:0.9;' : '') + '">' + escHtml(maskedName) + '</span>' + tierBadge + codeBadge + '</span>';
     const amtClass  = rank === 1 ? 'wager-amount gold' : 'wager-amount';
 
     return '<tr class="lb-main-row"><td><span class="rank-badge ' + rankClass + '">' + rank + '</span></td>'
@@ -8521,36 +8553,59 @@ function renderSquidGameTracker(players) {
 
   const topRacers = (players || []).slice(0, 10);
 
-  // Determine current active player based on logged in user, explicit selection, or default to leader Eddie
+  // Determine current active player based on logged in user, linked casino accounts, explicit selection, or leader
   let activeWager = 0;
   let activeUsername = null;
   let isOwnAccount = false;
   const currentTokenUser = window.authUser;
+
+  // Resolve user identity across multiple possible usernames (auth user, yeet username, verified storage)
+  const currentSelfNames = [];
+  if (currentTokenUser) {
+    if (currentTokenUser.username) currentSelfNames.push(currentTokenUser.username.toLowerCase());
+    if (currentTokenUser.yeetUsername) currentSelfNames.push(currentTokenUser.yeetUsername.toLowerCase());
+    if (currentTokenUser.degencityUsername) currentSelfNames.push(currentTokenUser.degencityUsername.toLowerCase());
+  }
+  const storedYeet = localStorage.getItem('verified_yeet_username');
+  if (storedYeet) currentSelfNames.push(storedYeet.toLowerCase());
+  const storedDegen = localStorage.getItem('verified_degencity_username');
+  if (storedDegen) currentSelfNames.push(storedDegen.toLowerCase());
+
+  function checkIsSelf(pName) {
+    if (!pName || currentSelfNames.length === 0) return false;
+    const lower = pName.toLowerCase().trim();
+    return currentSelfNames.includes(lower);
+  }
 
   if (selectedSquidPlayer) {
     const matchedSelected = (players || []).find(p => p.username && p.username.toLowerCase() === selectedSquidPlayer.toLowerCase());
     if (matchedSelected) {
       activeWager = Number(matchedSelected.weekly_volume) || 0;
       activeUsername = matchedSelected.username;
-      isOwnAccount = currentTokenUser && currentTokenUser.username && (currentTokenUser.username.toLowerCase() === matchedSelected.username.toLowerCase());
+      isOwnAccount = checkIsSelf(matchedSelected.username);
     }
-  } else if (currentTokenUser && currentTokenUser.username) {
-    const matched = (players || []).find(p => p.username && p.username.toLowerCase() === currentTokenUser.username.toLowerCase());
-    if (matched) {
-      activeWager = Number(matched.weekly_volume) || 0;
-      activeUsername = matched.username;
+  } else {
+    // Check if the current user matches any player in the weekly list
+    let matchedSelf = null;
+    if (currentSelfNames.length > 0) {
+      matchedSelf = (players || []).find(p => p.username && checkIsSelf(p.username));
+    }
+    if (matchedSelf) {
+      activeWager = Number(matchedSelf.weekly_volume) || 0;
+      activeUsername = matchedSelf.username;
       isOwnAccount = true;
-    } else {
+    } else if (currentTokenUser && currentTokenUser.username) {
+      // User is logged in but has $0 weekly volume
       activeWager = Number(currentTokenUser.weekly_volume || currentTokenUser.weekly_wager || 0);
-      activeUsername = currentTokenUser.username;
+      activeUsername = currentTokenUser.yeetUsername || currentTokenUser.username;
       isOwnAccount = true;
+    } else if (topRacers.length > 0) {
+      // Default to leader (Eddie / bettyeddy) if not logged in
+      const leader = topRacers[0];
+      activeWager = Number(leader.weekly_volume) || 0;
+      activeUsername = leader.username || 'bettyeddy';
+      isOwnAccount = false;
     }
-  } else if (topRacers.length > 0) {
-    // Default to leader (Eddie / bettyeddy)
-    const leader = topRacers[0];
-    activeWager = Number(leader.weekly_volume) || 0;
-    activeUsername = leader.username || 'bettyeddy';
-    isOwnAccount = false;
   }
 
   const milestones = [
@@ -8632,13 +8687,12 @@ function renderSquidGameTracker(players) {
       const isLeader = (rankIdx === 1) && (pVol > 0);
       const isWinner = pVol >= 5000 && (rankIdx <= 3);
       const isSelected = selectedSquidPlayer && (selectedSquidPlayer.toLowerCase() === rawName.toLowerCase());
-      const isUserSelf = Boolean(currentTokenUser && currentTokenUser.username && (currentTokenUser.username.toLowerCase() === rawName.toLowerCase()));
+      const isUserSelf = checkIsSelf(rawName);
       const icon = avatarIcons[(players || []).indexOf(p) % avatarIcons.length] || '🦑';
 
-      // Calculate continuous track rail position (0% - 100%)
-      let exactPct = isLeader
-        ? Math.min(96, Math.max(14, (pVol / 5000) * 100))
-        : Math.min(11.5, Math.max(2.5, 2.5 + (pIdx - 1) * 1.5));
+      // Proportional rail position along the 0 to 5000 track
+      const calculatedPct = (pVol / 5000) * 100;
+      let exactPct = Math.min(96, Math.max(3, calculatedPct));
 
       // Dual-lane vertical stagger to prevent overlap
       let visualTop = isLeader ? 0 : (pIdx % 2 === 0 ? -6 : 16);
@@ -8655,14 +8709,14 @@ function renderSquidGameTracker(players) {
       // Compact formatted wager inside circle
       const compactAmt = pVol >= 1000 ? `$${(pVol / 1000).toFixed(pVol >= 10000 ? 0 : 1)}k` : `$${Math.round(pVol)}`;
       const pPct = Math.min(100, Math.max(0, (pVol / 5000) * 100));
-      const zIndex = isLeader ? 75 : (isUserSelf ? 70 : (isSelected ? 65 : (40 - pIdx)));
+      const zIndex = isUserSelf ? 85 : (isLeader ? 75 : (isSelected ? 65 : (40 - pIdx)));
 
       return `
         <div class="sg-track-runner-pin ${isNearLeft ? 'near-left' : ''} ${isLeader ? 'is-leader' : ''} ${isWinner ? 'is-winner' : ''} ${isUserSelf ? 'is-self' : ''} ${isSelected ? 'is-selected' : ''}" 
              style="left: ${exactPct}%; top: ${visualTop}px; z-index: ${zIndex};"
              onclick="selectSquidPlayer('${escHtml(rawName)}')"
              title="${escHtml(maskUsername(rawName))}: $${pVol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}">
-          ${isLeader ? '<div class="pin-leader-callout">👑 EDDIE (#1)</div>' : ''}
+          ${isUserSelf ? '<div class="pin-self-callout">⭐ YOU</div>' : (isLeader ? '<div class="pin-leader-callout">👑 EDDIE (#1)</div>' : '')}
           <div class="sg-step-pin-avatar">
             <span class="pin-uname">${escHtml(displayName)}</span>
             <span class="pin-amt">${compactAmt}</span>
@@ -8670,7 +8724,7 @@ function renderSquidGameTracker(players) {
           <div class="pin-pointer-arrow"></div>
           <div class="sg-step-pin-tooltip">
             <div class="pin-tt-header">
-              <div class="pin-tt-name">${icon} ${escHtml(maskUsername(rawName))} ${isUserSelf ? '<span style="color:#00ff80; font-size:0.68rem;">(You)</span>' : ''}</div>
+              <div class="pin-tt-name">${icon} ${escHtml(maskUsername(rawName))} ${isUserSelf ? '<span style="color:#00ff80; font-size:0.68rem; font-weight:800;">(You)</span>' : ''}</div>
               <div class="pin-tt-rank">#${rankIdx}</div>
             </div>
             <div class="pin-tt-wager-row">
@@ -8726,7 +8780,7 @@ function renderSquidGameTracker(players) {
     if (activeUsername) {
       const isEddyLeader = activeUsername.toLowerCase().includes('eddy') || activeUsername.toLowerCase().includes('eddie');
       const displayActive = isOwnAccount ? activeUsername : maskUsername(activeUsername);
-      dHPct.textContent = `${overallPct.toFixed(1)}% complete (${isEddyLeader ? '👑 EDDIE' : displayActive}${isOwnAccount ? ' - You' : ''})`;
+      dHPct.textContent = `${overallPct.toFixed(1)}% complete (${isOwnAccount ? (displayActive + ' - You') : (isEddyLeader ? '👑 EDDIE' : displayActive)})`;
     } else {
       dHPct.textContent = 'Login or select player to view individual progress';
     }
@@ -8741,13 +8795,13 @@ function renderSquidGameTracker(players) {
   const hRunnersLayer = document.getElementById('sg-h-runners-layer');
   if (hRunnersLayer) {
     if (activeUsername) {
-      let isEddyLeader = activeUsername.toLowerCase().includes('eddy') || activeUsername.toLowerCase().includes('eddie');
-      let dispName = isEddyLeader ? 'EDDIE' : (activeUsername.length > 5 ? activeUsername.slice(0, 4) : activeUsername);
+      let isEddyLeader = !isOwnAccount && (activeUsername.toLowerCase().includes('eddy') || activeUsername.toLowerCase().includes('eddie'));
+      let dispName = isOwnAccount ? (activeUsername.length > 5 ? activeUsername.slice(0, 4) : activeUsername) : (isEddyLeader ? 'EDDIE' : (activeUsername.length > 5 ? activeUsername.slice(0, 4) : activeUsername));
       let compactAmt = activeWager >= 1000 ? `$${(activeWager / 1000).toFixed(activeWager >= 10000 ? 0 : 1)}k` : `$${Math.round(activeWager)}`;
 
       hRunnersLayer.innerHTML = `
-        <div class="sg-track-runner-pin ${isEddyLeader ? 'is-leader' : ''} is-selected" style="left: ${Math.min(96, Math.max(3, overallPct))}%; top: 0px; z-index: 50;">
-          ${isEddyLeader ? '<div class="pin-leader-callout">👑 EDDIE</div>' : ''}
+        <div class="sg-track-runner-pin ${isEddyLeader ? 'is-leader' : ''} ${isOwnAccount ? 'is-self' : 'is-selected'}" style="left: ${Math.min(96, Math.max(3, overallPct))}%; top: 0px; z-index: 50;">
+          ${isOwnAccount ? '<div class="pin-self-callout">⭐ YOU</div>' : (isEddyLeader ? '<div class="pin-leader-callout">👑 EDDIE</div>' : '')}
           <div class="sg-step-pin-avatar">
             <span class="pin-uname">${escHtml(dispName)}</span>
             <span class="pin-amt">${compactAmt}</span>
@@ -8794,7 +8848,7 @@ function renderSquidGameTracker(players) {
   if (tcProgVal) tcProgVal.textContent = `$${activeWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / $5,000`;
   if (tcProgSub) {
     tcProgSub.textContent = activeUsername
-      ? `${overallPct.toFixed(1)}% complete toward VIP (${activeUsername})`
+      ? `${overallPct.toFixed(1)}% complete toward VIP (${isOwnAccount ? activeUsername + ' - You' : activeUsername})`
       : 'Connect account to track progress';
   }
 
@@ -8804,18 +8858,19 @@ function renderSquidGameTracker(players) {
       mpTableList.innerHTML = '<div style="color:var(--text-muted); font-size:0.82rem; padding:16px;">No racers logged yet this week.</div>';
     } else {
       mpTableList.innerHTML = topRacers.map((p, idx) => {
-        const isSelf = Boolean(activeUsername && p.username && p.username.toLowerCase() === activeUsername.toLowerCase());
+        const isSelf = checkIsSelf(p.username);
+        const isSelected = selectedSquidPlayer && (selectedSquidPlayer.toLowerCase() === (p.username || '').toLowerCase());
         const vol = Number(p.weekly_volume) || 0;
         const isVip = vol >= 5000;
         const rankIcon = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
 
         return `
-          <div class="sg-mp-row ${isSelf ? 'is-user' : ''}" onclick="selectSquidPlayer('${escHtml(p.username || '')}')" style="cursor:pointer;" title="Click to track in RLGL stage">
+          <div class="sg-mp-row ${isSelf ? 'is-user is-self' : (isSelected ? 'is-user' : '')}" onclick="selectSquidPlayer('${escHtml(p.username || '')}')" style="cursor:pointer;" title="Click to track in RLGL stage">
             <div style="display:flex; align-items:center; gap:8px;">
               <span>${rankIcon}</span>
-              <strong style="color:${isSelf ? '#00ffe5' : '#ffffff'};">${escHtml(maskUsername(p.username || 'Player'))}</strong>
+              <strong style="color:${isSelf ? '#00ff80' : (isSelected ? '#00ffe5' : '#ffffff')};">${escHtml(maskUsername(p.username || 'Player'))}</strong>
               ${isVip ? '<span style="color:#ffd700; font-size:0.7rem; font-weight:800;">👑 VIP</span>' : ''}
-              ${isSelf ? '<span style="font-size:0.65rem; background:rgba(0,255,229,0.2); color:#00ffe5; padding:1px 5px; border-radius:4px;">ACTIVE</span>' : ''}
+              ${isSelf ? '<span style="font-size:0.65rem; background:rgba(0,255,128,0.2); color:#00ff80; border:1px solid rgba(0,255,128,0.4); padding:1px 6px; border-radius:4px; font-weight:800;">YOU</span>' : (isSelected ? '<span style="font-size:0.65rem; background:rgba(0,255,229,0.2); color:#00ffe5; padding:1px 5px; border-radius:4px;">VIEWING</span>' : '')}
             </div>
             <div style="font-weight:800; color:#ffd700;">$${vol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
           </div>
@@ -8829,18 +8884,19 @@ function renderSquidGameTracker(players) {
       mpBarsList.innerHTML = '<div style="color:var(--text-muted); font-size:0.82rem; padding:16px;">No racing bars available yet.</div>';
     } else {
       mpBarsList.innerHTML = topRacers.map((p) => {
-        const isSelf = Boolean(activeUsername && p.username && p.username.toLowerCase() === activeUsername.toLowerCase());
+        const isSelf = checkIsSelf(p.username);
+        const isSelected = selectedSquidPlayer && (selectedSquidPlayer.toLowerCase() === (p.username || '').toLowerCase());
         const vol = Number(p.weekly_volume) || 0;
         const pct = Math.min(100, Math.max(0, (vol / 5000) * 100));
         const isVip = vol >= 5000;
 
         return `
-          <div class="sg-mp-bar-row" onclick="selectSquidPlayer('${escHtml(p.username || '')}')" style="cursor:pointer;" title="Click to track in RLGL stage">
-            <div class="sg-mp-bar-user" style="color:${isSelf ? '#00ffe5' : '#ffffff'}; font-weight:${isSelf ? '900' : '700'};" title="${escHtml(maskUsername(p.username || 'Player'))}">${escHtml(maskUsername(p.username || 'Player'))}</div>
+          <div class="sg-mp-bar-row ${isSelf ? 'is-self' : ''}" onclick="selectSquidPlayer('${escHtml(p.username || '')}')" style="cursor:pointer;" title="Click to track in RLGL stage">
+            <div class="sg-mp-bar-user" style="color:${isSelf ? '#00ff80' : (isSelected ? '#00ffe5' : '#ffffff')}; font-weight:${isSelf || isSelected ? '900' : '700'};" title="${escHtml(maskUsername(p.username || 'Player'))}">${escHtml(maskUsername(p.username || 'Player'))}${isSelf ? ' (You)' : ''}</div>
             <div class="sg-mp-track">
-              <div class="sg-mp-fill" style="width: ${pct}%;"></div>
+              <div class="sg-mp-fill" style="width: ${pct}%; background:${isSelf ? 'linear-gradient(90deg, #00ff80, #00ffe5)' : ''};"></div>
             </div>
-            ${isVip ? '<span class="sg-mp-crown">👑</span>' : `<span style="font-family:var(--font-ui); font-size:0.75rem; font-weight:800; color:${isSelf ? '#00ffe5' : '#a49bc2'}; min-width:48px; text-align:right;">${pct.toFixed(0)}%</span>`}
+            ${isVip ? '<span class="sg-mp-crown">👑</span>' : `<span style="font-family:var(--font-ui); font-size:0.75rem; font-weight:800; color:${isSelf ? '#00ff80' : (isSelected ? '#00ffe5' : '#a49bc2')}; min-width:48px; text-align:right;">${pct.toFixed(0)}%</span>`}
           </div>
         `;
       }).join('');
@@ -8896,20 +8952,38 @@ function renderWeeklyLeaderboard(data) {
   const initialLimit = 10;
   const displayedPlayers = weeklyLbShowAll ? players : players.slice(0, initialLimit);
 
+  // Self names resolution for table row highlighting
+  const currentTokenUser = window.authUser;
+  const selfNames = [];
+  if (currentTokenUser) {
+    if (currentTokenUser.username) selfNames.push(currentTokenUser.username.toLowerCase());
+    if (currentTokenUser.yeetUsername) selfNames.push(currentTokenUser.yeetUsername.toLowerCase());
+    if (currentTokenUser.degencityUsername) selfNames.push(currentTokenUser.degencityUsername.toLowerCase());
+  }
+  const storedYeet = localStorage.getItem('verified_yeet_username');
+  if (storedYeet) selfNames.push(storedYeet.toLowerCase());
+  const storedDegen = localStorage.getItem('verified_degencity_username');
+  if (storedDegen) selfNames.push(storedDegen.toLowerCase());
+
   const rows = displayedPlayers.map((p, i) => {
     const rank = i + 1;
     const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-n';
     const isHidden = p.user_id === -1 || p.is_hidden;
+    const isSelf = !isHidden && p.username && selfNames.includes(p.username.toLowerCase().trim());
+    const isSelected = !isHidden && selectedSquidPlayer && (selectedSquidPlayer.toLowerCase() === (p.username || '').toLowerCase().trim());
+
     const tierBadge = p.tier && p.tier !== 'Unranked'
       ? `<span style="display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:800; color:var(--cyan-400); background:rgba(0,255,229,0.1); border:1px solid rgba(0,255,229,0.25); padding:2px 6px; border-radius:12px; margin-left:6px;">${p.tier_image ? `<img src="${p.tier_image}" style="width:12px;height:12px;" alt="${p.tier}"/>` : ''}${escHtml(p.tier)}</span>`
       : '';
     const codeBadge = p.source_code
       ? `<span style="display:inline-flex; align-items:center; font-size:0.65rem; font-weight:800; color:${p.source_code.includes('BIGBALLZ') ? '#ffd700' : 'var(--cyan-400)'}; background:${p.source_code.includes('BIGBALLZ') ? 'rgba(255,215,0,0.1)' : 'rgba(0,255,229,0.08)'}; border:1px solid ${p.source_code.includes('BIGBALLZ') ? 'rgba(255,215,0,0.25)' : 'rgba(0,255,229,0.2)'}; padding:1px 6px; border-radius:10px; margin-left:6px; letter-spacing:0.04em;">${escHtml(p.source_code)}</span>`
       : '';
-    const maskedName = maskUsername(p.username);
-    const nameHtml = isHidden
-      ? `<span class="hidden-user">🔒 Hidden User</span>`
-      : `<span>${escHtml(maskedName)}${tierBadge}${codeBadge}</span>`;
+    const selfBadge = isSelf
+      ? `<span style="display:inline-flex; align-items:center; font-size:0.65rem; font-weight:900; color:#00ff80; background:rgba(0,255,128,0.18); border:1px solid rgba(0,255,128,0.45); padding:1px 6px; border-radius:10px; margin-left:6px; letter-spacing:0.04em;">YOU</span>`
+      : '';
+    const maskedName = isSelf ? p.username : maskUsername(p.username);
+    const hiddenIcon = isHidden ? '<span title="Hidden profile" style="margin-right:2px; font-size:0.85em; opacity:0.85;">🔒</span>' : '';
+    const nameHtml = `<span style="display:inline-flex; align-items:center; flex-wrap:wrap; gap:4px;">${hiddenIcon}<span style="${isHidden ? 'font-style:italic; opacity:0.9;' : ''}">${escHtml(maskedName)}</span>${selfBadge}${tierBadge}${codeBadge}</span>`;
     const amtClass = rank === 1 ? 'wager-amount gold' : 'wager-amount';
 
     // VIP Status & Airdrop Qualification (Top 3 split: $60 / $40 / $25)
@@ -8925,8 +8999,12 @@ function renderWeeklyLeaderboard(data) {
       vipStatusHtml = `<span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.72rem; padding:3px 8px; border-radius:6px;">🔒 Need ${fmt(diff)} to VIP</span>`;
     }
 
+    const rowClasses = ['lb-main-row'];
+    if (isSelf) rowClasses.push('is-self');
+    if (isSelected) rowClasses.push('is-selected');
+
     return `
-      <tr class="lb-main-row">
+      <tr class="${rowClasses.join(' ')}" onclick="selectSquidPlayer('${escHtml(p.username || '')}')" style="cursor:pointer;" title="Click to view progress in Gauntlet">
         <td><span class="rank-badge ${rankClass}">${rank}</span></td>
         <td class="lb-player-cell">${nameHtml}</td>
         <td style="color:#ffd700; font-weight:900; font-size:1.1rem; font-family:var(--font-display); letter-spacing:0.02em;">
@@ -8936,7 +9014,7 @@ function renderWeeklyLeaderboard(data) {
         <td class="${amtClass}" style="color:#ffffff; font-weight:800; font-size:0.95rem;">${fmt(p.weekly_volume)}</td>
         <td>${vipStatusHtml}</td>
         <td>
-          <a href="https://yeet.com" target="_blank" rel="noopener" class="tc-claim-btn unlocked" style="display:inline-block; font-size:0.72rem; padding:5px 10px; text-decoration:none; border-radius:6px; background:linear-gradient(135deg, #ff2a7a, #9d00ff); border:none; color:#fff; font-weight:700;">
+          <a href="https://yeet.com" target="_blank" rel="noopener" class="tc-claim-btn unlocked" onclick="event.stopPropagation();" style="display:inline-block; font-size:0.72rem; padding:5px 10px; text-decoration:none; border-radius:6px; background:linear-gradient(135deg, #ff2a7a, #9d00ff); border:none; color:#fff; font-weight:700;">
             Play on Yeet ⚡
           </a>
         </td>

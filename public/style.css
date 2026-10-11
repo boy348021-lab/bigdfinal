@@ -766,6 +766,22 @@
   animation: callout-bob 1.8s infinite alternate ease-in-out;
   pointer-events: none;
 }
+.pin-self-callout {
+  position: absolute;
+  top: -24px;
+  background: linear-gradient(90deg, #00ff80 0%, #00ffe5 100%);
+  color: #0c0614;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+  box-shadow: 0 0 16px rgba(0, 255, 128, 0.9);
+  letter-spacing: 0.04em;
+  animation: callout-bob 1.8s infinite alternate ease-in-out;
+  pointer-events: none;
+}
 @keyframes callout-bob {
   0% { transform: translateY(0); }
   100% { transform: translateY(-3px); }

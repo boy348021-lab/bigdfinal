@@ -633,7 +633,7 @@ async function fetchCombinedYeetReferrals({ startDate = null, endDate = null, so
     } else {
       playerMap.set(key, {
         userId: p.userId,
-        username: isHidden ? "🔒 Hidden User" : (p.username || `Player_${p.userId}`),
+        username: p.username || `Player_${p.userId}`,
         isHidden: isHidden,
         sourceCode: sourceCode,
         volume: vol,
@@ -855,23 +855,21 @@ app.get("/api/leaderboard", async (req, res) => {
       })
     ]);
 
-    // Build weekly volume & points lookup map by normalized username / userId
+    // Build weekly volume & points lookup map by unique key
     const weeklyMap = new Map();
     (rawWeeklyReferrals || []).forEach(p => {
-      const u = p.username ? p.username.toLowerCase().trim() : `id_${p.userId}`;
+      const isHidden = Boolean(p.isHidden || p.is_hidden || (p.username && p.username.includes("Hidden")));
+      const u = (!isHidden && p.username && p.username.trim()) 
+        ? p.username.toLowerCase().trim() 
+        : `id_${p.userId}_${p.sourceCode || ''}`;
       const vol = Number(p.volume) || 0;
       const pts = Number(p.leaderboardPoints) || 0;
       const casino = Number(p.casinoPoints) || 0;
       const sports = Number(p.sportsbookPoints) || 0;
-      // CRITICAL: Yeet API `volume` is the TOTAL wager (Slots + House combined).
-      // There is NO per-game-type dollar split available from the Yeet API.
-      // We CANNOT assume any of it is slots-eligible.
-      // slots_volume = 0 (unknown from Yeet; only DB wager_transactions with provider=SLOTS is authoritative)
-      // house_volume = vol (all Yeet volume is treated as house/non-qualifying for safety)
       weeklyMap.set(u, {
         total_volume: vol,
-        slots_volume: 0,   // NEVER assume Yeet volume = slots qualifying — no API split exists
-        house_volume: vol, // Treat full Yeet volume as house until DB slots data overrides
+        slots_volume: 0,
+        house_volume: vol,
         points: pts,
         casino_points: casino,
         sportsbook_points: sports
@@ -882,13 +880,24 @@ app.get("/api/leaderboard", async (req, res) => {
     let yeetWagers = (rawYeetReferrals || []).map((p) => {
       const vol = Number(p.volume) || 0;
       const points = Number(p.leaderboardPoints) || 0;
-      const isHidden = Boolean(p.isHidden);
-      const uKey = p.username ? p.username.toLowerCase().trim() : `id_${p.userId}`;
-      const wStats = weeklyMap.get(uKey) || { total_volume: 0, slots_volume: 0, house_volume: 0, points: 0, casino_points: 0, sportsbook_points: 0 };
-      const weeklyVol = wStats.total_volume;
-      const weeklySlots = wStats.slots_volume;
-      const weeklyHouse = wStats.house_volume;
-      const weeklyPts = wStats.points;
+      const isHidden = Boolean(p.isHidden || p.is_hidden || (p.username && p.username.includes("Hidden")));
+      const uKey = (!isHidden && p.username && p.username.trim())
+        ? p.username.toLowerCase().trim()
+        : `id_${p.userId}_${p.sourceCode || ''}`;
+      
+      // When requesting period === 'weekly', rawYeetReferrals ARE ALREADY the weekly referrals!
+      let weeklyVol = vol;
+      let weeklySlots = 0;
+      let weeklyHouse = vol;
+      let weeklyPts = points;
+
+      if (period !== 'weekly') {
+        const wStats = weeklyMap.get(uKey) || { total_volume: 0, slots_volume: 0, house_volume: 0, points: 0, casino_points: 0, sportsbook_points: 0 };
+        weeklyVol = wStats.total_volume;
+        weeklySlots = wStats.slots_volume;
+        weeklyHouse = wStats.house_volume;
+        weeklyPts = wStats.points;
+      }
 
       return {
         user_id: p.userId,
