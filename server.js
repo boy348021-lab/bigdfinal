@@ -299,7 +299,7 @@ async function getKickLiveStatus() {
   const pyResult = await fetchKickViaPython();
   let baseData = (pyResult && pyResult.ok) ? pyResult : null;
 
-  // Fallback Method: Direct fetch if Python helper had an issue
+  // Fallback Method 1: Direct fetch with standard headers
   if (!baseData) {
     try {
       const res = await fetch(`https://kick.com/api/v2/channels/${channel}`, {
@@ -335,6 +335,53 @@ async function getKickLiveStatus() {
           } : null
         };
       }
+    } catch (e) {}
+  }
+
+  // Fallback Method 2: System curl fetch (bypasses Cloudflare TLS fingerprinting)
+  if (!baseData) {
+    try {
+      const curlData = await new Promise((resolve) => {
+        execFile("curl", [
+          "-s",
+          "-m", "8",
+          "-H", "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "-H", "Accept: application/json",
+          `https://kick.com/api/v2/channels/${channel}`
+        ], (err, stdout) => {
+          if (err || !stdout) return resolve(null);
+          try {
+            const d = JSON.parse(stdout);
+            const user = d.user || {};
+            const categories = d.recent_categories || [];
+            const recentCat = categories[0] || {};
+            const livestream = d.livestream;
+            resolve({
+              live: Boolean(livestream && livestream.is_live !== false),
+              ok: true,
+              channel,
+              username: user.username || "BigDgamesTV",
+              bio: user.bio || "Turning Dreams into reality",
+              profile_pic: user.profile_pic,
+              banner_image: d.banner_image && d.banner_image.url,
+              followers_count: d.followers_count || 1328,
+              category: recentCat.name || "Slots & Casino",
+              category_icon: recentCat.category && recentCat.category.icon || "🎰",
+              playback_url: d.playback_url,
+              stream: livestream ? {
+                session_title: livestream.session_title,
+                viewer_count: livestream.viewer_count || 0,
+                category: (livestream.categories && livestream.categories[0] && livestream.categories[0].name) || recentCat.name || "Slots & Casino",
+                thumbnail: livestream.thumbnail && livestream.thumbnail.url,
+                created_at: livestream.created_at
+              } : null
+            });
+          } catch (pe) {
+            resolve(null);
+          }
+        });
+      });
+      if (curlData) baseData = curlData;
     } catch (e) {}
   }
 

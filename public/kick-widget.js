@@ -630,11 +630,11 @@
       navKickBadge.classList.toggle('is-offline', !isLive);
     }
     if (navKickText) {
-      navKickText.textContent = isLive ? 'LIVE' : 'OFFLINE';
+      navKickText.textContent = isLive ? 'ONLINE' : 'OFFLINE';
     }
 
     if (heroWatchTag) {
-      heroWatchTag.textContent = isLive ? 'LIVE' : 'OFFLINE';
+      heroWatchTag.textContent = isLive ? 'ONLINE' : 'OFFLINE';
     }
     if (heroWatchBtn) {
       heroWatchBtn.classList.toggle('is-live', isLive);
