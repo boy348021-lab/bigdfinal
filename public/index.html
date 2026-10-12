@@ -5528,8 +5528,8 @@ footer a:hover { color: var(--purple-300); }
           </div>
           <div class="social-card-content">
             <div class="social-title" style="display:flex; align-items:center; gap:5px;">
-              <span>Monthly Pool:</span>
-              <span id="hero-combined-wager-pill" style="color:#ffd700; font-weight:900;">$54.9k+</span>
+              <span>Monthly Leaderboard:</span>
+              <span id="hero-combined-wager-pill" style="color:#ffd700; font-weight:900;">$3,000</span>
               <span style="font-size:0.62rem; color:var(--cyan-400); background:rgba(0,255,229,0.12); padding:1px 5px; border-radius:4px; border:1px solid rgba(0,255,229,0.3); font-weight:800;">BIGDTV + BALLZS</span>
             </div>
           </div>
@@ -5608,18 +5608,22 @@ footer a:hover { color: var(--purple-300); }
     <!-- Integrated Activity Feed -->
     <div class="kpi-dock-ticker">
       <span class="kpi-ticker-badge">⚡ LIVE COMMUNITY TELEMETRY</span>
-      <div class="kpi-ticker-track">
-        <div class="ticker-item"><span class="ticker-tag tag-reward">PRIZE POOL</span> 💰 <strong>$3,000 Combined Leaderboard</strong> (BIGDTV + BALLZS) Active!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>reversed</strong> holds all-time record with $11,116.42 wagered!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>thatonet</strong> linked Kick account under code <strong>BIGDTV</strong>!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-live">LIVE NOW</span> 🟢 <strong>BigDgamesTV</strong> is streaming live on Kick!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-reward">WEEKLY REWARDS</span> ⚡ <strong>10 Coins / $1</strong> on Slots & <strong>0.25 Coins / $1</strong> on House/Live!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #2</span> ⚡ <strong>armedupmused</strong> holding 2nd with $10,906.21!</div>
-        <!-- Duplicated track for endless marquee -->
-        <div class="ticker-item"><span class="ticker-tag tag-reward">PRIZE POOL</span> 💰 <strong>$3,000 Combined Leaderboard</strong> (BIGDTV + BALLZS) Active!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>reversed</strong> holds all-time record with $11,116.42 wagered!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>thatonet</strong> linked Kick account under code <strong>BIGDTV</strong>!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-live">LIVE NOW</span> 🟢 <strong>BigDgamesTV</strong> is streaming live on Kick!</div>
+      <div class="kpi-ticker-track" id="kpi-ticker-track">
+        <div class="ticker-item"><span class="ticker-tag tag-reward">PRIZE POOL</span> 💰 <strong>$3,000 Combined Race</strong> (BIGDTV + BALLZS) Active!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>bettyeddy</strong> leading all-time with <strong>$11,954.86</strong> wagered!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>30+ Active Players</strong> connected under <strong>BIGDTV</strong> & <strong>BALLZS</strong>!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-live" id="ticker-live-status-tag">KICK STREAM</span> <span id="ticker-live-stream-text">📺 Watch live streaming & giveaways at <strong>kick.com/bigdgamestv</strong>!</span></div>
+        <div class="ticker-item"><span class="ticker-tag tag-reward">WEEKLY AIRDROP</span> ⚡ <strong>$125 Weekly Gauntlet</strong> • 10 Coins / $1 on Slots!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #2</span> ⚡ <strong>oli****</strong> holding 2nd with <strong>$8,506.39</strong> wagered!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-code">MILESTONES</span> 🎁 <strong>Community Milestone Giveaways</strong> live at $50k+!</div>
+        <!-- Duplicated track for seamless loop -->
+        <div class="ticker-item"><span class="ticker-tag tag-reward">PRIZE POOL</span> 💰 <strong>$3,000 Combined Race</strong> (BIGDTV + BALLZS) Active!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>bettyeddy</strong> leading all-time with <strong>$11,954.86</strong> wagered!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>30+ Active Players</strong> connected under <strong>BIGDTV</strong> & <strong>BALLZS</strong>!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-live">KICK STREAM</span> 📺 Watch live streaming & giveaways at <strong>kick.com/bigdgamestv</strong>!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-reward">WEEKLY AIRDROP</span> ⚡ <strong>$125 Weekly Gauntlet</strong> • 10 Coins / $1 on Slots!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #2</span> ⚡ <strong>oli****</strong> holding 2nd with <strong>$8,506.39</strong> wagered!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-code">MILESTONES</span> 🎁 <strong>Community Milestone Giveaways</strong> live at $50k+!</div>
       </div>
     </div>
   </div>
@@ -7282,6 +7286,24 @@ function setKickLiveStatus(isLive) {
     watchLiveBtn.classList.toggle('is-offline', !isLive);
     watchLiveTag.textContent = isLive ? 'ONLINE' : 'OFFLINE';
   }
+
+  const tickerLiveTag = document.getElementById('ticker-live-status-tag');
+  const tickerLiveText = document.getElementById('ticker-live-stream-text');
+  if (tickerLiveTag && tickerLiveText) {
+    if (isLive) {
+      tickerLiveTag.textContent = 'STREAM LIVE';
+      tickerLiveTag.style.background = 'rgba(0, 255, 102, 0.22)';
+      tickerLiveTag.style.color = '#00ff66';
+      tickerLiveTag.style.borderColor = 'rgba(0, 255, 102, 0.5)';
+      tickerLiveText.innerHTML = '🟢 <strong>BigDgamesTV</strong> is LIVE on Kick! Watch at <strong>kick.com/bigdgamestv</strong>';
+    } else {
+      tickerLiveTag.textContent = 'KICK STREAM';
+      tickerLiveTag.style.background = '';
+      tickerLiveTag.style.color = '';
+      tickerLiveTag.style.borderColor = '';
+      tickerLiveText.innerHTML = '📺 Catch BigD live streaming & giveaways at <strong>kick.com/bigdgamestv</strong>!';
+    }
+  }
 }
 
 async function refreshKickLiveStatus() {
@@ -8358,8 +8380,6 @@ async function fetchBiweeklyLeaderboard() {
     if (monthlyWagerEl) monthlyWagerEl.textContent = formattedMonthlyWager;
     const headerMonthlyWagerEl = document.getElementById('bw-header-wager-val');
     if (headerMonthlyWagerEl) headerMonthlyWagerEl.textContent = formattedMonthlyWager;
-    const pillCombinedWagerEl = document.getElementById('hero-combined-wager-pill');
-    if (pillCombinedWagerEl) pillCombinedWagerEl.textContent = '$' + formattedMonthlyWager + '+';
 
     updateMilestonesProgress(totalMonthlyWager);
   } catch (err) {
@@ -9310,13 +9330,13 @@ document.addEventListener('click', (e) => {
   const items = [
     'BIGDGAMESTV',
     'ACTIVE PARTNER: <span class="hi">YEET (CODE: BIGDTV)</span>',
-    'COMBINED LEADERBOARD: <span class="hi">$3,000 PRIZE POOL</span>',
+    'COMBINED RACE: <span class="hi">BIGDTV + BALLZS</span>',
+    'PRIZE POOL: <span class="hi">$3,000 MONTHLY</span>',
     'WEEKLY REWARDS: <span class="hi">LIVE NOW</span>',
     'SLOTS MULTIPLIER: <span class="hi">10 COINS / $1</span>',
     'HOUSE / LIVE: <span class="hi">0.25 COINS / $1</span>',
-    'COMBINED RACE: <span class="hi">BIGDTV + BALLZS</span>',
     'STREAM: <span class="hi">KICK.COM/BIGDGAMESTV</span>',
-    'TOP ALL-TIME: <span class="hi">$11,116.42 (reversed)</span>'
+    'TOP ALL-TIME: <span class="hi">$11,954.86 (bettyeddy)</span>'
   ];
   const track = document.getElementById('ticker-track');
   if(track){
