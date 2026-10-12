@@ -1955,20 +1955,36 @@ body::after {
 /* 3. Latest Winners Auto Carousel */
 .winners-carousel-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
   width: 100%;
+}
+@media (max-width: 1200px) {
+  .winners-carousel-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 768px) {
+  .winners-carousel-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .winners-carousel-grid {
+    grid-template-columns: 1fr;
+  }
 }
 .winner-card {
   background: rgba(13, 8, 32, 0.75);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(157, 0, 255, 0.2);
   border-radius: var(--radius-lg);
-  padding: 18px 20px;
+  padding: 16px 14px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   transition: all 0.3s ease;
+  min-width: 0;
 }
 .winner-card:hover {
   transform: translateY(-4px);
@@ -6572,27 +6588,27 @@ footer a:hover { color: var(--purple-300); }
     <!-- Panel 3: Hall of Fame (Last Month Winners) -->
     <div class="intel-panel" id="intel-panel-winners">
       <div class="winners-carousel-grid" id="winners-container">
-        <!-- Winner 1 -->
+        <!-- Rank 1 -->
         <div class="winner-card" style="border-color:rgba(255,215,0,0.5); background:rgba(255,215,0,0.06);">
           <div class="winner-avatar" style="background:linear-gradient(135deg, #ffd700, #ffaa00); color:#000;">🥇</div>
           <div class="winner-info">
             <div class="winner-name">oliseburner <span style="font-size:0.65rem; color:#ffd700; background:rgba(255,215,0,0.15); padding:1px 5px; border-radius:4px;">BALLZS</span></div>
             <div class="winner-prize">$1,000 CASH</div>
-            <div class="winner-time">Sept 2026 Champion • 93.3k Pts</div>
+            <div class="winner-time">Sept Champion • 93.3k Pts</div>
           </div>
         </div>
 
-        <!-- Winner 2 -->
+        <!-- Rank 2 -->
         <div class="winner-card" style="border-color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.04);">
           <div class="winner-avatar" style="background:linear-gradient(135deg, #e0e0e0, #9e9e9e); color:#000;">🥈</div>
           <div class="winner-info">
             <div class="winner-name">bettyeddy <span style="font-size:0.65rem; color:var(--cyan-400); background:rgba(0,255,229,0.15); padding:1px 5px; border-radius:4px;">BIGD</span></div>
             <div class="winner-prize" style="color:#e0e0e0;">$500 CASH</div>
-            <div class="winner-time">2nd Place • $41.2k Wagered</div>
+            <div class="winner-time">2nd Place • $41.3k Wagered</div>
           </div>
         </div>
 
-        <!-- Winner 3 -->
+        <!-- Rank 3 -->
         <div class="winner-card" style="border-color:rgba(205,127,50,0.4); background:rgba(205,127,50,0.05);">
           <div class="winner-avatar" style="background:linear-gradient(135deg, #cd7f32, #8b4513); color:#fff;">🥉</div>
           <div class="winner-info">
@@ -6602,13 +6618,73 @@ footer a:hover { color: var(--purple-300); }
           </div>
         </div>
 
-        <!-- Winner 4 -->
+        <!-- Rank 4 -->
         <div class="winner-card">
           <div class="winner-avatar" style="background:rgba(0,255,229,0.15); color:var(--cyan-400); border-color:rgba(0,255,229,0.4);">4th</div>
           <div class="winner-info">
             <div class="winner-name">PinkMynx222 <span style="font-size:0.65rem; color:#ffd700; background:rgba(255,215,0,0.15); padding:1px 5px; border-radius:4px;">BALLZS</span></div>
             <div class="winner-prize" style="color:var(--cyan-400);">$275 CASH</div>
-            <div class="winner-time">4th Place • 27.2k Pts</div>
+            <div class="winner-time">4th Place • 27.3k Pts</div>
+          </div>
+        </div>
+
+        <!-- Rank 5 -->
+        <div class="winner-card">
+          <div class="winner-avatar" style="background:rgba(190,77,255,0.15); color:var(--purple-300); border-color:rgba(190,77,255,0.4);">5th</div>
+          <div class="winner-info">
+            <div class="winner-name">Poildur <span style="font-size:0.65rem; color:var(--cyan-400); background:rgba(0,255,229,0.15); padding:1px 5px; border-radius:4px;">BIGD</span></div>
+            <div class="winner-prize" style="color:var(--purple-300);">$225 CASH</div>
+            <div class="winner-time">5th Place • 19.4k Pts</div>
+          </div>
+        </div>
+
+        <!-- Rank 6 -->
+        <div class="winner-card">
+          <div class="winner-avatar" style="background:rgba(255,255,255,0.08); color:#f4efff; border-color:rgba(255,255,255,0.2);">6th</div>
+          <div class="winner-info">
+            <div class="winner-name">Reversed <span style="font-size:0.65rem; color:var(--cyan-400); background:rgba(0,255,229,0.15); padding:1px 5px; border-radius:4px;">BIGD</span></div>
+            <div class="winner-prize" style="color:#ffffff;">$175 CASH</div>
+            <div class="winner-time">6th Place • 16.6k Pts</div>
+          </div>
+        </div>
+
+        <!-- Rank 7 -->
+        <div class="winner-card">
+          <div class="winner-avatar" style="background:rgba(255,255,255,0.08); color:#f4efff; border-color:rgba(255,255,255,0.2);">7th</div>
+          <div class="winner-info">
+            <div class="winner-name">bluntz <span style="font-size:0.65rem; color:var(--cyan-400); background:rgba(0,255,229,0.15); padding:1px 5px; border-radius:4px;">BIGD</span></div>
+            <div class="winner-prize" style="color:#ffffff;">$150 CASH</div>
+            <div class="winner-time">7th Place • 15.9k Pts</div>
+          </div>
+        </div>
+
+        <!-- Rank 8 -->
+        <div class="winner-card">
+          <div class="winner-avatar" style="background:rgba(255,255,255,0.08); color:#f4efff; border-color:rgba(255,255,255,0.2);">8th</div>
+          <div class="winner-info">
+            <div class="winner-name">thatoneT <span style="font-size:0.65rem; color:var(--cyan-400); background:rgba(0,255,229,0.15); padding:1px 5px; border-radius:4px;">BIGD</span></div>
+            <div class="winner-prize" style="color:#ffffff;">$125 CASH</div>
+            <div class="winner-time">8th Place • 14.3k Pts</div>
+          </div>
+        </div>
+
+        <!-- Rank 9 -->
+        <div class="winner-card">
+          <div class="winner-avatar" style="background:rgba(255,255,255,0.08); color:#f4efff; border-color:rgba(255,255,255,0.2);">9th</div>
+          <div class="winner-info">
+            <div class="winner-name">SmallDud <span style="font-size:0.65rem; color:var(--cyan-400); background:rgba(0,255,229,0.15); padding:1px 5px; border-radius:4px;">BIGD</span></div>
+            <div class="winner-prize" style="color:#ffffff;">$100 CASH</div>
+            <div class="winner-time">9th Place • 5.5k Pts</div>
+          </div>
+        </div>
+
+        <!-- Rank 10 -->
+        <div class="winner-card">
+          <div class="winner-avatar" style="background:rgba(255,255,255,0.08); color:#f4efff; border-color:rgba(255,255,255,0.2);">10th</div>
+          <div class="winner-info">
+            <div class="winner-name">Roxanne <span style="font-size:0.65rem; color:#ffd700; background:rgba(255,215,0,0.15); padding:1px 5px; border-radius:4px;">BALLZS</span></div>
+            <div class="winner-prize" style="color:#ffffff;">$100 CASH</div>
+            <div class="winner-time">10th Place • 4.4k Pts</div>
           </div>
         </div>
       </div>

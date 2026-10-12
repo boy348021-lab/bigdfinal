@@ -14,6 +14,8 @@ import fs from "fs";
 import { readFile } from "fs/promises";
 import { WebSocket } from "ws";
 import ActionDispatcher from "./server/blackjack/ActionDispatcher.js";
+import { DrawRegistryEngine } from "./server/registry/DrawRegistryEngine.js";
+import { setupRegistryRoutes } from "./server/registry/routes.js";
 
 dotenv.config();
 
@@ -89,6 +91,9 @@ const supabase        = supabaseUrl && supabaseKey
 if (!supabase) {
   console.warn("⚠️  Supabase not configured — set SUPABASE_URL + SUPABASE_SERVICE_KEY in .env");
 }
+
+// Initialize Shared Cross-Site Draw Registry Engine
+const drawRegistryEngine = new DrawRegistryEngine(supabase);
 
 // Auto-detect the base URL: prefer explicit env var, then Vercel URL, then production domain, then localhost
 const BASE_URL = process.env.BASE_URL
@@ -3179,16 +3184,14 @@ async function getUserWagerDetails(target) {
     ]);
 
     const mMatch = matchYeetPlayer(monthly, candidateNames);
-    const aMatch = matchYeetPlayer(allTime, candidateNames);
     const mVol = mMatch ? (Number(mMatch.volume) || 0) : 0;
-    const aVol = aMatch ? (Number(aMatch.volume) || 0) : 0;
-    const matchedPlayer = mMatch || aMatch;
-    const effectiveWager = Math.max(mVol, aVol);
+    const matchedPlayer = mMatch;
+    // Strict requirement: ONLY the current calendar month wager volume qualifies for milestone eligibility
+    const effectiveWager = mVol;
 
     return {
       wager: effectiveWager,
       monthlyWager: mVol,
-      allTimeWager: aVol,
       matchedUsername: matchedPlayer ? matchedPlayer.username : candidateNames[0],
       sourceCode: matchedPlayer ? (matchedPlayer.sourceCode || 'UNKNOWN') : null,
       player: matchedPlayer
@@ -3475,6 +3478,9 @@ app.get("/api/milestones/pool-entries", requireAdmin, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch pool entries" });
   }
 });
+
+// ─── Shared Cross-Site Draw Registry API Routes ──────────────────────────────
+setupRegistryRoutes(app, drawRegistryEngine, { getUserWagerDetails });
 
 // ─── Fallback → index.html ────────────────────────────────────────────────────
 app.use((req, res) => {
