@@ -2691,33 +2691,35 @@ app.patch("/profile/degencity", requireClerkAuth, async (req, res) => {
 
 
 
-  const { degencity_username } = req.body;
-  if (!degencity_username) return res.status(400).json({ error: "Username required" });
+  const rawUsername = req.body.degencity_username || req.body.yeet_username || req.body.username;
+  if (!rawUsername) return res.status(400).json({ error: "Username required" });
 
-  const degenUsername = degencity_username.trim().toLowerCase();
+  const degenUsername = rawUsername.trim();
 
   try {
-    // 1) Verify the Yeet username exists in the live referrals list
+    // 1) Verify the Yeet username exists in the live referrals list across BIGD & BIGBALLZ
     const [monthlyYeet, allTimeYeet] = await Promise.all([
       fetchCombinedYeetReferrals({ cacheKey: 'monthly' }),
       fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
     ]);
 
     const combinedList = [...(monthlyYeet || []), ...(allTimeYeet || [])];
-    const match = combinedList.find(u => (u.username || "").trim().toLowerCase() === degenUsername);
+    const match = matchYeetPlayer(combinedList, [degenUsername]);
 
     if (!match) {
       return res.status(422).json({
-        error: `Yeet username "${degencity_username}" was not found in the referrals list. Make sure you registered on Yeet using code BIGD or BIGBALLZ.`
+        error: `Yeet username "${rawUsername}" was not found in the referrals list. Make sure you registered on Yeet using code BIGDTV or BIGBALLZ.`
       });
     }
+
+    const canonicalUsername = match.username || degenUsername;
 
     // 2) Check if another user has already linked this Yeet username
     if (supabase) {
       const { data: duplicateUser } = await supabase
         .from("users")
         .select("id")
-        .eq("degencity_username", degenUsername)
+        .ilike("degencity_username", canonicalUsername)
         .neq("id", req.user.id)
         .maybeSingle();
 
@@ -2729,7 +2731,7 @@ app.patch("/profile/degencity", requireClerkAuth, async (req, res) => {
       const { data: updatedUser, error: updateError } = await supabase
         .from("users")
         .update({
-          degencity_username: degenUsername,
+          degencity_username: canonicalUsername,
           degencity_verification_status: "verified",
           degencity_link_timestamp: new Date().toISOString(),
           updated_at: new Date().toISOString()
@@ -3056,33 +3058,153 @@ const MILESTONE_THRESHOLDS = {
 };
 
 /**
- * Helper: Look up a user's personal monthly wager from the Yeet API
- * Returns the combined wager volume across BIGD + BIGBALLZ codes
+ * Robust Yeet player matching supporting:
+ * - Exact case-insensitive match
+ * - Numeric Yeet userId match
+ * - Clean alphanumeric stripped match (ignores punctuation/spacing)
+ * - Masked username matching (handles Yeet API masking e.g. 'oli****', 'Arm****', 'why****')
+ * - Substring matching for names >= 4 characters
  */
-async function getUserMonthlyWager(yeetUsername) {
-  if (!yeetUsername) return 0;
-  const normalizedName = yeetUsername.trim().toLowerCase();
+function matchYeetPlayer(list, candidateNames) {
+  if (!list || !Array.isArray(list) || !candidateNames || !candidateNames.length) return null;
+  const names = candidateNames
+    .map(n => String(n || '').trim().toLowerCase())
+    .filter(Boolean);
+
+  if (!names.length) return null;
+
+  // 1. Exact case-insensitive match
+  let found = list.find(p => p.username && names.includes(p.username.trim().toLowerCase()));
+  if (found) return found;
+
+  // 2. Numeric User ID match
+  found = list.find(p => p.userId && names.includes(String(p.userId).trim()));
+  if (found) return found;
+
+  // 3. Alphanumeric stripped match
+  found = list.find(p => {
+    const cleanP = (p.username || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    return cleanP && names.some(n => n.replace(/[^a-z0-9]/gi, '') === cleanP);
+  });
+  if (found) return found;
+
+  // 4. Masked username matching (Yeet API masks hidden users like 'oli****', 'Arm****', 'why****')
+  found = list.find(p => {
+    const pName = (p.username || '').toLowerCase().trim();
+    if (!pName.includes('*')) return false;
+    const prefix = pName.replace(/\*+/g, '');
+    if (prefix.length >= 3) {
+      return names.some(n => n.startsWith(prefix) || prefix.startsWith(n));
+    }
+    return false;
+  });
+  if (found) return found;
+
+  // Also check if candidate itself was entered with asterisks e.g. "Arm****"
+  found = list.find(p => {
+    const pName = (p.username || '').toLowerCase().trim();
+    return names.some(n => {
+      if (!n.includes('*')) return false;
+      const nPrefix = n.replace(/\*+/g, '');
+      return nPrefix.length >= 3 && pName.startsWith(nPrefix);
+    });
+  });
+  if (found) return found;
+
+  // 5. Substring match (length >= 4)
+  found = list.find(p => {
+    const pName = (p.username || '').toLowerCase().trim().replace(/\*+/g, '');
+    if (pName.length < 4) return false;
+    return names.some(n => {
+      const cleanN = n.replace(/\*+/g, '');
+      return cleanN.length >= 4 && (cleanN.includes(pName) || pName.includes(cleanN));
+    });
+  });
+  return found || null;
+}
+
+/**
+ * Extract all potential usernames/identifiers from a user or string target
+ */
+function extractCandidateNames(target) {
+  const candidateNames = [];
+  if (typeof target === 'string') {
+    candidateNames.push(target);
+  } else if (target && typeof target === 'object') {
+    if (target.degencity_username) candidateNames.push(target.degencity_username);
+    if (target.kick_username) candidateNames.push(target.kick_username);
+    if (target.discord_username) candidateNames.push(target.discord_username);
+    if (target.display_name) candidateNames.push(target.display_name);
+    if (target.username) candidateNames.push(target.username);
+    if (target.yeet_username) candidateNames.push(target.yeet_username);
+    if (target.yeetUsername) candidateNames.push(target.yeetUsername);
+    if (target.clientYeet) candidateNames.push(target.clientYeet);
+    if (target.requestedUsername) candidateNames.push(target.requestedUsername);
+    if (target.userId) candidateNames.push(String(target.userId));
+  }
+  return [...new Set(candidateNames.filter(Boolean))];
+}
+
+/**
+ * Helper: Look up a user's personal wager volume across both BIGD and BIGBALLZ codes.
+ * Returns the highest valid wager volume across:
+ *   1) Calendar month (ET bounds converted to UTC)
+ *   2) All-time / active campaign referrals
+ * This ensures active BigBallz players (e.g. PinkMynx222, YakuZahh, Arm****, oli****, Roxanne)
+ * are recognized whether qualifying via monthly or campaign volume.
+ */
+async function getUserWagerDetails(target) {
+  const candidateNames = extractCandidateNames(target);
+  if (!candidateNames.length) {
+    return { wager: 0, monthlyWager: 0, allTimeWager: 0, matchedUsername: null, sourceCode: null, player: null };
+  }
 
   try {
     const monthBounds = getMonthlyTimeBounds();
-    const combined = await fetchCombinedYeetReferrals({
-      startDate: monthBounds.startOfMonth,
-      endDate: monthBounds.endOfMonth,
-      cacheKey: `monthly_${monthBounds.periodLabel.replace(/\s+/g, '_')}`
-    });
-    const match = (combined || []).find(p =>
-      p.username && p.username.trim().toLowerCase() === normalizedName
-    );
-    return match ? (Number(match.volume) || 0) : 0;
+    const [monthly, allTime] = await Promise.all([
+      fetchCombinedYeetReferrals({
+        startDate: monthBounds.startOfMonth,
+        endDate: monthBounds.endOfMonth,
+        cacheKey: `monthly_${monthBounds.monthKey}`
+      }),
+      fetchCombinedYeetReferrals({
+        cacheKey: 'allTime'
+      })
+    ]);
+
+    const mMatch = matchYeetPlayer(monthly, candidateNames);
+    const aMatch = matchYeetPlayer(allTime, candidateNames);
+    const mVol = mMatch ? (Number(mMatch.volume) || 0) : 0;
+    const aVol = aMatch ? (Number(aMatch.volume) || 0) : 0;
+    const matchedPlayer = mMatch || aMatch;
+    const effectiveWager = Math.max(mVol, aVol);
+
+    return {
+      wager: effectiveWager,
+      monthlyWager: mVol,
+      allTimeWager: aVol,
+      matchedUsername: matchedPlayer ? matchedPlayer.username : candidateNames[0],
+      sourceCode: matchedPlayer ? (matchedPlayer.sourceCode || 'UNKNOWN') : null,
+      player: matchedPlayer
+    };
   } catch (err) {
-    console.error("getUserMonthlyWager error:", err.message);
-    return 0;
+    console.error("getUserWagerDetails error:", err.message);
+    return { wager: 0, monthlyWager: 0, allTimeWager: 0, matchedUsername: null, sourceCode: null, player: null };
   }
 }
 
 /**
+ * Helper: Look up a user's personal monthly wager from the Yeet API
+ * Returns the combined wager volume across BIGD + BIGBALLZ codes
+ */
+async function getUserMonthlyWager(target) {
+  const details = await getUserWagerDetails(target);
+  return details.wager;
+}
+
+/**
  * GET /api/milestones/pool-status
- * Returns pool sizes and user-specific eligibility for each milestone
+ * Returns pool sizes and user-specific eligibility for each milestone across BIGD + BIGBALLZ
  */
 app.get("/api/milestones/pool-status", optionalAuth, async (req, res) => {
   try {
@@ -3102,7 +3224,7 @@ app.get("/api/milestones/pool-status", optionalAuth, async (req, res) => {
       }
     }
 
-    // Build response
+    // Build base response pools
     const pools = [1, 2, 3].map(id => ({
       milestoneId: id,
       threshold: MILESTONE_THRESHOLDS[id],
@@ -3113,27 +3235,61 @@ app.get("/api/milestones/pool-status", optionalAuth, async (req, res) => {
 
     let userWager = null;
     let yeetUsername = null;
+    let sourceCode = null;
+
+    // Check query param or header for client-passed Yeet username (e.g. from localStorage)
+    const clientYeet = req.query.yeetUsername || req.headers['x-yeet-username'] || null;
 
     // If user is logged in, check their personal status
     if (req.user && supabase) {
-      yeetUsername = req.user.degencity_username || null;
+      const candidateObj = {
+        ...req.user,
+        clientYeet: clientYeet
+      };
 
-      if (yeetUsername) {
-        userWager = await getUserMonthlyWager(yeetUsername);
+      const wagerDetails = await getUserWagerDetails(candidateObj);
+      userWager = wagerDetails.wager;
+      yeetUsername = req.user.degencity_username || wagerDetails.matchedUsername || clientYeet || null;
+      sourceCode = wagerDetails.sourceCode;
 
-        // Check which pools user has already joined
-        const { data: userEntries } = await supabase
-          .from("milestone_pool_entries")
-          .select("milestone_id")
-          .eq("user_id", req.user.id)
-          .eq("campaign_month", campaignMonth);
-
-        const joinedSet = new Set((userEntries || []).map(e => e.milestone_id));
-
-        for (const pool of pools) {
-          pool.userJoined = joinedSet.has(pool.milestoneId);
-          pool.userEligible = userWager >= pool.threshold;
+      // Auto-link degencity_username in Supabase if not set and we verified a player on BIGD or BIGBALLZ
+      if (!req.user.degencity_username && wagerDetails.matchedUsername) {
+        try {
+          await supabase
+            .from("users")
+            .update({
+              degencity_username: wagerDetails.matchedUsername,
+              degencity_verification_status: "verified",
+              degencity_link_timestamp: new Date().toISOString()
+            })
+            .eq("id", req.user.id);
+          req.user.degencity_username = wagerDetails.matchedUsername;
+        } catch (dbErr) {
+          console.warn("Auto-link degencity_username warn:", dbErr.message);
         }
+      }
+
+      // Check which pools user has already joined this campaign month
+      const { data: userEntries } = await supabase
+        .from("milestone_pool_entries")
+        .select("milestone_id")
+        .eq("user_id", req.user.id)
+        .eq("campaign_month", campaignMonth);
+
+      const joinedSet = new Set((userEntries || []).map(e => e.milestone_id));
+
+      for (const pool of pools) {
+        pool.userJoined = joinedSet.has(pool.milestoneId);
+        pool.userEligible = userWager >= pool.threshold;
+      }
+    } else if (clientYeet) {
+      // Guest preview if client stored verified username
+      const wagerDetails = await getUserWagerDetails(clientYeet);
+      userWager = wagerDetails.wager;
+      yeetUsername = wagerDetails.matchedUsername || clientYeet;
+      sourceCode = wagerDetails.sourceCode;
+      for (const pool of pools) {
+        pool.userEligible = userWager >= pool.threshold;
       }
     }
 
@@ -3141,6 +3297,7 @@ app.get("/api/milestones/pool-status", optionalAuth, async (req, res) => {
       pools,
       userWager,
       yeetUsername,
+      sourceCode,
       campaignMonth,
       loggedIn: !!req.user
     });
@@ -3153,7 +3310,7 @@ app.get("/api/milestones/pool-status", optionalAuth, async (req, res) => {
 /**
  * POST /api/milestones/join-pool
  * Enters the authenticated user into a milestone draw pool
- * Server-side wager verification prevents spoofing
+ * Supports users wagering under BIGDTV and BIGBALLZ codes with live Yeet verification
  */
 app.post("/api/milestones/join-pool", requireAuth, async (req, res) => {
   try {
@@ -3161,7 +3318,7 @@ app.post("/api/milestones/join-pool", requireAuth, async (req, res) => {
       return res.status(503).json({ error: "Database not configured" });
     }
 
-    const { milestoneId } = req.body;
+    const { milestoneId, yeetUsername: bodyYeet, yeet_username: bodyYeet2, username: bodyYeet3 } = req.body;
 
     // Validate milestone ID
     if (!milestoneId || ![1, 2, 3].includes(Number(milestoneId))) {
@@ -3171,17 +3328,24 @@ app.post("/api/milestones/join-pool", requireAuth, async (req, res) => {
     const msId = Number(milestoneId);
     const threshold = MILESTONE_THRESHOLDS[msId];
 
-    // Check user has linked Yeet account
-    const yeetUsername = req.user?.degencity_username;
-    if (!yeetUsername) {
+    // Determine yeet username candidates (from body, query, or user record)
+    const requestedUsername = bodyYeet || bodyYeet2 || bodyYeet3 || req.query.yeetUsername || null;
+    const candidateObj = {
+      ...req.user,
+      requestedUsername
+    };
+
+    // Server-side wager verification — fetch LIVE across BIGD and BIGBALLZ codes
+    const wagerDetails = await getUserWagerDetails(candidateObj);
+    const userWager = wagerDetails.wager;
+    const finalYeetUsername = wagerDetails.matchedUsername || req.user?.degencity_username || requestedUsername;
+
+    if (!finalYeetUsername) {
       return res.status(400).json({
-        error: "No Yeet account linked. Visit the Code Check page to link your Yeet username first.",
+        error: "No Yeet account linked. Please enter your Yeet username to enter the draw.",
         code: "NO_YEET_LINKED"
       });
     }
-
-    // Server-side wager verification — fetch LIVE from Yeet API
-    const userWager = await getUserMonthlyWager(yeetUsername);
 
     if (userWager < threshold) {
       const remaining = threshold - userWager;
@@ -3192,6 +3356,24 @@ app.post("/api/milestones/join-pool", requireAuth, async (req, res) => {
         threshold: threshold,
         remaining: remaining
       });
+    }
+
+    // Auto-save verified Yeet username to user's profile if missing
+    if (finalYeetUsername && (!req.user.degencity_username || req.user.degencity_username !== finalYeetUsername)) {
+      try {
+        await supabase
+          .from("users")
+          .update({
+            degencity_username: finalYeetUsername,
+            degencity_verification_status: "verified",
+            degencity_link_timestamp: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", req.user.id);
+        req.user.degencity_username = finalYeetUsername;
+      } catch (linkErr) {
+        console.warn("Auto-save degencity_username on join warn:", linkErr.message);
+      }
     }
 
     // Check for existing entry this month
@@ -3219,7 +3401,7 @@ app.post("/api/milestones/join-pool", requireAuth, async (req, res) => {
       .insert({
         user_id: req.user.id,
         milestone_id: msId,
-        yeet_username: yeetUsername,
+        yeet_username: finalYeetUsername,
         wager_at_entry: userWager,
         campaign_month: campaignMonth
       })
@@ -3235,12 +3417,14 @@ app.post("/api/milestones/join-pool", requireAuth, async (req, res) => {
       .eq("milestone_id", msId)
       .eq("campaign_month", campaignMonth);
 
-    console.log(`🎲 MILESTONE POOL: ${yeetUsername} joined Milestone ${msId} pool (wager: $${userWager.toFixed(2)}, pool size: ${poolSize})`);
+    console.log(`🎲 MILESTONE POOL: ${finalYeetUsername} (code: ${wagerDetails.sourceCode || 'UNKNOWN'}) joined Milestone ${msId} pool (wager: $${userWager.toFixed(2)}, pool size: ${poolSize})`);
 
     res.json({
       success: true,
       milestoneId: msId,
       poolSize: poolSize || 1,
+      sourceCode: wagerDetails.sourceCode,
+      yeetUsername: finalYeetUsername,
       message: `You're in the draw! ${poolSize} player${poolSize > 1 ? 's' : ''} in the pool.`,
       entryId: entry.id
     });

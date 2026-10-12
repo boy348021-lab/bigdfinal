@@ -6057,7 +6057,7 @@ footer a:hover { color: var(--purple-300); }
         <div class="challenges-header" style="text-align:center; max-width:720px; margin:0 auto 28px;">
           <div class="section-title">Yeet <span>Wager Milestones</span></div>
           <p class="challenges-sub">
-            Wager on Yeet with code <strong class="text-cyan">BIGDTV</strong> to push community goals forward. When milestones unlock, random draws take place live on Kick stream for all active participants!
+            Wager on Yeet with code <strong class="text-cyan">BIGDTV</strong> or <strong style="color:#ffd700;">BIGBALLZ</strong> to push community goals forward. When milestones unlock, random draws take place live on Kick stream for all active participants!
           </p>
         </div>
 
@@ -6076,7 +6076,7 @@ footer a:hover { color: var(--purple-300); }
               🎁 REWARD: 3 × $20 BONUS BUYS ($60 TOTAL)
             </div>
             <p style="font-family: var(--font-ui); font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 16px;">
-              When the community reaches <strong style="color: #fff;">$50,000</strong> total wager on Yeet using code <strong style="color: var(--cyan-400);">BIGDTV</strong>, 3 participants from the wagering pool will be drawn live on stream to receive <strong>$20 Bonus Buys</strong> each!
+              When the community reaches <strong style="color: #fff;">$50,000</strong> total wager on Yeet using code <strong style="color: var(--cyan-400);">BIGDTV</strong> or <strong style="color: #ffd700;">BIGBALLZ</strong>, 3 participants from the wagering pool will be drawn live on stream to receive <strong>$20 Bonus Buys</strong> each!
             </p>
             
             <div style="margin-bottom:12px;">
@@ -6120,7 +6120,7 @@ footer a:hover { color: var(--purple-300); }
               🎁 REWARD: 5 × $20 BONUS BUYS ($100 TOTAL)
             </div>
             <p style="font-family: var(--font-ui); font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 16px;">
-              When the community reaches <strong style="color: #fff;">$100,000</strong> total wager on Yeet using code <strong style="color: var(--cyan-400);">BIGDTV</strong>, 5 participants from the wagering pool will be drawn live on stream to receive <strong>$20 Bonus Buys</strong> each!
+              When the community reaches <strong style="color: #fff;">$100,000</strong> total wager on Yeet using code <strong style="color: var(--cyan-400);">BIGDTV</strong> or <strong style="color: #ffd700;">BIGBALLZ</strong>, 5 participants from the wagering pool will be drawn live on stream to receive <strong>$20 Bonus Buys</strong> each!
             </p>
             
             <div style="margin-bottom:12px;">
@@ -6164,7 +6164,7 @@ footer a:hover { color: var(--purple-300); }
               🎁 REWARD: 3 × $40 BONUS BUYS ($120 TOTAL)
             </div>
             <p style="font-family: var(--font-ui); font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 16px;">
-              When the community reaches <strong style="color: #fff;">$150,000</strong> total wager on Yeet using code <strong style="color: var(--cyan-400);">BIGDTV</strong>, 3 participants from the wagering pool will be drawn live on stream to receive <strong>$40 Bonus Buys</strong> each!
+              When the community reaches <strong style="color: #fff;">$150,000</strong> total wager on Yeet using code <strong style="color: var(--cyan-400);">BIGDTV</strong> or <strong style="color: #ffd700;">BIGBALLZ</strong>, 3 participants from the wagering pool will be drawn live on stream to receive <strong>$40 Bonus Buys</strong> each!
             </p>
             
             <div style="margin-bottom:12px;">
@@ -7640,8 +7640,10 @@ async function loadMilestonePoolStatus() {
   try {
     const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
     const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    const storedYeet = localStorage.getItem('verified_yeet_username') || localStorage.getItem('verified_degencity_username') || '';
+    const qs = storedYeet ? `?yeetUsername=${encodeURIComponent(storedYeet)}` : '';
 
-    const res = await fetch('/api/milestones/pool-status', { headers, cache: 'no-store' });
+    const res = await fetch(`/api/milestones/pool-status${qs}`, { headers, cache: 'no-store' });
     if (!res.ok) {
       console.warn('Pool status fetch failed:', res.status);
       return;
@@ -7674,7 +7676,9 @@ function renderPoolButton(pool, statusData) {
   if (countEl) countEl.textContent = pool.totalEntries;
 
   const isLoggedIn = statusData.loggedIn;
-  const hasYeet = !!statusData.yeetUsername;
+  const storedYeet = localStorage.getItem('verified_yeet_username') || localStorage.getItem('verified_degencity_username') || '';
+  const effectiveYeet = statusData.yeetUsername || storedYeet;
+  const hasYeet = !!effectiveYeet;
   const userWager = statusData.userWager || 0;
 
   // Reset classes
@@ -7696,8 +7700,18 @@ function renderPoolButton(pool, statusData) {
   } else if (!hasYeet) {
     // No Yeet account linked
     btn.classList.add('no-yeet');
-    btn.innerHTML = `<span>⚠️</span><span>Link Yeet Account First</span>`;
-    btn.onclick = () => { window.location.href = '/verify.html'; };
+    btn.innerHTML = `<span>⚡</span><span>Link Yeet / BigBallz</span>`;
+    btn.onclick = () => {
+      const entered = window.prompt("Enter your Yeet username (registered with code BIGDTV or BIGBALLZ):");
+      if (entered && entered.trim()) {
+        localStorage.setItem('verified_yeet_username', entered.trim());
+        loadMilestonePoolStatus().then(() => {
+          joinMilestonePool(pool.milestoneId);
+        });
+      } else {
+        window.location.href = '/verify.html';
+      }
+    };
   } else if (userWager < pool.threshold) {
     // Wager too low
     const remaining = pool.threshold - userWager;
@@ -7721,70 +7735,79 @@ function renderPoolButton(pool, statusData) {
  * Join a milestone pool — called when user clicks the button
  */
 async function joinMilestonePool(milestoneId) {
-  const btn = document.getElementById(`ms-pool-btn-${milestoneId}`);
-  const btnText = document.getElementById(`ms-pool-btn-text-${milestoneId}`);
+  const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
+  if (!token) {
+    showPoolToast('Please log in first!', 'error');
+    if (typeof loginWithDiscord === 'function') loginWithDiscord();
+    return;
+  }
 
+  const storedYeet = _poolStatusCache?.yeetUsername || localStorage.getItem('verified_yeet_username') || localStorage.getItem('verified_degencity_username') || '';
+
+  if (!storedYeet) {
+    const entered = window.prompt("Enter your Yeet username (registered with code BIGDTV or BIGBALLZ):");
+    if (!entered || !entered.trim()) {
+      showPoolToast('Yeet username is required to enter the draw.', 'error');
+      return;
+    }
+    localStorage.setItem('verified_yeet_username', entered.trim());
+    return joinMilestonePoolWithUsername(milestoneId, entered.trim());
+  }
+
+  return joinMilestonePoolWithUsername(milestoneId, storedYeet);
+}
+
+async function joinMilestonePoolWithUsername(milestoneId, yeetUsername) {
+  const btn = document.getElementById(`ms-pool-btn-${milestoneId}`);
   if (!btn) return;
 
-  // Prevent double-click
   btn.classList.add('loading');
   const originalHTML = btn.innerHTML;
   btn.innerHTML = `<span class="spinner-cyan" style="width:18px;height:18px;border-width:2px;"></span><span>Joining...</span>`;
 
   try {
     const token = typeof getAuthToken === 'function' ? getAuthToken() : null;
-    if (!token) {
-      showPoolToast('Please log in first!', 'error');
-      btn.classList.remove('loading');
-      btn.innerHTML = originalHTML;
-      return;
-    }
-
     const res = await fetch('/api/milestones/join-pool', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ milestoneId })
+      body: JSON.stringify({ milestoneId, yeetUsername })
     });
 
     const data = await res.json();
 
     if (res.ok && data.success) {
-      // Success! Update button to "joined" state
+      if (data.yeetUsername) {
+        localStorage.setItem('verified_yeet_username', data.yeetUsername);
+      }
       btn.classList.remove('loading', 'eligible', 'pulse');
       btn.classList.add('joined');
       btn.disabled = true;
       btn.innerHTML = `<span>✓</span><span>You're In the Draw!</span>`;
 
-      // Update pool counter
       const countEl = document.getElementById(`ms-pool-count-${milestoneId}`);
       if (countEl) countEl.textContent = data.poolSize;
 
-      showPoolToast(`🎉 You've entered the Milestone ${milestoneId} draw! ${data.poolSize} player${data.poolSize > 1 ? 's' : ''} in the pool.`, 'success');
-
-      // Update req text
-      const reqEl = document.getElementById(`ms-pool-req-${milestoneId}`);
-      if (reqEl && _poolStatusCache) {
-        reqEl.innerHTML = `Your wager: <strong>$${(_poolStatusCache.userWager || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong> ✓`;
-      }
+      showPoolToast(`🎉 You've entered the Milestone ${milestoneId} draw! (${data.poolSize} player${data.poolSize > 1 ? 's' : ''} in pool)`, 'success');
+      loadMilestonePoolStatus();
     } else {
-      // Error from server
       btn.classList.remove('loading');
       btn.innerHTML = originalHTML;
 
       if (data.code === 'ALREADY_JOINED') {
-        // They're already in — update UI
         btn.classList.remove('eligible', 'pulse');
         btn.classList.add('joined');
         btn.disabled = true;
         btn.innerHTML = `<span>✓</span><span>You're In the Draw!</span>`;
         showPoolToast("You're already in this draw pool!", 'info');
-      } else if (data.code === 'WAGER_TOO_LOW') {
-        showPoolToast(data.error, 'error');
       } else if (data.code === 'NO_YEET_LINKED') {
-        showPoolToast('Link your Yeet account on the Code Check page first.', 'error');
+        const entered = window.prompt("Enter your Yeet username (registered with code BIGDTV or BIGBALLZ):");
+        if (entered && entered.trim()) {
+          localStorage.setItem('verified_yeet_username', entered.trim());
+          joinMilestonePoolWithUsername(milestoneId, entered.trim());
+        }
       } else {
         showPoolToast(data.error || 'Failed to join pool.', 'error');
       }
