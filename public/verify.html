@@ -1198,9 +1198,9 @@ async function doVerify() {
       localStorage.setItem('verified_degencity_username', match.username);
       localStorage.setItem('verified_yeet_username', match.username);
 
-      const isBallz = match.source_code && match.source_code.includes('BIGBALLZ');
+      const isBallz = match.source_code && (match.source_code.includes('BALLZS') || match.source_code.includes('BIGBALLZ'));
       const isBigD = match.source_code && match.source_code.includes('BIGD');
-      const codeName = (isBallz && isBigD) ? 'BIGDTV + BIGBALLZ' : (isBallz ? 'BIGBALLZ' : 'BIGDTV');
+      const codeName = (isBallz && isBigD) ? 'BIGDTV + BALLZS' : (isBallz ? 'BALLZS' : 'BIGDTV');
       const accentColor = isBallz ? '#ffd700' : 'var(--cyan-400)';
 
       resultBox.innerHTML = `
@@ -1210,7 +1210,7 @@ async function doVerify() {
             Great news! The account <strong>${escHtml(match.username)}</strong> is <strong>verified and active</strong> under partner code <strong style="color:${accentColor};">${codeName}</strong> on Yeet.
           </div>
           <div style="font-size:0.8rem; color:var(--cyan-400); margin-top:6px; line-height:1.5;">
-            ✓ Eligible for Big D & BigBallz leaderboards, wager rewards, milestone draw pools, and store claims!
+            ✓ Eligible for Big D & Ballz leaderboards, wager rewards, milestone draw pools, and store claims!
           </div>
         </div>
       `;
@@ -1253,13 +1253,13 @@ async function doVerify() {
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <div>
                 <span class="promo-text">Partner Code 2:</span>
-                <span class="promo-code" style="color:#ffd700;">BIGBALLZ</span>
+                <span class="promo-code" style="color:#ffd700;">BALLZS</span>
               </div>
-              <button class="btn-copy-promo" onclick="copyCode('BIGBALLZ', this)">📋 Copy</button>
+              <button class="btn-copy-promo" onclick="copyCode('BALLZS', this)">📋 Copy</button>
             </div>
           </div>
           <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:6px; line-height: 1.45;">
-            To qualify, make sure you registered on Yeet using affiliate code <strong>BIGDTV</strong> or <strong>BIGBALLZ</strong> and have active gameplay.
+            To qualify, make sure you registered on Yeet using affiliate code <strong>BIGDTV</strong> or <strong>BALLZS</strong> and have active gameplay.
           </div>
         </div>
       `;

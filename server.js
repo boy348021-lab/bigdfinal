@@ -22,13 +22,19 @@ const PORT = process.env.PORT || 3000;
 
 const API_KEY               = process.env.DEGEN_API_KEY || "e7d0fb2a-20fd-471e-b6a2-f2989ea7ecba";
 const YEET_API_KEY          = process.env.YEET_API_KEY || "2d820a56cb7d4479b8799f0cb4eea78f";
-const YEET_BIGBALLZ_API_KEY = process.env.YEET_BIGBALLZ_API_KEY || process.env.DRTPT_API_KEY || "8e4cf0f57a2941109a4ba73fcc8fe5f4";
+const YEET_BALLZS_API_KEY   = process.env.YEET_BALLZS_API_KEY || process.env.YEET_BIGBALLZ_API_KEY || process.env.DRTPT_API_KEY || "8e4cf0f57a2941109a4ba73fcc8fe5f4";
+const YEET_BIGBALLZ_API_KEY = YEET_BALLZS_API_KEY;
 const YEET_API_BASE         = "https://api.yeet.com/concierge/public/affiliate/referrals";
 const KICK_CHANNEL          = "bigdgamestv";
 
 // ─── IN-MEMORY ZERO-LATENCY CACHE FOR YEET API (<2ms response) ───
 const yeetCache = {
   bigd: {
+    monthly: { data: null, timestamp: 0, key: '' },
+    weekly:  { data: null, timestamp: 0, key: '' },
+    allTime: { data: null, timestamp: 0, key: '' }
+  },
+  ballzs: {
     monthly: { data: null, timestamp: 0, key: '' },
     weekly:  { data: null, timestamp: 0, key: '' },
     allTime: { data: null, timestamp: 0, key: '' }
@@ -541,7 +547,7 @@ function getMonthlyTimeBounds() {
 async function fetchYeetReferralsForStreamer(apiKey, streamerCode, { startDate = null, endDate = null, sortBy = 'volume', limit = 100, cacheKey = 'monthly' } = {}) {
   const now = Date.now();
   const expectedKey = `${startDate}_${endDate}_${sortBy}`;
-  const cacheBucket = streamerCode === 'BIGBALLZ' ? yeetCache.bigballz : yeetCache.bigd;
+  const cacheBucket = (streamerCode === 'BALLZS' || streamerCode === 'BIGBALLZ') ? (yeetCache.ballzs || yeetCache.bigballz) : yeetCache.bigd;
   const cached = cacheBucket ? cacheBucket[cacheKey] : null;
 
   // Return cached result immediately if fresh (< 2ms response time) and key matches
@@ -598,12 +604,12 @@ async function fetchYeetReferralsForStreamer(apiKey, streamerCode, { startDate =
 }
 
 /**
- * Fetch and combine live referrals across both streamer codes (BIGD + BIGBALLZ)
+ * Fetch and combine live referrals across both streamer codes (BIGD + BALLZS)
  */
 async function fetchCombinedYeetReferrals({ startDate = null, endDate = null, sortBy = 'leaderboardPoints', limit = 100, cacheKey = 'monthly' } = {}) {
-  const [bigdRaw, bigballzRaw] = await Promise.all([
+  const [bigdRaw, ballzsRaw] = await Promise.all([
     fetchYeetReferralsForStreamer(YEET_API_KEY, 'BIGD', { startDate, endDate, sortBy, limit, cacheKey }),
-    fetchYeetReferralsForStreamer(YEET_BIGBALLZ_API_KEY, 'BIGBALLZ', { startDate, endDate, sortBy, limit, cacheKey })
+    fetchYeetReferralsForStreamer(YEET_BALLZS_API_KEY, 'BALLZS', { startDate, endDate, sortBy, limit, cacheKey })
   ]);
 
   const playerMap = new Map();
@@ -648,7 +654,7 @@ async function fetchCombinedYeetReferrals({ startDate = null, endDate = null, so
   }
 
   (bigdRaw || []).forEach(p => processReferral(p, 'BIGD'));
-  (bigballzRaw || []).forEach(p => processReferral(p, 'BIGBALLZ'));
+  (ballzsRaw || []).forEach(p => processReferral(p, 'BALLZS'));
 
   return Array.from(playerMap.values());
 }
@@ -876,7 +882,7 @@ app.get("/api/leaderboard", async (req, res) => {
       });
     });
 
-    // 2. Map & format player data — Scoring logic: Points = Wager * House Edge (matching BigBallz)
+    // 2. Map & format player data — Scoring logic: Points = Wager * House Edge (matching BALLZS)
     let yeetWagers = (rawYeetReferrals || []).map((p) => {
       const vol = Number(p.volume) || 0;
       const points = Number(p.leaderboardPoints) || 0;
@@ -930,13 +936,13 @@ app.get("/api/leaderboard", async (req, res) => {
     // Filter by code if explicitly specified
     if (codeFilter === 'bigd') {
       yeetWagers = yeetWagers.filter(u => u.source_code.includes('BIGD'));
-    } else if (codeFilter === 'bigballz') {
-      yeetWagers = yeetWagers.filter(u => u.source_code.includes('BIGBALLZ'));
+    } else if (codeFilter === 'bigballz' || codeFilter === 'ballzs') {
+      yeetWagers = yeetWagers.filter(u => u.source_code.includes('BALLZS') || u.source_code.includes('BIGBALLZ'));
     }
 
     const latestTimestamp = Math.max(
       yeetCache.bigd[cacheKey]?.timestamp || 0,
-      yeetCache.bigballz[cacheKey]?.timestamp || 0
+      yeetCache.ballzs[cacheKey]?.timestamp || yeetCache.bigballz[cacheKey]?.timestamp || 0
     );
 
     res.set("Cache-Control", "public, max-age=30");
@@ -948,7 +954,7 @@ app.get("/api/leaderboard", async (req, res) => {
       prize_pool: 3000,
       prize_distribution: COMBINED_PRIZE_POOL,
       airdrop_config: WEEKLY_AIRDROP_CONFIG,
-      codes_supported: ["BIGD", "BIGBALLZ"],
+      codes_supported: ["BIGD", "BALLZS"],
       active_filter: codeFilter,
       scoring_rule: "POINTS_HOUSE_EDGE",
       scoring_formula: "POINTS = WAGER × HOUSE EDGE",
@@ -970,7 +976,7 @@ app.get("/api/partners/history", (req, res) => {
       status: "active",
       season: "September 2026",
       url: "https://yeet.com",
-      combined_with: "BigBallz",
+      combined_with: "BALLZS",
       prize_pool: "$3,000"
     },
     previous_partners: [
@@ -2697,7 +2703,7 @@ app.patch("/profile/degencity", requireClerkAuth, async (req, res) => {
   const degenUsername = rawUsername.trim();
 
   try {
-    // 1) Verify the Yeet username exists in the live referrals list across BIGD & BIGBALLZ
+    // 1) Verify the Yeet username exists in the live referrals list across BIGD & BALLZS
     const [monthlyYeet, allTimeYeet] = await Promise.all([
       fetchCombinedYeetReferrals({ cacheKey: 'monthly' }),
       fetchCombinedYeetReferrals({ cacheKey: 'allTime' })
@@ -2708,7 +2714,7 @@ app.patch("/profile/degencity", requireClerkAuth, async (req, res) => {
 
     if (!match) {
       return res.status(422).json({
-        error: `Yeet username "${rawUsername}" was not found in the referrals list. Make sure you registered on Yeet using code BIGDTV or BIGBALLZ.`
+        error: `Yeet username "${rawUsername}" was not found in the referrals list. Make sure you registered on Yeet using code BIGDTV or BALLZS.`
       });
     }
 
@@ -3146,11 +3152,11 @@ function extractCandidateNames(target) {
 }
 
 /**
- * Helper: Look up a user's personal wager volume across both BIGD and BIGBALLZ codes.
+ * Helper: Look up a user's personal wager volume across both BIGD and BALLZS codes.
  * Returns the highest valid wager volume across:
  *   1) Calendar month (ET bounds converted to UTC)
  *   2) All-time / active campaign referrals
- * This ensures active BigBallz players (e.g. PinkMynx222, YakuZahh, Arm****, oli****, Roxanne)
+ * This ensures active BALLZS players (e.g. PinkMynx222, YakuZahh, Arm****, oli****, Roxanne)
  * are recognized whether qualifying via monthly or campaign volume.
  */
 async function getUserWagerDetails(target) {
@@ -3195,7 +3201,7 @@ async function getUserWagerDetails(target) {
 
 /**
  * Helper: Look up a user's personal monthly wager from the Yeet API
- * Returns the combined wager volume across BIGD + BIGBALLZ codes
+ * Returns the combined wager volume across BIGD + BALLZS codes
  */
 async function getUserMonthlyWager(target) {
   const details = await getUserWagerDetails(target);
@@ -3204,7 +3210,7 @@ async function getUserMonthlyWager(target) {
 
 /**
  * GET /api/milestones/pool-status
- * Returns pool sizes and user-specific eligibility for each milestone across BIGD + BIGBALLZ
+ * Returns pool sizes and user-specific eligibility for each milestone across BIGD + BALLZS
  */
 app.get("/api/milestones/pool-status", optionalAuth, async (req, res) => {
   try {
@@ -3252,7 +3258,7 @@ app.get("/api/milestones/pool-status", optionalAuth, async (req, res) => {
       yeetUsername = req.user.degencity_username || wagerDetails.matchedUsername || clientYeet || null;
       sourceCode = wagerDetails.sourceCode;
 
-      // Auto-link degencity_username in Supabase if not set and we verified a player on BIGD or BIGBALLZ
+      // Auto-link degencity_username in Supabase if not set and we verified a player on BIGD or BALLZS
       if (!req.user.degencity_username && wagerDetails.matchedUsername) {
         try {
           await supabase
@@ -3310,7 +3316,7 @@ app.get("/api/milestones/pool-status", optionalAuth, async (req, res) => {
 /**
  * POST /api/milestones/join-pool
  * Enters the authenticated user into a milestone draw pool
- * Supports users wagering under BIGDTV and BIGBALLZ codes with live Yeet verification
+ * Supports users wagering under BIGDTV and BALLZS codes with live Yeet verification
  */
 app.post("/api/milestones/join-pool", requireAuth, async (req, res) => {
   try {
@@ -3335,7 +3341,7 @@ app.post("/api/milestones/join-pool", requireAuth, async (req, res) => {
       requestedUsername
     };
 
-    // Server-side wager verification — fetch LIVE across BIGD and BIGBALLZ codes
+    // Server-side wager verification — fetch LIVE across BIGD and BALLZS codes
     const wagerDetails = await getUserWagerDetails(candidateObj);
     const userWager = wagerDetails.wager;
     const finalYeetUsername = wagerDetails.matchedUsername || req.user?.degencity_username || requestedUsername;
