@@ -7,7 +7,7 @@
 CREATE TABLE IF NOT EXISTS milestone_pool_entries (
   id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id         UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  milestone_id    INTEGER     NOT NULL CHECK (milestone_id BETWEEN 1 AND 3),
+  milestone_id    INTEGER     NOT NULL CHECK (milestone_id BETWEEN 1 AND 5),
   yeet_username   TEXT        NOT NULL,
   wager_at_entry  NUMERIC(12,2) NOT NULL,
   entered_at      TIMESTAMPTZ NOT NULL DEFAULT now(),

@@ -38,8 +38,8 @@ export class DrawRegistryEngine {
       });
     }
 
-    // 2. Ensure the 3 draws exist
-    for (const msId of [1, 2, 3]) {
+    // 2. Ensure all milestone draws exist (1 through 5)
+    for (const msId of [1, 2, 3, 4, 5]) {
       const { data: draw } = await this.db
         .from("draws")
         .select("id")
@@ -232,8 +232,8 @@ export class DrawRegistryEngine {
   }) {
     if (!this.db) throw new Error("Database offline");
     const msId = Number(milestoneId);
-    if (![1, 2, 3].includes(msId)) {
-      throw new Error("Invalid milestoneId. Must be 1, 2, or 3.");
+    if (![1, 2, 3, 4, 5].includes(msId)) {
+      throw new Error("Invalid milestoneId. Must be between 1 and 5.");
     }
 
     const campaignMonth = getCurrentCampaignMonth();

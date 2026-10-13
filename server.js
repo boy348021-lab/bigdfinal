@@ -3066,7 +3066,9 @@ async function loadRegisteredUsers() {
 const MILESTONE_THRESHOLDS = {
   1: 3000,   // $3,000 personal wager → eligible for $50K community milestone pool
   2: 5000,   // $5,000 → $100K pool
-  3: 10000   // $10,000 → $150K pool
+  3: 10000,  // $10,000 → $150K pool
+  4: 10000,  // $10,000 → $200K pool
+  5: 10000   // $10,000 → $300K pool
 };
 
 /**
@@ -3221,10 +3223,10 @@ app.get("/api/milestones/pool-status", optionalAuth, async (req, res) => {
     const now = new Date();
     const campaignMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-    // Get pool counts for each milestone
-    let poolCounts = { 1: 0, 2: 0, 3: 0 };
+    // Get pool counts for each milestone (1 to 5)
+    let poolCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     if (supabase) {
-      for (const milestoneId of [1, 2, 3]) {
+      for (const milestoneId of [1, 2, 3, 4, 5]) {
         const { count } = await supabase
           .from("milestone_pool_entries")
           .select("*", { count: "exact", head: true })
@@ -3235,10 +3237,10 @@ app.get("/api/milestones/pool-status", optionalAuth, async (req, res) => {
     }
 
     // Build base response pools
-    const pools = [1, 2, 3].map(id => ({
+    const pools = [1, 2, 3, 4, 5].map(id => ({
       milestoneId: id,
       threshold: MILESTONE_THRESHOLDS[id],
-      totalEntries: poolCounts[id],
+      totalEntries: poolCounts[id] || 0,
       userJoined: false,
       userEligible: false
     }));
@@ -3331,8 +3333,8 @@ app.post("/api/milestones/join-pool", requireAuth, async (req, res) => {
     const { milestoneId, yeetUsername: bodyYeet, yeet_username: bodyYeet2, username: bodyYeet3 } = req.body;
 
     // Validate milestone ID
-    if (!milestoneId || ![1, 2, 3].includes(Number(milestoneId))) {
-      return res.status(400).json({ error: "Invalid milestone ID. Must be 1, 2, or 3." });
+    if (!milestoneId || ![1, 2, 3, 4, 5].includes(Number(milestoneId))) {
+      return res.status(400).json({ error: "Invalid milestone ID. Must be between 1 and 5." });
     }
 
     const msId = Number(milestoneId);

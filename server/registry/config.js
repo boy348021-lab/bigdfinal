@@ -7,12 +7,16 @@ export const REGISTRY_CONFIG = {
   MILESTONE_THRESHOLDS: {
     1: 3000,   // $3,000 personal monthly wager -> $50,000 community milestone
     2: 5000,   // $5,000 personal monthly wager -> $100,000 community milestone
-    3: 10000   // $10,000 personal monthly wager -> $150,000 community milestone
+    3: 10000,  // $10,000 personal monthly wager -> $150,000 community milestone
+    4: 10000,  // $10,000 personal monthly wager -> $200,000 community milestone
+    5: 10000   // $10,000 personal monthly wager -> $300,000 community milestone
   },
   COMMUNITY_TARGETS: {
     1: 50000,
     2: 100000,
-    3: 150000
+    3: 150000,
+    4: 200000,
+    5: 300000
   },
   // Site credentials for inter-site authentication
   SITES: {

@@ -3436,6 +3436,46 @@ body::after {
 }
 .ms-pool-m3 .ms-pool-counter .pool-count { color: #ffd700; }
 
+/* Milestone 4 emerald/green theme overrides ($200K) */
+.ms-pool-m4 .btn-join-pool.eligible {
+  background: linear-gradient(135deg, rgba(0,255,128,0.18) 0%, rgba(0,200,100,0.12) 100%);
+  border-color: rgba(0,255,128,0.5);
+  color: #00ff80;
+  box-shadow: 0 0 20px rgba(0,255,128,0.15);
+}
+.ms-pool-m4 .btn-join-pool.eligible:hover {
+  border-color: rgba(0,255,128,0.7);
+  box-shadow: 0 0 30px rgba(0,255,128,0.3);
+}
+@keyframes pool-pulse-emerald {
+  0%, 100% { box-shadow: 0 0 15px rgba(0,255,128,0.15); }
+  50% { box-shadow: 0 0 25px rgba(0,255,128,0.35), 0 0 50px rgba(0,255,128,0.1); }
+}
+.ms-pool-m4 .btn-join-pool.eligible.pulse {
+  animation: pool-pulse-emerald 2s ease-in-out infinite;
+}
+.ms-pool-m4 .ms-pool-counter .pool-count { color: #00ff80; }
+
+/* Milestone 5 ruby/rose/crimson theme overrides ($300K) */
+.ms-pool-m5 .btn-join-pool.eligible {
+  background: linear-gradient(135deg, rgba(255,59,92,0.2) 0%, rgba(255,0,128,0.15) 100%);
+  border-color: rgba(255,59,92,0.55);
+  color: #ff3b5c;
+  box-shadow: 0 0 20px rgba(255,59,92,0.18);
+}
+.ms-pool-m5 .btn-join-pool.eligible:hover {
+  border-color: rgba(255,59,92,0.8);
+  box-shadow: 0 0 30px rgba(255,59,92,0.35);
+}
+@keyframes pool-pulse-ruby {
+  0%, 100% { box-shadow: 0 0 15px rgba(255,59,92,0.18); }
+  50% { box-shadow: 0 0 25px rgba(255,59,92,0.4), 0 0 50px rgba(255,59,92,0.15); }
+}
+.ms-pool-m5 .btn-join-pool.eligible.pulse {
+  animation: pool-pulse-ruby 2s ease-in-out infinite;
+}
+.ms-pool-m5 .ms-pool-counter .pool-count { color: #ff3b5c; }
+
 /* ============================================================
    STORE
    ============================================================ */
@@ -6270,6 +6310,94 @@ footer a:hover { color: var(--purple-300); }
             </div>
           </div>
 
+          <!-- Milestone 4: $200K Target -->
+          <div id="milestone-card-4" style="background: linear-gradient(145deg, rgba(16,28,24,0.88) 0%, rgba(8,16,14,0.96) 100%); border: 1px solid rgba(0,255,128,0.28); border-radius: var(--radius-lg); padding: 30px 24px; text-align: left; position: relative; overflow: hidden; transition: transform 0.3s ease;">
+            <div id="milestone-badge-4" style="position: absolute; top: 16px; right: 16px; background: rgba(0, 255, 128, 0.15); border: 1px solid rgba(0, 255, 128, 0.4); color: #00ff80; padding: 4px 14px; border-radius: 20px; font-family: var(--font-ui); font-size: 0.72rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase;">
+              🔥 MEGA TARGET #4
+            </div>
+            <div style="font-size: 2.5rem; margin-bottom: 12px;">⚡</div>
+            <div style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; color: #ffffff; margin-bottom: 6px;">
+              $200,000 <span style="color: #00ff80;">MILESTONE</span>
+            </div>
+            <div style="display: inline-block; background: rgba(0, 255, 128, 0.15); border: 1px solid rgba(0, 255, 128, 0.35); color: #00ff80; padding: 4px 10px; border-radius: 4px; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 800; margin-bottom: 14px;">
+              🎁 REWARD: 5 × $40 BONUS BUYS ($200 TOTAL)
+            </div>
+            <p style="font-family: var(--font-ui); font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 16px;">
+              When the community reaches <strong style="color: #fff;">$200,000</strong> total wager on Yeet using code <strong style="color: var(--cyan-400);">BIGDTV</strong> or <strong style="color: #ffd700;">BALLZS</strong>, 5 participants from the wagering pool will be drawn live on stream to receive <strong>$40 Bonus Buys</strong> each!
+            </p>
+            
+            <div style="margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-family:var(--font-ui); color:var(--text-secondary); margin-bottom:5px;">
+                <span id="ms-prog-label-4">Progress</span>
+                <span id="ms-prog-pct-4" style="color:#00ff80; font-weight:700;">0%</span>
+              </div>
+              <div style="background:rgba(255,255,255,0.06); border-radius:10px; height:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
+                <div id="ms-prog-bar-4" style="width:0%; height:100%; background:linear-gradient(90deg, #00c864, #00ff80); border-radius:10px; transition:width 0.8s ease;"></div>
+              </div>
+            </div>
+
+            <div id="ms-status-4" style="font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+              <span>●</span> Status: Unlocks after $150K Goal
+            </div>
+
+            <!-- POOL JOIN SECTION -->
+            <div class="ms-pool-divider ms-pool-m4" id="ms-pool-section-4">
+              <div class="ms-pool-divider-label">🎟️ Enter the Draw</div>
+              <div class="ms-pool-requirement" id="ms-pool-req-4">Wager <strong>$10,000+</strong> this month to enter the pool</div>
+              <button class="btn-join-pool locked" id="ms-pool-btn-4" data-milestone="4" onclick="joinMilestonePool(4)">
+                <span>🔒</span>
+                <span id="ms-pool-btn-text-4">Loading...</span>
+              </button>
+              <div class="ms-pool-counter" id="ms-pool-counter-4">
+                <span>👥</span> <span class="pool-count" id="ms-pool-count-4">0</span> <span>players in the pool</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Milestone 5: $300K Target -->
+          <div id="milestone-card-5" style="background: linear-gradient(145deg, rgba(28,14,22,0.9) 0%, rgba(16,8,12,0.96) 100%); border: 1px solid rgba(255,59,92,0.3); border-radius: var(--radius-lg); padding: 30px 24px; text-align: left; position: relative; overflow: hidden; transition: transform 0.3s ease;">
+            <div id="milestone-badge-5" style="position: absolute; top: 16px; right: 16px; background: rgba(255, 59, 92, 0.15); border: 1px solid rgba(255, 59, 92, 0.45); color: #ff3b5c; padding: 4px 14px; border-radius: 20px; font-family: var(--font-ui); font-size: 0.72rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase;">
+              💎 ULTIMATE TARGET #5
+            </div>
+            <div style="font-size: 2.5rem; margin-bottom: 12px;">🌟</div>
+            <div style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; color: #ffffff; margin-bottom: 6px;">
+              $300,000 <span style="color: #ff3b5c;">MILESTONE</span>
+            </div>
+            <div style="display: inline-block; background: rgba(255, 59, 92, 0.15); border: 1px solid rgba(255, 59, 92, 0.35); color: #ff3b5c; padding: 4px 10px; border-radius: 4px; font-family: var(--font-ui); font-size: 0.75rem; font-weight: 800; margin-bottom: 14px;">
+              🎁 REWARD: 5 × $50 BONUS BUYS ($250 TOTAL)
+            </div>
+            <p style="font-family: var(--font-ui); font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 16px;">
+              When the community reaches <strong style="color: #fff;">$300,000</strong> total wager on Yeet using code <strong style="color: var(--cyan-400);">BIGDTV</strong> or <strong style="color: #ffd700;">BALLZS</strong>, 5 participants from the wagering pool will be drawn live on stream to receive <strong>$50 Bonus Buys</strong> each!
+            </p>
+            
+            <div style="margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-family:var(--font-ui); color:var(--text-secondary); margin-bottom:5px;">
+                <span id="ms-prog-label-5">Progress</span>
+                <span id="ms-prog-pct-5" style="color:#ff3b5c; font-weight:700;">0%</span>
+              </div>
+              <div style="background:rgba(255,255,255,0.06); border-radius:10px; height:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
+                <div id="ms-prog-bar-5" style="width:0%; height:100%; background:linear-gradient(90deg, #ff007f, #ff3b5c); border-radius:10px; transition:width 0.8s ease;"></div>
+              </div>
+            </div>
+
+            <div id="ms-status-5" style="font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+              <span>●</span> Status: Unlocks after $200K Goal
+            </div>
+
+            <!-- POOL JOIN SECTION -->
+            <div class="ms-pool-divider ms-pool-m5" id="ms-pool-section-5">
+              <div class="ms-pool-divider-label">🎟️ Enter the Draw</div>
+              <div class="ms-pool-requirement" id="ms-pool-req-5">Wager <strong>$10,000+</strong> this month to enter the pool</div>
+              <button class="btn-join-pool locked" id="ms-pool-btn-5" data-milestone="5" onclick="joinMilestonePool(5)">
+                <span>🔒</span>
+                <span id="ms-pool-btn-text-5">Loading...</span>
+              </button>
+              <div class="ms-pool-counter" id="ms-pool-counter-5">
+                <span>👥</span> <span class="pool-count" id="ms-pool-count-5">0</span> <span>players in the pool</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -7775,6 +7903,52 @@ function updateMilestonesProgress(totalWager) {
   } else {
     const rem = m3Target - current;
     if (m3Status) m3Status.innerHTML = `<span>●</span> Status: <strong>$${rem.toLocaleString(undefined, {maximumFractionDigits:0})}</strong> to target (Unlocks after $100K)`;
+  }
+
+  // Milestone 4: $200K (5x $40)
+  const m4Target = 200000;
+  const m4Pct = Math.min(100, (current / m4Target) * 100);
+  const m4Bar = document.getElementById('ms-prog-bar-4');
+  const m4PctEl = document.getElementById('ms-prog-pct-4');
+  const m4Label = document.getElementById('ms-prog-label-4');
+  const m4Badge = document.getElementById('milestone-badge-4');
+  const m4Status = document.getElementById('ms-status-4');
+  if (m4Bar) m4Bar.style.width = `${m4Pct.toFixed(1)}%`;
+  if (m4PctEl) m4PctEl.textContent = `${m4Pct.toFixed(1)}%`;
+  if (m4Label) m4Label.textContent = current >= m4Target ? 'Completed ($200,000 / $200,000)' : `$${current.toLocaleString(undefined, {maximumFractionDigits:0})} / $200,000`;
+  if (current >= m4Target) {
+    if (m4Badge) { m4Badge.textContent = '✓ UNLOCKED'; m4Badge.style.color = '#00ff80'; m4Badge.style.borderColor = 'rgba(0,255,128,0.5)'; m4Badge.style.background = 'rgba(0,255,128,0.15)'; }
+    if (m4Status) { m4Status.innerHTML = `<span>★</span> Status: <strong style="color:#00ff80;">Target Achieved! Live Draw Active</strong>`; m4Status.style.color = '#00ff80'; }
+  } else if (current >= m3Target) {
+    const rem = m4Target - current;
+    if (m4Badge) { m4Badge.textContent = '⚡ ACTIVE TARGET #4'; m4Badge.style.color = '#00ff80'; }
+    if (m4Status) m4Status.innerHTML = `<span>●</span> Status: <strong>$${rem.toLocaleString(undefined, {maximumFractionDigits:0})}</strong> to unlock 5x $40`;
+  } else {
+    const rem = m4Target - current;
+    if (m4Status) m4Status.innerHTML = `<span>●</span> Status: <strong>$${rem.toLocaleString(undefined, {maximumFractionDigits:0})}</strong> to target (Unlocks after $150K)`;
+  }
+
+  // Milestone 5: $300K (5x $50)
+  const m5Target = 300000;
+  const m5Pct = Math.min(100, (current / m5Target) * 100);
+  const m5Bar = document.getElementById('ms-prog-bar-5');
+  const m5PctEl = document.getElementById('ms-prog-pct-5');
+  const m5Label = document.getElementById('ms-prog-label-5');
+  const m5Badge = document.getElementById('milestone-badge-5');
+  const m5Status = document.getElementById('ms-status-5');
+  if (m5Bar) m5Bar.style.width = `${m5Pct.toFixed(1)}%`;
+  if (m5PctEl) m5PctEl.textContent = `${m5Pct.toFixed(1)}%`;
+  if (m5Label) m5Label.textContent = current >= m5Target ? 'Completed ($300,000 / $300,000)' : `$${current.toLocaleString(undefined, {maximumFractionDigits:0})} / $300,000`;
+  if (current >= m5Target) {
+    if (m5Badge) { m5Badge.textContent = '✓ UNLOCKED'; m5Badge.style.color = '#00ff80'; m5Badge.style.borderColor = 'rgba(0,255,128,0.5)'; m5Badge.style.background = 'rgba(0,255,128,0.15)'; }
+    if (m5Status) { m5Status.innerHTML = `<span>★</span> Status: <strong style="color:#00ff80;">Target Achieved! Live Draw Active</strong>`; m5Status.style.color = '#00ff80'; }
+  } else if (current >= m4Target) {
+    const rem = m5Target - current;
+    if (m5Badge) { m5Badge.textContent = '⚡ ACTIVE TARGET #5'; m5Badge.style.color = '#ff3b5c'; }
+    if (m5Status) m5Status.innerHTML = `<span>●</span> Status: <strong>$${rem.toLocaleString(undefined, {maximumFractionDigits:0})}</strong> to unlock 5x $50`;
+  } else {
+    const rem = m5Target - current;
+    if (m5Status) m5Status.innerHTML = `<span>●</span> Status: <strong>$${rem.toLocaleString(undefined, {maximumFractionDigits:0})}</strong> to target (Unlocks after $200K)`;
   }
 }
 

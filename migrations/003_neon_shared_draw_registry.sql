@@ -44,9 +44,9 @@ CREATE TABLE IF NOT EXISTS campaigns (
 CREATE TABLE IF NOT EXISTS draws (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   campaign_id     TEXT NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
-  milestone_id    INTEGER NOT NULL CHECK (milestone_id BETWEEN 1 AND 3),
-  target_usd      NUMERIC(12,2) NOT NULL,       -- $50,000, $100,000, $150,000 community milestone
-  threshold_usd   NUMERIC(12,2) NOT NULL,       -- $3,000, $5,000, $10,000 individual wager requirement
+  milestone_id    INTEGER NOT NULL CHECK (milestone_id BETWEEN 1 AND 5),
+  target_usd      NUMERIC(12,2) NOT NULL,       -- $50k, $100k, $150k, $200k, $300k community milestone
+  threshold_usd   NUMERIC(12,2) NOT NULL,       -- $3k, $5k, $10k individual wager requirement
   status          TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'locked', 'drawn', 'cancelled')),
   seed_commitment TEXT,                         -- SHA-256 seed published when locked for provably-fair draw
   revealed_seed   TEXT,
