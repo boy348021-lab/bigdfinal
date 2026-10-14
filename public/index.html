@@ -2860,20 +2860,21 @@ body::after {
 
 .kpi-chips-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 12px;
 }
 
-@media (max-width: 1020px) {
+@media (max-width: 1200px) {
+  .kpi-chips-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
   .kpi-chips-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
-  }
-  .kpi-chip-card:last-child {
-    grid-column: 1 / -1;
-    max-width: 460px;
-    margin: 0 auto;
-    width: 100%;
   }
 }
 
@@ -5660,7 +5661,7 @@ footer a:hover { color: var(--purple-300); }
       <div class="kpi-chip-card">
         <div class="kpi-chip-icon" style="color:var(--gold-400);">💰</div>
         <div class="kpi-chip-data">
-          <div class="kpi-chip-val">$<span class="stat-total-live-val">102.9k</span><span style="color:var(--gold-400)">+</span></div>
+          <div class="kpi-chip-val">$<span class="stat-total-live-val">276.0k</span><span style="color:var(--gold-400)">+</span></div>
           <div class="kpi-chip-label">Lifetime Wagered</div>
         </div>
       </div>
@@ -5669,12 +5670,21 @@ footer a:hover { color: var(--purple-300); }
       <div class="kpi-chip-card kpi-chip-gold" style="cursor:pointer;" onclick="activateTab('biweekly'); document.getElementById('tabs-section')?.scrollIntoView({behavior:'smooth'});" title="Click to view Monthly Wager Standings">
         <div class="kpi-chip-icon" style="color:#ffd700;">⚡</div>
         <div class="kpi-chip-data">
-          <div class="kpi-chip-val" style="color:#ffd700;">$<span id="stat-monthly-wager-val">0</span><span style="color:#ffd700;">+</span></div>
+          <div class="kpi-chip-val" style="color:#ffd700;">$<span id="stat-monthly-wager-val">103.5k</span><span style="color:#ffd700;">+</span></div>
           <div class="kpi-chip-label" style="color:#ffd700; font-weight:800;">Monthly Wagered</div>
         </div>
       </div>
 
-      <!-- 3. Monthly Race ($3,000 Pool) -->
+      <!-- 3. Players Referred / Active Wagerers -->
+      <div class="kpi-chip-card" style="cursor:pointer;" onclick="activateTab('leaderboard'); document.getElementById('tabs-section')?.scrollIntoView({behavior:'smooth'});" title="Click to view all connected referred players">
+        <div class="kpi-chip-icon" style="color:var(--cyan-400);">👥</div>
+        <div class="kpi-chip-data">
+          <div class="kpi-chip-val" style="color:var(--cyan-400);"><span class="stat-players-val">43</span><span style="font-size:0.75rem; color:#00ff80; margin-left:2px;">LIVE</span></div>
+          <div class="kpi-chip-label">Referred Players</div>
+        </div>
+      </div>
+
+      <!-- 4. Monthly Race ($3,000 Pool) -->
       <div class="kpi-chip-card" style="cursor:pointer;" onclick="activateTab('biweekly'); document.getElementById('tabs-section')?.scrollIntoView({behavior:'smooth'});" title="Click to view Live Monthly Wager Race ($3,000 Pool)">
         <div class="kpi-chip-icon" style="color:var(--cyan-400);">🏆</div>
         <div class="kpi-chip-data">
@@ -5683,7 +5693,7 @@ footer a:hover { color: var(--purple-300); }
         </div>
       </div>
 
-      <!-- 4. Referral Rewards -->
+      <!-- 5. Referral Rewards -->
       <div class="kpi-chip-card" style="cursor:pointer;" onclick="openReferralModal()" title="Click to view Referral Program rules & claim details">
         <div class="kpi-chip-icon" style="color:#00ff80;">🎁</div>
         <div class="kpi-chip-data">
@@ -5694,11 +5704,11 @@ footer a:hover { color: var(--purple-300); }
         </div>
       </div>
 
-      <!-- 5. Total Yeet Points -->
+      <!-- 6. Total Yeet Points -->
       <div class="kpi-chip-card">
         <div class="kpi-chip-icon" style="color:var(--purple-300);">🎰</div>
         <div class="kpi-chip-data">
-          <div class="kpi-chip-val" style="color:var(--cyan-400);"><span id="strip-total-points-val">0</span><span style="font-size:0.75em; margin-left:2px;">⚡</span></div>
+          <div class="kpi-chip-val" style="color:var(--cyan-400);"><span id="strip-total-points-val">488.2k</span><span style="font-size:0.75em; margin-left:2px;">⚡</span></div>
           <div class="kpi-chip-label">Yeet Points Live</div>
         </div>
       </div>
@@ -5709,20 +5719,20 @@ footer a:hover { color: var(--purple-300); }
       <span class="kpi-ticker-badge">⚡ LIVE COMMUNITY TELEMETRY</span>
       <div class="kpi-ticker-track" id="kpi-ticker-track">
         <div class="ticker-item"><span class="ticker-tag tag-reward">PRIZE POOL</span> 💰 <strong>$3,000 Combined Race</strong> (BIGDTV + BALLZS) Active!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>bettyeddy</strong> leading all-time with <strong>$11,954.86</strong> wagered!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>30+ Active Players</strong> connected under <strong>BIGDTV</strong> & <strong>BALLZS</strong>!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>PinkMynx222</strong> leading all-time with <strong>$66,789.56</strong> wagered!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>43+ Active Referred Players</strong> connected under <strong>BIGDTV</strong> & <strong>BALLZS</strong>!</div>
         <div class="ticker-item"><span class="ticker-tag tag-live" id="ticker-live-status-tag">KICK STREAM</span> <span id="ticker-live-stream-text">📺 Watch live streaming & giveaways at <strong>kick.com/bigdgamestv</strong>!</span></div>
         <div class="ticker-item"><span class="ticker-tag tag-reward">WEEKLY AIRDROP</span> ⚡ <strong>$250 Weekly Airdrop</strong> • 5 Winners Every Week! ($1,000/Mo)</div>
-        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #2</span> ⚡ <strong>oli****</strong> holding 2nd with <strong>$8,506.39</strong> wagered!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-code">MILESTONES</span> 🎁 <strong>Community Milestone Giveaways</strong> live at $50k+!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #2</span> ⚡ <strong>bettyeddy</strong> holding 2nd with <strong>$55,687.71</strong> wagered!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-code">MILESTONES</span> 🎁 <strong>Community Milestone Giveaways</strong> live at $50k+ ($103.5k+ Reached This Month)!</div>
         <!-- Duplicated track for seamless loop -->
         <div class="ticker-item"><span class="ticker-tag tag-reward">PRIZE POOL</span> 💰 <strong>$3,000 Combined Race</strong> (BIGDTV + BALLZS) Active!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>bettyeddy</strong> leading all-time with <strong>$11,954.86</strong> wagered!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>30+ Active Players</strong> connected under <strong>BIGDTV</strong> & <strong>BALLZS</strong>!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #1</span> 🏆 <strong>PinkMynx222</strong> leading all-time with <strong>$66,789.56</strong> wagered!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-code">VERIFIED</span> 🔑 <strong>43+ Active Referred Players</strong> connected under <strong>BIGDTV</strong> & <strong>BALLZS</strong>!</div>
         <div class="ticker-item"><span class="ticker-tag tag-live">KICK STREAM</span> 📺 Watch live streaming & giveaways at <strong>kick.com/bigdgamestv</strong>!</div>
         <div class="ticker-item"><span class="ticker-tag tag-reward">WEEKLY AIRDROP</span> ⚡ <strong>$250 Weekly Airdrop</strong> • 5 Winners Every Week! ($100 / $60 / $40 / $30 / $20)</div>
-        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #2</span> ⚡ <strong>oli****</strong> holding 2nd with <strong>$8,506.39</strong> wagered!</div>
-        <div class="ticker-item"><span class="ticker-tag tag-code">MILESTONES</span> 🎁 <strong>Community Milestone Giveaways</strong> live at $50k+!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-rank">RANK #2</span> ⚡ <strong>bettyeddy</strong> holding 2nd with <strong>$55,687.71</strong> wagered!</div>
+        <div class="ticker-item"><span class="ticker-tag tag-code">MILESTONES</span> 🎁 <strong>Community Milestone Giveaways</strong> live at $50k+ ($103.5k+ Reached This Month)!</div>
       </div>
     </div>
   </div>
@@ -7855,8 +7865,9 @@ async function fetchLeaderboard(after, before, rangeLabel) {
         : totalPoints.toFixed(0);
 
     if (currentCampaign === 'yeet') {
+      const livePlayerCount = uniqueUsers > 0 ? String(uniqueUsers) : (allUsers.length > 0 ? String(allUsers.length) : '43');
       document.querySelectorAll('.stat-players-val').forEach(el => {
-        el.textContent = '42'; // Total Referred Members across campaign
+        el.textContent = livePlayerCount;
       });
       document.querySelectorAll('.stat-total-live-val').forEach(el => {
         el.textContent = formattedWager;
@@ -7867,7 +7878,7 @@ async function fetchLeaderboard(after, before, rangeLabel) {
       if (stripPtsEl) stripPtsEl.textContent = formattedPoints;
 
       const oldPlayersEl = document.getElementById('stat-players');
-      if (oldPlayersEl) oldPlayersEl.innerHTML = `<span>42</span>`;
+      if (oldPlayersEl) oldPlayersEl.innerHTML = `<span>${livePlayerCount}</span>`;
       const oldTotalEl = document.getElementById('stat-total-live');
       if (oldTotalEl) oldTotalEl.textContent = formattedWager;
 
@@ -9629,7 +9640,9 @@ document.addEventListener('click', (e) => {
     'SLOTS MULTIPLIER: <span class="hi">10 COINS / $1</span>',
     'HOUSE / LIVE: <span class="hi">0.25 COINS / $1</span>',
     'STREAM: <span class="hi">KICK.COM/BIGDGAMESTV</span>',
-    'TOP ALL-TIME: <span class="hi">$11,954.86 (bettyeddy)</span>'
+    'TOP ALL-TIME: <span class="hi">$66,789.56 (PinkMynx222)</span>',
+    'ALL-TIME VOLUME: <span class="hi">$276.0K+</span>',
+    'TOTAL PLAYERS: <span class="hi">43+ VERIFIED</span>'
   ];
   const track = document.getElementById('ticker-track');
   if(track){
