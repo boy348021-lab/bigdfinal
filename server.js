@@ -820,6 +820,13 @@ app.get("/api/leaderboard", async (req, res) => {
       }).filter(u => (u.wager_data || []).length > 0);
     }
 
+    // Sort descending from highest wager to lowest wager
+    lifetimeList.sort((a, b) => {
+      const volA = Number(a.volume) || (a.wager_data || []).reduce((s, m) => s + (Number(m.total_wager_usd) || 0), 0);
+      const volB = Number(b.volume) || (b.wager_data || []).reduce((s, m) => s + (Number(m.total_wager_usd) || 0), 0);
+      return volB - volA;
+    });
+
     res.set("Cache-Control", "no-store");
     return res.json({ data: lifetimeList, partner: "degencity", period: "All-Time DegenCity Archive" });
   }

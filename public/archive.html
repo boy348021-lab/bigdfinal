@@ -331,7 +331,7 @@
     <!-- AUGUST 2026 DEGENCITY ARCHIVE CARD -->
     <div class="archive-card">
       <div class="archive-card-title">
-        <span>🏆 August 2026 Final Leaderboard Standings (DegenCity Sponsored)</span>
+        <span>🏆 August 2026 Final Leaderboard Standings (DegenCity)</span>
         <span class="month-badge" style="color:#ffd700; border-color:rgba(255,215,0,0.3); background:rgba(255,215,0,0.1);">August 1 – August 31, 2026</span>
       </div>
 
@@ -523,12 +523,18 @@
         const fmt = n => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const fmtShort = n => '$' + (n >= 1000 ? (n / 1000).toFixed(1) + 'k' : Number(n || 0).toFixed(2));
 
-        const rows = data.map((p, i) => {
+        // Sort players from highest wager to lowest wager
+        const sortedData = [...data].map(p => {
+          const total = Number(p.volume) || (p.wager_data || []).reduce((s, m) => s + (Number(m.total_wager_usd) || 0), 0);
+          return { ...p, _calculatedTotal: total };
+        }).sort((a, b) => b._calculatedTotal - a._calculatedTotal);
+
+        const rows = sortedData.map((p, i) => {
           const rank = i + 1;
           const rankClass = rank <= 3 ? 'rank-' + rank : 'rank-n';
           const isHidden = p.user_id === -1 || p.is_hidden;
           const name = isHidden ? '🔒 Hidden User' : maskUsername(p.username || 'Player');
-          const total = Number(p.volume) || (p.wager_data || []).reduce((s, m) => s + (m.total_wager_usd || 0), 0);
+          const total = p._calculatedTotal;
 
           return `
         <tr class="lb-main-row">
