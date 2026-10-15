@@ -106,6 +106,9 @@ console.log(`BASE_URL: ${BASE_URL}`);
 // Admin secret for admin endpoints (set ADMIN_SECRET in .env)
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "bigdtv-admin-change-me";
 
+// Partner Draw Secret for Ballz / stream giveaways (read-only pool access)
+const BALLZS_DRAW_SECRET = process.env.BALLZS_DRAW_SECRET || "ballzs-stream-draw-access-2026";
+
 // ─── JWT & OAuth Configuration ────────────────────────────────────────────────
 const JWT_SECRET = process.env.SESSION_SECRET || "bigdtv-dev-secret-change-in-production";
 
@@ -3453,18 +3456,26 @@ app.post("/api/milestones/join-pool", requireAuth, async (req, res) => {
   }
 });
 
+function requireDrawAdmin(req, res, next) {
+  const key = req.headers["x-admin-secret"] || req.headers["x-draw-secret"] || req.query.admin_secret || req.query.draw_secret;
+  if (key === ADMIN_SECRET || key === BALLZS_DRAW_SECRET) {
+    return next();
+  }
+  return res.status(403).json({ error: "Forbidden: Invalid admin or draw secret" });
+}
+
 /**
  * GET /api/milestones/pool-entries
- * Admin endpoint — returns all entries for a given milestone + month
- * Used for the live stream draw
+ * Draw endpoint — returns all verified entries for a given milestone + month
+ * Accessible via ADMIN_SECRET or dedicated BALLZS_DRAW_SECRET for live stream giveaways
  */
-app.get("/api/milestones/pool-entries", requireAdmin, async (req, res) => {
+app.get("/api/milestones/pool-entries", requireDrawAdmin, async (req, res) => {
   try {
     if (!supabase) {
       return res.status(503).json({ error: "Database not configured" });
     }
 
-    const milestoneId = Number(req.query.milestoneId) || 1;
+    const milestoneId = Number(req.query.milestoneId) || 2;
     const now = new Date();
     const campaignMonth = req.query.month || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
@@ -3477,10 +3488,15 @@ app.get("/api/milestones/pool-entries", requireAdmin, async (req, res) => {
 
     if (error) throw error;
 
+    // Also provide a clean, ready-to-copy list of participant usernames for giveaway wheels
+    const usernames = (entries || []).map(e => e.yeet_username);
+
     res.json({
+      success: true,
       milestoneId,
       campaignMonth,
       totalEntries: (entries || []).length,
+      wheelReadyList: usernames,
       entries: entries || []
     });
   } catch (err) {
