@@ -5748,7 +5748,7 @@ footer a:hover { color: var(--purple-300); }
   <div class="tabs-nav">
     <button class="tab-btn active" data-panel="leaderboard">🏆 Lifetime Wager</button>
     <button class="tab-btn" data-panel="biweekly" id="tab-btn-monthly">💰 Monthly Wager Race</button>
-    <button class="tab-btn" data-panel="weekly">⚡ Weekly Airdrop Gauntlet</button>
+    <button class="tab-btn" data-panel="weekly">⚡ Weekly Airdrop</button>
     <button class="tab-btn" data-panel="challenges">🎯 Challenges</button>
     <button class="tab-btn" data-panel="milestones">⭐ Milestones</button>
   </div>
@@ -5789,184 +5789,6 @@ footer a:hover { color: var(--purple-300); }
         </div>
       </div>
 
-      <!-- THE AIRDROP GAUNTLET VIP SUITE (Unified Weekly Feature) -->
-      <div class="sg-suite-container" style="margin-bottom: 28px;">
-        
-        <!-- Interactive View Switcher (Switch between 3D Gauntlet Track, Milestone HUD, and Multiplayer Race) -->
-        <div class="sg-mode-switcher">
-          <div class="sg-mode-label">
-            <span>⚡</span> THE AIRDROP GAUNTLET
-            <span style="font-size:0.7rem; font-weight:800; background:rgba(0,255,229,0.12); border:1px solid rgba(0,255,229,0.3); color:var(--cyan-400); padding:2px 8px; border-radius:12px; margin-left:8px; letter-spacing:0.04em;">🤝 BIGD + BALLZS COMBINED</span>
-          </div>
-          <div class="sg-mode-pills">
-            <button type="button" class="sg-mode-btn active" id="btn-mode-3d" onclick="switchSgView('3d')">
-              <span>🔥</span> 3D Gauntlet Arena
-            </button>
-            <button type="button" class="sg-mode-btn" id="btn-mode-horizontal" onclick="switchSgView('horizontal')">
-              <span>📊</span> Milestone HUD
-            </button>
-            <button type="button" class="sg-mode-btn" id="btn-mode-multiplayer" onclick="switchSgView('multiplayer')">
-              <span>👥</span> Multiplayer Race
-            </button>
-          </div>
-        </div>
-
-        <!-- VIEW 1: 3D GAUNTLET TRACK -->
-        <div class="sg-glass-arena" id="sg-view-3d">
-          <div class="sg-arena-header">
-            <div class="sg-arena-title-group">
-              <div class="sg-arena-badge">
-                <span>◯ △ ▢</span> 1. THE AIRDROP GAUNTLET (3D ARENA) • JOINT POOL
-              </div>
-              <div class="sg-arena-title">
-                Keep moving. <span>Don't stop until you reach the VIP zone.</span>
-              </div>
-              <div class="sg-arena-subtitle">
-                Wager on Yeet using code <strong style="color:var(--cyan-400);">BIGDTV</strong> or <strong style="color:#ffd700;">BALLZS</strong> to sprint forward! Combined player pool & shared airdrop rewards. Reach $5,000 Wager to unlock VIP status and compete for the <strong>$250 Weekly Airdrop</strong> (Top 5 Winners: $100 &bull; $60 &bull; $40 &bull; $30 &bull; $20 &bull; $1,000 Every Month)!
-              </div>
-            </div>
-            <div class="sg-wager-pill">
-              <span id="sg-3d-wager-display">$0.00</span> / $5,000
-              <span class="sg-wager-pct" id="sg-3d-pct-display">0.0% complete</span>
-            </div>
-          </div>
-
-          <!-- Red Light Green Light Arena Stage with Clean Background & 3D Center Doll -->
-          <div class="sg-rlgl-stage" id="sg-rlgl-3d-stage">
-            <!-- 3D Layer 1: Atmospheric Sunset Scenery Plate (Clean Arena Background) -->
-            <div class="sg-3d-layer sg-3d-layer-sky">
-              <div class="sg-3d-sun-glow"></div>
-            </div>
-
-            <!-- 3D Layer 2: Giant Robotic Doll (Young-hee) with Laser Scanning Eyes & Status Beacon -->
-            <div class="sg-3d-layer sg-3d-layer-doll" id="sg-3d-doll">
-              <div class="sg-doll-silhouette" title="Airdrop Overseer">
-                <div class="sg-doll-img-wrap">
-                  <img src="/squid_doll_transparent.png" alt="Airdrop Gauntlet Overseer" class="sg-doll-img" />
-                  <div class="sg-doll-eye-lasers">
-                    <span class="sg-doll-laser-beam left"></span>
-                    <span class="sg-doll-laser-beam right"></span>
-                  </div>
-                </div>
-                <div class="sg-doll-status-beacon" id="sg-doll-status-beacon">
-                  <span class="sg-beacon-glow"></span>
-                  <span class="sg-beacon-text">SCANNING VIP TRACK</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- 3D Layer 3: Foreground Track & Status Callouts -->
-            <div class="sg-3d-layer sg-3d-layer-foreground">
-              <div class="sg-rlgl-callouts">
-                <div class="sg-callout-green">
-                  <span class="sg-co-tag">🟢 GREEN LIGHT</span>
-                  <span class="sg-co-sub">Keep wagering!</span>
-                </div>
-                <div class="sg-callout-red">
-                  <span class="sg-co-tag">🔴 RED LIGHT</span>
-                  <span class="sg-co-sub">VIP awaits…</span>
-                </div>
-              </div>
-
-              <!-- Asphalt Progression Strip with Spotlights & Runner -->
-              <div class="sg-rlgl-track-wrap">
-                <div class="sg-rlgl-asphalt-rail"></div>
-                <div class="sg-rlgl-green-fill" id="sg-rlgl-fill" style="width: 0%;"></div>
-                <div class="sg-rlgl-runners-layer" id="sg-rlgl-runners-layer"></div>
-                <div class="sg-rlgl-nodes" id="sg-3d-steps-container">
-                  <!-- Dynamically populated ($0, $1k, $2k, $3k, $4k, $5k VIP) -->
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- VIEW 2: ENHANCED HORIZONTAL TRACK & 3-CARD TELEMETRY STRIP -->
-        <div class="sg-horizontal-arena" id="sg-view-horizontal" style="display: none;">
-          <div class="sg-arena-header">
-            <div class="sg-arena-title-group">
-              <div class="sg-arena-badge">
-                <span>◯ △ ▢</span> 2. MILESTONE HUD • COMBINED RACE
-              </div>
-              <div class="sg-arena-title">
-                Track your sprint. <span>Unlock every stage to claim the VIP prize.</span>
-              </div>
-              <div class="sg-arena-subtitle">
-                Real-time milestone telemetry tracking your individual progress, active checkpoints, and distance to the next reward tier across the shared BIGDTV + BALLZS race pool.
-              </div>
-            </div>
-            <div class="sg-wager-pill">
-              <span id="sg-h-wager-display">$0.00</span> / $5,000
-              <span class="sg-wager-pct" id="sg-h-pct-display">0.0% complete</span>
-            </div>
-          </div>
-
-          <div class="sg-h-track-wrap">
-            <div class="sg-h-rail"></div>
-            <div class="sg-h-rail-active" id="sg-h-rail-fill" style="width: 0%;"></div>
-            <div class="sg-h-runners-layer" id="sg-h-runners-layer"></div>
-            <div class="sg-h-nodes" id="sg-h-nodes-container">
-              <!-- Rendered horizontally -->
-            </div>
-          </div>
-
-          <!-- 3-Card Summary Strip -->
-          <div class="sg-3card-telemetry">
-            <div class="sg-telemetry-card">
-              <div class="sg-tc-header">🎯 NEXT TARGET</div>
-              <div class="sg-tc-value" id="sg-tc-target-val">$2,500</div>
-              <div class="sg-tc-sub" id="sg-tc-target-sub">$2,500 remaining to Stage 1</div>
-            </div>
-            <div class="sg-telemetry-card">
-              <div class="sg-tc-header">⚡ YOUR PROGRESS</div>
-              <div class="sg-tc-value" id="sg-tc-prog-val">$0.00 / $5,000</div>
-              <div class="sg-tc-sub" id="sg-tc-prog-sub">0.0% complete toward VIP</div>
-            </div>
-            <div class="sg-telemetry-card" style="border-color:rgba(255,215,0,0.35); background:rgba(255,215,0,0.04);">
-              <div class="sg-tc-header" style="color:#ffd700;">👑 VIP REWARD</div>
-              <div class="sg-tc-value" style="color:#ffd700;">$5,000 Wager</div>
-              <div class="sg-tc-sub">VIP Airdrop Zone ($250 Weekly Pool &bull; 5 Winners: $100 / $60 / $40 / $30 / $20)</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- VIEW 3: MULTIPLAYER LIVE COMPARISON RACER -->
-        <div class="sg-multiplayer-arena" id="sg-view-multiplayer" style="display: none;">
-          <div class="sg-arena-header">
-            <div class="sg-arena-title-group">
-              <div class="sg-arena-badge">
-                <span>◯ △ ▢</span> 3. MULTIPLAYER RACE (BIGD + BALLZS POOL)
-              </div>
-              <div class="sg-arena-title">
-                See how you <span>stack up against other racers across both codes.</span>
-              </div>
-            </div>
-            <div class="sg-wager-pill">
-              <span>$250 PAYOUT</span>
-              <span class="sg-wager-pct">Top 5 Winners Split $100 / $60 / $40 / $30 / $20</span>
-            </div>
-          </div>
-
-          <div class="sg-multiplayer-grid">
-            <!-- Left Column: Top Players Table -->
-            <div>
-              <div class="sg-mp-col-title">TOP RACERS THIS WEEK</div>
-              <div id="sg-mp-table-list">
-                <!-- Dynamically populated -->
-              </div>
-            </div>
-
-            <!-- Right Column: Parallel Progression Tracks -->
-            <div>
-              <div class="sg-mp-col-title">LIVE PROGRESSION TRACK ($0 → $5k VIP)</div>
-              <div id="sg-mp-bars-list">
-                <!-- Dynamically populated racing bars -->
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
 
       <!-- Weekly Filter Tabs -->
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
@@ -8951,6 +8773,9 @@ function initSquidParallax() {
 
 function renderSquidGameTracker(players) {
   lastWeeklyPlayersList = players || [];
+  if (!document.getElementById('sg-rlgl-3d-stage') && !document.querySelector('.sg-suite-container')) {
+    return;
+  }
   initSquidParallax();
 
   const stepsContainer = document.getElementById('sg-3d-steps-container');
@@ -9420,7 +9245,7 @@ function renderWeeklyLeaderboard(data) {
     if (isSelected) rowClasses.push('is-selected');
 
     return `
-      <tr class="${rowClasses.join(' ')}" onclick="selectSquidPlayer('${escHtml(p.username || '')}')" style="cursor:pointer;" title="Click to view progress in Gauntlet">
+      <tr class="${rowClasses.join(' ')}">
         <td><span class="rank-badge ${rankClass}">${rank}</span></td>
         <td class="lb-player-cell">${nameHtml}</td>
         <td style="color:#ffd700; font-weight:900; font-size:1.1rem; font-family:var(--font-display); letter-spacing:0.02em;">
