@@ -2335,53 +2335,6 @@ hamburger.addEventListener('click', () => {
   mascotImg.alt = currentMascot.alt;
   bot.setAttribute('title', `Big D (${currentMascot.name}) — Join Discord!`);
 
-  let t = 0;
-  const speed = 0.00018;
-
-  function point(t) {
-    const margin = 16;
-    const botW = bot.offsetWidth || 72;
-    const botH = bot.offsetHeight || 110;
-
-    const minX = margin + botW / 2;
-    const maxX = Math.max(minX, window.innerWidth - margin - botW / 2);
-    const minY = margin + botH / 2 + 50;
-    const maxY = Math.max(minY, window.innerHeight - margin - botH / 2 - 40);
-
-    const w = maxX - minX;
-    const h = maxY - minY;
-    const total = 2 * (w + h);
-
-    let d = (t % 1) * total;
-
-    if (d < w) return { x: minX + d, y: minY, edge: 'top' };
-    d -= w;
-    if (d < h) return { x: maxX, y: minY + d, edge: 'right' };
-    d -= h;
-    if (d < w) return { x: maxX - d, y: maxY, edge: 'bottom' };
-    d -= w;
-    return { x: minX, y: maxY - d, edge: 'left' };
-  }
-
-  function animate() {
-    requestAnimationFrame(animate);
-    t += speed;
-
-    const pos = point(t);
-    bot.style.left = pos.x + "px";
-    bot.style.top = pos.y + "px";
-
-    const facingLeft = pos.edge === 'bottom' || pos.edge === 'left';
-    bot.style.transform = `translate(-50%, -50%) scaleX(${facingLeft ? -1 : 1})`;
-
-    const bubble = bot.querySelector('.bigd-speech-bubble');
-    if (bubble) {
-      bubble.style.transform = facingLeft ? 'scaleX(-1)' : 'none';
-    }
-  }
-
-  animate();
-
   bot.onclick = () => {
     window.open("https://discord.gg/aHSVMX4DCr", "_blank", "noopener,noreferrer");
   };

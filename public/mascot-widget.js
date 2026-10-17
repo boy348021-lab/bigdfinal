@@ -18,6 +18,10 @@
     6: { name: 'Native American', src: '/bigd-native.png', alt: 'Big D — Native American' }
   };
 
+  // Prevent multiple instances if script is loaded multiple times
+  if (window.__bigdMascotWidgetInitialized) return;
+  window.__bigdMascotWidgetInitialized = true;
+
   // 1. Inject Styles matching the floating Kick widget behavior
   if (!document.getElementById('bigd-mascot-style')) {
     const styleEl = document.createElement('style');
@@ -36,7 +40,7 @@
         user-select: none;
         -webkit-user-select: none;
         touch-action: manipulation;
-        transition: opacity 0.35s ease, transform 0.35s ease, filter 0.25s ease;
+        transition: opacity 0.35s ease, filter 0.25s ease;
         filter: drop-shadow(0 0 14px rgba(157, 0, 255, 0.45)) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.7));
         opacity: 1;
         pointer-events: auto;
@@ -45,6 +49,7 @@
         opacity: 0 !important;
         pointer-events: none !important;
         transform: translate(-50%, -50%) scale(0.85) translateY(24px) !important;
+        transition: opacity 0.35s ease, transform 0.35s ease, filter 0.25s ease !important;
       }
       #edge-bot:hover {
         filter: drop-shadow(0 0 22px rgba(190, 77, 255, 0.8)) drop-shadow(0 0 35px rgba(0, 231, 1, 0.4)) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.85));
@@ -122,6 +127,10 @@
       document.body.appendChild(bot);
     }
 
+    // If an orbit animation is already running on this bot instance, don't start another
+    if (bot._orbitStarted) return;
+    bot._orbitStarted = true;
+
     const mascotImg = document.getElementById('bigd-mascot-img');
     const speechBubble = document.getElementById('mascot-speech-bubble') || bot.querySelector('.bigd-speech-bubble');
 
@@ -140,25 +149,32 @@
       window.open(DISCORD_URL, '_blank', 'noopener,noreferrer');
     });
 
-    // 3. Smooth Edge Revolving / Perimeter Orbit Engine
-    let t = 0;
-    const speed = 0.00035; // Smooth perimeter walking speed
+    // 3. Smooth Edge Revolving / Perimeter Orbit Engine (Constant Physical Pace)
+    // Speed calibrated to 85 pixels/second constant linear speed regardless of screen aspect ratio or frame rate
+    const SPEED_PX_PER_SEC = 85;
+    let distanceTraveledPx = 0;
+    let lastTime = performance.now();
 
-    function getPerimeterPoint(progress) {
-      const margin = 16;
+    function getPerimeterPoint(distPx) {
+      const margin = 18;
       const botW = bot.offsetWidth || 72;
       const botH = bot.offsetHeight || 94;
 
+      // Ensure full clearance below the fixed top navbar (64px height + speech bubble 28px + safe buffer)
+      const navEl = document.getElementById('nav') || document.querySelector('nav');
+      const navBottom = navEl ? navEl.getBoundingClientRect().bottom : 64;
+      const speechBubbleAllowance = 32;
+
       const minX = margin + botW / 2;
       const maxX = Math.max(minX, window.innerWidth - margin - botW / 2);
-      const minY = margin + botH / 2 + 50; // top offset for nav bar
+      const minY = Math.max(navBottom + speechBubbleAllowance + botH / 2, 98 + botH / 2);
       const maxY = Math.max(minY, window.innerHeight - margin - botH / 2 - 20);
 
-      const w = maxX - minX;
-      const h = maxY - minY;
-      const total = 2 * (w + h);
+      const w = Math.max(1, maxX - minX);
+      const h = Math.max(1, maxY - minY);
+      const totalPerimeter = 2 * (w + h);
 
-      let d = (progress % 1) * total;
+      let d = ((distPx % totalPerimeter) + totalPerimeter) % totalPerimeter;
 
       if (d < w) return { x: minX + d, y: minY, edge: 'top' };
       d -= w;
@@ -169,16 +185,19 @@
       return { x: minX, y: maxY - d, edge: 'left' };
     }
 
-    function animateOrbit() {
-      t += speed;
-      const pos = getPerimeterPoint(t);
+    function animateOrbit(currentTime) {
+      const dt = Math.min((currentTime - lastTime) / 1000, 0.1); // clamp delta time to avoid large jumps
+      lastTime = currentTime;
+
+      distanceTraveledPx += SPEED_PX_PER_SEC * dt;
+      const pos = getPerimeterPoint(distanceTraveledPx);
 
       bot.style.left = `${pos.x}px`;
       bot.style.top = `${pos.y}px`;
 
       const facingLeft = pos.edge === 'bottom' || pos.edge === 'left';
       
-      // Preserve transition for scroll out while allowing instant position animation
+      // Flip character and bubble smoothly without position lag
       if (!bot.classList.contains('is-scrolled-out')) {
         bot.style.transform = `translate(-50%, -50%) scaleX(${facingLeft ? -1 : 1})`;
       }
@@ -190,7 +209,10 @@
       requestAnimationFrame(animateOrbit);
     }
 
-    requestAnimationFrame(animateOrbit);
+    requestAnimationFrame((time) => {
+      lastTime = time;
+      requestAnimationFrame(animateOrbit);
+    });
 
     // 4. Scroll Disappear Handler (Identical threshold to floating window)
     function handleScrollVisibility() {
