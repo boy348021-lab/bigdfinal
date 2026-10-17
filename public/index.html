@@ -9008,10 +9008,10 @@ function renderSquidGameTracker(players) {
       activeUsername = currentTokenUser.yeetUsername || currentTokenUser.username;
       isOwnAccount = true;
     } else if (topRacers.length > 0) {
-      // Default to leader (Eddie / bettyeddy) if not logged in
+      // Default to the current #1 leader dynamically if not logged in
       const leader = topRacers[0];
       activeWager = Number(leader.weekly_volume) || 0;
-      activeUsername = leader.username || 'bettyeddy';
+      activeUsername = leader.username || 'Leader';
       isOwnAccount = false;
     }
   }
@@ -9106,11 +9106,9 @@ function renderSquidGameTracker(players) {
       let visualTop = isLeader ? 0 : (pIdx % 2 === 0 ? -6 : 16);
       const isNearLeft = exactPct < 8;
 
-      // Display name inside circle: prioritize readable acronym or EDDIE for bettyeddy
+      // Display name inside circle: show clean readable short name
       let displayName = rawName;
-      if (rawName.toLowerCase().includes('eddy') || rawName.toLowerCase().includes('eddie')) {
-        displayName = 'EDDIE';
-      } else if (displayName.length > 5) {
+      if (displayName.length > 5) {
         displayName = displayName.slice(0, 4);
       }
 
@@ -9119,12 +9117,14 @@ function renderSquidGameTracker(players) {
       const pPct = Math.min(100, Math.max(0, (pVol / 5000) * 100));
       const zIndex = isUserSelf ? 85 : (isLeader ? 75 : (isSelected ? 65 : (40 - pIdx)));
 
+      const leaderBadgeText = `👑 ${maskUsername(rawName)} (#1)`;
+
       return `
         <div class="sg-track-runner-pin ${isNearLeft ? 'near-left' : ''} ${isLeader ? 'is-leader' : ''} ${isWinner ? 'is-winner' : ''} ${isUserSelf ? 'is-self' : ''} ${isSelected ? 'is-selected' : ''}" 
              style="left: ${exactPct}%; top: ${visualTop}px; z-index: ${zIndex};"
              onclick="selectSquidPlayer('${escHtml(rawName)}')"
              title="${escHtml(maskUsername(rawName))}: $${pVol.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}">
-          ${isUserSelf ? '<div class="pin-self-callout">⭐ YOU</div>' : (isLeader ? '<div class="pin-leader-callout">👑 EDDIE (#1)</div>' : '')}
+          ${isUserSelf ? '<div class="pin-self-callout">⭐ YOU</div>' : (isLeader ? `<div class="pin-leader-callout">${escHtml(leaderBadgeText)}</div>` : '')}
           <div class="sg-step-pin-avatar">
             <span class="pin-uname">${escHtml(displayName)}</span>
             <span class="pin-amt">${compactAmt}</span>
@@ -9186,9 +9186,10 @@ function renderSquidGameTracker(players) {
   if (dHWager) dHWager.textContent = '$' + activeWager.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if (dHPct) {
     if (activeUsername) {
-      const isEddyLeader = activeUsername.toLowerCase().includes('eddy') || activeUsername.toLowerCase().includes('eddie');
-      const displayActive = isOwnAccount ? activeUsername : maskUsername(activeUsername);
-      dHPct.textContent = `${overallPct.toFixed(1)}% complete (${isOwnAccount ? (displayActive + ' - You') : (isEddyLeader ? '👑 EDDIE' : displayActive)})`;
+      const topLeaderName = (topRacers[0] && topRacers[0].username) ? topRacers[0].username : '';
+      const isCurrentLeader = !isOwnAccount && topLeaderName && (activeUsername.toLowerCase() === topLeaderName.toLowerCase());
+      const displayActive = isOwnAccount ? (activeUsername + ' - You') : maskUsername(activeUsername);
+      dHPct.textContent = `${overallPct.toFixed(1)}% complete (${isCurrentLeader ? `👑 ${displayActive} (#1)` : displayActive})`;
     } else {
       dHPct.textContent = 'Login or select player to view individual progress';
     }
@@ -9203,15 +9204,20 @@ function renderSquidGameTracker(players) {
   const hRunnersLayer = document.getElementById('sg-h-runners-layer');
   if (hRunnersLayer) {
     if (activeUsername) {
-      let isEddyLeader = !isOwnAccount && (activeUsername.toLowerCase().includes('eddy') || activeUsername.toLowerCase().includes('eddie'));
-      let dispName = isOwnAccount ? (activeUsername.length > 5 ? activeUsername.slice(0, 4) : activeUsername) : (isEddyLeader ? 'EDDIE' : (activeUsername.length > 5 ? activeUsername.slice(0, 4) : activeUsername));
-      let compactAmt = activeWager >= 1000 ? `$${(activeWager / 1000).toFixed(activeWager >= 10000 ? 0 : 1)}k` : `$${Math.round(activeWager)}`;
+      const topLeaderName = (topRacers[0] && topRacers[0].username) ? topRacers[0].username : '';
+      const isCurrentLeader = !isOwnAccount && topLeaderName && (activeUsername.toLowerCase() === topLeaderName.toLowerCase());
+      const dispName = isOwnAccount 
+        ? (activeUsername.length > 5 ? activeUsername.slice(0, 4) : activeUsername)
+        : maskUsername(activeUsername);
+      const shortDispName = dispName.length > 5 ? dispName.slice(0, 4) : dispName;
+      const compactAmt = activeWager >= 1000 ? `$${(activeWager / 1000).toFixed(activeWager >= 10000 ? 0 : 1)}k` : `$${Math.round(activeWager)}`;
+      const leaderBadgeText = isCurrentLeader ? `👑 ${maskUsername(activeUsername)} (#1)` : `👑 ${maskUsername(activeUsername)}`;
 
       hRunnersLayer.innerHTML = `
-        <div class="sg-track-runner-pin ${isEddyLeader ? 'is-leader' : ''} ${isOwnAccount ? 'is-self' : 'is-selected'}" style="left: ${Math.min(96, Math.max(3, overallPct))}%; top: 0px; z-index: 50;">
-          ${isOwnAccount ? '<div class="pin-self-callout">⭐ YOU</div>' : (isEddyLeader ? '<div class="pin-leader-callout">👑 EDDIE</div>' : '')}
+        <div class="sg-track-runner-pin ${isCurrentLeader ? 'is-leader' : ''} ${isOwnAccount ? 'is-self' : 'is-selected'}" style="left: ${Math.min(96, Math.max(3, overallPct))}%; top: 0px; z-index: 50;">
+          ${isOwnAccount ? '<div class="pin-self-callout">⭐ YOU</div>' : (isCurrentLeader ? `<div class="pin-leader-callout">${escHtml(leaderBadgeText)}</div>` : '')}
           <div class="sg-step-pin-avatar">
-            <span class="pin-uname">${escHtml(dispName)}</span>
+            <span class="pin-uname">${escHtml(shortDispName)}</span>
             <span class="pin-amt">${compactAmt}</span>
           </div>
           <div class="pin-pointer-arrow"></div>
