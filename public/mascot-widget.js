@@ -42,20 +42,37 @@
         user-select: none;
         -webkit-user-select: none;
         touch-action: manipulation;
-        transition: opacity 0.35s ease, filter 0.25s ease;
-        filter: drop-shadow(0 0 14px rgba(157, 0, 255, 0.45)) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.7));
+        transition: opacity 0.35s ease;
         opacity: 1;
         pointer-events: auto;
         will-change: transform;
+        contain: layout style;
+        transform: translate3d(0, 0, 0);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
       }
       #edge-bot.is-scrolled-out {
         opacity: 0 !important;
         pointer-events: none !important;
       }
-      #edge-bot:hover {
-        filter: drop-shadow(0 0 22px rgba(190, 77, 255, 0.8)) drop-shadow(0 0 35px rgba(0, 231, 1, 0.4)) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.85));
+      /* Aura glow layer behind the mascot so the main moving container is not running dynamic SVG filter rasterization on every frame */
+      .bigd-mascot-aura {
+        position: absolute;
+        inset: 4px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(157, 0, 255, 0.4) 0%, rgba(0, 231, 1, 0.15) 55%, transparent 75%);
+        filter: blur(8px);
+        pointer-events: none;
+        z-index: 0;
+        transition: transform 0.25s ease, opacity 0.25s ease;
+      }
+      #edge-bot:hover .bigd-mascot-aura {
+        transform: scale(1.3);
+        opacity: 0.9;
       }
       #bigd-mascot-img {
+        position: relative;
+        z-index: 1;
         width: 68px;
         height: auto;
         image-rendering: pixelated;
@@ -63,16 +80,19 @@
         image-rendering: crisp-edges;
         display: block;
         pointer-events: none;
-        animation: bigd-idle-float 2.6s ease-in-out infinite alternate;
+        /* Clean vertical micro-bobbing without angle rotation to prevent visual jitter against linear movement */
+        animation: bigd-idle-float 2.2s ease-in-out infinite alternate;
+        transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.3, 1);
+        will-change: transform;
       }
       @keyframes bigd-idle-float {
-        0% { transform: translateY(0px) rotate(0deg); }
-        50% { transform: translateY(-5px) rotate(-1.5deg); }
-        100% { transform: translateY(-2px) rotate(1.5deg); }
+        0% { transform: translateY(0px); }
+        100% { transform: translateY(-4px); }
       }
       .bigd-speech-bubble {
         position: absolute;
         top: -26px;
+        z-index: 2;
         white-space: nowrap;
         background: linear-gradient(90deg, #5865f2, #7983f5);
         border: 1px solid #ffffff;
@@ -86,7 +106,7 @@
         box-shadow: 0 4px 15px rgba(88, 101, 242, 0.6);
         opacity: 0;
         transform: translateY(6px) scale(0.9);
-        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         pointer-events: none;
       }
       .bigd-speech-bubble::after {
@@ -122,10 +142,18 @@
       bot.setAttribute('title', 'Join Big D on Discord!');
       bot.setAttribute('aria-label', 'Big D Mascot — Join Discord');
       bot.innerHTML = `
+        <div class="bigd-mascot-aura"></div>
         <div class="bigd-speech-bubble" id="mascot-speech-bubble">JOIN DISCORD!</div>
         <img id="bigd-mascot-img" src="/bigd-gamer.png" alt="Big D Pixel Mascot" draggable="false" />
       `;
       document.body.appendChild(bot);
+    } else {
+      // Ensure aura exists if bot was already in static HTML
+      if (!bot.querySelector('.bigd-mascot-aura')) {
+        const aura = document.createElement('div');
+        aura.className = 'bigd-mascot-aura';
+        bot.insertBefore(aura, bot.firstChild);
+      }
     }
 
     const mascotImg = document.getElementById('bigd-mascot-img');
@@ -236,18 +264,16 @@
 
       const facingLeft = pos.edge === 'bottom' || pos.edge === 'left';
 
-      // Use GPU hardware-accelerated translate3d with subpixel rendering
-      // Position offset from center (-50%, -50% = -36px, -47px)
+      // Keep outer bot strictly in pure translation space for maximum compositor efficiency
       const posX = pos.x - 36;
       const posY = pos.y - 47;
-      const scaleX = facingLeft ? -1 : 1;
 
-      bot.style.transform = `translate3d(${posX.toFixed(2)}px, ${posY.toFixed(2)}px, 0) scaleX(${scaleX})`;
+      bot.style.transform = `translate3d(${posX.toFixed(1)}px, ${posY.toFixed(1)}px, 0)`;
 
-      // Only touch speech bubble DOM when orientation flips to avoid unnecessary style recalculations
-      if (speechBubble && lastFacingLeft !== facingLeft) {
+      // Only flip sprite image on orientation turn
+      if (mascotImg && lastFacingLeft !== facingLeft) {
         lastFacingLeft = facingLeft;
-        speechBubble.style.transform = facingLeft ? 'scaleX(-1)' : 'none';
+        mascotImg.style.transform = facingLeft ? 'scaleX(-1)' : 'scaleX(1)';
       }
 
       requestAnimationFrame(animateOrbit);

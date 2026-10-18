@@ -464,13 +464,12 @@ footer a:hover { color: var(--purple-200); }
 .ticker-sep { color: rgba(136,0,255,0.5); padding: 0 4px; }
 @keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-/* ─── BIG D FLOATING PIXEL MASCOT ────────────────────────── */
 #edge-bot {
   position: fixed;
   left: 0;
   top: 0;
   width: 72px;
-  height: 110px;
+  height: 94px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -480,12 +479,14 @@ footer a:hover { color: var(--purple-200); }
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
-  transition: transform 0.15s ease-out;
-  filter: drop-shadow(0 0 14px rgba(157, 0, 255, 0.45)) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.7));
+  contain: layout style;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 #edge-bot:hover {
-  filter: drop-shadow(0 0 22px rgba(190, 77, 255, 0.8)) drop-shadow(0 0 35px rgba(0, 231, 1, 0.4)) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.85));
+  transform: scale(1.04);
 }
 
 #bigd-mascot-img {

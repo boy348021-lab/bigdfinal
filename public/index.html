@@ -4046,10 +4046,10 @@ footer a:hover { color: var(--purple-300); }
    ============================================================ */
 #edge-bot {
   position: fixed;
-  right: 24px;
-  bottom: 34px;
-  width: 68px;
-  height: 90px;
+  top: 0;
+  left: 0;
+  width: 72px;
+  height: 94px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -4059,12 +4059,14 @@ footer a:hover { color: var(--purple-300); }
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
-  filter: drop-shadow(0 0 14px rgba(157, 0, 255, 0.45)) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.7));
+  contain: layout style;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 #edge-bot:hover {
-  transform: translateY(-4px) scale(1.06);
-  filter: drop-shadow(0 0 22px rgba(190, 77, 255, 0.8)) drop-shadow(0 0 35px rgba(0, 231, 1, 0.4)) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.85));
+  transform: scale(1.04);
 }
 
 #bigd-mascot-img {
