@@ -28,8 +28,10 @@
     styleEl.id = 'bigd-mascot-style';
     styleEl.textContent = `
       #edge-bot {
-        position: fixed;
-        z-index: 99999;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        z-index: 99999 !important;
         width: 72px;
         height: 94px;
         display: flex;
@@ -44,11 +46,11 @@
         filter: drop-shadow(0 0 14px rgba(157, 0, 255, 0.45)) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.7));
         opacity: 1;
         pointer-events: auto;
+        will-change: transform;
       }
       #edge-bot.is-scrolled-out {
         opacity: 0 !important;
         pointer-events: none !important;
-        transform: translate(-50%, -50%) scale(0.85) translateY(24px) !important;
       }
       #edge-bot:hover {
         filter: drop-shadow(0 0 22px rgba(190, 77, 255, 0.8)) drop-shadow(0 0 35px rgba(0, 231, 1, 0.4)) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.85));
@@ -166,21 +168,23 @@
       window.open(DISCORD_URL, '_blank', 'noopener,noreferrer');
     };
 
-    // 3. Constant-Linear-Speed Edge Orbit Engine
-    // Linear constant speed in pixels per second: ~160 px/s for pleasant walking pace
-    const SPEED_PX_PER_SEC = 160;
+    // 3. Ultra-Smooth Hardware-Accelerated Perimeter Orbit Engine
+    const SPEED_PX_PER_SEC = 140; // Silky smooth walking speed in px/s
     let distanceTraveled = 0;
     let lastTime = null;
 
-    function getBounds() {
-      const margin = 16;
-      const botW = bot.offsetWidth || 72;
-      const botH = bot.offsetHeight || 94;
+    // Cache layout bounds and refresh on resize or periodically to avoid DOM layout thrashing
+    let cachedBounds = null;
 
-      // Ensure clearance under fixed top navigation bar (64px nav + speech bubble height ~26px + safety margin)
+    function computeBounds() {
+      const margin = 16;
+      const botW = 72;
+      const botH = 94;
+
+      // Ensure clearance under fixed top navigation bar (64px nav + safety margin)
       const navEl = document.getElementById('nav') || document.querySelector('nav');
-      const navBottom = navEl ? navEl.getBoundingClientRect().bottom : 64;
-      const topClearance = Math.max(76, navBottom + 20);
+      const navHeight = navEl ? navEl.offsetHeight || 64 : 64;
+      const topClearance = Math.max(76, navHeight + 20);
 
       const minX = margin + botW / 2;
       const maxX = Math.max(minX, window.innerWidth - margin - botW / 2);
@@ -193,6 +197,11 @@
 
       return { minX, maxX, minY, maxY, w, h, total };
     }
+
+    cachedBounds = computeBounds();
+    window.addEventListener('resize', () => {
+      cachedBounds = computeBounds();
+    }, { passive: true });
 
     function getPointAtDistance(dist, bounds) {
       const { minX, maxX, minY, maxY, w, h, total } = bounds;
@@ -213,28 +222,31 @@
       return { x: minX, y: maxY - d, edge: 'left' };
     }
 
+    let lastFacingLeft = false;
+
     function animateOrbit(currentTime) {
       if (lastTime === null) {
         lastTime = currentTime;
       }
-      const dt = Math.min((currentTime - lastTime) / 1000, 0.1); // clamp in case of inactive tab
+      const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
       lastTime = currentTime;
 
-      const bounds = getBounds();
       distanceTraveled += SPEED_PX_PER_SEC * dt;
-      const pos = getPointAtDistance(distanceTraveled, bounds);
-
-      bot.style.left = `${pos.x}px`;
-      bot.style.top = `${pos.y}px`;
+      const pos = getPointAtDistance(distanceTraveled, cachedBounds);
 
       const facingLeft = pos.edge === 'bottom' || pos.edge === 'left';
-      
-      // Preserve transition for scroll out while allowing instant position animation
-      if (!bot.classList.contains('is-scrolled-out')) {
-        bot.style.transform = `translate(-50%, -50%) scaleX(${facingLeft ? -1 : 1})`;
-      }
 
-      if (speechBubble) {
+      // Use GPU hardware-accelerated translate3d with subpixel rendering
+      // Position offset from center (-50%, -50% = -36px, -47px)
+      const posX = pos.x - 36;
+      const posY = pos.y - 47;
+      const scaleX = facingLeft ? -1 : 1;
+
+      bot.style.transform = `translate3d(${posX.toFixed(2)}px, ${posY.toFixed(2)}px, 0) scaleX(${scaleX})`;
+
+      // Only touch speech bubble DOM when orientation flips to avoid unnecessary style recalculations
+      if (speechBubble && lastFacingLeft !== facingLeft) {
+        lastFacingLeft = facingLeft;
         speechBubble.style.transform = facingLeft ? 'scaleX(-1)' : 'none';
       }
 
