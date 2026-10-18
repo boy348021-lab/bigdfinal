@@ -6,6 +6,10 @@
 (function () {
   'use strict';
 
+  // Prevent multiple executions on the same page
+  if (window.__bigdMascotWidgetInitialized) return;
+  window.__bigdMascotWidgetInitialized = true;
+
   const DISCORD_URL = 'https://discord.gg/aHSVMX4DCr';
 
   const DAILY_MASCOTS = {
@@ -17,10 +21,6 @@
     5: { name: 'Westside', src: '/bigd-westside.png', alt: 'Big D — Westside' },
     6: { name: 'Native American', src: '/bigd-native.png', alt: 'Big D — Native American' }
   };
-
-  // Prevent multiple instances if script is loaded multiple times
-  if (window.__bigdMascotWidgetInitialized) return;
-  window.__bigdMascotWidgetInitialized = true;
 
   // 1. Inject Styles matching the floating Kick widget behavior
   if (!document.getElementById('bigd-mascot-style')) {
@@ -49,7 +49,6 @@
         opacity: 0 !important;
         pointer-events: none !important;
         transform: translate(-50%, -50%) scale(0.85) translateY(24px) !important;
-        transition: opacity 0.35s ease, transform 0.35s ease, filter 0.25s ease !important;
       }
       #edge-bot:hover {
         filter: drop-shadow(0 0 22px rgba(190, 77, 255, 0.8)) drop-shadow(0 0 35px rgba(0, 231, 1, 0.4)) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.85));
@@ -127,16 +126,33 @@
       document.body.appendChild(bot);
     }
 
-    // If an orbit animation is already running on this bot instance, don't start another
-    if (bot._orbitStarted) return;
-    bot._orbitStarted = true;
-
     const mascotImg = document.getElementById('bigd-mascot-img');
     const speechBubble = document.getElementById('mascot-speech-bubble') || bot.querySelector('.bigd-speech-bubble');
 
-    // Daily Mascot outfit rotation
-    const today = new Date().getDay();
-    const currentMascot = DAILY_MASCOTS[today] || DAILY_MASCOTS[1];
+    // Daily Mascot outfit rotation with URL testing override support
+    const urlParams = new URLSearchParams(window.location.search);
+    const mascotOverride = urlParams.get('mascot') ? urlParams.get('mascot').toLowerCase() : null;
+    const dayOverride = urlParams.get('day') !== null ? parseInt(urlParams.get('day'), 10) : null;
+
+    let currentMascot;
+    if (mascotOverride) {
+      const map = {
+        gamer: DAILY_MASCOTS[1],
+        office: DAILY_MASCOTS[2],
+        gambler: DAILY_MASCOTS[3],
+        funky: DAILY_MASCOTS[4],
+        westside: DAILY_MASCOTS[5],
+        native: DAILY_MASCOTS[6],
+        hustler: DAILY_MASCOTS[0]
+      };
+      currentMascot = map[mascotOverride] || DAILY_MASCOTS[1];
+    } else if (dayOverride !== null && DAILY_MASCOTS[dayOverride]) {
+      currentMascot = DAILY_MASCOTS[dayOverride];
+    } else {
+      const today = new Date().getDay();
+      currentMascot = DAILY_MASCOTS[today] || DAILY_MASCOTS[1];
+    }
+
     if (mascotImg) {
       mascotImg.src = currentMascot.src;
       mascotImg.alt = currentMascot.alt;
@@ -144,60 +160,76 @@
     if (speechBubble) {
       speechBubble.textContent = `JOIN DISCORD! (${currentMascot.name})`;
     }
+    bot.setAttribute('title', `Big D (${currentMascot.name}) — Join Discord!`);
 
-    bot.addEventListener('click', () => {
+    bot.onclick = () => {
       window.open(DISCORD_URL, '_blank', 'noopener,noreferrer');
-    });
+    };
 
-    // 3. Smooth Edge Revolving / Perimeter Orbit Engine (Constant Physical Pace)
-    // Speed calibrated to 85 pixels/second constant linear speed regardless of screen aspect ratio or frame rate
-    const SPEED_PX_PER_SEC = 85;
-    let distanceTraveledPx = 0;
-    let lastTime = performance.now();
+    // 3. Constant-Linear-Speed Edge Orbit Engine
+    // Linear constant speed in pixels per second: ~160 px/s for pleasant walking pace
+    const SPEED_PX_PER_SEC = 160;
+    let distanceTraveled = 0;
+    let lastTime = null;
 
-    function getPerimeterPoint(distPx) {
-      const margin = 18;
+    function getBounds() {
+      const margin = 16;
       const botW = bot.offsetWidth || 72;
       const botH = bot.offsetHeight || 94;
 
-      // Ensure full clearance below the fixed top navbar (64px height + speech bubble 28px + safe buffer)
+      // Ensure clearance under fixed top navigation bar (64px nav + speech bubble height ~26px + safety margin)
       const navEl = document.getElementById('nav') || document.querySelector('nav');
       const navBottom = navEl ? navEl.getBoundingClientRect().bottom : 64;
-      const speechBubbleAllowance = 32;
+      const topClearance = Math.max(76, navBottom + 20);
 
       const minX = margin + botW / 2;
       const maxX = Math.max(minX, window.innerWidth - margin - botW / 2);
-      const minY = Math.max(navBottom + speechBubbleAllowance + botH / 2, 98 + botH / 2);
+      const minY = topClearance + botH / 2;
       const maxY = Math.max(minY, window.innerHeight - margin - botH / 2 - 20);
 
       const w = Math.max(1, maxX - minX);
       const h = Math.max(1, maxY - minY);
-      const totalPerimeter = 2 * (w + h);
+      const total = 2 * (w + h);
 
-      let d = ((distPx % totalPerimeter) + totalPerimeter) % totalPerimeter;
+      return { minX, maxX, minY, maxY, w, h, total };
+    }
 
-      if (d < w) return { x: minX + d, y: minY, edge: 'top' };
+    function getPointAtDistance(dist, bounds) {
+      const { minX, maxX, minY, maxY, w, h, total } = bounds;
+      let d = ((dist % total) + total) % total;
+
+      if (d < w) {
+        return { x: minX + d, y: minY, edge: 'top' };
+      }
       d -= w;
-      if (d < h) return { x: maxX, y: minY + d, edge: 'right' };
+      if (d < h) {
+        return { x: maxX, y: minY + d, edge: 'right' };
+      }
       d -= h;
-      if (d < w) return { x: maxX - d, y: maxY, edge: 'bottom' };
+      if (d < w) {
+        return { x: maxX - d, y: maxY, edge: 'bottom' };
+      }
       d -= h;
       return { x: minX, y: maxY - d, edge: 'left' };
     }
 
     function animateOrbit(currentTime) {
-      const dt = Math.min((currentTime - lastTime) / 1000, 0.1); // clamp delta time to avoid large jumps
+      if (lastTime === null) {
+        lastTime = currentTime;
+      }
+      const dt = Math.min((currentTime - lastTime) / 1000, 0.1); // clamp in case of inactive tab
       lastTime = currentTime;
 
-      distanceTraveledPx += SPEED_PX_PER_SEC * dt;
-      const pos = getPerimeterPoint(distanceTraveledPx);
+      const bounds = getBounds();
+      distanceTraveled += SPEED_PX_PER_SEC * dt;
+      const pos = getPointAtDistance(distanceTraveled, bounds);
 
       bot.style.left = `${pos.x}px`;
       bot.style.top = `${pos.y}px`;
 
       const facingLeft = pos.edge === 'bottom' || pos.edge === 'left';
       
-      // Flip character and bubble smoothly without position lag
+      // Preserve transition for scroll out while allowing instant position animation
       if (!bot.classList.contains('is-scrolled-out')) {
         bot.style.transform = `translate(-50%, -50%) scaleX(${facingLeft ? -1 : 1})`;
       }
@@ -209,10 +241,7 @@
       requestAnimationFrame(animateOrbit);
     }
 
-    requestAnimationFrame((time) => {
-      lastTime = time;
-      requestAnimationFrame(animateOrbit);
-    });
+    requestAnimationFrame(animateOrbit);
 
     // 4. Scroll Disappear Handler (Identical threshold to floating window)
     function handleScrollVisibility() {
